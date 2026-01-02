@@ -7,6 +7,15 @@ import type { ComponentType, SVGProps } from 'react'
 
 const queueStatuses = ['awaiting_contact', 'contacted', 'meeting_scheduled']
 
+type QueueItem = {
+  id: string;
+  productName: string;
+  email: string;
+  status?: string;
+  quotesCount: number;
+  updatedAt?: string;
+};
+
 async function getStats() {
   const supabase = getSupabaseAdmin()
   const now = new Date()
