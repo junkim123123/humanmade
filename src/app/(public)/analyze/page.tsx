@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function PublicAnalyzePage() {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -21,7 +21,7 @@ export async function getOrderMessages(orderId: string, opts?: { asAdmin?: boole
       return { success: true, messages: data || [] }
     }
 
-    const supabase = createClient(cookies())
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, error: 'Not authenticated' }
 

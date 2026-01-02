@@ -13,7 +13,7 @@ export async function getOrCreateVerification(reportId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -71,7 +71,7 @@ export async function startVerification(verificationId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -105,7 +105,7 @@ export async function createMockQuotes(
   productName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

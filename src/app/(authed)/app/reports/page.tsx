@@ -52,7 +52,7 @@ function formatDate(value: string) {
 }
 
 export default async function AppReportsPage() {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

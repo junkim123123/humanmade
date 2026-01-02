@@ -106,7 +106,7 @@ export async function createVerificationRequest(options: {
   currentUser?: { id: string; email?: string | null };
 }): Promise<{ success: boolean; orderId?: string; error?: string; consumedCredit?: boolean }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const user = options.currentUser
       ? { id: options.currentUser.id, email: options.currentUser.email || null }
       : (await supabase.auth.getUser()).data.user;
@@ -309,7 +309,7 @@ export async function sendOrderMessage(
 ): Promise<{ success: boolean; messageId?: string; message?: OrderMessage; error?: string; detail?: string }>
 {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -391,7 +391,7 @@ export async function getUserOrders(options?: {
   offset?: number;
 }): Promise<{ success: boolean; orders?: any[]; total?: number; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -434,7 +434,7 @@ export async function getOrderDetail(
   orderId: string
 ): Promise<{ success: boolean; order?: any; milestones?: any[]; documents?: any[]; events?: any[]; messages?: any[]; quotes?: any[]; cost?: any; rfq?: any; assignment?: any; uploads?: any[]; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -566,7 +566,7 @@ export async function updateOrderStatus(
   newStatus: OrderStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -610,7 +610,7 @@ export async function updateMilestoneStatus(
   newStatus: 'pending' | 'in_progress' | 'completed' | 'failed'
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -665,7 +665,7 @@ export async function updateOrderContact(
   }
 ): Promise<{ success: boolean; error?: string; detail?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: 'Not authenticated' };
@@ -740,7 +740,7 @@ export async function addOrderUpload(
   input: { title: string; fileUrl?: string | null; description?: string | null; type?: string }
 ): Promise<{ success: boolean; document?: any; error?: string; detail?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -823,7 +823,7 @@ export async function getVerificationQuotes(
   verificationId: string
 ): Promise<{ success?: boolean; quotes?: any[]; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

@@ -162,7 +162,7 @@ function StatCard({
 export default async function AdminDashboard() {
   // TEMP: Allow bypassing role check but still require authentication
   const FORCE_ALLOW_ADMIN = true
-  const supabase = createClient(cookies())
+  const supabase = createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

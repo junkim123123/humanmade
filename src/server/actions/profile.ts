@@ -26,7 +26,7 @@ export interface UserProfile {
 
 export async function getMyProfile(): Promise<{ success: boolean; profile?: UserProfile; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: 'Not authenticated' };
 
@@ -51,7 +51,7 @@ export async function getMyProfile(): Promise<{ success: boolean; profile?: User
 
 export async function updateProfile(updates: Partial<Omit<UserProfile, 'id' | 'email'>>): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: 'Not authenticated' };
 

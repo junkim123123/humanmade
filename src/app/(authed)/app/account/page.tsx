@@ -6,8 +6,7 @@ import { getMyProfile, UserProfile } from "@/server/actions/profile";
 import { getMyCredits } from "@/server/actions/credits";
 
 export default async function AccountPage() {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

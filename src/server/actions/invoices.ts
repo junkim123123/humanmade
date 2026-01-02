@@ -14,7 +14,7 @@ export async function requestInvoice(orderId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -194,7 +194,7 @@ export async function getOrderInvoice(orderId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

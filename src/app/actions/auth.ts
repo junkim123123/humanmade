@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
 export async function signOut() {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
   
   await supabase.auth.signOut();
   

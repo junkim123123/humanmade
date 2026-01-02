@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export const dynamic = "force-dynamic";
 
 export default async function SupportPage({ searchParams }: { searchParams: Promise<{ category?: string; orderId?: string; reportId?: string }> }) {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const params = await searchParams;
   const initialCategory = params?.category || null;

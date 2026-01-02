@@ -14,7 +14,7 @@ export interface SupplierMatchingParams {
 export async function findSupplierMatches(
   params: SupplierMatchingParams
 ): Promise<SupplierMatch[]> {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
 
   // Search in Supabase cache first
   // This is a placeholder - implement actual search logic based on your schema
@@ -142,7 +142,7 @@ export async function matchSuppliersFallback(
   }
 
   try {
-    const supabase = createClient(cookies());
+    const supabase = createClient();
 
     // Build search query
     const primaryTerms: string[] = [];
