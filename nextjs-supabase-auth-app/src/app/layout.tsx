@@ -9,7 +9,7 @@ export const metadata = {
   description: 'A Next.js application with Supabase authentication',
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
