@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { SupportForm } from "@/components/support/SupportForm";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 export default async function SupportPage({ searchParams }: { searchParams: Promise<{ category?: string; orderId?: string; reportId?: string }> }) {
-  const supabase = await createClient();
+  const supabase = createClient(cookies());
   const { data: { user } } = await supabase.auth.getUser();
   const params = await searchParams;
   const initialCategory = params?.category || null;

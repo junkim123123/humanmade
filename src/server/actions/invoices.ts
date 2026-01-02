@@ -1,7 +1,8 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
 
 /**
  * Request invoice for an order
@@ -13,7 +14,7 @@ export async function requestInvoice(orderId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -193,7 +194,7 @@ export async function getOrderInvoice(orderId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

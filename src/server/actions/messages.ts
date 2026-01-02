@@ -1,9 +1,10 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { requireAdminUser } from '@/lib/auth/admin'
 import { sendOrderMessage } from './orders'
+import { cookies } from 'next/headers'
 
 export async function getOrderMessages(orderId: string, opts?: { asAdmin?: boolean }) {
   try {
@@ -20,7 +21,7 @@ export async function getOrderMessages(orderId: string, opts?: { asAdmin?: boole
       return { success: true, messages: data || [] }
     }
 
-    const supabase = await createClient()
+    const supabase = createClient(cookies())
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, error: 'Not authenticated' }
 
