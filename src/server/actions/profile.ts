@@ -20,6 +20,7 @@ export interface UserProfile {
   notify_order_updates: boolean;
   notify_monthly_credits: boolean;
   notify_marketing: boolean;
+  role?: string | null;
 }
 
 export async function getMyProfile(): Promise<{ success: boolean; profile?: UserProfile; error?: string }> {
