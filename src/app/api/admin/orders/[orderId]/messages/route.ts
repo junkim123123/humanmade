@@ -45,12 +45,12 @@ function extractOrderId({
   return { orderId, pathname }
 }
 
-import type { NextRequest } from 'next/server';
+import type { NextRequest, RouteContext } from 'next/server';
 
-export async function GET(req: NextRequest, context: any) {
-  const { params } = context;
+export async function GET(req: NextRequest, ctx: RouteContext<'/api/admin/orders/[orderId]/messages'>) {
+  const { orderId } = await ctx.params;
   const url = new URL(req.url)
-  const { orderId, pathname } = extractOrderId({ params, url })
+  const { pathname } = extractOrderId({ params: { orderId }, url })
 
   if (!orderId) {
     const queryKeys = Array.from(url.searchParams.keys())
@@ -71,8 +71,8 @@ export async function GET(req: NextRequest, context: any) {
   return NextResponse.json({ success: true, messages: data || [] })
 }
 
-export async function POST(req: NextRequest, context: any) {
-  const { params } = context;
+export async function POST(req: NextRequest, ctx: RouteContext<'/api/admin/orders/[orderId]/messages'>) {
+  const { orderId } = await ctx.params;
   try {
     const url = new URL(req.url)
     const raw = await req.text()
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest, context: any) {
       }
     }
 
-    const { orderId, pathname } = extractOrderId({ params, url, payload })
+    const { pathname } = extractOrderId({ params: { orderId }, url, payload })
 
     if (!orderId) {
       const bodyKeys = Object.keys(payload || {})
