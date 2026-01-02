@@ -63,6 +63,16 @@ function LoginPageContent() {
     }
   };
 
+  const handleSignInWithGoogle = async () => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Decorative background */}
@@ -140,6 +150,44 @@ function LoginPageContent() {
               {loading ? "Loading..." : mode === "signin" ? "Sign In" : "Sign Up"}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center">
+            <div className="flex-grow border-t border-slate-200" />
+            <span className="mx-4 text-xs text-slate-500">OR</span>
+            <div className="flex-grow border-t border-slate-200" />
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={handleSignInWithGoogle}
+            disabled={loading}
+            className="w-full h-12 bg-white hover:bg-slate-50 text-slate-700 font-semibold border-slate-200/80 shadow-sm"
+          >
+            <svg
+              className="w-5 h-5 mr-3"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22.578 12.27c0-.79-.07-1.54-.2-2.27h-9.78v4.28h5.58a4.8 4.8 0 01-2.08 3.18v2.78h3.57c2.08-1.92 3.28-4.72 3.28-8Z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12.598 22.5c3.24 0 5.95-1.08 7.93-2.92l-3.57-2.78c-1.08.72-2.45 1.15-4.36 1.15-3.35 0-6.18-2.26-7.2-5.28H1.7v2.87A8.96 8.96 0 0012.6 22.5Z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.398 14.25a5.32 5.32 0 010-3.5V7.88H1.7a8.96 8.96 0 000 8.24l3.7-2.87Z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12.598 4.5c1.75 0 3.35.6 4.6 1.8l3.16-3.15A8.93 8.93 0 0012.6 1.5c-4.42 0-8.13 2.87-9.9 6.75l3.7 2.87c1.02-3.02 3.85-5.28 7.2-5.28Z"
+                fill="#EA4335"
+              />
+            </svg>
+            Sign in with Google
+          </Button>
 
           {/* Toggle mode */}
           <div className="mt-6 text-center">

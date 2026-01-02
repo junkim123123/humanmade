@@ -12,6 +12,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Temporarily remove /admin to validate server-side rendering behavior
-  matcher: ['/app/:path*'],
+  matcher: ['/((?!auth/callback|_next/static|_next/image|favicon.ico).*)'],
 }
