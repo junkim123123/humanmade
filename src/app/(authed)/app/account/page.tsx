@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AccountSettings } from "@/components/account/AccountSettings";
@@ -5,7 +6,8 @@ import { getMyProfile, UserProfile } from "@/server/actions/profile";
 import { getMyCredits } from "@/server/actions/credits";
 
 export default async function AccountPage() {
-  const supabase = await createClient();
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
