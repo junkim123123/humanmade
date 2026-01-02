@@ -47,7 +47,7 @@ function extractOrderId({
 
 import type { NextRequest } from 'next/server';
 
-export async function GET(req: NextRequest, context: { params: { orderId: string } }) {
+export async function GET(req: NextRequest, context: any) {
   const { params } = context;
   const url = new URL(req.url)
   const { orderId, pathname } = extractOrderId({ params, url })
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest, context: { params: { orderId: string
   return NextResponse.json({ success: true, messages: data || [] })
 }
 
-export async function POST(req: NextRequest, context: { params: { orderId: string } }) {
+export async function POST(req: NextRequest, context: any) {
   const { params } = context;
   try {
     const url = new URL(req.url)
