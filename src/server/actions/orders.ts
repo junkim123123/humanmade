@@ -225,7 +225,7 @@ export async function createVerificationRequest(options: {
       }
 
       console.error('[createVerificationRequest] order insert failed', orderError);
-      return { success: false, error: 'order_create_failed', detail: orderError?.message };
+      return { success: false, error: 'order_create_failed' };
     }
 
     // Event log
@@ -770,7 +770,6 @@ export async function addOrderUpload(
     }
 
     const insertPayload = {
-      order_id: orderId,
       order_id: orderId,
       kind: docType,
       file_type: docType,

@@ -26,6 +26,7 @@ export interface DataQualityResult {
   helperText: string;
   missingSignals: MissingSignal[];
   presentSignals: DataQualitySignal[];
+  strength: "low" | "medium" | "high";
 }
 
 const listify = (items: string[]): string => {
@@ -146,5 +147,6 @@ export function computeDataQuality(report: Report): DataQualityResult {
     helperText,
     missingSignals: missingSignals.slice(0, 3),
     presentSignals,
+    strength: tier,
   };
 }

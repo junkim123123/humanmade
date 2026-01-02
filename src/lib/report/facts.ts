@@ -50,21 +50,25 @@ export function extractConfirmedFacts(report: Report): FactItem[] {
   }
 
   if (effectiveWeight.value && !facts.find((f) => f.id === "net_weight")) {
-    const evidenceType: EvidenceType = effectiveWeight.source === "extracted" ? "label" : "customs";
-    const weightLabel =
-      effectiveWeight.source === "extracted"
-        ? "Net weight verified"
-        : effectiveWeight.source === "inferred"
-          ? "Net weight inferred"
-          : "Net weight assumed";
-
+    let evidenceType: EvidenceType = "customs";
+    let weightLabel = "Net weight assumed";
+    let confidence = 0.65;
+    let sourceRef = "Category inference";
+    if (effectiveWeight.source === "extracted") {
+      evidenceType = "label";
+      weightLabel = "Net weight verified";
+      confidence = 0.85;
+      sourceRef = "Label extraction";
+    } else if (effectiveWeight.source === "inferred") {
+      weightLabel = "Net weight inferred";
+    }
     facts.push({
       id: "net_weight",
       label: weightLabel,
       value: `${effectiveWeight.value} g`,
       evidenceType,
-      confidence: effectiveWeight.source === "extracted" ? 0.85 : 0.65,
-      sourceRef: effectiveWeight.source === "extracted" ? "Label extraction" : "Category inference",
+      confidence,
+      sourceRef,
     });
   }
 

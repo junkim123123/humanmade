@@ -55,12 +55,13 @@ export async function updateProfile(updates: Partial<Omit<UserProfile, 'id' | 'e
     if (!user) return { success: false, error: 'Not authenticated' };
 
     const admin = getSupabaseAdmin();
+    const updatePayload: Record<string, any> = {
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
     const { error } = await admin
       .from('profiles')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', user.id);
 
     if (error) {

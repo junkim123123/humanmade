@@ -85,13 +85,14 @@ export async function adminGrantCredits(
     if (error) {
       console.error('[adminGrantCredits] update failed', error);
       return { success: false, error: 'Failed to grant credits' };
-    }
-
-    return { success: true, newBalance: data };
-  } catch (error) {
-    console.error('[adminGrantCredits] unexpected', error);
-    return { success: false, error: 'Unexpected error' };
-  }
+        const params: Record<string, any> = {
+          p_user_id: userId,
+          p_amount: amount,
+          p_type: 'admin_grant',
+          p_description: description || '',
+          p_created_by: adminUser?.id || null,
+        };
+        const { data, error } = await admin.rpc('add_user_credits', params);
 }
 
 // Get all users with their credit balances (for admin)

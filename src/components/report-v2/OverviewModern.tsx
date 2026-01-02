@@ -21,7 +21,8 @@ function DecisionCard({ report }: { report: Report }) {
   const costRange = report.baseline?.costRange || { conservative: { totalLandedCost: 0 }, standard: { totalLandedCost: 0 } };
   const bestEstimate = costRange.standard?.totalLandedCost || 0;
   let minCost = costRange.conservative?.totalLandedCost || bestEstimate;
-  let maxCost = costRange.optimistic?.totalLandedCost || bestEstimate * 1.2;
+  let maxCost =
+    costRange.range?.totalLandedCost?.p90 ?? bestEstimate * 1.2;
   // Ensure bestEstimate is inside [min, max]
   if (bestEstimate < minCost) minCost = bestEstimate;
   if (bestEstimate > maxCost) maxCost = bestEstimate;
@@ -30,8 +31,8 @@ function DecisionCard({ report }: { report: Report }) {
 
   // Evidence badge logic
   const { strength, reason: evidenceSummary } = computeDataQuality(report);
-  const safeStrength = strength ?? "low";
-  const evidenceColors = {
+  const safeStrength: "low" | "medium" | "high" = strength ?? "low";
+  const evidenceColors: Record<"low"|"medium"|"high", string> = {
     low: "bg-yellow-100 text-yellow-700 border-yellow-300",
     medium: "bg-blue-100 text-blue-700 border-blue-300",
     high: "bg-green-100 text-green-700 border-green-300",
@@ -58,7 +59,7 @@ function DecisionCard({ report }: { report: Report }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength]}`}>{safeStrength.charAt(0).toUpperCase() + safeStrength.slice(1)} evidence</span>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>{safeStrength.charAt(0).toUpperCase() + safeStrength.slice(1)} evidence</span>
           <span className="text-[13px] text-slate-600">{evidenceSummary}</span>
         </div>
       </div>

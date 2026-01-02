@@ -144,7 +144,6 @@ export const sampleReport: Report = {
   },
   createdAt: "2024-02-10T10:00:00.000Z",
   updatedAt: "2024-02-15T12:00:00.000Z",
-  _similarRecordsCount: 18,
   _hsCandidatesCount: 2,
   _hasLandedCosts: true,
   _supplierCandidateCount: 6,
