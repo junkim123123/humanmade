@@ -45,19 +45,18 @@ function extractOrderId({
   return { orderId, pathname }
 }
 
-import type { NextRequest, RouteContext } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function GET(req: NextRequest, ctx: RouteContext<'/api/admin/orders/[orderId]/messages'>) {
-  const { orderId } = await ctx.params;
-  const url = new URL(req.url)
-  const { pathname } = extractOrderId({ params: { orderId }, url })
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const { orderId, pathname } = extractOrderId({ url });
 
   if (!orderId) {
-    const queryKeys = Array.from(url.searchParams.keys())
-    return NextResponse.json({ error: 'missing_orderId', detail: { pathname, paramsPresent: !!params, queryKeys } }, { status: 400 })
+    const queryKeys = Array.from(url.searchParams.keys());
+    return NextResponse.json({ error: 'missing_orderId', detail: { pathname, queryKeys } }, { status: 400 });
   }
 
-  const auth = await ensureAdmin()
+  const auth = await ensureAdmin();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   const admin = getSupabaseAdmin()
@@ -92,7 +91,7 @@ export async function POST(req: NextRequest, ctx: RouteContext<'/api/admin/order
     if (!orderId) {
       const bodyKeys = Object.keys(payload || {})
       const queryKeys = Array.from(url.searchParams.keys())
-      return NextResponse.json({ error: 'missing_orderId', detail: { pathname, paramsPresent: !!params, bodyKeys, queryKeys } }, { status: 400 })
+      return NextResponse.json({ error: 'missing_orderId', detail: { pathname, paramsPresent: false, bodyKeys, queryKeys } }, { status: 400 })
     }
 
     if (!raw) {

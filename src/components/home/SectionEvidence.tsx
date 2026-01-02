@@ -36,7 +36,7 @@ const proofStates = [
   },
 ]
 
-export const SectionEvidence = forwardRef<HTMLElement, SectionEvidenceProps>(
+export const SectionEvidence = forwardRef<HTMLDivElement, SectionEvidenceProps>(
   ({ isActive: _isActive = false }, ref) => {
     const [openIndex, setOpenIndex] = useState<number>(-1)
 

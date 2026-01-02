@@ -46,11 +46,9 @@ export async function POST(req: NextRequest) {
 
     if (!result.success || !result.orderId) {
       const errorCode = result.error || 'failed_to_start_verification';
-      return NextResponse.json({
-        error: errorCode,
-        detail: result.detail || result,
-        raw,
-      }, { status: 500 });
+      const response: any = { error: errorCode, raw };
+      if ('detail' in result && result.detail) response.detail = result.detail;
+      return NextResponse.json(response, { status: 500 });
     }
 
     // Return 200 with minimal payload for CTA redirect
