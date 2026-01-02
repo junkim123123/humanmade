@@ -1,43 +1,10 @@
-"use client";
+import AdminCreditsClient from "./AdminCreditsClient";
+import { adminGetAllUserCredits } from "@/server/actions/credits";
 
-import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Wallet, Plus, Minus, Search, RefreshCw, DollarSign } from "lucide-react";
-import { getAllUserCredits, grantCredits } from "./actions";
-
-const CREDIT_VALUE = 45; // $45 per credit
-
-interface UserCredits {
-  user_id: string;
-  email: string;
-  credits_balance: number;
-  updated_at: string | null;
-}
-
-export default function AdminCreditsPage() {
-  const [users, setUsers] = useState<UserCredits[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserCredits | null>(null);
-  const [dollarAmount, setDollarAmount] = useState<number>(45);
-  const [description, setDescription] = useState("");
-  const [isGranting, setIsGranting] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [isAdding, setIsAdding] = useState(true);
-
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      const res = await getAllUserCredits();
-      if (res.success) {
-        setUsers(res.users || []);
-      }
-    } catch (err) {
-      console.error("Failed to load users", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+export default async function AdminCreditsPage() {
+  const res = await adminGetAllUserCredits();
+  const users = res.success ? res.users || [] : [];
+  return <AdminCreditsClient users={users} />;
 
   useEffect(() => {
     void loadUsers();

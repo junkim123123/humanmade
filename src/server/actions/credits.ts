@@ -89,12 +89,16 @@ export async function adminGrantCredits(
     }
 
     return { success: true, newBalance: data };
+  } catch (error) {
+    console.error('[adminGrantCredits] unexpected', error);
+    return { success: false, error: 'Unexpected error' };
+  }
+}
 
 // Get all users with their credit balances (for admin)
 export async function adminGetAllUserCredits(): Promise<{ success: boolean; users?: any[]; error?: string }> {
   try {
     const admin = getSupabaseAdmin();
-    
     // Get all users with credits
     const { data: credits, error: creditsError } = await (admin.from('user_credits') as any)
       .select('user_id, credits_balance, updated_at');
@@ -106,8 +110,23 @@ export async function adminGetAllUserCredits(): Promise<{ success: boolean; user
 
     // Get user emails from auth.users
     const userIds = (credits || []).map((c: any) => c.user_id);
-    
     const { data: { users: authUsers }, error: usersError } = await admin.auth.admin.listUsers();
+    // Merge emails into credits
+    const users = (credits || []).map((c: any) => {
+      const authUser = (authUsers || []).find((u: any) => u.id === c.user_id);
+      return {
+        user_id: c.user_id,
+        credits_balance: c.credits_balance,
+        updated_at: c.updated_at,
+        email: authUser?.email || '',
+      };
+    });
+    return { success: true, users };
+  } catch (error) {
+    console.error('[adminGetAllUserCredits] unexpected', error);
+    return { success: false, error: 'Unexpected error' };
+  }
+}
 
     if (usersError) {
       console.error('[adminGetAllUserCredits] users fetch failed', usersError);
