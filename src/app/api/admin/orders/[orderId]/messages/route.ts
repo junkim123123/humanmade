@@ -45,12 +45,12 @@ function extractOrderId({
   return { orderId, pathname }
 }
 
-import type { NextRequest } from 'next/server';
+import type { NextRequest, RouteContext } from 'next/server';
 
-export async function GET(req: NextRequest, context: { params: { orderId: string } }) {
-  const { params } = context;
+export async function GET(req: NextRequest, ctx: RouteContext<'/api/admin/orders/[orderId]/messages'>) {
+  const { orderId } = await ctx.params;
   const url = new URL(req.url)
-  const { orderId, pathname } = extractOrderId({ params, url })
+  const { pathname } = extractOrderId({ params: { orderId }, url })
 
   if (!orderId) {
     const queryKeys = Array.from(url.searchParams.keys())
@@ -71,8 +71,8 @@ export async function GET(req: NextRequest, context: { params: { orderId: string
   return NextResponse.json({ success: true, messages: data || [] })
 }
 
-export async function POST(req: NextRequest, context: { params: { orderId: string } }) {
-  const { params } = context;
+export async function POST(req: NextRequest, ctx: RouteContext<'/api/admin/orders/[orderId]/messages'>) {
+  const { orderId } = await ctx.params;
   try {
     const url = new URL(req.url)
     const raw = await req.text()
