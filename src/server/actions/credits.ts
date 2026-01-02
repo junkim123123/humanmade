@@ -74,26 +74,21 @@ export async function adminGrantCredits(
     const { data: { user: adminUser } } = await supabase.auth.getUser();
     
     const admin = getSupabaseAdmin();
-    const { data, error } = await admin.rpc('add_user_credits', { 
-      p_user_id: userId, 
+    const params: Record<string, any> = {
+      p_user_id: userId,
       p_amount: amount,
       p_type: 'admin_grant',
       p_description: description || `Admin granted ${amount} credits`,
-      p_created_by: adminUser?.id || null
-    });
+      p_created_by: adminUser?.id || null,
+    };
+    const { data, error } = await admin.rpc('add_user_credits', params);
 
     if (error) {
       console.error('[adminGrantCredits] update failed', error);
       return { success: false, error: 'Failed to grant credits' };
-        const params: Record<string, any> = {
-          p_user_id: userId,
-          p_amount: amount,
-          p_type: 'admin_grant',
-          p_description: description || '',
-          p_created_by: adminUser?.id || null,
-        };
-        const { data, error } = await admin.rpc('add_user_credits', params);
-}
+    }
+
+    return { success: true, newBalance: data };
 
 // Get all users with their credit balances (for admin)
 export async function adminGetAllUserCredits(): Promise<{ success: boolean; users?: any[]; error?: string }> {
