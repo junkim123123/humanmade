@@ -2,6 +2,7 @@ import { CheckCircle2, Clock, AlertCircle, ChevronRight } from 'lucide-react';
 
 interface OrderTimelineProps {
   milestones: any[];
+  events?: any[];
   onUpdateMilestone?: (milestoneId: string, status: string) => Promise<void>;
 }
 
@@ -30,7 +31,7 @@ const statusColors: Record<string, string> = {
   failed: 'bg-red-100 text-red-700',
 };
 
-export default function OrderTimeline({ milestones, onUpdateMilestone }: OrderTimelineProps) {
+export default function OrderTimeline({ milestones, events = [], onUpdateMilestone }: OrderTimelineProps) {
   // Use default steps if no milestones exist
   const displayMilestones = milestones.length > 0 ? milestones : defaultSteps;
   
