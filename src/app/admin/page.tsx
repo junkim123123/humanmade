@@ -15,13 +15,14 @@ async function getStats() {
   const lastDay = new Date(now.getTime() - 24 * 60 * 60 * 1000)
   const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-  const countOrZero = async (promise: Promise<{ count: number | null; error: any }>) => {
+  type CountResult = { count: number | null; error: any };
+  const countOrZero = async (promise: PromiseLike<CountResult>) => {
     const { count, error } = await promise
     if (error) throw error
     return count || 0
   }
 
-  const safeCountOrZero = async (promise: Promise<{ count: number | null; error: any }>) => {
+  const safeCountOrZero = async (promise: PromiseLike<CountResult>) => {
     try {
       return await countOrZero(promise)
     } catch (err: any) {
