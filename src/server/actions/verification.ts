@@ -1,7 +1,8 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
 
 /**
  * Get or create verification request for a report
@@ -12,7 +13,7 @@ export async function getOrCreateVerification(reportId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -70,7 +71,7 @@ export async function startVerification(verificationId: string): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -104,7 +105,7 @@ export async function createMockQuotes(
   productName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

@@ -1,8 +1,9 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
 export interface UserProfile {
   id: string;
@@ -25,7 +26,7 @@ export interface UserProfile {
 
 export async function getMyProfile(): Promise<{ success: boolean; profile?: UserProfile; error?: string }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: 'Not authenticated' };
 
@@ -50,7 +51,7 @@ export async function getMyProfile(): Promise<{ success: boolean; profile?: User
 
 export async function updateProfile(updates: Partial<Omit<UserProfile, 'id' | 'email'>>): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: 'Not authenticated' };
 
