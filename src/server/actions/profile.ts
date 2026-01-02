@@ -61,6 +61,7 @@ export async function updateProfile(updates: Partial<Omit<UserProfile, 'id' | 'e
     };
     const { error } = await admin
       .from('profiles')
+      // @ts-ignore
       .update(updatePayload)
       .eq('id', user.id);
 

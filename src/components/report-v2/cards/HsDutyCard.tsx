@@ -104,7 +104,7 @@ export default function HsDutyCard({ decisionSupport }: HsDutyCardProps) {
               <p className="text-[12px] text-amber-700 mt-2">Origin not confirmed so tariff band is wide.</p>
             )}
             {/* Tighten tip */}
-            {(dutyRate.rateMax - dutyRate.rateMin > 5 || !(decisionSupport.inputStatus && decisionSupport.inputStatus.originConfirmed)) && (
+            {(dutyRate.rateMax - dutyRate.rateMin > 5 || decisionSupport.dutyRate.status !== 'CONFIRMED') && (
               <p className="text-[12px] text-blue-700 mt-1">Upload label photo to confirm origin and ingredients.</p>
             )}
           </div>

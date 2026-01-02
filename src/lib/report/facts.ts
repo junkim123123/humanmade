@@ -54,7 +54,7 @@ export function extractConfirmedFacts(report: Report): FactItem[] {
     let weightLabel = "Net weight assumed";
     let confidence = 0.65;
     let sourceRef = "Category inference";
-    if (effectiveWeight.source === "extracted") {
+    if (effectiveWeight.source === "confirmed") {
       evidenceType = "label";
       weightLabel = "Net weight verified";
       confidence = 0.85;

@@ -60,7 +60,7 @@ export default function AdminCreditsClient({ users }: Props) {
         setDollarAmount(45);
         setDescription("");
       } else {
-        alert(res.error || "Failed to update balance");
+        alert("Failed to update balance");
       }
     } catch (err) {
       console.error("Failed to update balance", err);
