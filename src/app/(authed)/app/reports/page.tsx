@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { FileText, Check, AlertCircle, Clock, Calendar, ArrowRight, Hourglass } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ReportListCTA } from "@/components/report/ReportListCTA";
@@ -51,7 +52,7 @@ function formatDate(value: string) {
 }
 
 export default async function AppReportsPage() {
-  const supabase = await createClient();
+  const supabase = createClient(cookies());
   const {
     data: { user },
   } = await supabase.auth.getUser();
