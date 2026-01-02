@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<any>(null);
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,8 +21,9 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const signInWithEmail = async (email, password) => {
-    const { user, error } = await supabase.auth.signIn({ email, password });
+  const signInWithEmail = async (email: string, password: string) => {
+    const resp: any = await supabase.auth.signIn({ email, password });
+    const { user, error } = resp || {};
     if (error) throw error;
     return user;
   };
