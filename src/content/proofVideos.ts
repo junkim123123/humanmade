@@ -9,6 +9,7 @@ export type ProofVideo = {
   youtubeId: string
   takeaways: string[]
   transcript: string
+  publishedAt?: string;
   isFeatured?: boolean
   isPinned?: boolean
 }

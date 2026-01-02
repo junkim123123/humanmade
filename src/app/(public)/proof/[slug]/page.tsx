@@ -37,11 +37,13 @@ export default async function ProofVideoPage({ params }: Props) {
     notFound();
   }
 
-  const publishedDate = new Date(video.publishedAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const publishedDate = video.publishedAt
+    ? new Date(video.publishedAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
 
   return (
     <div className="min-h-screen bg-white">
@@ -90,7 +92,7 @@ export default async function ProofVideoPage({ params }: Props) {
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
-                {publishedDate}
+                {publishedDate ?? "Date TBD"}
               </span>
             </div>
           </div>
