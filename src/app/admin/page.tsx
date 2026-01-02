@@ -92,6 +92,14 @@ async function getStats() {
 }
 
 async function getQueuePreview() {
+  type QueueItem = {
+    id: string;
+    productName: string;
+    email: string;
+    status: string;
+    quotesCount: number;
+    updatedAt: string;
+  };
   const supabase = getSupabaseAdmin()
   const { data, error } = await (supabase.from('orders') as any)
     .select('id, product_name, status, updated_at, created_at, report_id, user_id, profiles(email), reports(product_name), order_quotes(count)')
@@ -171,7 +179,7 @@ export default async function AdminDashboard() {
   }
 
   const stats = await getStats()
-  const queue = await getQueuePreview()
+  const queue: QueueItem[] = await getQueuePreview()
 
   return (
     <div>
