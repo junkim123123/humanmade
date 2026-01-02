@@ -235,7 +235,11 @@ export default async function AdminDashboard() {
                       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{item.status}</span>
                     </td>
                     <td className="px-4 py-3 text-slate-700">{item.quotesCount}</td>
-                    <td className="px-4 py-3 text-slate-600">{new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(item.updatedAt))}</td>
+                    <td className="px-4 py-3 text-slate-600">{
+                      item.updatedAt
+                        ? new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(item.updatedAt))
+                        : 'Date TBD'
+                    }</td>
                   </tr>
                 ))}
               </tbody>
