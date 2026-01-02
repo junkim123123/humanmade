@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Users, FileText, CheckSquare, ShoppingCart, Inbox, UploadCloud, MessageSquare } from 'lucide-react'
 import type { ComponentType, SVGProps } from 'react'
+import { cookies } from 'next/headers'
 
 const queueStatuses = ['awaiting_contact', 'contacted', 'meeting_scheduled']
 
@@ -161,7 +162,7 @@ function StatCard({
 export default async function AdminDashboard() {
   // TEMP: Allow bypassing role check but still require authentication
   const FORCE_ALLOW_ADMIN = true
-  const supabase = await createClient()
+  const supabase = createClient(cookies())
   const {
     data: { user },
   } = await supabase.auth.getUser()

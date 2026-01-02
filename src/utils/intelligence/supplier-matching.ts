@@ -1,7 +1,8 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import type { SupplierMatch } from "@/types";
 import { ProductSignals, ProductSignalEvidence } from "@/lib/report/signals";
 import { getCategoryPriorities } from "@/lib/report/category-rules";
+import { cookies } from "next/headers";
 
 export interface SupplierMatchingParams {
   productName: string;
@@ -13,7 +14,7 @@ export interface SupplierMatchingParams {
 export async function findSupplierMatches(
   params: SupplierMatchingParams
 ): Promise<SupplierMatch[]> {
-  const supabase = await createClient();
+  const supabase = createClient(cookies());
 
   // Search in Supabase cache first
   // This is a placeholder - implement actual search logic based on your schema
@@ -141,7 +142,7 @@ export async function matchSuppliersFallback(
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createClient(cookies());
 
     // Build search query
     const primaryTerms: string[] = [];
