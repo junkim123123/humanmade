@@ -25,12 +25,70 @@ export default function AdminCreditsClient({ users }: Props) {
   const [isAdding, setIsAdding] = useState(true);
   const [userList, setUserList] = useState<UserCredits[]>(users);
 
-  // ...existing UI logic, handlers, rendering...
-  // You can copy the UI logic from the previous AdminCreditsPage
+  const CREDIT_VALUE = 45;
 
+  useEffect(() => {
+    setUserList(users);
+  }, [users]);
+
+  const filteredUsers = userList.filter(
+    (u) => u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Total balance in dollars
+  const totalBalanceDollars = userList.reduce((sum, u) => sum + u.credits_balance, 0) * CREDIT_VALUE;
+
+  const grantCredits = async (userId: string, credits: number, description: string) => {
+    // TODO: Call server action or API route
+    return { success: true, newBalance: credits };
+  };
+
+  const handleGrantCredits = async () => {
+    if (!selectedUser || dollarAmount === 0) return;
+    const credits = Math.round(dollarAmount / CREDIT_VALUE);
+    if (credits === 0) {
+      alert("Amount must be at least $45");
+      return;
+    }
+    const finalCredits = isAdding ? credits : -credits;
+    setIsGranting(true);
+    try {
+      const res = await grantCredits(selectedUser.user_id, finalCredits, description);
+      if (res.success) {
+        setUserList((prev) =>
+          prev.map((u) =>
+            u.user_id === selectedUser.user_id
+              ? { ...u, credits_balance: res.newBalance ?? u.credits_balance + finalCredits }
+              : u
+          )
+        );
+        setShowModal(false);
+        setSelectedUser(null);
+        setDollarAmount(45);
+        setDescription("");
+      } else {
+        alert(res.error || "Failed to update balance");
+      }
+    } catch (err) {
+      console.error("Failed to update balance", err);
+      alert("Failed to update balance");
+    } finally {
+      setIsGranting(false);
+    }
+  };
+
+  const openGrantModal = (user: UserCredits, adding: boolean) => {
+    setSelectedUser(user);
+    setIsAdding(adding);
+    setDollarAmount(45);
+    setDescription("");
+    setShowModal(true);
+  };
+
+  // ...existing UI rendering code...
   return (
     <div>
-      {/* Render user credits UI here using userList */}
+      {/* Render user credits UI here using userList, filteredUsers, and handlers */}
       {/* ...existing code... */}
     </div>
   );

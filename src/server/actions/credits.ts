@@ -28,38 +28,6 @@ export async function adminGrantCredits(
 }
 
 export async function adminGetAllUserCredits(): Promise<{ success: boolean; users?: any[]; error?: string }> {
+  // TODO: Implement real logic
   return { success: true, users: [] };
-}
-
-    if (usersError) {
-      console.error('[adminGetAllUserCredits] users fetch failed', usersError);
-    }
-
-    // Merge data
-    const userMap = new Map((authUsers || []).map(u => [u.id, u]));
-    const mergedUsers = (credits || []).map((c: any) => ({
-      user_id: c.user_id,
-      email: userMap.get(c.user_id)?.email || 'Unknown',
-      credits_balance: c.credits_balance,
-      updated_at: c.updated_at
-    }));
-
-    // Also add users with no credits row yet
-    const existingUserIds = new Set((credits || []).map((c: any) => c.user_id));
-    for (const authUser of (authUsers || [])) {
-      if (!existingUserIds.has(authUser.id)) {
-        mergedUsers.push({
-          user_id: authUser.id,
-          email: authUser.email || 'Unknown',
-          credits_balance: 0,
-          updated_at: null
-        });
-      }
-    }
-
-    return { success: true, users: mergedUsers };
-  } catch (error) {
-    console.error('[adminGetAllUserCredits] unexpected', error);
-    return { success: false, error: 'Unexpected error' };
-  }
 }

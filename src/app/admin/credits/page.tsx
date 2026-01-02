@@ -5,59 +5,6 @@ export default async function AdminCreditsPage() {
   const res = await adminGetAllUserCredits();
   const users = res.success ? res.users || [] : [];
   return <AdminCreditsClient users={users} />;
-
-  useEffect(() => {
-    void loadUsers();
-  }, []);
-
-  const filteredUsers = users.filter(
-    (u) => u.email.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // Total balance in dollars
-  const totalBalanceDollars = users.reduce((sum, u) => sum + u.credits_balance, 0) * CREDIT_VALUE;
-
-  const handleGrantCredits = async () => {
-    if (!selectedUser || dollarAmount === 0) return;
-    
-    // Convert dollars to credits (round to nearest credit)
-    const credits = Math.round(dollarAmount / CREDIT_VALUE);
-    if (credits === 0) {
-      alert("Amount must be at least $45");
-      return;
-    }
-    
-    const finalCredits = isAdding ? credits : -credits;
-    
-    setIsGranting(true);
-    try {
-      const res = await grantCredits(selectedUser.user_id, finalCredits, description);
-      if (res.success) {
-        // Update local state
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.user_id === selectedUser.user_id
-              ? { ...u, credits_balance: res.newBalance ?? u.credits_balance + finalCredits }
-              : u
-          )
-        );
-        setShowModal(false);
-        setSelectedUser(null);
-        setDollarAmount(45);
-        setDescription("");
-      } else {
-        alert(res.error || "Failed to update balance");
-      }
-    } catch (err) {
-      console.error("Failed to update balance", err);
-      alert("Failed to update balance");
-    } finally {
-      setIsGranting(false);
-    }
-  };
-
-  const openGrantModal = (user: UserCredits, adding: boolean) => {
-    setSelectedUser(user);
     setIsAdding(adding);
     setDollarAmount(45);
     setDescription("");
