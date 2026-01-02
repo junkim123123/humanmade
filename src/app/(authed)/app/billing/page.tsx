@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Wallet, ArrowUpRight, ArrowDownRight, Clock, Gift, RefreshCw, HelpCircle } from "lucide-react";
-import { getMyCredits, getMyCreditTransactions, CreditTransaction } from "@/server/actions/credits";
+import { fetchMyCredits, fetchMyCreditTransactions } from "./actions";
+import type { CreditTransaction } from "@/server/actions/credits";
 
 const CREDIT_VALUE = 45; // $45 per credit
 
@@ -26,8 +27,8 @@ export default function BillingPage() {
     async function loadData() {
       try {
         const [creditsRes, txRes] = await Promise.all([
-          getMyCredits(),
-          getMyCreditTransactions()
+          fetchMyCredits(),
+          fetchMyCreditTransactions()
         ]);
         if (creditsRes.success) {
           setBalance(creditsRes.balance || 0);

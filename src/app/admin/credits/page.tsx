@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Wallet, Plus, Minus, Search, RefreshCw, DollarSign } from "lucide-react";
-import { adminGetAllUserCredits, adminGrantCredits } from "@/server/actions/credits";
+import { getAllUserCredits, grantCredits } from "./actions";
 
 const CREDIT_VALUE = 45; // $45 per credit
 
@@ -28,7 +28,7 @@ export default function AdminCreditsPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const res = await adminGetAllUserCredits();
+      const res = await getAllUserCredits();
       if (res.success) {
         setUsers(res.users || []);
       }
@@ -64,7 +64,7 @@ export default function AdminCreditsPage() {
     
     setIsGranting(true);
     try {
-      const res = await adminGrantCredits(selectedUser.user_id, finalCredits, description);
+      const res = await grantCredits(selectedUser.user_id, finalCredits, description);
       if (res.success) {
         // Update local state
         setUsers((prev) =>
