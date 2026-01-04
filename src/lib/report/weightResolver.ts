@@ -267,6 +267,22 @@ If you are unsure whether the printed number is net weight or something else, do
 Do not use serving size or nutrition table amounts as net weight.
 Do not use model numbers, item counts, or volumes as weight.
 
+Multipack and unit scope rules
+You must decide the unit scope.
+If the image shows a multipack, assortment box, or a bag containing multiple inner packs:
+- Default unit_scope is "outer_pack" meaning the whole multipack is the unit.
+- Only set unit_scope to "inner_unit" if the pack count is clearly printed AND you can justify that the weight applies per inner unit or provides a breakdown.
+- Never divide weight using serving size, nutrition servings, or piece counts of candies/toys.
+- If you cannot confirm pack count and scope, set unit_scope "unknown" and return only an estimated range for the outer pack.
+
+Add these output keys
+unit_scope: "outer_pack" | "inner_unit" | "unknown"
+pack_count: number | null
+pack_count_confidence: number (0..1)
+
+If unit_scope is "inner_unit", you must explain exactly where the pack count is visible.
+If not clearly visible, keep outer_pack or unknown.
+
 Output format
 Return a JSON object with these keys:
 unit_weight_grams
@@ -275,6 +291,9 @@ max_grams
 confidence
 signals
 reason
+unit_scope
+pack_count
+pack_count_confidence
 
 Validation rules
 If you provide unit_weight_grams, it must be between 1 and 5000.
@@ -365,6 +384,13 @@ Return only JSON.`;
           confidence: Math.max(0, Math.min(1, typeof data.confidence === 'number' ? data.confidence : 0.5)),
           signals: Array.isArray(data.signals) ? data.signals : [],
           reason: typeof data.reason === 'string' ? data.reason : 'Estimated from visual cues',
+          unit_scope: (data.unit_scope === "outer_pack" || data.unit_scope === "inner_unit" || data.unit_scope === "unknown") 
+            ? data.unit_scope 
+            : "unknown",
+          pack_count: typeof data.pack_count === 'number' ? data.pack_count : null,
+          pack_count_confidence: typeof data.pack_count_confidence === 'number' 
+            ? Math.max(0, Math.min(1, data.pack_count_confidence)) 
+            : 0,
         };
       }
     }
@@ -377,6 +403,9 @@ Return only JSON.`;
       confidence: 0,
       signals: [],
       reason: typeof data.reason === 'string' ? data.reason : 'Unable to infer weight from photos',
+      unit_scope: "unknown",
+      pack_count: null,
+      pack_count_confidence: 0,
     };
   } catch (error) {
     console.warn('[WeightResolver] Gemini Vision inference failed:', error);
