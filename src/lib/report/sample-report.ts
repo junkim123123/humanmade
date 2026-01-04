@@ -167,8 +167,8 @@ export const sampleReport: Report = {
       max: 2.32,
     },
     hsCandidates: [
-      { code: "1704.90", confidence: 0.85, reason: "Sugar confectionery", description: "Sugar confectionery (including white chocolate), not containing cocoa" },
-      { code: "1901.90", confidence: 0.72, reason: "Food preparations", description: "Food preparations of goods of headings 0401 to 0404" },
+      { code: "1704.90", confidence: 0.85, rationale: "Sugar confectionery", evidenceSnippet: "Sugar confectionery (including white chocolate), not containing cocoa" },
+      { code: "1901.90", confidence: 0.72, rationale: "Food preparations", evidenceSnippet: "Food preparations of goods of headings 0401 to 0404" },
     ],
     evidenceLevel: "similar_import",
     missingInputs: ["origin"],
@@ -513,54 +513,46 @@ export const sampleReport: Report = {
       unit: "g",
       confidence: 0.68,
       evidenceSnippet: "From category defaults",
-      source: "CATEGORY",
     },
     casePackDraft: {
       candidates: [
         { value: 72, confidence: 0.75, evidenceSnippet: "Standard retail pack configuration" },
         { value: 144, confidence: 0.45, evidenceSnippet: "Alternative bulk pack" },
       ],
-      selectedValue: 72,
-      selectedConfidence: 0.75,
+      chosen: 72,
+      confirmed: false,
     },
     customsCategoryDraft: {
       value: "Sugar confectionery",
       confidence: 0.85,
       evidenceSnippet: "HS code 1704.90 classification",
-      source: "HS_CODE",
     },
-    hsCandidatesDraft: {
-      candidates: [
-        { code: "1704.90", confidence: 0.85, reason: "Sugar confectionery" },
-        { code: "1901.90", confidence: 0.72, reason: "Food preparations" },
-      ],
-    },
+    hsCandidatesDraft: [
+      { code: "1704.90", confidence: 0.85, rationale: "Sugar confectionery", evidenceSnippet: "HS code classification" },
+      { code: "1901.90", confidence: 0.72, rationale: "Food preparations", evidenceSnippet: "Alternative classification" },
+    ],
   },
   weightDraft: {
     value: 140,
     unit: "g",
     confidence: 0.68,
     evidenceSnippet: "From category defaults",
-    source: "CATEGORY",
   },
   casePackDraft: {
     candidates: [
       { value: 72, confidence: 0.75, evidenceSnippet: "Standard retail pack configuration" },
       { value: 144, confidence: 0.45, evidenceSnippet: "Alternative bulk pack" },
     ],
-    selectedValue: 72,
-    selectedConfidence: 0.75,
+    chosen: 72,
+    confirmed: false,
   },
   customsCategoryDraft: {
     value: "Sugar confectionery",
     confidence: 0.85,
     evidenceSnippet: "HS code 1704.90 classification",
-    source: "HS_CODE",
   },
-  hsCandidatesDraft: {
-    candidates: [
-      { code: "1704.90", confidence: 0.85, reason: "Sugar confectionery" },
-      { code: "1901.90", confidence: 0.72, reason: "Food preparations" },
-    ],
-  },
+  hsCandidatesDraft: [
+    { code: "1704.90", confidence: 0.85, rationale: "Sugar confectionery", evidenceSnippet: "HS code classification" },
+    { code: "1901.90", confidence: 0.72, rationale: "Food preparations", evidenceSnippet: "Alternative classification" },
+  ],
 };
