@@ -2,7 +2,6 @@
 
 import { PrimaryNav } from "@/components/PrimaryNav";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
@@ -19,7 +18,7 @@ const caseStudies = [
     borderColor: "border-rose-200/60",
     categoryColor: "text-rose-600",
     bgColor: "bg-rose-50/40",
-    image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
+    image: encodeURI("/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg"),
   },
   {
     id: "p-2",
@@ -31,7 +30,7 @@ const caseStudies = [
     borderColor: "border-blue-200/60",
     categoryColor: "text-blue-600",
     bgColor: "bg-blue-50/40",
-    image: "/product-photos/$0.5 장난감/mmexport1758762530965.jpg",
+    image: encodeURI("/product-photos/$0.5 장난감/mmexport1758762530965.jpg"),
   },
   {
     id: "p-3",
@@ -43,7 +42,7 @@ const caseStudies = [
     borderColor: "border-emerald-200/60",
     categoryColor: "text-emerald-600",
     bgColor: "bg-emerald-50/40",
-    image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
+    image: encodeURI("/product-photos/3d젤리/mmexport1758762843530.jpg"),
   },
 ];
 
@@ -204,16 +203,17 @@ export default function ReportsPage() {
                     {/* Product Image with fallback */}
                     {study.image ? (
                       <>
-                        <Image
+                        <img
                           src={study.image}
                           alt={study.productName}
-                          fill
-                          className="object-cover z-0"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          priority={index < 3}
-                          unoptimized
+                          className="absolute inset-0 w-full h-full object-cover z-0"
+                          loading={index < 3 ? "eager" : "lazy"}
+                          onError={(e) => {
+                            // Hide image on error
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
-                        {/* Fallback shown if image fails to load */}
+                        {/* Fallback shown if image fails to load - always rendered but behind image */}
                         <div className="absolute inset-0 z-[-1] flex items-center justify-center">
                           <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${
                             study.category === "Confectionery" ? "bg-gradient-to-br from-pink-400 to-rose-500" :
