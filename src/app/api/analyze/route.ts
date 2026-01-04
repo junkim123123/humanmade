@@ -366,12 +366,8 @@ export async function POST(request: Request) {
       hasLabelImage: !!labelFile,
     };
 
-    // Guest user flow: Skip DB operations and run pipeline directly
-    if (!user) {
-      console.log("[Analyze API] Guest user - running pipeline without DB save");
-      // Skip all DB operations for guest users
-      // We'll run the pipeline and return results directly
-    } else {
+    // Create placeholder report row before pipeline runs (for both authenticated and guest users)
+    if (user) {
       // Ensure user profile exists before creating report
       // Use admin client to bypass RLS policies
       const admin = getSupabaseAdmin();
@@ -422,44 +418,54 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-      
-      // Authenticated user: Create placeholder report row before pipeline runs
-      const reportData = {
-        user_id: user.id,
-        input_key: inputKey,
-        product_name: "Pending analysis",
-        category: "pending",
-        confidence: "low",
-        status: "processing",
-        image_url: productImageUrl, // Main product image for backward compatibility
-        signals: {},
-        baseline: {},
-        data: {
-          product_image_url: productImageUrl,
-          barcode_image_url: barcodeImageUrl,
-          label_image_url: labelImageUrl,
-          extra_image_url_1: extra1ImageUrl,
-          extra_image_url_2: extra2ImageUrl,
+    }
+    
+    // Create report data (user_id is null for guest users)
+    const reportData = {
+      user_id: user ? user.id : null,
+      input_key: inputKey,
+      product_name: "Pending analysis",
+      category: "pending",
+      confidence: "low",
+      status: "processing",
+      image_url: productImageUrl, // Main product image for backward compatibility
+      signals: {},
+      baseline: {},
+      data: {
+        product_image_url: productImageUrl,
+        barcode_image_url: barcodeImageUrl,
+        label_image_url: labelImageUrl,
+        extra_image_url_1: extra1ImageUrl,
+        extra_image_url_2: extra2ImageUrl,
+        ...uploadFlags,
+        inputStatus: {
           ...uploadFlags,
-          inputStatus: {
-            ...uploadFlags,
-            unitsPerCase: 1,
-          },
+          unitsPerCase: 1,
         },
-        pipeline_result: { 
-          queued: true, 
-          productImagePath: productImageUrl,
-          barcodeImagePath: barcodeImageUrl,
-          labelImagePath: labelImageUrl,
-          extra1ImagePath: extra1ImageUrl,
-          extra2ImagePath: extra2ImageUrl,
-          uploadAudit: uploadFlags,
-        },
-        schema_version: 1,
-      };
-      
-      // Try upsert with conflict handling on input_key
-      const { data: upsertedReport, error: upsertError } = await supabase
+      },
+      pipeline_result: { 
+        queued: true, 
+        productImagePath: productImageUrl,
+        barcodeImagePath: barcodeImageUrl,
+        labelImagePath: labelImageUrl,
+        extra1ImagePath: extra1ImageUrl,
+        extra2ImagePath: extra2ImageUrl,
+        uploadAudit: uploadFlags,
+      },
+      schema_version: 1,
+    };
+    
+    // Use admin client for both authenticated and guest users to ensure report creation succeeds
+    const admin = getSupabaseAdmin();
+    
+    // For authenticated users, try regular client first, then fallback to admin
+    // For guest users, use admin client directly
+    let upsertedReport: any = null;
+    let upsertError: any = null;
+    
+    if (user) {
+      // Try upsert with conflict handling on input_key (authenticated users)
+      const { data: upserted, error: upsertErr } = await supabase
         .from("reports")
         .upsert(reportData, {
           onConflict: "input_key",
@@ -467,9 +473,46 @@ export async function POST(request: Request) {
         })
         .select("id, status")
         .single();
-
+      
+      upsertedReport = upserted;
+      upsertError = upsertErr;
+    }
+    
+    // If regular client failed or user is guest, use admin client
+    if (upsertError || !user) {
       if (upsertError) {
-        // If upsert fails, try to fetch existing report
+        console.warn("[Analyze API] Regular client failed, trying admin client as fallback");
+      } else {
+        console.log("[Analyze API] Guest user - creating report with user_id = null using admin client");
+      }
+      
+      try {
+        const { data: adminUpserted, error: adminError } = await admin
+          .from("reports")
+          .upsert(reportData, {
+            onConflict: "input_key",
+            ignoreDuplicates: false,
+          })
+          .select("id, status")
+          .single();
+        
+        if (!adminError && adminUpserted) {
+          upsertedReport = adminUpserted;
+          upsertError = null;
+          console.log(`[Analyze API] Admin client succeeded: ${adminUpserted.id}`);
+        } else {
+          upsertError = adminError;
+          console.error("[Analyze API] Admin client also failed:", adminError?.message);
+        }
+      } catch (adminFallbackError: any) {
+        upsertError = adminFallbackError;
+        console.error("[Analyze API] Admin fallback also failed:", adminFallbackError);
+      }
+    }
+    
+    if (upsertError) {
+      // If upsert fails, try to fetch existing report (only for authenticated users)
+      if (user) {
         console.error("[Analyze API] Upsert failed, attempting to fetch existing report", {
           error: upsertError.message,
           code: upsertError.code,
@@ -502,59 +545,34 @@ export async function POST(request: Request) {
           finalReportId = existingReport.id as string;
           console.log(`[Analyze API] Reusing existing report: ${finalReportId}`);
         } else {
-          // Try using admin client as fallback
-          console.warn("[Analyze API] Regular client failed, trying admin client as fallback");
-          try {
-            const admin = getSupabaseAdmin();
-            const { data: adminUpserted, error: adminError } = await admin
-              .from("reports")
-              .upsert(reportData, {
-                onConflict: "input_key",
-                ignoreDuplicates: false,
-              })
-              .select("id, status")
-              .single();
-            
-            if (!adminError && adminUpserted) {
-              finalReportId = adminUpserted.id as string;
-              console.log(`[Analyze API] Admin client succeeded: ${finalReportId}`);
-            } else {
-              console.error("[Analyze API] Admin client also failed:", adminError?.message);
-              return NextResponse.json(
-                { 
-                  ok: false, 
-                  error: "REPORT_INIT_FAILED", 
-                  message: upsertError.message || "Unable to create report",
-                  details: process.env.NODE_ENV === "development" ? {
-                    upsertError: upsertError.message,
-                    fetchError: fetchError?.message,
-                    adminError: adminError?.message,
-                  } : undefined,
-                },
-                { status: 500 }
-              );
-            }
-          } catch (adminFallbackError: any) {
-            console.error("[Analyze API] Admin fallback also failed:", adminFallbackError);
-            return NextResponse.json(
-              { 
-                ok: false, 
-                error: "REPORT_INIT_FAILED", 
-                message: upsertError.message || "Unable to create report",
-                details: process.env.NODE_ENV === "development" ? {
-                  upsertError: upsertError.message,
-                  fetchError: fetchError?.message,
-                  adminFallbackError: adminFallbackError?.message,
-                } : undefined,
-              },
-              { status: 500 }
-            );
-          }
+          return NextResponse.json(
+            { 
+              ok: false, 
+              error: "REPORT_INIT_FAILED", 
+              message: upsertError.message || "Unable to create report",
+              details: process.env.NODE_ENV === "development" ? {
+                upsertError: upsertError.message,
+                fetchError: fetchError?.message,
+              } : undefined,
+            },
+            { status: 500 }
+          );
         }
       } else {
-        finalReportId = upsertedReport.id as string;
-        console.log(`[Analyze API] Created/updated placeholder report: ${finalReportId}, input_key=${inputKey.substring(0, 16)}...`);
+        // For guest users, if report creation fails, return error
+        return NextResponse.json(
+          { 
+            ok: false, 
+            error: "REPORT_INIT_FAILED", 
+            message: upsertError.message || "Unable to create report",
+            details: process.env.NODE_ENV === "development" ? upsertError.message : undefined,
+          },
+          { status: 500 }
+        );
       }
+    } else {
+      finalReportId = upsertedReport.id as string;
+      console.log(`[Analyze API] Created/updated placeholder report: ${finalReportId}, input_key=${inputKey.substring(0, 16)}..., user_id=${user ? user.id : 'null'}`);
     }
 
     // ============================================================================
@@ -1294,33 +1312,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // For guest users, skip DB updates and return results directly
-    if (!user) {
-      console.log("[Analyze API] Guest user - skipping DB update, returning results directly");
-      // Return results without saving to DB
-      return NextResponse.json({
-        ok: true,
-        reportId: null, // No reportId for guest users
-        reused: false,
-        savedReport: false,
-        isGuest: true,
-        data: { ...result, draftInference },
-        report: {
-          ...report,
-          product_image_url: productImageUrl,
-          barcode_image_url: barcodeImageUrl,
-          label_image_url: labelImageUrl,
-          extra_image_url_1: extra1ImageUrl,
-          extra_image_url_2: extra2ImageUrl,
-        },
-        pipeline_result: sanitizedPipelineResult,
-        warnings,
-      });
-    }
-
     const admin = getSupabaseAdmin();
 
-    // Update report with pipeline outputs (authenticated users only)
+    // Update report with pipeline outputs (for both authenticated and guest users)
     // Use admin client to ensure update succeeds even with RLS policies
     if (!finalReportId) {
       console.error("[Analyze API] Cannot update report: finalReportId is null");

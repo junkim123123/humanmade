@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import ReportV2Client from "./ReportV2Client";
 
 export const dynamic = "force-dynamic";
@@ -13,11 +13,6 @@ async function getReport(reportId: string, headersList: Headers, retryCount = 0)
   const retryDelay = 2000; // 2 seconds - give DB more time
   
   try {
-    // Build baseUrl from request headers
-    const proto = headersList.get("x-forwarded-proto") || "http";
-    const host = headersList.get("x-forwarded-host") || headersList.get("host") || "localhost:3000";
-    const baseUrl = `${proto}://${host}`;
-    
     // Validate reportId before making request
     if (!reportId || typeof reportId !== "string" || reportId.trim() === "") {
       console.error("[Report V2 Page] Invalid reportId in getReport:", reportId);
@@ -25,18 +20,24 @@ async function getReport(reportId: string, headersList: Headers, retryCount = 0)
     }
     
     const cleanReportId = reportId.trim();
-    const apiUrl = `${baseUrl}/api/reports/${cleanReportId}`;
+    // Use relative URL to stay same origin
+    const apiUrl = `/api/reports/${encodeURIComponent(cleanReportId)}`;
+    
+    // Get cookies to forward authentication
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
     
     console.log(`[Report V2 Page] Fetching report from: ${apiUrl}`, {
       reportId: cleanReportId,
-      baseUrl,
       retryCount,
+      hasCookies: !!cookieHeader,
     });
     
     const res = await fetch(apiUrl, {
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        ...(cookieHeader ? { cookie: cookieHeader } : {}),
       },
     });
 
