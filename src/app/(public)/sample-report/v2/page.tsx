@@ -1,6 +1,5 @@
 import ReportV2Client from "@/app/reports/[reportId]/v2/ReportV2Client";
 import { sampleReport } from "@/lib/report/sample-report";
-import { getSupplierMatches } from "@/lib/report/normalizeReport";
 import { DEMO_SUPPLIER_MATCHES } from "@/lib/report/demoSuppliers";
 
 export const dynamic = 'force-dynamic';
@@ -8,21 +7,9 @@ export const dynamic = 'force-dynamic';
 export default async function SampleReportV2Page() {
   const report = sampleReport;
   
-  // Normalize supplier matches to ensure consistent format
-  const normalized = getSupplierMatches(report);
-  
-  // Use demo suppliers as fallback if no matches found
-  // Optional: Check env kill switch (default: enabled)
-  const useDemoFactories = process.env.NEXT_PUBLIC_DEMO_FACTORIES !== "0";
-  
-  if (useDemoFactories && (!Array.isArray(normalized) || normalized.length === 0)) {
-    (report as any)._supplierMatches = DEMO_SUPPLIER_MATCHES;
-  } else {
-    (report as any)._supplierMatches = normalized;
-  }
-  
-  // Mark as sample report for potential future use
+  // Force inject demo matches unconditionally for sample report
   (report as any)._isSampleReport = true;
+  (report as any)._supplierMatches = DEMO_SUPPLIER_MATCHES;
 
   return (
     <div>

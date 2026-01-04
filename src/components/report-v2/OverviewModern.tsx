@@ -177,10 +177,20 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   const hasVisionDraft = inputStatus?.labelExtractionSource === "VISION" && inputStatus?.labelDraft;
   
   // Check if we need ConfidenceBuilder
+  const supplierMatches = getSupplierMatches(reportAny);
+  
   return (
     <div className="space-y-6">
       {/* Top Decision Card with cost, range, evidence, missing inputs, actions */}
       <DecisionCard report={report} />
+      
+      {/* Diagnostics badge for sample reports */}
+      {reportAny._isSampleReport ? (
+        <div className="mt-3 inline-flex items-center rounded-full border px-3 py-1 text-[12px] text-slate-600">
+          Suppliers {supplierMatches.length}
+          {supplierMatches[0]?.supplierName ? ` • ${supplierMatches[0].supplierName}` : ""}
+        </div>
+      ) : null}
 
       {/* Details and rest of report */}
       <details className="rounded-xl border border-slate-200 bg-white group" open={false}>

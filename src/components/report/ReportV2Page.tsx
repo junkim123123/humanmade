@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import type { Report } from "@/lib/report/types";
 import ReportV2HeaderWithTabs from "@/components/report-v2/ReportV2HeaderWithTabs";
 import OverviewModern from "@/components/report-v2/OverviewModern";
+import SupplierCandidatesTop from "@/components/report-v2/SupplierCandidatesTop";
+import { getSupplierMatches } from "@/lib/report/normalizeReport";
 
 export interface ReportV2PageProps {
   reportId?: string;
@@ -72,6 +74,16 @@ export default function ReportV2Page({ reportId, report, initialReport }: Report
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <OverviewModern report={resolvedReport} />
+        
+        {/* Force render SupplierCandidatesTop for sample reports */}
+        {(resolvedReport as any)._isSampleReport ? (() => {
+          const supplierMatches = getSupplierMatches(resolvedReport as any);
+          return (
+            <div className="mt-6">
+              <SupplierCandidatesTop matches={supplierMatches} />
+            </div>
+          );
+        })() : null}
       </div>
     </div>
   );
