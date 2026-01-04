@@ -5,12 +5,12 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float, ContactShadows, Environment, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 
-// Isometric Camera Setup
+// Isometric Camera Setup - zoomed in for texture focus
 function IsometricCamera() {
   const { camera } = useThree();
   
   useEffect(() => {
-    const distance = 6;
+    const distance = 5; // Slightly closer for texture focus
     const angleX = Math.PI / 6; // 30도
     const angleY = Math.PI / 4; // 45도
     
@@ -32,86 +32,44 @@ function IsometricCamera() {
   return null;
 }
 
-// Factory - 왼쪽 (추상 공장)
+// Source (Factory) - Large rounded cube
 function Factory() {
   return (
-    <group position={[-2.5, 0.8, 0]}>
-      {/* Main factory building */}
-      <RoundedBox args={[1.2, 1, 1]} radius={0.05} smoothness={4} castShadow receiveShadow>
+    <group position={[-2, 0.8, 0]}>
+      <RoundedBox args={[1.2, 1.2, 1.2]} radius={0.1} smoothness={4} castShadow receiveShadow>
         <meshStandardMaterial
           color="#64748B"
           roughness={0.4}
           metalness={0.1}
         />
       </RoundedBox>
-      {/* Chimney 1 */}
-      <RoundedBox args={[0.15, 0.8, 0.15]} radius={0.05} smoothness={4} position={[-0.4, 1.2, 0.3]} castShadow>
-        <meshStandardMaterial
-          color="#475569"
-          roughness={0.4}
-          metalness={0.1}
-        />
-      </RoundedBox>
-      {/* Chimney 2 */}
-      <RoundedBox args={[0.15, 0.6, 0.15]} radius={0.05} smoothness={4} position={[0.4, 1.1, 0.3]} castShadow>
-        <meshStandardMaterial
-          color="#475569"
-          roughness={0.4}
-          metalness={0.1}
-        />
-      </RoundedBox>
     </group>
   );
 }
 
-// Shipment Container - 중앙 (해상 운송)
-function Shipment() {
+// Process (Shipping) - Connecting cylinder/capsule
+function ShippingConnection() {
   return (
     <group position={[0, 0.6, 0]}>
-      {/* Main container body */}
-      <RoundedBox args={[1.8, 0.8, 1]} radius={0.05} smoothness={4} castShadow receiveShadow>
+      {/* Main connecting cylinder */}
+      <mesh castShadow receiveShadow>
+        <cylinderGeometry args={[0.12, 0.12, 3.8, 32]} />
         <meshStandardMaterial
           color="#3B82F6"
           roughness={0.4}
           metalness={0.1}
         />
-      </RoundedBox>
-      {/* Container top lid */}
-      <RoundedBox args={[1.85, 0.15, 1.05]} radius={0.05} smoothness={4} position={[0, 0.5, 0]} castShadow>
-        <meshStandardMaterial
-          color="#3B82F6"
-          roughness={0.4}
-          metalness={0.1}
-        />
-      </RoundedBox>
-      {/* Subtle highlights for glossy effect */}
-      <RoundedBox args={[1.7, 0.05, 0.9]} radius={0.05} smoothness={4} position={[0, 0.45, -0.4]}>
-        <meshStandardMaterial
-          color="#10B981"
-          roughness={0.4}
-          metalness={0.1}
-          transparent
-          opacity={0.3}
-        />
-      </RoundedBox>
+      </mesh>
     </group>
   );
 }
 
-// Warehouse - 오른쪽 (창고 스택)
+// Destination (Warehouse) - Stack of 2 thinner rounded boxes
 function Warehouse() {
   return (
-    <group position={[2.5, 0.5, 0]}>
+    <group position={[2, 0.6, 0]}>
       {/* Bottom box */}
-      <RoundedBox args={[1.1, 0.6, 0.9]} radius={0.05} smoothness={4} position={[0, 0.3, 0]} castShadow receiveShadow rotation={[0, 0, 0.05]}>
-        <meshStandardMaterial
-          color="#D97706"
-          roughness={0.4}
-          metalness={0.1}
-        />
-      </RoundedBox>
-      {/* Middle box */}
-      <RoundedBox args={[0.9, 0.5, 0.7]} radius={0.05} smoothness={4} position={[-0.1, 0.75, 0.1]} castShadow rotation={[0, 0, -0.03]}>
+      <RoundedBox args={[1, 0.8, 0.9]} radius={0.1} smoothness={4} position={[0, 0.4, 0]} castShadow receiveShadow>
         <meshStandardMaterial
           color="#F59E0B"
           roughness={0.4}
@@ -119,7 +77,7 @@ function Warehouse() {
         />
       </RoundedBox>
       {/* Top box */}
-      <RoundedBox args={[0.7, 0.4, 0.5]} radius={0.05} smoothness={4} position={[-0.2, 1.15, 0.2]} castShadow rotation={[0, 0, 0.05]}>
+      <RoundedBox args={[0.8, 0.6, 0.7]} radius={0.1} smoothness={4} position={[0, 1.1, 0]} castShadow>
         <meshStandardMaterial
           color="#F59E0B"
           roughness={0.4}
@@ -130,61 +88,39 @@ function Warehouse() {
   );
 }
 
-// Connecting Pipeline - 연결 파이프라인
-function Pipeline() {
-  const groupRef = useRef<THREE.Group>(null);
+// Floating particles traveling along the connection (flow simulation)
+function FlowParticles() {
+  const particlesRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      // 미묘한 애니메이션으로 흐름 표현
-      groupRef.current.children.forEach((child, i) => {
-        if (child instanceof THREE.Mesh && child.name === "flow") {
-          const time = state.clock.elapsedTime;
-          child.position.x = Math.sin(time * 0.5 + i) * 0.05;
+    if (particlesRef.current) {
+      const time = state.clock.elapsedTime;
+      particlesRef.current.children.forEach((child, i) => {
+        if (child instanceof THREE.Mesh) {
+          // Travel from left to right along the connection
+          const progress = ((time * 0.3) + (i * 0.5)) % 4;
+          child.position.x = -2 + progress;
+          // Subtle vertical float
+          child.position.y = 0.6 + Math.sin(time * 2 + i) * 0.1;
         }
       });
     }
   });
 
   return (
-    <group ref={groupRef}>
-      {/* Factory to Shipment */}
-      <RoundedBox args={[2.3, 0.08, 0.08]} radius={0.05} smoothness={4} position={[-1.25, 0.65, 0]} castShadow>
-        <meshStandardMaterial
-          color="#64748B"
-          roughness={0.4}
-          metalness={0.1}
-        />
-      </RoundedBox>
-      {/* Shipment to Warehouse */}
-      <RoundedBox args={[2.3, 0.08, 0.08]} radius={0.05} smoothness={4} position={[1.25, 0.55, 0]} castShadow>
-        <meshStandardMaterial
-          color="#64748B"
-          roughness={0.4}
-          metalness={0.1}
-        />
-      </RoundedBox>
-      {/* Flow indicators */}
-      {[...Array(8)].map((_, i) => {
-        const x = -2.5 + (i * 0.7);
-        return (
-          <mesh
-            key={i}
-            name="flow"
-            position={[x, 0.65, 0]}
-            castShadow
-          >
-            <sphereGeometry args={[0.06, 16, 16]} />
-            <meshStandardMaterial
-              color="#3B82F6"
-              roughness={0.3}
-              metalness={0.8}
-              emissive="#3B82F6"
-              emissiveIntensity={0.4}
-            />
-          </mesh>
-        );
-      })}
+    <group ref={particlesRef}>
+      {[...Array(6)].map((_, i) => (
+        <mesh key={i} castShadow>
+          <sphereGeometry args={[0.08, 16, 16]} />
+          <meshStandardMaterial
+            color="#3B82F6"
+            roughness={0.3}
+            metalness={0.2}
+            emissive="#3B82F6"
+            emissiveIntensity={0.3}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -195,11 +131,11 @@ function SceneContent() {
     <>
       <IsometricCamera />
       
-      {/* Premium Studio Lighting */}
-      <ambientLight intensity={0.4} />
+      {/* Studio Lighting Setup */}
+      <ambientLight intensity={0.5} />
       <directionalLight
-        position={[5, 10, 5]}
-        intensity={0.8}
+        position={[5, 5, 5]}
+        intensity={1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -211,23 +147,23 @@ function SceneContent() {
         shadow-radius={3}
       />
       
-      {/* Environment for realistic reflections on rounded edges */}
+      {/* Environment for realistic reflections */}
       <Environment preset="city" blur={1} />
       
-      {/* Float animation for entire scene - gentle floating */}
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+      {/* Float animation - gentle hover */}
+      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
         <group>
-          {/* Supply Chain Objects */}
+          {/* Supply Chain Composition */}
           <Factory />
-          <Shipment />
+          <ShippingConnection />
           <Warehouse />
           
-          {/* Connecting Pipeline */}
-          <Pipeline />
+          {/* Flow particles */}
+          <FlowParticles />
         </group>
       </Float>
       
-      {/* Premium Contact Shadows - soft grounding */}
+      {/* Soft Contact Shadows */}
       <ContactShadows
         position={[0, -1, 0]}
         opacity={0.4}
