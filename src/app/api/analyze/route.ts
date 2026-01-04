@@ -466,14 +466,36 @@ export async function POST(request: Request) {
     };
     
     // Note: The pipeline expects imageUrl, we pass the data URL
-    const result = await runIntelligencePipeline({
-      imageUrl: imageDataUrl,
-      imagePublicUrl: productImageUrl, // Pass product image URL for storage
+    console.log("[Analyze API] Starting intelligence pipeline...", {
+      hasImage: !!imageDataUrl,
+      imageSize: imageDataUrl?.length,
+      hasBarcode: !!barcodeDataUrl,
+      hasLabel: !!labelDataUrl,
       quantity: parsedQuantity,
       dutyRate: parsedDutyRate,
       shippingCost: parsedShippingCost,
       fee: parsedFee,
-    }, warnOnce);
+    });
+    
+    let result;
+    try {
+      result = await runIntelligencePipeline({
+        imageUrl: imageDataUrl,
+        imagePublicUrl: productImageUrl, // Pass product image URL for storage
+        quantity: parsedQuantity,
+        dutyRate: parsedDutyRate,
+        shippingCost: parsedShippingCost,
+        fee: parsedFee,
+      }, warnOnce);
+      console.log("[Analyze API] Pipeline completed successfully");
+    } catch (pipelineError: any) {
+      console.error("[Analyze API] Pipeline execution error:", {
+        message: pipelineError?.message,
+        stack: pipelineError?.stack,
+        name: pipelineError?.name,
+      });
+      throw pipelineError; // Re-throw to be caught by outer catch block
+    }
 
     // Build report from pipeline result
     // For guest users, use a temporary reportId
@@ -1581,7 +1603,16 @@ export async function POST(request: Request) {
       warnings,
     });
   } catch (error) {
-    console.error("[Analyze API] Pipeline execution failed:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    console.error("[Analyze API] Pipeline execution failed:", {
+      message: errorMessage,
+      stack: errorStack,
+      finalReportId,
+      userId,
+      errorType: error?.constructor?.name,
+    });
 
     if (finalReportId && userId) {
       try {
@@ -1599,14 +1630,12 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage || "Unknown error occurred",
         message: "Intelligence pipeline execution failed",
-        stack:
-          process.env.NODE_ENV === "development"
-            ? error instanceof Error
-              ? error.stack
-              : undefined
-            : undefined,
+        details: process.env.NODE_ENV === "development" ? {
+          stack: errorStack,
+          type: error?.constructor?.name,
+        } : undefined,
       },
       { status: 500 }
     );

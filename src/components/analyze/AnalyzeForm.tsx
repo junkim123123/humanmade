@@ -203,7 +203,12 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       }
 
       if (!response.ok || !data?.success) {
-        const errorMessage = data?.error || data?.message || "Analysis failed";
+        const errorMessage = data?.error || data?.message || `Analysis failed (${response.status})`;
+        console.error("[AnalyzeForm] API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+        });
         setApiError(errorMessage);
         toast.error(errorMessage);
         setLoading(false);
@@ -240,6 +245,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to process analysis";
+      console.error("[AnalyzeForm] Unexpected error:", err);
       setApiError(errorMessage);
       toast.error(errorMessage);
       setLoading(false);
