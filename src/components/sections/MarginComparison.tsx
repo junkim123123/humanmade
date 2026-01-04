@@ -1,6 +1,11 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { CountUp } from "@/components/animation/CountUp";
+import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
+import { motion } from "framer-motion";
+import { useRef } from "react";
+import { useInView } from "framer-motion";
 
 interface CostItem {
   label: string;
@@ -58,7 +63,7 @@ function ComparisonColumn({
       {/* Big Total Cost */}
       <div className="mb-6">
         <div className="text-4xl lg:text-5xl font-black text-slate-900 mb-1">
-          {totalCost}
+          <CountUp from={0} to={parseFloat(totalCost.replace("$", ""))} decimals={2} prefix="$" />
         </div>
         <div className="text-sm text-slate-500">total cost</div>
       </div>
@@ -134,6 +139,7 @@ export default function MarginComparison() {
   ];
 
   return (
+    <FadeUp>
     <section className="bg-gradient-to-b from-slate-50 to-violet-50 py-16 lg:py-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
@@ -148,7 +154,7 @@ export default function MarginComparison() {
 
         {/* Comparison Table */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 lg:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Current Way */}
             <ComparisonColumn
               title="Current way (buying wholesale)"
@@ -166,29 +172,51 @@ export default function MarginComparison() {
               isHighlight={true}
               advantages={nexSupplyAdvantages}
             />
-          </div>
+          </StaggerContainer>
 
           {/* Profit Unlocked Highlight */}
-          <div className="mt-8 pt-8 border-t border-slate-200">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-center sm:text-left">
-                <div className="text-sm font-medium text-slate-600 mb-1">
-                  Profit unlocked
-                </div>
-                <div className="text-3xl lg:text-4xl font-black text-emerald-600">
-                  +$3.28 / unit
-                </div>
-              </div>
-              <div className="text-sm text-slate-500 text-center sm:text-right">
-                Based on example product pricing.
-                <br />
-                Actual savings vary by product.
-              </div>
-            </div>
-          </div>
+          <ProfitBadge />
         </div>
       </div>
+    </FadeUp>
     </section>
+  );
+}
+
+// Profit Badge with Scale Bounce Animation
+function ProfitBadge() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+      transition={{
+        type: "spring",
+        stiffness: 200,
+        damping: 20,
+        delay: 1.5,
+      }}
+      className="mt-8 pt-8 border-t border-slate-200"
+    >
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-center sm:text-left">
+          <div className="text-sm font-medium text-slate-600 mb-1">
+            Profit unlocked
+          </div>
+          <div className="text-3xl lg:text-4xl font-black text-emerald-600">
+            <CountUp from={0} to={3.28} decimals={2} prefix="+$" suffix=" / unit" />
+          </div>
+        </div>
+        <div className="text-sm text-slate-500 text-center sm:text-right">
+          Based on example product pricing.
+          <br />
+          Actual savings vary by product.
+        </div>
+      </div>
+    </motion.div>
   );
 }
 

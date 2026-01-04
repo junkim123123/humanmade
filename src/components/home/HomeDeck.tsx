@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect } from "react"
 
 import Hero from "@/components/hero/Hero"
-import FlowDiorama from "@/components/sections/FlowDiorama"
+import StickyScroll from "@/components/sections/StickyScroll"
 import MarginComparison from "@/components/sections/MarginComparison"
 import ProofShowcase from "@/components/sections/ProofShowcase"
 import { SectionEvidence } from "@/components/home/SectionEvidence"
@@ -87,9 +87,62 @@ export default function HomeDeck() {
             <Hero />
           </section>
 
-          {/* 2. Flow Diorama - How it works */}
+          {/* 2. Sticky Scroll - How it works */}
           <section id="how-it-works" className="bg-white">
-            <FlowDiorama />
+            <StickyScroll
+              title="How it works"
+              subtitle="From product photo to landed cost, then to your door."
+              steps={[
+                {
+                  title: "Analyze (Free)",
+                  description: "Upload a product photo. Our AI calculates your real landed cost and margin estimate in minutes.",
+                  color: "blue",
+                  visual: (
+                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
+                      <div className="space-y-4">
+                        <div className="h-32 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
+                          <span className="text-4xl">📸</span>
+                        </div>
+                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  title: "Verify ($45)",
+                  description: "Deposit $45 to start factory validation. We reach out to verified suppliers and confirm pricing, MOQ, and lead times.",
+                  color: "purple",
+                  visual: (
+                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
+                      <div className="space-y-4">
+                        <div className="h-32 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg flex items-center justify-center">
+                          <span className="text-4xl">✅</span>
+                        </div>
+                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  title: "Execute (10%)",
+                  description: "We handle production, quality control, and logistics. You pay 10% fee only when your order ships.",
+                  color: "emerald",
+                  visual: (
+                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
+                      <div className="space-y-4">
+                        <div className="h-32 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex items-center justify-center">
+                          <span className="text-4xl">🚀</span>
+                        </div>
+                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ),
+                },
+              ]}
+            />
           </section>
 
           {/* 3. Margin Comparison */}

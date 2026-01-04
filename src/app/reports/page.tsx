@@ -2,10 +2,8 @@
 
 import { PrimaryNav } from "@/components/PrimaryNav";
 import Link from "next/link";
-import { Suspense } from "react";
-import ProductCard3D from "@/components/reports/ProductCard3D";
-import ProductIsometric from "@/components/reports/ProductIsometric";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 
 // Case study data matching Swell premium style
 const caseStudies = [
@@ -51,12 +49,48 @@ const stats = [
   { value: "98%", label: "Quality Score" },
 ];
 
-function GlassCardLoader() {
+// Simple Price Comparison Card (2D Fintech Style)
+function PriceComparisonCard() {
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="relative">
-        <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin" />
-        <div className="absolute inset-0 w-8 h-8 border-2 border-transparent border-r-purple-300 rounded-full animate-[spin_0.8s_linear_reverse_infinite]" />
+    <div className="w-full max-w-lg mx-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl p-8 transform-gpu [transform:rotateY(-8deg)_rotateX(3deg)] [transform-style:preserve-3d]">
+        <div className="mb-6 pb-6 border-b border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-900">Price Comparison</h3>
+          <p className="text-sm text-slate-500 mt-1">Per unit cost analysis</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50">
+            <div>
+              <p className="font-medium text-slate-900">Wholesale</p>
+              <p className="text-sm text-slate-500">Traditional sourcing</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-bold text-slate-900">$12.50</p>
+              <p className="text-xs text-slate-500">per unit</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200">
+            <div>
+              <p className="font-semibold text-slate-900">NexSupply</p>
+              <p className="text-sm text-purple-600">Direct sourcing</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-purple-600">$8.30</p>
+              <p className="text-xs text-purple-600 font-medium">per unit</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-slate-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-600">Total Savings</span>
+            <span className="text-lg font-bold text-emerald-600">33%</span>
+          </div>
+        </div>
+
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/60 via-transparent to-transparent pointer-events-none"></div>
       </div>
     </div>
   );
@@ -114,17 +148,9 @@ export default function ReportsPage() {
               </div>
             </div>
             
-            {/* Right Column - Large 3D Illustration (Swell Style) */}
-            <div className="relative h-[400px] lg:h-[500px] xl:h-[600px] w-full">
-              <Suspense fallback={
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50/50 to-cyan-50/30 rounded-2xl">
-                  <GlassCardLoader />
-                </div>
-              }>
-                <div className="w-full h-full rounded-2xl overflow-hidden">
-                  <ProductIsometric />
-                </div>
-              </Suspense>
+            {/* Right Column - Floating UI Card (2D Fintech Style) */}
+            <div className="relative h-[400px] lg:h-[500px] xl:h-[600px] w-full flex items-center justify-center">
+              <PriceComparisonCard />
             </div>
           </div>
         </div>
@@ -134,21 +160,23 @@ export default function ReportsPage() {
       <section className="relative py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header - Swell Style */}
-          <div className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
-              Featured Case Studies
-            </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Explore how we've helped brands optimize their supply chain with premium sourcing solutions.
-            </p>
-          </div>
+          <FadeUp>
+            <div className="text-center mb-20">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
+                Featured Case Studies
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Explore how we've helped brands optimize their supply chain with premium sourcing solutions.
+              </p>
+            </div>
+          </FadeUp>
 
           {/* Product Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
             {caseStudies.map((study, index) => (
+              <FadeUp key={study.id} delay={index * 0.1}>
               <div
-                key={study.id}
-                className="group relative animate-fade-in"
+                className="group relative"
               >
                 {/* Glassmorphism Card */}
                 <div
@@ -167,11 +195,14 @@ export default function ReportsPage() {
                   {/* Gradient Overlay */}
                   <div className={`absolute inset-0 ${study.gradientFrom} ${study.gradientTo} bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                   
-                  {/* 3D Product Illustration */}
-                  <div className="relative aspect-[4/3] bg-gradient-to-br from-white/80 to-slate-50/60">
-                    <Suspense fallback={<GlassCardLoader />}>
-                      <ProductCard3D category={study.category as "Confectionery" | "Toys" | "Snacks"} />
-                    </Suspense>
+                  {/* Product Illustration Placeholder - 2D Fintech Style */}
+                  <div className="relative aspect-[4/3] bg-gradient-to-br from-white to-slate-50 flex items-center justify-center">
+                    {/* Simple Icon Placeholder */}
+                    <div className={`w-24 h-24 rounded-2xl ${study.bgColor} border ${study.borderColor} flex items-center justify-center`}>
+                      <span className={`text-3xl font-bold ${study.categoryColor}`}>
+                        {study.category.charAt(0)}
+                      </span>
+                    </div>
                     
                     {/* Category Badge */}
                     <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full ${study.bgColor} backdrop-blur-sm border ${study.borderColor}`}>
@@ -204,15 +235,17 @@ export default function ReportsPage() {
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 </div>
               </div>
+              </FadeUp>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
       
       {/* CTA Section - Swell Style */}
       <section className="relative py-24 lg:py-36">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-cyan-600 p-12 lg:p-20 shadow-2xl shadow-purple-500/25">
+        <FadeUp>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-cyan-600 p-12 lg:p-20 shadow-2xl shadow-purple-500/25">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
               Ready to optimize your supply chain?
             </h2>
@@ -226,8 +259,9 @@ export default function ReportsPage() {
               <span>Start New Analysis</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
+            </div>
           </div>
-        </div>
+        </FadeUp>
       </section>
     </div>
   );
