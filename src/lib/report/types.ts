@@ -311,6 +311,78 @@ export interface Report {
   
   // Raw model output (for audit/debugging, optional)
   _rawModelOutput?: unknown;
+  
+  // V2 normalized data (optional, added by API)
+  v2?: {
+    costModel: {
+      standard: {
+        unitPrice: number;
+        shippingPerUnit: number;
+        dutyPerUnit: number;
+        feePerUnit: number;
+        totalLandedCost: number;
+      };
+      conservative: {
+        unitPrice: number;
+        shippingPerUnit: number;
+        dutyPerUnit: number;
+        feePerUnit: number;
+        totalLandedCost: number;
+      };
+    };
+    deliveredCostRange: {
+      min: number;
+      max: number;
+    };
+    hsCandidates: Array<{ code: string; confidence: number; rationale: string; evidenceSnippet: string }>;
+    evidenceLevel: "verified_quote" | "exact_import" | "similar_import" | "category_prior";
+    missingInputs: string[];
+    importKeyCompanies: Array<{
+      companyName: string;
+      role: string;
+      shipmentsCount: number;
+      lastSeen: string | null;
+      originCountry: string | null;
+      exampleDescription: string | null;
+      source: string;
+    }>;
+    evidence?: any;
+  };
+  
+  // Extended properties (added by API)
+  _supplierMatches?: any[];
+  _recommendedMatches?: any[];
+  _candidateMatches?: any[];
+  _excludedMatches?: any[];
+  _supplierRecommendedCount?: number;
+  _supplierCandidateCount?: number;
+  _supplierExcludedCount?: number;
+  categoryFactories?: any[];
+  _proof?: {
+    hsCode: string | null;
+    hsConfidence: number;
+    labelTerms: string[];
+    labelUploaded?: boolean;
+    labelOcrStatus?: string;
+    labelOcrFailureReason?: string | null;
+    labelTermsFromDb?: string[];
+    labelOcrCheckedAt?: string | null;
+    similarImportsCount: number;
+    leadsCount: number;
+    evidenceLevel: "high" | "medium" | "low";
+  };
+  draftInference?: {
+    weightDraft?: { value: number | null; unit: "g" | "oz"; confidence: number; evidenceSnippet: string };
+    casePackDraft?: {
+      candidates: Array<{ value: number; confidence: number; evidenceSnippet: string }>;
+      selectedValue?: number;
+      selectedConfidence?: number;
+      chosen?: number | null;
+      confirmed?: boolean;
+    };
+    customsCategoryDraft?: { value: string | null; confidence: number; evidenceSnippet: string };
+    hsCandidatesDraft?: Array<{ code: string; confidence: number; rationale: string; evidenceSnippet: string }>;
+  };
 }
 
 export interface ReportResponse {
