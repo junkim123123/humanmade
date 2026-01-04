@@ -125,13 +125,15 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
               <h1 className="text-[24px] font-bold text-slate-900">
                 {report.productName}
               </h1>
-              {/* V2 Badge - visible marker to confirm correct renderer */}
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                Report V2
-                {report.schemaVersion && (
-                  <span className="ml-1 text-blue-600">v{report.schemaVersion}</span>
-                )}
-              </span>
+              {/* V2 Badge - visible marker to confirm correct renderer (dev only) */}
+              {process.env.NODE_ENV !== "production" && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                  Report V2
+                  {report.schemaVersion && (
+                    <span className="ml-1 text-blue-600">v{report.schemaVersion}</span>
+                  )}
+                </span>
+              )}
             </div>
             <div className="mt-2 flex items-center gap-3">
               <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] font-medium ${evidenceBadge.color}`}>

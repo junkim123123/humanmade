@@ -48,11 +48,19 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
 
   const [showOptional, setShowOptional] = useState(false);
 
-  const productInputRef = useRef<HTMLInputElement>(null);
-  const barcodeInputRef = useRef<HTMLInputElement>(null);
-  const labelInputRef = useRef<HTMLInputElement>(null);
-  const extra1InputRef = useRef<HTMLInputElement>(null);
-  const extra2InputRef = useRef<HTMLInputElement>(null);
+  // Gallery inputs (multiple selection, no capture)
+  const productGalleryInputRef = useRef<HTMLInputElement>(null);
+  const barcodeGalleryInputRef = useRef<HTMLInputElement>(null);
+  const labelGalleryInputRef = useRef<HTMLInputElement>(null);
+  const extra1GalleryInputRef = useRef<HTMLInputElement>(null);
+  const extra2GalleryInputRef = useRef<HTMLInputElement>(null);
+  
+  // Camera inputs (single file, capture="environment")
+  const productCameraInputRef = useRef<HTMLInputElement>(null);
+  const barcodeCameraInputRef = useRef<HTMLInputElement>(null);
+  const labelCameraInputRef = useRef<HTMLInputElement>(null);
+  const extra1CameraInputRef = useRef<HTMLInputElement>(null);
+  const extra2CameraInputRef = useRef<HTMLInputElement>(null);
   
   const productSlotRef = useRef<HTMLDivElement>(null);
   const barcodeSlotRef = useRef<HTMLDivElement>(null);
@@ -89,13 +97,18 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
   }, [slots]);
 
   const handleFileSelect = useCallback(
-    (slotType: "product" | "barcode" | "label" | "extra1" | "extra2", file: File) => {
+    (slotType: "product" | "barcode" | "label" | "extra1" | "extra2", file: File | FileList) => {
+      // Handle both single file and FileList (from multiple selection)
+      const files = file instanceof FileList ? Array.from(file) : [file];
+      // For now, use the first file (can be extended to support multiple later)
+      const selectedFile = files[0];
+      if (!selectedFile) return;
       // Validation: max 10MB, valid image type
       const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
       const VALID_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       
       // Check file size
-      if (file.size > MAX_FILE_SIZE) {
+      if (selectedFile.size > MAX_FILE_SIZE) {
         setSlots((prev) => ({
           ...prev,
           [slotType]: { 
@@ -108,8 +121,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
       }
 
       // Check MIME type - handle HEIC gracefully
-      const isHEIC = file.type === "image/heic" || file.type === "image/heif";
-      if (!VALID_TYPES.includes(file.type)) {
+      const isHEIC = selectedFile.type === "image/heic" || selectedFile.type === "image/heif";
+      if (!VALID_TYPES.includes(selectedFile.type)) {
         if (isHEIC) {
           setSlots((prev) => ({
             ...prev,
@@ -133,14 +146,14 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
       }
 
       // File is valid, create preview and store
-      const preview = URL.createObjectURL(file);
+      const preview = URL.createObjectURL(selectedFile);
       setSlots((prev) => {
         if (prev[slotType].preview) {
           URL.revokeObjectURL(prev[slotType].preview!);
         }
         return {
           ...prev,
-          [slotType]: { file, preview, error: undefined },
+          [slotType]: { file: selectedFile, preview, error: undefined },
         };
       });
     },
@@ -192,7 +205,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     slotType: "product" | "barcode" | "label" | "extra1" | "extra2",
     label: string,
     helperText: string,
-    inputRef: React.RefObject<HTMLInputElement | null>,
+    galleryInputRef: React.RefObject<HTMLInputElement | null>,
+    cameraInputRef: React.RefObject<HTMLInputElement | null>,
     slotRef?: React.RefObject<HTMLDivElement | null>,
     isRequired = false,
     tooltipText?: string
@@ -246,7 +260,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
               <div className="absolute right-2 top-2 flex gap-1.5">
                 <button
                   type="button"
-                  onClick={() => inputRef.current?.click()}
+                  onClick={() => galleryInputRef.current?.click()}
                   disabled={disabled}
                   className="rounded-full bg-white border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
                 >
@@ -263,20 +277,51 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
               </div>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              disabled={disabled}
-              className="w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-3 p-6 text-center"
-            >
+            <div className="w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-3 p-6">
               <div className="rounded-lg bg-slate-200 p-3">
                 <ImageIcon className="h-6 w-6 text-slate-500" />
               </div>
-              <p className="text-[13px] text-slate-500">Drop, paste, or browse</p>
-            </button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  disabled={disabled}
+                  className="flex-1 rounded-lg bg-white border border-slate-300 px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  Choose photos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={disabled}
+                  className="flex-1 rounded-lg bg-slate-900 text-white px-4 py-2.5 text-[13px] font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
+                >
+                  Take photo
+                </button>
+              </div>
+              <p className="text-[12px] text-slate-500">Or drop, paste files here</p>
+            </div>
           )}
+          {/* Gallery input (multiple selection, no capture) */}
           <input
-            ref={inputRef}
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              const fileList = e.target.files;
+              if (fileList && fileList.length > 0) {
+                handleFileSelect(slotType, fileList);
+              }
+              // Reset input to allow selecting the same file again
+              e.target.value = '';
+            }}
+            disabled={disabled}
+          />
+          {/* Camera input (single file, capture="environment") */}
+          <input
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
@@ -286,6 +331,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
               if (file) {
                 handleFileSelect(slotType, file);
               }
+              // Reset input to allow taking another photo
+              e.target.value = '';
             }}
             disabled={disabled}
           />
@@ -314,9 +361,9 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
       
       {/* Upload Grid */}
       <div className="grid gap-5 sm:grid-cols-3">
-        {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productInputRef, productSlotRef, true)}
-        {renderSlot("barcode", "Barcode photo (optional)", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeInputRef, barcodeSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
-        {renderSlot("label", "Label photo (optional)", "Back label with net weight, materials, warnings, and origin if shown.", labelInputRef, labelSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
+        {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true)}
+        {renderSlot("barcode", "Barcode photo (optional)", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
+        {renderSlot("label", "Label photo (optional)", "Back label with net weight, materials, warnings, and origin if shown.", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
       </div>
 
       {/* Optional Section */}
@@ -338,8 +385,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
               <p className="mt-1 text-[14px] text-slate-600">Helps with variants and inner packaging.</p>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
-              {renderSlot("extra1", "Packaging details", "Side of box, shipping label, or outer packaging.", extra1InputRef)}
-              {renderSlot("extra2", "What's inside", "Close-up of the item, materials, or construction.", extra2InputRef)}
+              {renderSlot("extra1", "Packaging details", "Side of box, shipping label, or outer packaging.", extra1GalleryInputRef, extra1CameraInputRef)}
+              {renderSlot("extra2", "What's inside", "Close-up of the item, materials, or construction.", extra2GalleryInputRef, extra2CameraInputRef)}
             </div>
             <button
               type="button"

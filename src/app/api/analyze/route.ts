@@ -19,6 +19,7 @@ import {
 import { createPartialReportAndQueueUpgrade } from "@/lib/analyze-fast-helper";
 import { buildSignalsFromUploads } from "@/lib/report/signals";
 import { normalizeEvidence } from "@/lib/report/evidence";
+import { computeDecisionSummary } from "@/lib/report/decision-summary";
 
 // Force Node.js runtime to avoid edge runtime issues with admin client and Gemini
 export const runtime = "nodejs";
@@ -1326,6 +1327,115 @@ export async function POST(request: Request) {
       );
     }
 
+    // Attach supplier matches to report for decision summary computation
+    // Use the same structure as hydration expects
+    (report as any)._supplierMatches = result.recommendedSuppliers.concat(result.candidateSuppliers).map((match) => ({
+      id: match.supplierId,
+      supplierId: match.supplierId,
+      supplier_id: match.supplierId,
+      exact_match_count: match.isInferred === false ? 1 : 0,
+      inferred_match_count: match.isInferred === true ? 1 : 0,
+    }));
+    (report as any)._recommendedMatches = result.recommendedSuppliers.map((match) => ({
+      id: match.supplierId,
+      supplierId: match.supplierId,
+      supplier_id: match.supplierId,
+      exact_match_count: match.isInferred === false ? 1 : 0,
+      inferred_match_count: match.isInferred === true ? 1 : 0,
+    }));
+    (report as any)._candidateMatches = result.candidateSuppliers.map((match) => ({
+      id: match.supplierId,
+      supplierId: match.supplierId,
+      supplier_id: match.supplierId,
+      exact_match_count: match.isInferred === false ? 1 : 0,
+      inferred_match_count: match.isInferred === true ? 1 : 0,
+    }));
+    
+    // Compute decision summary from pipeline outputs
+    const decisionSummary = computeDecisionSummary(report, sanitizedPipelineResult);
+    
+    // Build V2 snapshot for resilience (if match table read fails, UI can use snapshot)
+    const v2Snapshot: any = {
+      _supplierMatches: result.recommendedSuppliers.concat(result.candidateSuppliers).map((match) => ({
+        id: match.supplierId,
+        supplierId: match.supplierId,
+        supplier_id: match.supplierId,
+        supplierName: match.supplierName,
+        supplier_name: match.supplierName,
+        exact_match_count: match.isInferred === false ? 1 : 0,
+        inferred_match_count: match.isInferred === true ? 1 : 0,
+        _intel: {
+          product_count: match.evidence?.recordCount || 0,
+          price_coverage_pct: 0,
+          last_seen_days: match.evidence?.lastSeenDays ?? null,
+        },
+        _profile: {
+          country: match.country || null,
+          last_seen_date: match.evidence?.lastShipmentDate || null,
+          shipment_count_12m: match.evidence?.recordCount || null,
+          role: match.supplierType || null,
+          role_reason: match.matchReason || null,
+        },
+        _supplierType: match.supplierType || null,
+        _companyType: null,
+        _exampleProducts: [],
+      })),
+      _recommendedMatches: result.recommendedSuppliers.map((match) => ({
+        id: match.supplierId,
+        supplierId: match.supplierId,
+        supplier_id: match.supplierId,
+        supplierName: match.supplierName,
+        supplier_name: match.supplierName,
+        exact_match_count: match.isInferred === false ? 1 : 0,
+        inferred_match_count: match.isInferred === true ? 1 : 0,
+        _intel: {
+          product_count: match.evidence?.recordCount || 0,
+          price_coverage_pct: 0,
+          last_seen_days: match.evidence?.lastSeenDays ?? null,
+        },
+        _profile: {
+          country: match.country || null,
+          last_seen_date: match.evidence?.lastShipmentDate || null,
+          shipment_count_12m: match.evidence?.recordCount || null,
+          role: match.supplierType || null,
+          role_reason: match.matchReason || null,
+        },
+        _supplierType: match.supplierType || null,
+        _companyType: null,
+        _exampleProducts: [],
+      })),
+      _candidateMatches: result.candidateSuppliers.map((match) => ({
+        id: match.supplierId,
+        supplierId: match.supplierId,
+        supplier_id: match.supplierId,
+        supplierName: match.supplierName,
+        supplier_name: match.supplierName,
+        exact_match_count: match.isInferred === false ? 1 : 0,
+        inferred_match_count: match.isInferred === true ? 1 : 0,
+        _intel: {
+          product_count: match.evidence?.recordCount || 0,
+          price_coverage_pct: 0,
+          last_seen_days: match.evidence?.lastSeenDays ?? null,
+        },
+        _profile: {
+          country: match.country || null,
+          last_seen_date: match.evidence?.lastShipmentDate || null,
+          shipment_count_12m: match.evidence?.recordCount || null,
+          role: match.supplierType || null,
+          role_reason: match.matchReason || null,
+        },
+        _supplierType: match.supplierType || null,
+        _companyType: null,
+        _exampleProducts: [],
+      })),
+      _hsCandidates: (result.marketEstimate?.hsCodeCandidates || []).map((c: any) => ({
+        code: c.code || c,
+        confidence: c.confidence || 0.8,
+        rationale: c.rationale || c.reason || "From pipeline",
+        evidenceSnippet: c.evidenceSnippet || null,
+      })),
+    };
+
     const { data: updateData, error: updateError } = await admin
       .from("reports")
       .update({
@@ -1348,6 +1458,10 @@ export async function POST(request: Request) {
             unitsPerCase: 1,
           },
           evidenceNormalized: normalizedEvidence,
+          // Store V2 snapshot for resilience
+          _v2Snapshot: v2Snapshot,
+          // Store decision summary
+          _decisionSummary: decisionSummary,
         } as unknown as Record<string, unknown>,
         pipeline_result: {
           ...sanitizedPipelineResult,

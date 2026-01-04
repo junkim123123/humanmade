@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import ReportV2Renderer from "@/components/report-v2/ReportV2Renderer";
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
-import { normalizeReport } from "@/lib/report/normalizeReport";
+import { hydrateReportForV2 } from "@/lib/report/hydrateReportForV2";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -51,54 +50,29 @@ export default async function Page({
     notFound();
   }
   
-  // Read report directly from DB using admin client
-  const admin = getSupabaseAdmin();
+  // Get current user for access control
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const viewerUserId = user?.id || null;
   
-  const { data: reportData, error: readError } = await admin
-    .from("reports")
-    .select("*")
-    .eq("id", cleanReportId)
-    .single();
+  // Hydrate report with supplier matches and normalized fields
+  const result = await hydrateReportForV2(cleanReportId, viewerUserId);
   
-  // Handle not found explicitly
-  if (readError || !reportData) {
-    console.error("[Report V2 Page] Report not found:", {
-      reportId: cleanReportId,
-      error: readError?.message,
-    });
+  // Handle errors
+  if (!result.ok) {
+    if (result.errorCode === "NOT_FOUND") {
+      console.error("[Report V2 Page] Report not found:", cleanReportId);
+      notFound();
+    }
+    if (result.errorCode === "FORBIDDEN") {
+      console.log("[Report V2 Page] Access forbidden:", cleanReportId);
+      return <ForbiddenUI />;
+    }
+    // Should not reach here, but TypeScript needs this
     notFound();
   }
   
-  // Get current user for ownership check
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  // Enforce access rules
-  const reportDataAny = reportData as any;
-  
-  // If report.user_id is null, allow anyone
-  // If report.user_id exists, require authenticated user and must match
-  if (reportDataAny.user_id !== null && reportDataAny.user_id !== undefined) {
-    // Report has an owner - require authentication and ownership
-    if (!user) {
-      console.log("[Report V2 Page] Report requires auth but user not logged in:", cleanReportId);
-      return <ForbiddenUI />;
-    }
-    
-    if (user.id !== reportDataAny.user_id) {
-      console.log("[Report V2 Page] User mismatch:", {
-        reportUserId: reportDataAny.user_id,
-        requestUserId: user.id,
-        reportId: cleanReportId,
-      });
-      return <ForbiddenUI />;
-    }
-  }
-  
-  // Normalize report before rendering
-  const normalized = normalizeReport(reportDataAny);
-  
   // Report access granted - render with shared renderer
-  return <ReportV2Renderer report={normalized} />;
+  return <ReportV2Renderer report={result.report} />;
 }
 

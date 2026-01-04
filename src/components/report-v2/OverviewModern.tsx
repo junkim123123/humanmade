@@ -15,6 +15,9 @@ import SupplierCandidatesEmptyState from "./SupplierCandidatesEmptyState";
 import LabelConfirmationModal from "./modals/LabelConfirmationModal";
 import { VerificationModal } from "@/components/modals/VerificationModal";
 import ExtractionSummary from "./ExtractionSummary";
+import VerdictCard from "./cards/VerdictCard";
+import ActionPlan48hCard from "./cards/ActionPlan48hCard";
+import SensitivityCard from "./cards/SensitivityCard";
 
 // --- New DecisionCard for top of report ---
 function DecisionCard({ report }: { report: Report }) {
@@ -81,53 +84,6 @@ function DecisionCard({ report }: { report: Report }) {
   );
 }
 
-function VerdictCard({ report }: { report: Report }) {
-  const costRange = report.baseline?.costRange || { conservative: { totalLandedCost: 0 }, standard: { totalLandedCost: 0 } };
-  const midCost = costRange.standard?.totalLandedCost || 0;
-  const minCostRaw = costRange.conservative?.totalLandedCost || midCost;
-  const maxCostRaw = midCost * 1.2;
-  const normalized = normalizeRange({ min: minCostRaw, mid: midCost, max: maxCostRaw }, "VerdictCard");
-  const { reason: dataQualityReason } = computeDataQuality(report);
-
-  const items = [
-    "Supplier outreach and at least 3 viable quotes",
-    "HS and duty confirmation",
-    "Label and origin checks",
-    "Execution plan to your destination country port",
-  ];
-
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-      <div className="px-6 py-5 border-b border-slate-100">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[16px] font-semibold text-slate-900">Decision snapshot</h3>
-          <span className="text-[12px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-            Estimate
-          </span>
-        </div>
-        <div>
-          <div className="text-[13px] text-slate-500 mb-1">Delivered cost range estimate</div>
-          <div className="text-[28px] font-bold text-slate-900 tracking-tight">
-            ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
-          </div>
-        </div>
-      </div>
-      <div className="px-6 py-4 bg-slate-50">
-        <p className="text-[13px] text-slate-600 mb-3">
-          What can change: some details are missing so this range may shift. Verification tightens it.
-        </p>
-        <ul className="space-y-1.5">
-          {items.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-[13px] text-slate-700">
-              <span className="w-1 h-1 rounded-full bg-slate-400 mt-2 shrink-0" />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
 
 interface OverviewModernProps {
   report: Report & {
@@ -179,8 +135,32 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   // Check if we need ConfidenceBuilder
   const supplierMatches = getSupplierMatches(reportAny);
   
+  const decisionSummary = (reportAny._decisionSummary || reportAny.data?._decisionSummary) as any;
+  
   return (
     <div className="space-y-6">
+      {/* Decision Summary Section - Verdict, Action Plan, Sensitivity */}
+      {decisionSummary ? (
+        <>
+          <VerdictCard verdict={decisionSummary._verdict} />
+          <ActionPlan48hCard actionPlan={decisionSummary._actionPlan48h} />
+          <SensitivityCard sensitivity={decisionSummary._sensitivity} />
+        </>
+      ) : (
+        // Fallback when decision summary is missing
+        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div className="px-6 py-5">
+            <h3 className="text-[16px] font-semibold text-slate-900 mb-2">Decision Summary</h3>
+            <p className="text-[13px] text-slate-600 mb-4">
+              Upload a clear label photo to unlock a stronger verdict and action plan.
+            </p>
+            <button className="bg-slate-900 text-white rounded-full px-4 py-2 text-[14px] font-medium hover:bg-slate-800 transition-colors">
+              Upload missing photos
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Top Decision Card with cost, range, evidence, missing inputs, actions */}
       <DecisionCard report={report} />
       
@@ -226,34 +206,47 @@ export default function OverviewModern({ report }: OverviewModernProps) {
       </details>
 
       {/* Decision Support Cards */}
-      {(reportAny._decisionSupport || reportAny.extras?.decisionSupport) && (
-        <>
-          {/* HS Code & Duty Card */}
+      <>
+        {/* HS Code & Duty Card - show even if empty with message */}
+        {(reportAny._decisionSupport || reportAny.extras?.decisionSupport) ? (
           <HsDutyCard decisionSupport={reportAny._decisionSupport || reportAny.extras?.decisionSupport} />
+        ) : (
+          // Empty state for HS code when no candidates found
+          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100">
+              <h3 className="text-[16px] font-semibold text-slate-900">HS code & Duty</h3>
+              <p className="text-[13px] text-slate-500 mt-1">Draft HS code suggestion based on category. Confirmed during verification.</p>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-[14px] text-slate-700">
+                HS code suggestion unavailable. Upload a clear label photo to extract ingredients and origin.
+              </p>
+            </div>
+          </div>
+        )}
 
-          {/* Supplier Candidates - Always render with state-specific UI */}
-          {(() => {
-            // Use normalization helper to get matches from various sources
-            const supplierMatches = getSupplierMatches(reportAny);
-            
-            // Minimal debug for production - log count only
-            if (typeof window !== 'undefined') {
-              console.log('[OverviewModern] Supplier matches:', supplierMatches.length);
-            }
-            
-            if (supplierMatches.length > 0) {
-              return <SupplierCandidatesTop matches={supplierMatches} />;
-            } else {
-              return (
-                <SupplierCandidatesEmptyState 
-                  reasonCode={reportAny.supplierEmptyReason || "no_signals"}
-                  uploadsOptional={uploadsOptional}
-                />
-              );
-            }
-          })()}
-        </>
-      )}
+        {/* Supplier Candidates - Always render with state-specific UI */}
+        {(() => {
+          // Use normalization helper to get matches from various sources
+          const supplierMatches = getSupplierMatches(reportAny);
+          
+          // Minimal debug for production - log count only
+          if (typeof window !== 'undefined') {
+            console.log('[OverviewModern] Supplier matches:', supplierMatches.length);
+          }
+          
+          if (supplierMatches.length > 0) {
+            return <SupplierCandidatesTop matches={supplierMatches} />;
+          } else {
+            return (
+              <SupplierCandidatesEmptyState 
+                reasonCode={reportAny.supplierEmptyReason || "no_matches"}
+                uploadsOptional={uploadsOptional}
+              />
+            );
+          }
+        })()}
+      </>
 
       {/* Assumptions */}
       <AssumptionsCard 

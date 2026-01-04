@@ -73,8 +73,8 @@ export default function SupplierCandidatesEmptyState({
     const isError = reasonCode === "pipeline_error";
     const isZeroFallback = reasonCode === "rerank_zero_fallback";
     
-    let title = "No suppliers matched";
-    let description = "No suppliers were found with the available product signals. You can still proceed with verification.";
+    let title = "Candidate factories";
+    let description = "No supplier matches found yet. Upload a clear barcode or label to improve matching.";
     
     if (isError) {
       title = "Supplier matching unavailable";

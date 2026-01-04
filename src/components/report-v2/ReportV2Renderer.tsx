@@ -31,8 +31,13 @@ export interface ReportV2RendererProps {
   };
 }
 
-// V2 Renderer Shared Badge component
+// V2 Renderer Shared Badge component (dev only)
 function V2RendererBadge() {
+  // Only show in development
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
+  
   return (
     <div className="fixed top-4 right-4 z-50">
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-medium shadow-sm">

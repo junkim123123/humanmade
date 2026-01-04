@@ -34,6 +34,115 @@ export function normalizeReport(report: any): any {
     normalized.id = normalized.reportId;
   }
 
+  // Normalize HS code fields from various sources
+  // Check pipeline_result, baseline, signals, and marketEstimate
+  const pipelineResult = normalized.pipeline_result || {};
+  const baseline = normalized.baseline || {};
+  const signals = normalized.signals || {};
+  const marketEstimate = normalized._marketEstimate || pipelineResult.marketEstimate || baseline.marketEstimate;
+
+  // Extract HS code (primary)
+  if (!normalized._hs) {
+    normalized._hs =
+      normalized.hsCode ||
+      normalized.hs_code ||
+      pipelineResult.hs ||
+      pipelineResult.hsCode ||
+      pipelineResult.classification ||
+      baseline.hsCode ||
+      baseline.hs_code ||
+      signals.hsCode ||
+      marketEstimate?.hsCode ||
+      null;
+  }
+
+  // Extract HS code candidates
+  if (!normalized._hsCandidates || normalized._hsCandidates?.length === 0) {
+    const candidates =
+      normalized.hsCodeCandidates ||
+      normalized.hs_code_candidates ||
+      normalized._hsCandidates ||
+      pipelineResult.hsCodeCandidates ||
+      pipelineResult.hs_code_candidates ||
+      pipelineResult.hsCandidates ||
+      baseline.riskFlags?.tariff?.hsCodeRange ||
+      marketEstimate?.hsCandidates ||
+      null;
+
+    if (candidates) {
+      // Normalize candidates array format
+      if (Array.isArray(candidates)) {
+        normalized._hsCandidates = candidates.map((c: any) => {
+          if (typeof c === "string") {
+            return { code: c, confidence: 0.8, rationale: "From pipeline" };
+          }
+          return {
+            code: c.code || c.hsCode || c,
+            confidence: c.confidence || 0.8,
+            rationale: c.rationale || c.reason || "From pipeline",
+            evidenceSnippet: c.evidenceSnippet || null,
+          };
+        });
+      } else {
+        normalized._hsCandidates = [];
+      }
+    } else {
+      normalized._hsCandidates = [];
+    }
+  }
+
+  // Store HS candidates count for UI
+  if (!normalized._hsCandidatesCount) {
+    normalized._hsCandidatesCount = normalized._hsCandidates?.length || 0;
+  }
+
+  // Ensure _hsCandidates is always an array
+  if (!Array.isArray(normalized._hsCandidates)) {
+    normalized._hsCandidates = [];
+  }
+
+  // Ensure decision summary exists (from data._decisionSummary or compute if missing)
+  if (!normalized._decisionSummary) {
+    // Try to get from data field
+    normalized._decisionSummary = normalized.data?._decisionSummary || null;
+  }
+
+  // Extract HS decision (primary HS code choice)
+  if (!normalized._hsDecision) {
+    // Use first candidate if available, or the primary HS code
+    const primaryHs = normalized._hsCandidates?.[0]?.code || normalized._hs || null;
+    normalized._hsDecision = primaryHs;
+  }
+
+  // Extract duty range from decisionSupport or baseline
+  if (!normalized._dutyRange) {
+    const decisionSupport = normalized._decisionSupport || normalized.extras?.decisionSupport;
+    if (decisionSupport?.dutyRate) {
+      normalized._dutyRange = {
+        min: decisionSupport.dutyRate.rateMin || 0,
+        max: decisionSupport.dutyRate.rateMax || 0,
+        rationale: decisionSupport.dutyRate.rationale || "",
+        status: decisionSupport.dutyRate.status || "DRAFT",
+      };
+    } else {
+      // Try to extract from baseline or pipeline_result
+      const baselineDuty = baseline.riskFlags?.tariff?.dutyRate;
+      const pipelineDuty = pipelineResult.dutyRate;
+      
+      if (baselineDuty || pipelineDuty) {
+        const duty = baselineDuty || pipelineDuty;
+        normalized._dutyRange = {
+          min: typeof duty === "number" ? duty : duty?.min || 0,
+          max: typeof duty === "number" ? duty : duty?.max || duty || 0,
+          rationale: duty?.rationale || "Estimated from category",
+          status: "DRAFT",
+        };
+      } else {
+        normalized._dutyRange = null;
+      }
+    }
+  }
+
   return normalized;
 }
 
