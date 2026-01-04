@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Report } from "@/lib/report/types";
 import { normalizeRange } from "@/lib/calc/cost-normalization";
 import { computeDataQuality } from "@/lib/report/data-quality";
+import { getSupplierMatches } from "@/lib/report/normalizeReport";
 import AssumptionsCard from "./cards/AssumptionsCard";
 import ConfirmedFactsPanel from "./cards/ConfirmedFactsPanel";
 import OCRRecoveryCard from "./cards/OCRRecoveryCard";
@@ -222,22 +223,20 @@ export default function OverviewModern({ report }: OverviewModernProps) {
 
           {/* Supplier Candidates - Always render with state-specific UI */}
           {(() => {
-            const supplierMatches = reportAny._supplierMatches || [];
+            // Use normalization helper to get matches from various sources
+            const supplierMatches = getSupplierMatches(reportAny);
             
             // Always log for debugging (not just dev mode)
             if (typeof window !== 'undefined') {
               console.log('[OverviewModern] Supplier matches check:', {
-                exists: !!reportAny._supplierMatches,
-                isArray: Array.isArray(reportAny._supplierMatches),
-                length: supplierMatches.length,
+                normalizedCount: supplierMatches.length,
                 firstMatch: supplierMatches[0] ? {
-                  id: supplierMatches[0].id,
-                  supplierName: supplierMatches[0].supplierName,
-                  supplierId: supplierMatches[0].supplierId,
+                  supplier_id: supplierMatches[0].supplier_id,
+                  supplier_name: supplierMatches[0].supplier_name,
                 } : null,
-                allMatches: supplierMatches.slice(0, 3).map(m => ({
-                  id: m?.id,
-                  supplierName: m?.supplierName,
+                allMatches: supplierMatches.slice(0, 3).map((m: any) => ({
+                  supplier_id: m?.supplier_id,
+                  supplier_name: m?.supplier_name,
                 })),
               });
             }

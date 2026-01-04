@@ -5,14 +5,17 @@ import { Building2, MapPin, ChevronDown } from "lucide-react";
 import { safePercent } from "@/lib/format/percent";
 
 interface SupplierMatch {
-  id: string;
-  supplierName: string;
+  id?: string;
+  supplier_id?: string;
   supplierId?: string;
+  supplier_name?: string;
+  supplierName?: string;
   supplierRole?: string; // Optional - don't show if undefined
   supplierKind?: string;
   entityType?: string;
   tier?: string;
   location?: string;
+  country?: string;
   confidence?: "high" | "medium" | "low";
   matchMode?: "normal" | "fallback";
   evidenceLabel?: "customs_matched" | "customs_company_only" | "db_keyword_only" | "signals_limited";
@@ -24,6 +27,11 @@ interface SupplierMatch {
   hasCustomsRecord?: boolean;
   categoryMatch?: boolean;
   matchType?: "normal" | "fallback";
+  // Normalized fields
+  _profile?: {
+    country?: string | null;
+    role?: string | null;
+  };
 }
 
 interface SupplierCandidatesTopProps {
@@ -54,13 +62,17 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   }
 
   // Filter out any matches with missing supplierName (should be done at API level, but safety check)
+  // Do NOT filter out candidates when role or type fields are missing - only filter on missing name
   const validMatches = matches.filter((m) => {
-    const hasName = m?.supplierName && m.supplierName !== "Unknown";
+    // Support both normalized format (supplier_name) and legacy format (supplierName)
+    const name = m?.supplier_name || m?.supplierName || m?.companyName;
+    const hasName = name && name !== "Unknown";
     if (!hasName) {
-      console.warn('[SupplierCandidatesTop] Filtered out match without supplierName:', {
+      console.warn('[SupplierCandidatesTop] Filtered out match without supplier name:', {
         id: m?.id,
+        supplier_id: m?.supplier_id || m?.supplierId,
+        supplier_name: m?.supplier_name,
         supplierName: m?.supplierName,
-        supplierId: m?.supplierId,
       });
     }
     return hasName;
@@ -68,7 +80,17 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   
   if (validMatches.length === 0) {
     console.warn('[SupplierCandidatesTop] No valid matches after filtering. Original matches:', matches);
-    return null;
+    // Show empty state message instead of returning null
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100">
+          <h3 className="text-[16px] font-semibold text-slate-900">Candidate factories</h3>
+        </div>
+        <div className="px-6 py-5">
+          <p className="text-[13px] text-slate-600">No supplier candidates available for this product.</p>
+        </div>
+      </div>
+    );
   }
   
   console.log(`[SupplierCandidatesTop] Rendering ${validMatches.length} valid matches`);
@@ -147,17 +169,20 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   };
 
   const getSupplierRoleDisplay = (match: SupplierMatch): string | null => {
+    // Try multiple sources for role, including normalized _profile
     const rawRole =
       match.supplierRole ||
+      match._profile?.role ||
       match.supplierKind ||
       match.entityType ||
       match.tier;
 
+    // If no role found, return null (don't show "Type not provided" - just don't show anything)
     if (!rawRole || typeof rawRole !== "string") return null;
 
     const normalized = rawRole.trim();
     if (!normalized || normalized.toLowerCase() === "unknown") {
-      return "Type not provided";
+      return null; // Don't show "Type not provided" - just hide the field
     }
 
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);
@@ -208,14 +233,16 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
         <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 mb-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
-              <p className="text-[15px] font-semibold text-slate-900 mb-1">{topMatch.supplierName || topMatch.companyName}</p>
+              <p className="text-[15px] font-semibold text-slate-900 mb-1">
+                {topMatch.supplier_name || topMatch.supplierName || topMatch.companyName}
+              </p>
               {getSupplierRoleDisplay(topMatch) && (
                 <p className="text-[13px] text-slate-600 mb-2">{getSupplierRoleDisplay(topMatch)}</p>
               )}
-              {topMatch.location && (
+              {(topMatch.location || topMatch.country || topMatch._profile?.country) && (
                 <div className="flex items-center gap-1.5 text-[13px] text-slate-500">
                   <MapPin className="w-3.5 h-3.5" />
-                  <span>{topMatch.location}</span>
+                  <span>{topMatch.location || topMatch.country || topMatch._profile?.country}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -237,11 +264,13 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
 
         {remainingMatches.length > 0 && (
           <div className="space-y-3 mb-4">
-            {visibleRemaining.map((match) => (
-              <div key={match.id} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+            {visibleRemaining.map((match, idx) => (
+              <div key={match.id || match.supplier_id || match.supplierId || idx} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
-                    <p className="text-[14px] font-medium text-slate-900">{match.supplierName || match.companyName}</p>
+                    <p className="text-[14px] font-medium text-slate-900">
+                      {match.supplier_name || match.supplierName || match.companyName}
+                    </p>
                     {getSupplierRoleDisplay(match) && (
                       <p className="text-[13px] text-slate-500">{getSupplierRoleDisplay(match)}</p>
                     )}

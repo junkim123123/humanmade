@@ -190,46 +190,57 @@ export async function POST(request: Request) {
     console.log(`[Analyze API] Generated input_key: ${inputKey.substring(0, 16)}...`);
     
     // Check if a report with this input_key already exists (idempotency)
-    // Only check for authenticated users
+    // Only check for authenticated users, and only reuse if user owns the report
     if (!rerun && user) {
       const { data: existingReport, error: existingError } = await supabase
         .from("reports")
-        .select("id, status, product_name")
+        .select("id, status, product_name, user_id")
         .eq("input_key", inputKey)
-        .eq("user_id", user.id)
+        .eq("user_id", user.id) // Only find reports owned by this user
         .maybeSingle();
       
       if (!existingError && existingReport) {
-        const status = existingReport.status as string;
-        console.log(`[Analyze API] Found existing report with input_key=${inputKey.substring(0, 16)}..., status=${status}, reportId=${existingReport.id}`);
-        
-        // If already processing or queued, return the existing report
-        if (status === "processing" || status === "queued") {
-          console.log(`[Analyze API] Report already ${status}, returning existing reportId without starting new pipeline`);
-          return NextResponse.json({
-            success: true,
-            reportId: existingReport.id,
-            reused: true,
-            status,
-            message: `Analysis already ${status}. Redirecting to existing report.`,
-          });
+        // Double-check ownership (defense in depth)
+        if (existingReport.user_id !== user.id) {
+          console.log(`[Analyze API] Found existing report but user mismatch, creating new report`);
+          // Continue to create new report below
+        } else {
+          const status = existingReport.status as string;
+          console.log(`[Analyze API] Found existing report with input_key=${inputKey.substring(0, 16)}..., status=${status}, reportId=${existingReport.id}`);
+          
+          // If already processing or queued, return the existing report
+          if (status === "processing" || status === "queued") {
+            console.log(`[Analyze API] Report already ${status}, returning existing reportId without starting new pipeline`);
+            return NextResponse.json({
+              success: true,
+              reportId: existingReport.id,
+              reused: true,
+              status,
+              message: `Analysis already ${status}. Redirecting to existing report.`,
+            });
+          }
+          
+          // If completed, return the existing report (user can use rerun=true to force new analysis)
+          if (status === "completed") {
+            console.log(`[Analyze API] Report already completed, returning existing reportId (use rerun=true to force new analysis)`);
+            return NextResponse.json({
+              success: true,
+              reportId: existingReport.id,
+              reused: true,
+              status,
+              message: "Analysis already completed. Redirecting to existing report.",
+            });
+          }
+          
+          // If failed, allow reprocessing by continuing (don't return)
+          console.log(`[Analyze API] Report previously failed, allowing reprocessing`);
         }
-        
-        // If completed, return the existing report (user can use rerun=true to force new analysis)
-        if (status === "completed") {
-          console.log(`[Analyze API] Report already completed, returning existing reportId (use rerun=true to force new analysis)`);
-          return NextResponse.json({
-            success: true,
-            reportId: existingReport.id,
-            reused: true,
-            status,
-            message: "Analysis already completed. Redirecting to existing report.",
-          });
-        }
-        
-        // If failed, allow reprocessing by continuing (don't return)
-        console.log(`[Analyze API] Report previously failed, allowing reprocessing`);
       }
+    }
+    
+    // If user is not logged in, always create a new report (never reuse)
+    if (!user) {
+      console.log(`[Analyze API] Guest user - always creating new report, never reusing`);
     }
 
     // Upload images to the uploads bucket with user-scoped paths

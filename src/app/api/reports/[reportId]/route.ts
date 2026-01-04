@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
 import { fetchSupplierIntel, inferSupplierType } from "@/lib/server/supplier-intel";
 import { fetchFactoriesForCategory } from "@/lib/server/supplier-factories";
 import { fetchSupplierEnrichments } from "@/lib/server/supplier-enrichment";
@@ -124,9 +125,59 @@ export async function GET(
     id: data.id,
     status: data.status,
     product_name: data.product_name,
+    user_id: data.user_id,
   });
 
   const reportData = data as any;
+  
+  // Auth check: If report.user_id is set, require logged in user and matching user.id
+  // If report.user_id is null, allow read even when signed out
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (reportData.user_id !== null && reportData.user_id !== undefined) {
+    // Report has an owner - require authentication and ownership
+    if (!user) {
+      console.log("[Reports API] Report requires auth but user not logged in:", reportId);
+      return NextResponse.json(
+        {
+          ok: false,
+          errorCode: "AUTH_REQUIRED",
+          reportId,
+          debug: {
+            reportUserId: reportData.user_id,
+            userLoggedIn: false,
+          },
+        },
+        { status: 403 }
+      );
+    }
+    
+    if (user.id !== reportData.user_id) {
+      console.log("[Reports API] User mismatch:", {
+        reportUserId: reportData.user_id,
+        requestUserId: user.id,
+        reportId,
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          errorCode: "FORBIDDEN",
+          reportId,
+          debug: {
+            reportUserId: reportData.user_id,
+            requestUserId: user.id,
+          },
+        },
+        { status: 403 }
+      );
+    }
+    
+    console.log("[Reports API] Auth check passed - user owns report");
+  } else {
+    // Report has no owner (user_id is null) - allow read even when signed out
+    console.log("[Reports API] Report has no owner (user_id=null), allowing read");
+  }
 
   // Fetch supplier matches
   const { data: supplierMatches, error: supplierMatchesError } = await admin
@@ -1267,8 +1318,7 @@ export async function GET(
   };
 
   return NextResponse.json({
-    success: true,
-    reportId: reportData.id,
+    ok: true,
     report: reportWithDecision,
   });
 }
