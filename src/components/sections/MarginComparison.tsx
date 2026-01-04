@@ -61,11 +61,11 @@ function ComparisonColumn({
       </h3>
 
       {/* Big Total Cost */}
-      <div className="mb-6">
-        <div className="text-4xl lg:text-5xl font-black text-slate-900 mb-1">
+      <div className="mb-4 sm:mb-6">
+        <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 mb-1">
           <CountUp from={0} to={parseFloat(totalCost.replace("$", ""))} decimals={2} prefix="$" />
         </div>
-        <div className="text-sm text-slate-500">total cost</div>
+        <div className="text-xs sm:text-sm text-slate-500">total cost</div>
       </div>
 
       {/* Cost Breakdown */}
@@ -199,7 +199,7 @@ function ProfitBadge() {
         damping: 20,
         delay: 1.5,
       }}
-      className="mt-8 pt-8 border-t border-slate-200"
+      className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-200"
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-center sm:text-left">

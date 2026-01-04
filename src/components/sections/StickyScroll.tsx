@@ -30,27 +30,27 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
   });
 
   return (
-    <section ref={containerRef} className="relative bg-white py-32">
+    <section ref={containerRef} className="relative bg-white py-16 sm:py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         {(title || subtitle) && (
-          <div className="text-center mb-16 lg:mb-20">
+          <div className="text-center mb-10 sm:mb-12 lg:mb-16 xl:mb-20">
             {title && (
               <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-3">
                 {title}
               </p>
             )}
             {subtitle && (
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-4 leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 leading-tight px-2">
                 {subtitle}
               </h2>
             )}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start">
           {/* Left Column - Scrolling Steps - 60% height per step */}
-          <div className="space-y-32 lg:space-y-[60vh]">
+          <div className="space-y-20 sm:space-y-28 lg:space-y-[60vh]">
             {steps.map((step, index) => {
               const stepRef = useRef<HTMLDivElement>(null);
               const stepProgress = useTransform(
@@ -90,10 +90,10 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
                       Step {index + 1}
                     </span>
                   </div>
-                  <h3 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 sm:mb-4">
                     {step.title}
                   </h3>
-                  <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
+                  <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
                     {step.description}
                   </p>
                 </motion.div>
@@ -102,7 +102,7 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
           </div>
 
           {/* Right Column - Sticky Visual */}
-          <div className="sticky top-24 lg:top-32 h-[600px] lg:h-[800px]">
+          <div className="sticky top-20 sm:top-24 lg:top-32 h-[400px] sm:h-[500px] lg:h-[600px] xl:h-[800px] mt-8 lg:mt-0">
             <div className="relative w-full h-full">
               {steps.map((step, index) => {
                 const stepOpacity = useTransform(

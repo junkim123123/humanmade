@@ -220,9 +220,9 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     return (
       <div ref={slotRef} className="flex flex-col h-full">
         {/* Header */}
-        <div className="mb-4">
+        <div className="mb-3 sm:mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="text-base font-semibold text-slate-900">{label}</h4>
+            <h4 className="text-sm sm:text-base font-semibold text-slate-900">{label}</h4>
             {isRequired && (
               <span className="rounded-full bg-red-50 border border-red-200 px-2.5 py-0.5 text-xs font-semibold text-red-700">
                 Required
@@ -277,16 +277,16 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
               </div>
             </div>
           ) : (
-            <div className="w-full h-full min-h-[240px] flex flex-col items-center justify-center gap-4 p-6">
-              <div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 p-4">
-                <ImageIcon className="h-8 w-8 text-slate-400" />
+            <div className="w-full h-full min-h-[200px] sm:min-h-[240px] flex flex-col items-center justify-center gap-3 sm:gap-4 p-4 sm:p-6">
+              <div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
+                <ImageIcon className="h-6 w-6 sm:h-8 sm:w-8 text-slate-400" />
               </div>
-              <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-xs">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5 w-full max-w-xs">
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
                   disabled={disabled}
-                  className="flex-1 rounded-xl bg-white border-2 border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm hover:shadow disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-white border-2 border-slate-200 px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm hover:shadow disabled:opacity-50 touch-manipulation"
                 >
                   Choose photos
                 </button>
@@ -294,7 +294,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={disabled}
-                  className="flex-1 rounded-xl bg-slate-900 text-white px-4 py-3 text-sm font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-slate-900 text-white px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 touch-manipulation"
                 >
                   Take photo
                 </button>
@@ -351,23 +351,23 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Section Header */}
       <div>
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Product photos</h3>
-        <p className="text-base text-slate-600 leading-relaxed">Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy.</p>
-        <p className="mt-1 text-sm text-slate-500">3 minutes. Assumptions are always labeled.</p>
+        <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">Product photos</h3>
+        <p className="text-sm sm:text-base text-slate-600 leading-relaxed">Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy.</p>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500">3 minutes. Assumptions are always labeled.</p>
       </div>
       
       {/* Upload Grid */}
-      <div className="grid gap-6 sm:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 sm:grid-cols-3">
         {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true)}
         {renderSlot("barcode", "Barcode photo (optional)", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
         {renderSlot("label", "Label photo (optional)", "Back label with net weight, materials, warnings, and origin if shown.", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
       </div>
 
       {/* Optional Section */}
-      <div className="pt-8 border-t border-slate-200/60">
+      <div className="pt-6 sm:pt-8 border-t border-slate-200/60">
         {!showOptional ? (
           <button
             type="button"
@@ -379,12 +379,12 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
             Add extra photos (optional)
           </button>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Extra photos (optional)</h3>
-              <p className="text-sm text-slate-600">Helps with variants and inner packaging.</p>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">Extra photos (optional)</h3>
+              <p className="text-xs sm:text-sm text-slate-600">Helps with variants and inner packaging.</p>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
               {renderSlot("extra1", "Packaging details", "Side of box, shipping label, or outer packaging.", extra1GalleryInputRef, extra1CameraInputRef)}
               {renderSlot("extra2", "What's inside", "Close-up of the item, materials, or construction.", extra2GalleryInputRef, extra2CameraInputRef)}
             </div>

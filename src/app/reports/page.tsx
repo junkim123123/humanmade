@@ -103,12 +103,12 @@ export default function ReportsPage() {
       <PrimaryNav />
       
       {/* Hero Section - Swell Style 2-Column Layout */}
-      <section className="relative overflow-hidden pt-20 pb-32 lg:pt-32 lg:pb-40">
+      <section className="relative overflow-hidden pt-16 sm:pt-20 pb-16 sm:pb-24 lg:pt-32 lg:pb-40">
         {/* Subtle background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-cyan-50/20 pointer-events-none" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             {/* Left Column - Text Content */}
             <div className="text-center lg:text-left">
               {/* Badge */}

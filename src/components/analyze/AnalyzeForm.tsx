@@ -470,7 +470,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-8 lg:grid-cols-[2fr_1fr] lg:gap-12">
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-[2fr_1fr] lg:gap-12">
         {/* Left: Photo Upload */}
         <div>
           {loading ? (
@@ -489,7 +489,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         </div>
 
         {/* Right: Settings */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {apiError && (
             <div className="p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-sm text-red-700">
               {apiError}
@@ -503,7 +503,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
           <div className="rounded-2xl border border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-lg shadow-slate-200/50 overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-slate-200/60 bg-gradient-to-br from-slate-50/50 to-transparent">
+            <div className="p-4 sm:p-6 border-b border-slate-200/60 bg-gradient-to-br from-slate-50/50 to-transparent">
               <h3 className="text-lg font-semibold text-slate-900 mb-3">Assumptions</h3>
               <ul className="space-y-2 text-sm text-slate-500">
                 <li className="flex items-start gap-2">
@@ -522,7 +522,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
             </div>
 
             {/* Form */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Destination */}
               <div>
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">Destination</div>
@@ -539,7 +539,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                     placeholder="9.99"
                     value={form.shelfPrice}
                     onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
-                    className="w-full h-12 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm pl-8 pr-4 text-base text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                    className="w-full h-11 sm:h-12 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm pl-8 pr-4 text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                   />
                 </div>
                 <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin.</p>
@@ -611,13 +611,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
               </details>
 
               {/* Submit */}
-              <div className="pt-6 border-t border-slate-200/60">
+              <div className="pt-4 sm:pt-6 border-t border-slate-200/60">
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={loading || !hasValidInput}
                   className={cn(
-                    "w-full h-12 rounded-xl text-base font-semibold transition-all shadow-lg",
+                    "w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-semibold transition-all shadow-lg touch-manipulation",
                     !hasValidInput
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                       : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-xl active:scale-[0.98]"

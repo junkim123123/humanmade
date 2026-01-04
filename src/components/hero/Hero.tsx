@@ -56,7 +56,7 @@ function FloatingUICard() {
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative backdrop-blur-md bg-white/70 rounded-2xl shadow-2xl border border-white/20 p-8 cursor-pointer"
+        className="relative backdrop-blur-md bg-white/70 rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-6 lg:p-8 cursor-pointer"
         style={{
           rotateX,
           rotateY,
@@ -121,10 +121,10 @@ export default function Hero() {
       {/* Animated Mesh Gradient Background */}
       <MeshGradient />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 lg:py-24">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 sm:py-16 lg:py-24">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 lg:gap-16">
           {/* Left Column - Copy */}
-          <div className="flex flex-col gap-8 lg:gap-12 w-full lg:w-1/2">
+          <div className="flex flex-col gap-6 sm:gap-8 lg:gap-12 w-full lg:w-1/2">
             {/* Eyebrow */}
             <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
               Sourcing Intelligence OS
@@ -165,7 +165,7 @@ export default function Hero() {
           </div>
 
           {/* Right Column - Floating UI Card */}
-          <div className="w-full lg:w-1/2 flex items-center justify-center lg:h-[90vh] relative">
+          <div className="w-full lg:w-1/2 flex items-center justify-center lg:h-[90vh] relative mt-8 sm:mt-0">
             <FloatingUICard />
           </div>
         </div>
