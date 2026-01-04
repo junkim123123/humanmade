@@ -107,6 +107,76 @@ export function normalizeReport(report: any): any {
     normalized._decisionSummary = normalized.data?._decisionSummary || null;
   }
 
+  // Pick verdict template deterministically if not already set
+  if (!normalized._verdictText || !normalized._verdictTemplateId) {
+    try {
+      const { pickVerdictTemplate } = require("./pickVerdictTemplate");
+      const reportId = normalized.id || normalized.reportId || "unknown";
+      const category = normalized.category || normalized.baseline?.category || "unknown";
+      
+      // Extract data quality signals
+      const inputStatus = normalized.inputStatus || normalized.data?.inputStatus || normalized._proof?.inputStatus || normalized.extras?.inputStatus || {};
+      const supplierMatches = getSupplierMatches(normalized);
+      
+      // Determine compliance trigger (check for electronics, batteries, toys with regulations)
+      const categoryLower = category.toLowerCase();
+      const complianceTriggerSuspected = 
+        categoryLower.includes("electronics") ||
+        categoryLower.includes("battery") ||
+        categoryLower.includes("toy") ||
+        categoryLower.includes("hybrid") ||
+        (normalized.baseline?.riskFlags?.compliance?.hasRisk === true);
+      
+      // Calculate margin estimate if possible
+      const costRange = normalized.baseline?.costRange || {};
+      const bestEstimate = costRange.standard?.totalLandedCost || 0;
+      const targetSellPrice = normalized.targetSellPrice || normalized._priceUnit || null;
+      const marginEstimate = targetSellPrice && bestEstimate > 0 
+        ? ((targetSellPrice - bestEstimate) / targetSellPrice) * 100 
+        : null;
+      
+      const verdictResult = pickVerdictTemplate({
+        reportId,
+        category,
+        decision: normalized._decisionSummary?._verdict?.decision || "GO", // Use existing decision if available
+        dataQuality: {
+          hasBarcode: !!(inputStatus.barcodePhotoUploaded || inputStatus.barcodeDecoded || inputStatus.barcode),
+          hasLabel: !!(inputStatus.labelPhotoUploaded),
+          labelReadable: inputStatus.labelOcrStatus === "SUCCESS" || inputStatus.labelOcrStatus === "success",
+          hasWeight: !!(inputStatus.weightGrams && !inputStatus.weightDefaultUsed),
+          hasBoxSize: !!(inputStatus.boxSize && !inputStatus.boxSizeDefaultUsed),
+          supplierMatches: supplierMatches.length,
+          exactMatches: supplierMatches.filter((m: any) => (m.exact_match_count || 0) > 0).length,
+          marginEstimate,
+          complianceTriggerSuspected,
+        },
+      });
+      
+      normalized._verdictText = verdictResult.text;
+      normalized._verdictTemplateId = verdictResult.templateId;
+      
+      // Also update decision summary if it exists
+      if (normalized._decisionSummary?._verdict) {
+        normalized._decisionSummary._verdict._templateId = verdictResult.templateId;
+        normalized._decisionSummary._verdict._templateText = verdictResult.text;
+      }
+    } catch (error) {
+      // Silently fail if template picking fails
+      console.warn("[normalizeReport] Failed to pick verdict template:", error);
+    }
+  }
+
+  // Pick report nudge (next best action and tip) if not already set
+  if (!normalized._nudge) {
+    try {
+      const { pickReportNudge } = require("./pickReportNudges");
+      normalized._nudge = pickReportNudge(normalized);
+    } catch (error) {
+      // Silently fail if nudge picking fails
+      console.warn("[normalizeReport] Failed to pick report nudge:", error);
+    }
+  }
+
   // Extract HS decision (primary HS code choice)
   if (!normalized._hsDecision) {
     // Use first candidate if available, or the primary HS code

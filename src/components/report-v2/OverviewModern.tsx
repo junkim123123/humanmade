@@ -142,7 +142,11 @@ export default function OverviewModern({ report }: OverviewModernProps) {
       {/* Decision Summary Section - Verdict, Action Plan, Sensitivity */}
       {decisionSummary ? (
         <>
-          <VerdictCard verdict={decisionSummary._verdict} />
+          <VerdictCard 
+            verdict={decisionSummary._verdict} 
+            verdictText={reportAny._verdictText}
+            nudge={reportAny._nudge}
+          />
           <ActionPlan48hCard actionPlan={decisionSummary._actionPlan48h} />
           <SensitivityCard sensitivity={decisionSummary._sensitivity} />
         </>

@@ -4,6 +4,8 @@
  * No external AI calls - purely deterministic based on report data
  */
 
+import { pickVerdictTemplate } from "./pickVerdictTemplate";
+
 export interface DecisionSummary {
   _verdict: {
     decision: "GO" | "HOLD" | "NO";
@@ -56,7 +58,44 @@ export function computeDecisionSummary(report: any, pipelineResult: any): Decisi
   const dutyMin = typeof dutyRange === "number" ? dutyRange : dutyRange?.min || 0;
   const dutyMax = typeof dutyRange === "number" ? dutyRange : dutyRange?.max || 0;
   
-  // Compute verdict
+  // Get category from report
+  const category = report.category || report.baseline?.category || "unknown";
+  const reportId = report.id || report.reportId || "unknown";
+  
+  // Determine compliance trigger
+  const categoryLower = category.toLowerCase();
+  const complianceTriggerSuspected = 
+    categoryLower.includes("electronics") ||
+    categoryLower.includes("battery") ||
+    categoryLower.includes("toy") ||
+    categoryLower.includes("hybrid") ||
+    (report.baseline?.riskFlags?.compliance?.hasRisk === true);
+  
+  // Calculate margin estimate if possible
+  const targetSellPrice = report.targetSellPrice || report._priceUnit || null;
+  const marginEstimate = targetSellPrice && bestEstimate > 0 
+    ? ((targetSellPrice - bestEstimate) / targetSellPrice) * 100 
+    : null;
+  
+  // Pick verdict template deterministically
+  const templateResult = pickVerdictTemplate({
+    reportId,
+    category,
+    decision: "GO", // Will be determined by pickVerdictTemplate
+    dataQuality: {
+      hasBarcode,
+      hasLabel,
+      labelReadable: inputStatus.labelOcrStatus === "SUCCESS" || inputStatus.labelOcrStatus === "success",
+      hasWeight,
+      hasBoxSize: !!(inputStatus.boxSize && !inputStatus.boxSizeDefaultUsed),
+      supplierMatches,
+      exactMatches,
+      marginEstimate,
+      complianceTriggerSuspected,
+    },
+  });
+  
+  // Compute verdict with template decision
   const verdict = computeVerdict({
     bestEstimate,
     minCost,
@@ -68,6 +107,8 @@ export function computeDecisionSummary(report: any, pipelineResult: any): Decisi
     hasWeight,
     hasOrigin,
     dutyRange: dutyMax - dutyMin,
+    category,
+    templateDecision: templateResult.decision,
   });
   
   // Compute action plan
@@ -110,63 +151,69 @@ function computeVerdict(params: {
   hasWeight: boolean;
   hasOrigin: boolean;
   dutyRange: number;
+  category: string;
+  templateDecision: "GO" | "HOLD" | "NO";
 }): DecisionSummary["_verdict"] {
-  const { bestEstimate, supplierMatches, exactMatches, hasBarcode, hasLabel, hasWeight, hasOrigin, dutyRange } = params;
+  const { bestEstimate, supplierMatches, exactMatches, hasBarcode, hasLabel, hasWeight, hasOrigin, dutyRange, templateDecision } = params;
   
-  const reasons: string[] = [];
-  let decision: "GO" | "HOLD" | "NO" = "HOLD";
+  // Use decision from template picker
+  const decision = templateDecision;
   let confidence = 50;
   
-  // Decision logic
+  // Confidence logic
   if (bestEstimate <= 0) {
-    decision = "NO";
-    reasons.push("Cost estimate unavailable");
     confidence = 0;
   } else if (supplierMatches === 0) {
-    decision = "HOLD";
-    reasons.push("No supplier matches found");
     confidence = 30;
   } else if (exactMatches === 0 && supplierMatches > 0) {
-    decision = "HOLD";
-    reasons.push("Only inferred supplier matches available");
     confidence = 40;
   } else if (exactMatches >= 3) {
-    decision = "GO";
-    reasons.push(`${exactMatches} exact supplier matches found`);
     confidence = 75;
   } else if (exactMatches >= 1) {
-    decision = "GO";
-    reasons.push(`${exactMatches} exact supplier match found`);
     confidence = 60;
   } else {
-    decision = "HOLD";
-    reasons.push("Limited supplier evidence");
     confidence = 40;
   }
   
   // Adjust confidence based on input completeness
   if (hasBarcode && hasLabel && hasWeight && hasOrigin) {
     confidence = Math.min(100, confidence + 20);
-    if (!reasons.some(r => r.includes("complete"))) {
-      reasons.push("All inputs confirmed");
-    }
   } else {
     const missingCount = [hasBarcode, hasLabel, hasWeight, hasOrigin].filter(Boolean).length;
     if (missingCount < 2) {
       confidence = Math.max(20, confidence - 15);
-      reasons.push("Missing critical inputs");
     }
   }
   
   // Adjust for duty range uncertainty
   if (dutyRange > 5) {
     confidence = Math.max(20, confidence - 10);
-    if (!reasons.some(r => r.includes("duty"))) {
-      reasons.push("Wide duty rate range");
-    }
   }
   
-  // Ensure reasons array has at most 3 items
+  // Build reasons from template statement (split into 3 parts if needed)
+  // Note: Template text will be stored separately in _verdictText
+  // Here we provide fallback reasons
+  const reasons: string[] = [];
+  if (decision === "GO") {
+    if (exactMatches >= 3) {
+      reasons.push(`${exactMatches} exact supplier matches found`);
+    } else if (exactMatches >= 1) {
+      reasons.push(`${exactMatches} exact supplier match found`);
+    } else {
+      reasons.push("Supplier matches available");
+    }
+  } else if (decision === "HOLD") {
+    if (supplierMatches === 0) {
+      reasons.push("No supplier matches found");
+    } else if (exactMatches === 0) {
+      reasons.push("Only inferred supplier matches available");
+    } else {
+      reasons.push("Limited supplier evidence");
+    }
+  } else {
+    reasons.push("Risk factors present");
+  }
+  
   return {
     decision,
     reasons: reasons.slice(0, 3),

@@ -8,10 +8,21 @@ interface VerdictCardProps {
     reasons: string[];
     confidence: number;
   };
+  verdictText?: string; // Optional pre-written verdict text from template
+  nudge?: {
+    actionKey: string;
+    actionText: string;
+    tipText: string;
+    severity: "high" | "medium" | "low";
+    target: string;
+  };
 }
 
-export default function VerdictCard({ verdict }: VerdictCardProps) {
+export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCardProps) {
   const { decision, reasons, confidence } = verdict;
+  
+  // Use template text if available, otherwise use reasons
+  const displayText = verdictText || reasons.join(" ");
   
   const decisionConfig = {
     GO: {
@@ -61,15 +72,35 @@ export default function VerdictCard({ verdict }: VerdictCardProps) {
       </div>
       
       <div className={`px-6 py-4 ${config.bgColor}`}>
-        <p className="text-[13px] font-medium text-slate-900 mb-2">Key reasons:</p>
-        <ul className="space-y-1.5">
-          {reasons.map((reason, idx) => (
-            <li key={idx} className="flex items-start gap-2 text-[13px] text-slate-700">
-              <span className="text-slate-400 mt-0.5">•</span>
-              <span>{reason}</span>
-            </li>
-          ))}
-        </ul>
+        {verdictText ? (
+          // Render template text as a single paragraph
+          <p className="text-[13px] text-slate-700 leading-relaxed mb-3">{verdictText}</p>
+        ) : (
+          // Fallback to reasons list
+          <>
+            <p className="text-[13px] font-medium text-slate-900 mb-2">Key reasons:</p>
+            <ul className="space-y-1.5 mb-3">
+              {reasons.map((reason, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-[13px] text-slate-700">
+                  <span className="text-slate-400 mt-0.5">•</span>
+                  <span>{reason}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        
+        {/* Next best action and tip */}
+        {nudge && (
+          <div className="mt-4 pt-4 border-t border-slate-200">
+            <p className="text-[13px] font-medium text-slate-900 mb-1.5">
+              {nudge.actionText}
+            </p>
+            <p className="text-[12px] text-slate-600 italic">
+              {nudge.tipText}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
