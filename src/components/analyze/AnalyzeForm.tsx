@@ -470,9 +470,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-[2fr_1fr] lg:gap-12">
         {/* Left: Photo Upload */}
-        <div className="lg:col-span-2">
+        <div>
           {loading ? (
             <LoadingState 
               progress={loadingProgress}
@@ -489,69 +489,69 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         </div>
 
         {/* Right: Settings */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="space-y-6">
           {apiError && (
-            <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-[14px] text-red-700">
+            <div className="p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-sm text-red-700">
               {apiError}
             </div>
           )}
           {restoredDraft && (
-            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-[14px] text-amber-700">
-              Draft restored. Re-attach your 3 photos and submit.
+            <div className="p-4 rounded-xl border border-amber-200/60 bg-amber-50/80 backdrop-blur-sm text-sm text-amber-700">
+              Draft restored. Re-attach your photos and submit.
             </div>
           )}
 
-          <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="rounded-2xl border border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-lg shadow-slate-200/50 overflow-hidden">
             {/* Header */}
-            <div className="p-5 border-b border-slate-100">
-              <h3 className="text-[16px] font-semibold text-slate-900">Assumptions</h3>
-              <ul className="mt-3 space-y-1.5 text-[13px] text-slate-600">
+            <div className="p-6 border-b border-slate-200/60 bg-gradient-to-br from-slate-50/50 to-transparent">
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Assumptions</h3>
+              <ul className="space-y-2 text-sm text-slate-500">
                 <li className="flex items-start gap-2">
-                  <span className="text-slate-400 mt-0.5">•</span>
-                  Per-unit estimate
+                  <span className="text-slate-300 mt-0.5">•</span>
+                  <span>Per-unit estimate</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-slate-400 mt-0.5">•</span>
-                  Missing weight or box size uses category defaults
+                  <span className="text-slate-300 mt-0.5">•</span>
+                  <span>Missing weight or box size uses category defaults</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-slate-400 mt-0.5">•</span>
-                  Defaults are labeled and editable
+                  <span className="text-slate-300 mt-0.5">•</span>
+                  <span>Defaults are labeled and editable</span>
                 </li>
               </ul>
             </div>
 
             {/* Form */}
-            <div className="p-5 space-y-5">
+            <div className="p-6 space-y-6">
               {/* Destination */}
               <div>
-                <div className="text-[13px] font-medium text-slate-500">Destination</div>
-                <div className="mt-1 text-[14px] font-medium text-slate-900">United States</div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">Destination</div>
+                <div className="text-base font-semibold text-slate-900">United States</div>
               </div>
 
               {/* Target Sell Price */}
               <div>
-                <label className="text-[14px] font-medium text-slate-900">Target Sell Price ($)</label>
-                <div className="mt-2 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-slate-400">$</span>
+                <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price ($)</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-slate-400">$</span>
                   <input
                     type="text"
                     placeholder="9.99"
                     value={form.shelfPrice}
                     onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
-                    className="w-full h-10 rounded-lg border border-slate-200 bg-white pl-7 pr-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors"
+                    className="w-full h-12 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm pl-8 pr-4 text-base text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                   />
                 </div>
-                <p className="mt-1.5 text-[13px] text-slate-500">Required to calculate your profit margin.</p>
+                <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin.</p>
               </div>
 
               {/* Advanced */}
               <details className="group">
-                <summary className="flex items-center gap-1 text-[14px] font-medium text-slate-700 cursor-pointer hover:text-slate-900 transition-colors">
-                  <span className="text-slate-400 group-open:rotate-90 transition-transform">▶</span>
-                  Edit assumptions
+                <summary className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer hover:text-slate-900 transition-colors select-none">
+                  <span className="text-slate-400 group-open:rotate-90 transition-transform text-xs">▶</span>
+                  <span>Edit assumptions</span>
                 </summary>
-                <div className="mt-4 space-y-4 pl-4 border-l border-slate-200">
+                <div className="mt-4 space-y-5 pl-5 border-l-2 border-slate-200/60">
                   <p className="text-[13px] text-slate-500">Only if you know the shipping box size and weight.</p>
                   
                   <div>

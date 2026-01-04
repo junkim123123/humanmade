@@ -98,13 +98,26 @@ export default function HomeDeck() {
                   description: "Upload a product photo. Our AI calculates your real landed cost and margin estimate in minutes.",
                   color: "blue",
                   visual: (
-                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
-                      <div className="space-y-4">
-                        <div className="h-32 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
-                          <span className="text-4xl">📸</span>
+                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+                      {/* Upload Area Mockup */}
+                      <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100">
+                        <div className="aspect-square rounded-xl border-2 border-dashed border-blue-300 bg-white/50 flex flex-col items-center justify-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                          </div>
+                          <p className="text-sm font-medium text-blue-700">Upload product photo</p>
                         </div>
-                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                      {/* Analysis Results */}
+                      <div className="p-6 space-y-3">
+                        <div className="h-3 bg-slate-200 rounded w-full"></div>
+                        <div className="h-3 bg-slate-200 rounded w-3/4"></div>
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="h-8 bg-blue-100 rounded w-24"></div>
+                          <div className="h-8 bg-emerald-100 rounded w-32"></div>
+                        </div>
                       </div>
                     </div>
                   ),
@@ -114,13 +127,31 @@ export default function HomeDeck() {
                   description: "Deposit $45 to start factory validation. We reach out to verified suppliers and confirm pricing, MOQ, and lead times.",
                   color: "purple",
                   visual: (
-                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
-                      <div className="space-y-4">
-                        <div className="h-32 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg flex items-center justify-center">
-                          <span className="text-4xl">✅</span>
+                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+                      {/* Verification Status */}
+                      <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-full bg-white border-4 border-purple-500 flex items-center justify-center">
+                            <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-white/80 rounded w-32 mb-2"></div>
+                            <div className="h-3 bg-white/60 rounded w-24"></div>
+                          </div>
                         </div>
-                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                      {/* Supplier Details */}
+                      <div className="p-6 space-y-4">
+                        <div className="space-y-2">
+                          <div className="h-3 bg-slate-200 rounded w-full"></div>
+                          <div className="h-3 bg-slate-200 rounded w-5/6"></div>
+                        </div>
+                        <div className="flex gap-3">
+                          <div className="flex-1 h-16 bg-slate-50 rounded-lg"></div>
+                          <div className="flex-1 h-16 bg-slate-50 rounded-lg"></div>
+                        </div>
                       </div>
                     </div>
                   ),
@@ -130,13 +161,45 @@ export default function HomeDeck() {
                   description: "We handle production, quality control, and logistics. You pay 10% fee only when your order ships.",
                   color: "emerald",
                   visual: (
-                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
-                      <div className="space-y-4">
-                        <div className="h-32 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex items-center justify-center">
-                          <span className="text-4xl">🚀</span>
+                    <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+                      {/* Shipping Status */}
+                      <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100">
+                        <div className="space-y-4">
+                          {/* Progress Bar */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs font-medium text-emerald-700">
+                              <span>Production</span>
+                              <span>Shipping</span>
+                            </div>
+                            <div className="h-2 bg-white/60 rounded-full overflow-hidden">
+                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: "75%" }}></div>
+                            </div>
+                          </div>
+                          {/* Shipping Card */}
+                          <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-slate-100"></div>
+                              <div className="flex-1">
+                                <div className="h-3 bg-slate-200 rounded w-24 mb-2"></div>
+                                <div className="h-2 bg-slate-200 rounded w-32"></div>
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                      {/* Order Details */}
+                      <div className="p-6 space-y-3 border-t border-slate-100">
+                        <div className="h-3 bg-slate-200 rounded w-full"></div>
+                        <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                        <div className="pt-2 flex items-center justify-between">
+                          <div className="h-6 bg-slate-200 rounded w-20"></div>
+                          <div className="h-8 bg-emerald-100 rounded w-28"></div>
+                        </div>
                       </div>
                     </div>
                   ),

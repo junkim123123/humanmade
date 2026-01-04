@@ -82,18 +82,33 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                 
                 {/* Product Visual Area */}
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-white/40 backdrop-blur-sm">
-                  {/* Icon or gradient placeholder */}
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-6xl font-bold opacity-20"
-                      style={{
-                        color: product.colorClass?.includes("pink") ? "#ec4899" :
-                               product.colorClass?.includes("blue") ? "#3b82f6" :
-                               "#8b5cf6"
-                      }}
-                    >
-                      {product.category.charAt(0)}
+                  {product.image ? (
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center relative">
+                      {/* Blurred gradient background */}
+                      <div className={`absolute inset-0 opacity-30 ${
+                        product.colorClass?.includes("pink") ? "bg-gradient-to-br from-pink-200 to-rose-300" :
+                        product.colorClass?.includes("blue") ? "bg-gradient-to-br from-blue-200 to-cyan-300" :
+                        "bg-gradient-to-br from-purple-200 to-violet-300"
+                      } blur-2xl`} />
+                      {/* Category letter */}
+                      <div className={`relative text-7xl font-bold opacity-30 ${
+                        product.colorClass?.includes("pink") ? "text-rose-500" :
+                        product.colorClass?.includes("blue") ? "text-blue-600" :
+                        "text-purple-600"
+                      }`}>
+                        {product.category.charAt(0)}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Category Tag */}

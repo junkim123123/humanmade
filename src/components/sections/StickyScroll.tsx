@@ -59,8 +59,8 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
                 [0, 1]
               );
 
-              const opacity = useTransform(stepProgress, [0, 0.2, 0.5, 0.8, 1], [0.3, 1, 1, 1, 0.3]);
-              const y = useTransform(stepProgress, [0, 0.5, 1], [30, 0, -30]);
+              const opacity = useTransform(stepProgress, [0, 0.15, 0.4, 0.6, 0.85, 1], [0.4, 0.8, 1, 1, 0.8, 0.4]);
+              const y = useTransform(stepProgress, [0, 0.5, 1], [20, 0, -20]);
 
               return (
                 <motion.div
@@ -122,7 +122,7 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
                       opacity: stepOpacity,
                       scale: stepScale,
                     }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <div className="w-full h-full flex items-center justify-center">
                       {step.visual}

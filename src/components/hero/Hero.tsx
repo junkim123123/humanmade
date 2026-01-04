@@ -130,8 +130,8 @@ export default function Hero() {
               Sourcing Intelligence OS
             </p>
 
-            {/* Headline - HUGE with tight tracking */}
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-tight text-slate-900 leading-[0.95]">
+            {/* Headline - Premium sizing */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
               Stop overpaying wholesalers.
               <br />
               <span className="text-slate-700">Source direct with execution.</span>
