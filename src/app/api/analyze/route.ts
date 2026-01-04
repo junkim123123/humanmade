@@ -359,6 +359,48 @@ export async function POST(request: Request) {
       // Skip all DB operations for guest users
       // We'll run the pipeline and return results directly
     } else {
+      // Ensure user profile exists before creating report
+      const { data: existingProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      if (!existingProfile && !profileError) {
+        // Profile doesn't exist, create it
+        console.log("[Analyze API] Creating missing profile for user:", user.id);
+        const { error: createProfileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            email: user.email || "",
+            role: "user",
+          });
+        
+        if (createProfileError) {
+          console.error("[Analyze API] Failed to create profile:", createProfileError.message);
+          return NextResponse.json(
+            {
+              success: false,
+              error: "PROFILE_CREATION_FAILED",
+              message: "Failed to create user profile. Please try again.",
+            },
+            { status: 500 }
+          );
+        }
+        console.log("[Analyze API] Profile created successfully");
+      } else if (profileError) {
+        console.error("[Analyze API] Error checking profile:", profileError.message);
+        return NextResponse.json(
+          {
+            success: false,
+            error: "PROFILE_CHECK_FAILED",
+            message: "Failed to verify user profile. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+      
       // Authenticated user: Create placeholder report row before pipeline runs
       const reportData = {
         user_id: user.id,
