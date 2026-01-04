@@ -69,11 +69,8 @@ export async function POST(request: Request) {
     if (!imageFile) {
       return NextResponse.json(
         {
-          ok: false,
-          error: { 
-            code: "IMAGE_REQUIRED", 
-            message: "Product photo is required." 
-          },
+          success: false,
+          error: "Product photo is required.",
         },
         { status: 400 }
       );

@@ -17,7 +17,7 @@ const moreNavItems = [
   { href: "/inbox", label: "Inbox", icon: MessageSquare },
   { href: "/admin", label: "Admin", icon: Settings, requiresAdmin: true },
   { href: "/support", label: "Help", icon: HelpCircle },
-  { href: "/support?category=bug_report", label: "Report a bug", icon: HelpCircle },
+  { href: "/support?category=technical_issues", label: "Technical Issues", icon: HelpCircle },
 ];
 
 interface NavItem {

@@ -105,7 +105,7 @@ export default async function AdminOrderWorkspace({ params, searchParams }: { pa
                 <button name="status" value="contacted" className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Mark contacted</button>
                 <button name="status" value="meeting_scheduled" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">Schedule meeting</button>
               </form>
-              <Link href={`/support?category=verification_help&orderId=${orderId}`} className="rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-white text-center">Request photos</Link>
+              <Link href={`/support?category=sourcing_quotes&orderId=${orderId}`} className="rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-white text-center">Request photos</Link>
               <details className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
                 <summary className="cursor-pointer font-semibold text-slate-900">More actions</summary>
                 <div className="mt-2 flex flex-wrap gap-2">

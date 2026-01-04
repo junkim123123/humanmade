@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 const categories = [
-  { id: "verification_help", label: "Verification help" },
-  { id: "account_billing", label: "Account and billing" },
-  { id: "bug_report", label: "Bug report" },
+  { id: "sourcing_quotes", label: "Sourcing & Quotes" },
+  { id: "order_logistics", label: "Order Status / Logistics" },
+  { id: "billing_credits", label: "Billing & Credits" },
+  { id: "technical_issues", label: "Technical Issues" },
 ];
 
 interface SupportFormProps {
@@ -18,7 +19,7 @@ interface SupportFormProps {
 
 export function SupportForm({ userEmail, userId, initialCategory, orderId, reportId }: SupportFormProps) {
   const [email, setEmail] = useState(userEmail || "");
-  const [category, setCategory] = useState(initialCategory || "verification_help");
+  const [category, setCategory] = useState(initialCategory || "sourcing_quotes");
   const [message, setMessage] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -141,7 +142,7 @@ export function SupportForm({ userEmail, userId, initialCategory, orderId, repor
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
-          placeholder="Tell us what you need"
+          placeholder="Describe your question or issue"
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
         />
       </label>
