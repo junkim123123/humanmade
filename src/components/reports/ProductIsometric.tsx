@@ -1,16 +1,16 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Float, ContactShadows, Environment, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 
-// Isometric Camera Setup - zoomed in for texture focus
+// Isometric Camera Setup
 function IsometricCamera() {
   const { camera } = useThree();
   
   useEffect(() => {
-    const distance = 5; // Slightly closer for texture focus
+    const distance = 6;
     const angleX = Math.PI / 6; // 30도
     const angleY = Math.PI / 4; // 45도
     
@@ -32,95 +32,110 @@ function IsometricCamera() {
   return null;
 }
 
-// Source (Factory) - Large rounded cube
+// Factory - Left (Large glass cube)
 function Factory() {
   return (
-    <group position={[-2, 0.8, 0]}>
-      <RoundedBox args={[1.2, 1.2, 1.2]} radius={0.1} smoothness={4} castShadow receiveShadow>
-        <meshStandardMaterial
-          color="#64748B"
-          roughness={0.4}
-          metalness={0.1}
+    <group position={[-2.5, 0.9, 0]}>
+      <RoundedBox args={[1.2, 1.2, 1.2]} radius={0.05} smoothness={4} castShadow receiveShadow>
+        <meshPhysicalMaterial
+          color="#A78BFA"
+          transmission={0.6}
+          roughness={0.2}
+          thickness={1.5}
+          ior={1.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
         />
       </RoundedBox>
     </group>
   );
 }
 
-// Process (Shipping) - Connecting cylinder/capsule
-function ShippingConnection() {
+// Shipment - Middle (Flat rectangular glass slab)
+function Shipment() {
   return (
     <group position={[0, 0.6, 0]}>
-      {/* Main connecting cylinder */}
-      <mesh castShadow receiveShadow>
-        <cylinderGeometry args={[0.12, 0.12, 3.8, 32]} />
-        <meshStandardMaterial
-          color="#3B82F6"
-          roughness={0.4}
-          metalness={0.1}
+      <RoundedBox args={[2.5, 0.3, 1]} radius={0.05} smoothness={4} castShadow receiveShadow>
+        <meshPhysicalMaterial
+          color="#22D3EE"
+          transmission={0.6}
+          roughness={0.2}
+          thickness={1.5}
+          ior={1.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
         />
-      </mesh>
+      </RoundedBox>
     </group>
   );
 }
 
-// Destination (Warehouse) - Stack of 2 thinner rounded boxes
+// Warehouse - Right (Stack of 3 thin glass slabs)
 function Warehouse() {
   return (
-    <group position={[2, 0.6, 0]}>
-      {/* Bottom box */}
-      <RoundedBox args={[1, 0.8, 0.9]} radius={0.1} smoothness={4} position={[0, 0.4, 0]} castShadow receiveShadow>
-        <meshStandardMaterial
-          color="#F59E0B"
-          roughness={0.4}
-          metalness={0.1}
+    <group position={[2.5, 0.6, 0]}>
+      {/* Bottom slab */}
+      <RoundedBox args={[1, 0.5, 0.8]} radius={0.05} smoothness={4} position={[0, 0.25, 0]} castShadow receiveShadow>
+        <meshPhysicalMaterial
+          color="#FDBA74"
+          transmission={0.6}
+          roughness={0.2}
+          thickness={1.5}
+          ior={1.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
         />
       </RoundedBox>
-      {/* Top box */}
-      <RoundedBox args={[0.8, 0.6, 0.7]} radius={0.1} smoothness={4} position={[0, 1.1, 0]} castShadow>
-        <meshStandardMaterial
-          color="#F59E0B"
-          roughness={0.4}
-          metalness={0.1}
+      {/* Middle slab */}
+      <RoundedBox args={[0.9, 0.4, 0.7]} radius={0.05} smoothness={4} position={[0, 0.7, 0]} castShadow>
+        <meshPhysicalMaterial
+          color="#FDBA74"
+          transmission={0.6}
+          roughness={0.2}
+          thickness={1.5}
+          ior={1.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
+        />
+      </RoundedBox>
+      {/* Top slab */}
+      <RoundedBox args={[0.8, 0.35, 0.6]} radius={0.05} smoothness={4} position={[0, 1.15, 0]} castShadow>
+        <meshPhysicalMaterial
+          color="#FDBA74"
+          transmission={0.6}
+          roughness={0.2}
+          thickness={1.5}
+          ior={1.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
         />
       </RoundedBox>
     </group>
   );
 }
 
-// Floating particles traveling along the connection (flow simulation)
-function FlowParticles() {
-  const particlesRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (particlesRef.current) {
-      const time = state.clock.elapsedTime;
-      particlesRef.current.children.forEach((child, i) => {
-        if (child instanceof THREE.Mesh) {
-          // Travel from left to right along the connection
-          const progress = ((time * 0.3) + (i * 0.5)) % 4;
-          child.position.x = -2 + progress;
-          // Subtle vertical float
-          child.position.y = 0.6 + Math.sin(time * 2 + i) * 0.1;
-        }
-      });
-    }
-  });
-
+// Connection Flow - Glowing grey line connecting blocks
+function ConnectionFlow() {
   return (
-    <group ref={particlesRef}>
-      {[...Array(6)].map((_, i) => (
-        <mesh key={i} castShadow>
-          <sphereGeometry args={[0.08, 16, 16]} />
-          <meshStandardMaterial
-            color="#3B82F6"
-            roughness={0.3}
-            metalness={0.2}
-            emissive="#3B82F6"
-            emissiveIntensity={0.3}
-          />
-        </mesh>
-      ))}
+    <group>
+      {/* Factory to Shipment connection */}
+      <mesh position={[-1.2, 0.6, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.06, 0.06, 2.3, 16]} />
+        <meshStandardMaterial
+          color="#94A3B8"
+          emissive="#94A3B8"
+          emissiveIntensity={0.5}
+        />
+      </mesh>
+      {/* Shipment to Warehouse connection */}
+      <mesh position={[1.2, 0.6, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.06, 0.06, 2.3, 16]} />
+        <meshStandardMaterial
+          color="#94A3B8"
+          emissive="#94A3B8"
+          emissiveIntensity={0.5}
+        />
+      </mesh>
     </group>
   );
 }
@@ -131,35 +146,31 @@ function SceneContent() {
     <>
       <IsometricCamera />
       
-      {/* Studio Lighting Setup */}
+      {/* Crucial Lighting for Glass */}
       <ambientLight intensity={0.5} />
-      <directionalLight
-        position={[5, 5, 5]}
+      <spotLight
+        position={[10, 10, 10]}
+        angle={0.15}
+        penumbra={1}
         intensity={1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-far={15}
-        shadow-camera-left={-4}
-        shadow-camera-right={4}
-        shadow-camera-top={4}
-        shadow-camera-bottom={-4}
-        shadow-radius={3}
       />
       
-      {/* Environment for realistic reflections */}
-      <Environment preset="city" blur={1} />
+      {/* Environment - Essential for glass reflections */}
+      <Environment preset="city" />
       
       {/* Float animation - gentle hover */}
       <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
         <group>
-          {/* Supply Chain Composition */}
+          {/* Supply Chain Glass Blocks */}
           <Factory />
-          <ShippingConnection />
+          <Shipment />
           <Warehouse />
           
-          {/* Flow particles */}
-          <FlowParticles />
+          {/* Connection Flow */}
+          <ConnectionFlow />
         </group>
       </Float>
       
@@ -170,7 +181,7 @@ function SceneContent() {
         scale={10}
         blur={2.5}
         far={4}
-        color="#4B5563"
+        color="#475569"
         resolution={1024}
       />
     </>
