@@ -38,7 +38,26 @@ export default function ReportV2Page({ reportId, report, initialReport }: Report
   const resolvedReport = useMemo(() => initialReport ?? report, [initialReport, report]);
   const [headerHeight, setHeaderHeight] = useState(0);
 
-  if (!resolvedReport) return null;
+  // Debug: Log report data on mount
+  if (typeof window !== 'undefined') {
+    console.log('[ReportV2Page] Report data received:', {
+      reportId,
+      hasReport: !!resolvedReport,
+      reportId: resolvedReport?.id,
+      hasSupplierMatches: !!(resolvedReport as any)?._supplierMatches,
+      supplierMatchesCount: Array.isArray((resolvedReport as any)?._supplierMatches) 
+        ? (resolvedReport as any)._supplierMatches.length 
+        : 0,
+      reportKeys: resolvedReport ? Object.keys(resolvedReport).filter(k => 
+        k.includes('supplier') || k.includes('factory') || k.includes('match')
+      ) : [],
+    });
+  }
+
+  if (!resolvedReport) {
+    console.error('[ReportV2Page] No report provided');
+    return null;
+  }
 
   return (
     <div
