@@ -34,14 +34,38 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   const [showAll, setShowAll] = useState(false);
   const [showLogistics, setShowLogistics] = useState(false);
 
+  // Debug logging
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log('[SupplierCandidatesTop] Matches received:', {
+      count: matches?.length || 0,
+      matches: matches?.slice(0, 2).map(m => ({
+        id: m.id,
+        supplierName: m.supplierName,
+        supplierId: m.supplierId,
+      })),
+    });
+  }
+
   if (!matches || matches.length === 0) {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.warn('[SupplierCandidatesTop] No matches provided');
+    }
     return null;
   }
 
   // Filter out any matches with missing supplierName (should be done at API level, but safety check)
-  const validMatches = matches.filter((m) => m.supplierName && m.supplierName !== "Unknown");
+  const validMatches = matches.filter((m) => {
+    const hasName = m.supplierName && m.supplierName !== "Unknown";
+    if (!hasName && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.warn('[SupplierCandidatesTop] Filtered out match without supplierName:', m.id);
+    }
+    return hasName;
+  });
   
   if (validMatches.length === 0) {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.warn('[SupplierCandidatesTop] No valid matches after filtering');
+    }
     return null;
   }
 

@@ -201,14 +201,27 @@ export default function OverviewModern({ report }: OverviewModernProps) {
           <HsDutyCard decisionSupport={reportAny._decisionSupport} />
 
           {/* Supplier Candidates - Always render with state-specific UI */}
-          {reportAny._supplierMatches && reportAny._supplierMatches.length > 0 ? (
-            <SupplierCandidatesTop matches={reportAny._supplierMatches} />
-          ) : (
-            <SupplierCandidatesEmptyState 
-              reasonCode={reportAny.supplierEmptyReason || "no_signals"}
-              uploadsOptional={uploadsOptional}
-            />
-          )}
+          {(() => {
+            const supplierMatches = reportAny._supplierMatches || [];
+            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+              console.log('[OverviewModern] Supplier matches check:', {
+                exists: !!reportAny._supplierMatches,
+                length: supplierMatches.length,
+                firstMatch: supplierMatches[0] ? {
+                  id: supplierMatches[0].id,
+                  supplierName: supplierMatches[0].supplierName,
+                } : null,
+              });
+            }
+            return supplierMatches.length > 0 ? (
+              <SupplierCandidatesTop matches={supplierMatches} />
+            ) : (
+              <SupplierCandidatesEmptyState 
+                reasonCode={reportAny.supplierEmptyReason || "no_signals"}
+                uploadsOptional={uploadsOptional}
+              />
+            );
+          })()}
         </>
       )}
 
