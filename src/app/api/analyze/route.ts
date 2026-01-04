@@ -119,6 +119,9 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    
+    // Create admin client once for use throughout the handler (for both authenticated and guest users)
+    const admin = getSupabaseAdmin();
 
     // Allow guest users to run analysis (we'll show sign up modal after results)
     // For guest users, we'll use a temporary user ID or handle differently
@@ -370,7 +373,6 @@ export async function POST(request: Request) {
     if (user) {
       // Ensure user profile exists before creating report
       // Use admin client to bypass RLS policies
-      const admin = getSupabaseAdmin();
       const { data: existingProfile, error: profileError } = await admin
         .from("profiles")
         .select("id")
@@ -456,8 +458,6 @@ export async function POST(request: Request) {
     };
     
     // Use admin client for both authenticated and guest users to ensure report creation succeeds
-    const admin = getSupabaseAdmin();
-    
     // For authenticated users, try regular client first, then fallback to admin
     // For guest users, use admin client directly
     let upsertedReport: any = null;
@@ -1311,8 +1311,6 @@ export async function POST(request: Request) {
         unitsPerCase: 1,
       },
     });
-
-    const admin = getSupabaseAdmin();
 
     // Update report with pipeline outputs (for both authenticated and guest users)
     // Use admin client to ensure update succeeds even with RLS policies
