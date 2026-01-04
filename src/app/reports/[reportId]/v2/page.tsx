@@ -4,7 +4,11 @@ import ReportV2Client from "./ReportV2Client";
 
 export const dynamic = "force-dynamic";
 
-async function getReport(reportId: string, headersList: Headers, retryCount = 0): Promise<{ report?: any; error?: "FORBIDDEN" | "NOT_FOUND" }> {
+type GetReportResult =
+  | { report: any; error?: undefined }
+  | { report?: undefined; error: "NOT_FOUND" | "FORBIDDEN" };
+
+async function getReport(reportId: string, headersList: Headers, retryCount = 0): Promise<GetReportResult> {
   const maxRetries = 8; // More retries
   const retryDelay = 2000; // 2 seconds - give DB more time
   
@@ -15,9 +19,9 @@ async function getReport(reportId: string, headersList: Headers, retryCount = 0)
     const baseUrl = `${proto}://${host}`;
     
     // Validate reportId before making request
-    if (!reportId || typeof reportId !== 'string' || reportId.trim() === '') {
+    if (!reportId || typeof reportId !== "string" || reportId.trim() === "") {
       console.error("[Report V2 Page] Invalid reportId in getReport:", reportId);
-      return null;
+      return { error: "NOT_FOUND" };
     }
     
     const cleanReportId = reportId.trim();
@@ -67,7 +71,8 @@ async function getReport(reportId: string, headersList: Headers, retryCount = 0)
 
     const json = await res.json().catch((err) => {
       console.error("[Report V2 Page] JSON parse error:", err);
-      return null;
+      // If JSON parse fails, treat as NOT_FOUND
+      return { ok: false, errorCode: "NOT_FOUND" };
     });
     
     if (!json?.ok) {
@@ -98,10 +103,10 @@ async function getReport(reportId: string, headersList: Headers, retryCount = 0)
     if (retryCount < maxRetries) {
       console.log(`[Report V2 Page] Network error, retrying... (${retryCount + 1}/${maxRetries}):`, reportId);
       await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
-      return getReport(reportId, headers, retryCount + 1);
+      return getReport(reportId, headersList, retryCount + 1);
     }
     console.error("[Report V2 Page] Error fetching report:", error);
-    return { error: "NOT_FOUND" as const };
+    return { error: "NOT_FOUND" };
   }
 }
 
@@ -137,7 +142,13 @@ export default async function Page({
     timestamp: new Date().toISOString(),
   });
   
-  const result = await getReport(reportId, headersList);
+  const cleanReportId = reportId.trim();
+  const result = await getReport(cleanReportId, headersList);
+  
+  if (result.error === "NOT_FOUND") {
+    console.error("[Report V2 Page] Failed to fetch report after all retries:", cleanReportId);
+    notFound();
+  }
   
   if (result.error === "FORBIDDEN") {
     // Show user-friendly message for auth errors
@@ -158,18 +169,16 @@ export default async function Page({
       </div>
     );
   }
-  
-  if (result.error === "NOT_FOUND" || !result.report) {
-    console.error("[Report V2 Page] Failed to fetch report after all retries:", reportId);
-    notFound();
-  }
+
+  // At this point, TypeScript knows result.report exists and result.error is undefined
+  const report = result.report;
 
   console.log("[Report V2 Page] Successfully fetched report:", {
-    reportId,
-    productName: result.report?.productName,
-    status: result.report?.status,
+    reportId: cleanReportId,
+    productName: report?.productName,
+    status: report?.status,
   });
 
-  return <ReportV2Client key={reportId} reportId={reportId} report={result.report} />;
+  return <ReportV2Client key={cleanReportId} reportId={cleanReportId} report={report} />;
 }
 
