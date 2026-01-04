@@ -139,46 +139,46 @@ export default function MarginComparison() {
   ];
 
   return (
-    <FadeUp>
     <section className="bg-gradient-to-b from-slate-50 to-violet-50 py-16 lg:py-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 mb-4">
-            See the margin gap
-          </h2>
-          <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
-            Compare buying wholesale vs going direct with NexSupply execution support.
-          </p>
+      <FadeUp>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Header */}
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 mb-4">
+              See the margin gap
+            </h2>
+            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
+              Compare buying wholesale vs going direct with NexSupply execution support.
+            </p>
+          </div>
+
+          {/* Comparison Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 lg:p-8">
+            <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              {/* Current Way */}
+              <ComparisonColumn
+                title="Current way (buying wholesale)"
+                label="Wholesale"
+                totalCost="$5.50"
+                items={wholesaleItems}
+              />
+
+              {/* NexSupply Way */}
+              <ComparisonColumn
+                title="NexSupply way (going direct)"
+                label="NexSupply"
+                totalCost="$2.22"
+                items={nexSupplyItems}
+                isHighlight={true}
+                advantages={nexSupplyAdvantages}
+              />
+            </StaggerContainer>
+
+            {/* Profit Unlocked Highlight */}
+            <ProfitBadge />
+          </div>
         </div>
-
-        {/* Comparison Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 lg:p-8">
-          <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Current Way */}
-            <ComparisonColumn
-              title="Current way (buying wholesale)"
-              label="Wholesale"
-              totalCost="$5.50"
-              items={wholesaleItems}
-            />
-
-            {/* NexSupply Way */}
-            <ComparisonColumn
-              title="NexSupply way (going direct)"
-              label="NexSupply"
-              totalCost="$2.22"
-              items={nexSupplyItems}
-              isHighlight={true}
-              advantages={nexSupplyAdvantages}
-            />
-          </StaggerContainer>
-
-          {/* Profit Unlocked Highlight */}
-          <ProfitBadge />
-        </div>
-      </div>
-    </FadeUp>
+      </FadeUp>
     </section>
   );
 }
