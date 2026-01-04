@@ -1745,6 +1745,7 @@ export async function POST(request: Request) {
       savedReport,
       status: "completed",
       warnings: warnings.length > 0 ? warnings : "none",
+      userId: user?.id,
     });
 
     // Ensure finalReportId exists before returning
@@ -1758,6 +1759,32 @@ export async function POST(request: Request) {
         },
         { status: 500 }
       );
+    }
+
+    // Verify report exists in DB before returning
+    if (finalReportId && user) {
+      const { data: verifyReport, error: verifyError } = await admin
+        .from("reports")
+        .select("id, status")
+        .eq("id", finalReportId)
+        .maybeSingle();
+      
+      if (verifyError || !verifyReport) {
+        console.error("[Analyze API] CRITICAL: Report ID returned but not found in DB:", {
+          reportId: finalReportId,
+          error: verifyError?.message,
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error: "REPORT_NOT_FOUND",
+            message: "Report was created but cannot be found. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+      
+      console.log(`[Analyze API] Verified report exists in DB: ${finalReportId}, status: ${verifyReport.status}`);
     }
 
     return NextResponse.json({

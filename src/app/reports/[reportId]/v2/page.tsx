@@ -17,10 +17,30 @@ async function getReport(reportId: string) {
       },
     });
 
-    if (res.status === 404) return null;
+    if (res.status === 404) {
+      console.error("[Report V2 Page] Report not found (404):", reportId);
+      return null;
+    }
 
-    const json = await res.json().catch(() => null);
-    if (!json?.success || !json?.report) return null;
+    if (!res.ok) {
+      console.error("[Report V2 Page] API error:", res.status, res.statusText);
+      return null;
+    }
+
+    const json = await res.json().catch((err) => {
+      console.error("[Report V2 Page] JSON parse error:", err);
+      return null;
+    });
+    
+    if (!json?.success) {
+      console.error("[Report V2 Page] API returned success=false:", json?.error);
+      return null;
+    }
+    
+    if (!json?.report) {
+      console.error("[Report V2 Page] API returned no report data");
+      return null;
+    }
 
     return json.report;
   } catch (error) {
