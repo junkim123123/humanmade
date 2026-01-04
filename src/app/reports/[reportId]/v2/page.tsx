@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { headers, cookies } from "next/headers";
-import ReportV2Client from "./ReportV2Client";
+import ReportV2Page from "@/components/report/ReportV2Page";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type GetReportResult =
   | { report: any; error?: undefined }
@@ -180,6 +181,6 @@ export default async function Page({
     status: report?.status,
   });
 
-  return <ReportV2Client key={cleanReportId} reportId={cleanReportId} report={report} />;
+  return <ReportV2Page key={cleanReportId} reportId={cleanReportId} report={report} />;
 }
 
