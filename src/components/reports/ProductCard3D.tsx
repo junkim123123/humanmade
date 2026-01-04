@@ -1,29 +1,35 @@
 "use client";
 
-import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, ContactShadows, Environment, OrbitControls } from "@react-three/drei";
+import { useRef, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float, ContactShadows, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
-// Isometric Camera
+// Isometric Camera Setup
 function IsometricCamera() {
-  const distance = 4;
-  const angleX = Math.PI / 6; // 30도
-  const angleY = Math.PI / 4; // 45도
+  const { camera } = useThree();
   
-  const x = distance * Math.cos(angleX) * Math.cos(angleY);
-  const y = distance * Math.sin(angleX);
-  const z = distance * Math.cos(angleX) * Math.sin(angleY);
+  useEffect(() => {
+    const distance = 4;
+    const angleX = Math.PI / 6; // 30도
+    const angleY = Math.PI / 4; // 45도
+    
+    const x = distance * Math.cos(angleX) * Math.cos(angleY);
+    const y = distance * Math.sin(angleX);
+    const z = distance * Math.cos(angleX) * Math.sin(angleY);
+    
+    camera.position.set(x, y, z);
+    camera.lookAt(0, 0, 0);
+    
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = 50;
+      camera.near = 0.1;
+      camera.far = 10;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera]);
 
-  return (
-    <perspectiveCamera
-      makeDefault
-      position={[x, y, z]}
-      fov={50}
-      near={0.1}
-      far={10}
-    />
-  );
+  return null;
 }
 
 // Confectionery - Marshmallow (부드러운 마시멜로우 형태)
