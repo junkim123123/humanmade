@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { CountUp } from "@/components/animation/CountUp";
 
 // Animated Mesh Gradient Background
 function MeshGradient() {
@@ -55,7 +56,7 @@ function FloatingUICard() {
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative bg-white rounded-2xl shadow-2xl p-8 cursor-pointer"
+        className="relative backdrop-blur-md bg-white/70 rounded-2xl shadow-2xl border border-white/20 p-8 cursor-pointer"
         style={{
           rotateX,
           rotateY,
@@ -98,10 +99,12 @@ function FloatingUICard() {
         </div>
 
         {/* Savings Badge */}
-        <div className="mt-6 pt-6 border-t border-slate-200">
+        <div className="mt-6 pt-6 border-t border-slate-200/50">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-600">Total Savings</span>
-            <span className="text-lg font-bold text-emerald-600">33%</span>
+            <span className="text-sm font-medium text-slate-500">Profit Unlocked</span>
+            <span className="text-lg font-bold text-emerald-600">
+              <CountUp from={0} to={4.20} decimals={2} prefix="$" suffix="/unit" />
+            </span>
           </div>
         </div>
 
@@ -114,7 +117,7 @@ function FloatingUICard() {
 
 export default function Hero() {
   return (
-    <div className="relative flex flex-col lg:flex-row items-center justify-between min-h-[90vh] bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
+    <div className="relative flex flex-col lg:flex-row items-center justify-between min-h-[90vh] bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden">
       {/* Animated Mesh Gradient Background */}
       <MeshGradient />
       
@@ -128,14 +131,14 @@ export default function Hero() {
             </p>
 
             {/* Headline - HUGE with tight tracking */}
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-tighter text-slate-900 leading-[1.05]">
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-tight text-slate-900 leading-[0.95]">
               Stop overpaying wholesalers.
               <br />
               <span className="text-slate-700">Source direct with execution.</span>
             </h1>
 
             {/* Subtext */}
-            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-xl">
+            <p className="text-lg sm:text-xl text-slate-500 leading-relaxed max-w-xl">
               Use our free AI sourcing calculator to see your real landed cost and margins. We only get paid when you decide to order.
             </p>
 

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 
 interface ProductCard {
   id: string;
@@ -44,81 +46,92 @@ interface ProofShowcaseProps {
 
 export default function ProofShowcase({ products = sampleProducts }: ProofShowcaseProps) {
   return (
-    <section className="bg-white py-16 lg:py-24">
+    <section className="bg-white py-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 mb-4">
-            Products we've sourced
-          </h2>
-          <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
-            Real products, verified factories, and measurable cost savings.
-          </p>
-        </div>
+        <FadeUp>
+          <div className="text-center mb-16 lg:mb-20">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6">
+              Products we've sourced
+            </h2>
+            <p className="text-xl text-slate-500 max-w-2xl mx-auto">
+              Real products, verified factories, and measurable cost savings.
+            </p>
+          </div>
+        </FadeUp>
 
         {/* Product Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 mb-12">
           {products.map((product, index) => (
-            <div
-              key={product.id}
-              className={`group rounded-xl border-2 p-6 transition-all hover:shadow-xl hover:-translate-y-1 ${
-                product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
-              }`}
-            >
-              {/* Product Image */}
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-white/50 backdrop-blur-sm mb-4 shadow-sm">
-                {product.image ? (
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm bg-gradient-to-br from-slate-100 to-slate-200">
-                    <div className="text-center">
-                      <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-300/50"></div>
-                      <div className="text-xs">Product image</div>
+            <FadeUp key={product.id} delay={index * 0.1}>
+              <motion.div
+                className={`group relative rounded-2xl border-2 overflow-hidden p-6 ${
+                  product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
+                }`}
+                whileHover={{ scale: 1.03, y: -4 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                {/* Blurred Circle Gradient Background */}
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 blur-3xl"
+                  style={{
+                    background: product.colorClass?.includes("pink") ? "linear-gradient(135deg, #f472b6, #ec4899)" :
+                               product.colorClass?.includes("blue") ? "linear-gradient(135deg, #60a5fa, #3b82f6)" :
+                               "linear-gradient(135deg, #a78bfa, #8b5cf6)"
+                  }}
+                />
+                
+                {/* Product Visual Area */}
+                <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-white/40 backdrop-blur-sm">
+                  {/* Icon or gradient placeholder */}
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-6xl font-bold opacity-20"
+                      style={{
+                        color: product.colorClass?.includes("pink") ? "#ec4899" :
+                               product.colorClass?.includes("blue") ? "#3b82f6" :
+                               "#8b5cf6"
+                      }}
+                    >
+                      {product.category.charAt(0)}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Category Tag */}
-              <div className="mb-3">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/60 backdrop-blur-sm text-slate-700 border border-slate-200/50">
-                  {product.category}
-                </span>
-              </div>
+                {/* Category Tag */}
+                <div className="mb-3 relative z-10">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/80 backdrop-blur-sm text-slate-700 border border-slate-200/50">
+                    {product.category}
+                  </span>
+                </div>
 
-              {/* Product Name */}
-              <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2">
-                {product.name}
-              </h3>
+                {/* Product Name */}
+                <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 relative z-10">
+                  {product.name}
+                </h3>
 
-              {/* Key Metric */}
-              <p className="text-sm font-medium text-slate-700">
-                {product.metric}
-              </p>
-            </div>
+                {/* Key Metric */}
+                <p className="text-sm font-medium text-slate-500 relative z-10">
+                  {product.metric}
+                </p>
+              </motion.div>
+            </FadeUp>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Proof CTA Section */}
-        <div className="text-center pt-8 border-t border-slate-200">
-          <Link
-            href="/proof"
-            className="inline-flex items-center gap-2 text-base font-semibold text-slate-900 hover:text-slate-700 transition-colors mb-3"
-          >
-            See all proof videos
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-          <p className="text-sm text-slate-500 max-w-xl mx-auto">
-            Most proof packs include photos, checklists, and supplier documents.
-          </p>
-        </div>
+        <FadeUp>
+          <div className="text-center pt-12 border-t border-slate-200">
+            <Link
+              href="/proof"
+              className="inline-flex items-center gap-2 text-base font-semibold text-slate-900 hover:text-slate-700 transition-colors mb-3"
+            >
+              See all proof videos
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <p className="text-sm text-slate-500 max-w-xl mx-auto">
+              Most proof packs include photos, checklists, and supplier documents.
+            </p>
+          </div>
+        </FadeUp>
       </div>
     </section>
   );

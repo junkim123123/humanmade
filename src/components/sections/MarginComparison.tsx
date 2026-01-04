@@ -139,7 +139,7 @@ export default function MarginComparison() {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-slate-50 to-violet-50 py-16 lg:py-24">
+    <section className="bg-gradient-to-b from-slate-50 to-violet-50 py-32">
       <FadeUp>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Header */}

@@ -4,6 +4,7 @@ import { PrimaryNav } from "@/components/PrimaryNav";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
+import { motion } from "framer-motion";
 
 // Case study data matching Swell premium style
 const caseStudies = [
@@ -157,7 +158,7 @@ export default function ReportsPage() {
       </section>
       
       {/* Products Grid Section */}
-      <section className="relative py-20 lg:py-32">
+      <section className="relative py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header - Swell Style */}
           <FadeUp>
@@ -165,7 +166,7 @@ export default function ReportsPage() {
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
                 Featured Case Studies
               </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed">
                 Explore how we've helped brands optimize their supply chain with premium sourcing solutions.
               </p>
             </div>
@@ -175,8 +176,10 @@ export default function ReportsPage() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
             {caseStudies.map((study, index) => (
               <FadeUp key={study.id} delay={index * 0.1}>
-              <div
+              <motion.div
                 className="group relative"
+                whileHover={{ scale: 1.03, y: -4 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
                 {/* Glassmorphism Card */}
                 <div
@@ -185,9 +188,6 @@ export default function ReportsPage() {
                     bg-white/70 backdrop-blur-xl
                     border ${study.borderColor}
                     shadow-lg shadow-slate-200/50
-                    transition-all duration-500 ease-out
-                    hover:shadow-2xl hover:shadow-slate-300/50
-                    hover:-translate-y-2 hover:scale-[1.02]
                     ${study.gradientFrom} ${study.gradientTo}
                     bg-gradient-to-br
                   `}
@@ -195,13 +195,24 @@ export default function ReportsPage() {
                   {/* Gradient Overlay */}
                   <div className={`absolute inset-0 ${study.gradientFrom} ${study.gradientTo} bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                   
-                  {/* Product Illustration Placeholder - 2D Fintech Style */}
-                  <div className="relative aspect-[4/3] bg-gradient-to-br from-white to-slate-50 flex items-center justify-center">
-                    {/* Simple Icon Placeholder */}
-                    <div className={`w-24 h-24 rounded-2xl ${study.bgColor} border ${study.borderColor} flex items-center justify-center`}>
-                      <span className={`text-3xl font-bold ${study.categoryColor}`}>
+                  {/* Product Visual - Soft Gradient Background */}
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    {/* Blurred Circle Gradient Background */}
+                    <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${
+                      study.category === "Confectionery" ? "bg-gradient-to-br from-pink-400 to-rose-500" :
+                      study.category === "Toys" ? "bg-gradient-to-br from-blue-400 to-blue-600" :
+                      "bg-gradient-to-br from-emerald-400 to-green-500"
+                    }`} />
+                    
+                    {/* Large Icon */}
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <div className={`text-8xl font-bold opacity-20 ${
+                        study.category === "Confectionery" ? "text-rose-500" :
+                        study.category === "Toys" ? "text-blue-600" :
+                        "text-green-500"
+                      }`}>
                         {study.category.charAt(0)}
-                      </span>
+                      </div>
                     </div>
                     
                     {/* Category Badge */}
@@ -217,7 +228,7 @@ export default function ReportsPage() {
                     <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight">
                       {study.productName}
                     </h3>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                    <p className="text-sm text-slate-500 leading-relaxed mb-4">
                       {study.benefit}
                     </p>
                     
@@ -234,7 +245,7 @@ export default function ReportsPage() {
                   {/* Shine Effect on Hover */}
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 </div>
-              </div>
+              </motion.div>
               </FadeUp>
             ))}
           </StaggerContainer>
@@ -242,7 +253,7 @@ export default function ReportsPage() {
       </section>
       
       {/* CTA Section - Swell Style */}
-      <section className="relative py-24 lg:py-36">
+      <section className="relative py-32">
         <FadeUp>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-cyan-600 p-12 lg:p-20 shadow-2xl shadow-purple-500/25">

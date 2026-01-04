@@ -30,7 +30,7 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
   });
 
   return (
-    <section ref={containerRef} className="relative bg-white py-24 lg:py-32">
+    <section ref={containerRef} className="relative bg-white py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         {(title || subtitle) && (
@@ -49,8 +49,8 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Left Column - Scrolling Steps */}
-          <div className="space-y-32 lg:space-y-48">
+          {/* Left Column - Scrolling Steps - 60% height per step */}
+          <div className="space-y-32 lg:space-y-[60vh]">
             {steps.map((step, index) => {
               const stepRef = useRef<HTMLDivElement>(null);
               const stepProgress = useTransform(
@@ -59,8 +59,8 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
                 [0, 1]
               );
 
-              const opacity = useTransform(stepProgress, [0, 0.3, 0.7, 1], [0.3, 1, 1, 0.3]);
-              const y = useTransform(stepProgress, [0, 0.5, 1], [20, 0, -20]);
+              const opacity = useTransform(stepProgress, [0, 0.2, 0.5, 0.8, 1], [0.3, 1, 1, 1, 0.3]);
+              const y = useTransform(stepProgress, [0, 0.5, 1], [30, 0, -30]);
 
               return (
                 <motion.div
