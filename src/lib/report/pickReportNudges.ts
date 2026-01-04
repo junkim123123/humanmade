@@ -258,7 +258,8 @@ export function pickReportNudge(report: any): ReportNudge {
   const unitScope = unitWeight?.unitScope || "unknown";
   const packCountConfidence = unitWeight?.packCountConfidence || 0;
   
-  // Check for multipack uncertainty (higher priority than low confidence)
+  // Check for multipack uncertainty (highest priority - even if confidence is high)
+  // Rule: If multipack possibility exists and pack_count_confidence is low, show multipack confirmation first
   const hasMultipackUncertainty = unitWeight?.source === "gemini_photo" && (
     unitScope === "unknown" || 
     (unitScope === "outer_pack" && packCountConfidence < 0.6) ||
@@ -269,7 +270,7 @@ export function pickReportNudge(report: any): ReportNudge {
   let weightAction: ActionDefinition | null = null;
   
   if (hasMultipackUncertainty) {
-    // Priority 1: Multipack uncertainty - show multipack confirmation
+    // Priority 1: Multipack uncertainty - show multipack confirmation (even if confidence is high)
     weightAction = {
       key: "multipack_confirm",
       priority: 0.3, // Highest priority
@@ -280,11 +281,11 @@ export function pickReportNudge(report: any): ReportNudge {
       condition: () => false, // Not used in filter
     };
   } else if (weightConfidence >= 0.85) {
-    // Tier 1: High confidence - move to next priority
-    // Don't show weight action, let other actions take priority
+    // Tier 1: confidence >= 0.85 - weight is sufficiently narrowed
+    // Don't show weight action, let other actions (origin, HS) take priority
     weightAction = null;
   } else if (weightConfidence >= 0.55) {
-    // Tier 2: Medium confidence - suggest confirmation
+    // Tier 2: 0.55 <= confidence < 0.85 - estimated but risky
     weightAction = {
       key: "weight_confirm_medium",
       priority: 0.7,
@@ -295,7 +296,8 @@ export function pickReportNudge(report: any): ReportNudge {
       condition: () => false,
     };
   } else {
-    // Tier 3: Low confidence or category default - require scale photo
+    // Tier 3: confidence < 0.55 or category_default - low trust, multipack risk
+    // Show scale photo (or multipack if applicable, but that's already handled above)
     weightAction = {
       key: "weight_scale_photo",
       priority: 0.5,
