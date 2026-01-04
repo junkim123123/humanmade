@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/browser";
 import { ThreeImageUpload, ThreeImageUploadHandle } from "@/components/analyze/ThreeImageUpload";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 import { analyzeSchema } from "@/lib/analyze/schema";
@@ -124,6 +125,19 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   const handleSubmit = async () => {
     if (loading) return; // Already submitting, ignore duplicate clicks
+    
+    // Check authentication for public mode - redirect to login if not authenticated
+    if (mode === "public") {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.info("Please sign in to run analysis");
+        router.push(`/signin?next=${encodeURIComponent("/analyze")}`);
+        return;
+      }
+    }
+    
     setSubmitted(true);
     setValidationErrors({});
     setApiError(null);
@@ -152,11 +166,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       return;
     }
 
-    // Public mode: allow guest users to run analysis
-    // We'll show sign up modal after results are generated
-    if (mode === "public") {
-      // Continue to API call - guest users can run analysis
-    }
+    // Public mode: authentication is already checked above, continue to API call
 
     // App mode: run analysis via API
     setLoading(true);
@@ -230,24 +240,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         return;
       }
 
-      // For guest users, show sign up modal after results
-      if (mode === "public" && data?.isGuest) {
-        // Guest user - results returned without DB save
-        // Store results in sessionStorage and show sign up modal
-        try {
-          window.sessionStorage.setItem("guestAnalysisResult", JSON.stringify(data));
-          toast.success("Analysis completed! Sign up to save your results.");
-          // Redirect to signup with a flag to show the results after signup
-          router.push("/signup?next=/analyze&guest=true");
-          return;
-        } catch (storageError) {
-          console.warn("[AnalyzeForm] Failed to save guest results", storageError);
-          // Fallback: still show success message
-          toast.success("Analysis completed! Please sign up to save your results.");
-          setLoading(false);
-        }
-        return;
-      }
+      // All users are authenticated at this point (checked above)
+      // No need for guest user handling
 
       // For authenticated users or if reportId exists
       if (data?.reportId) {
