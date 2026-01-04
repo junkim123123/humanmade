@@ -203,12 +203,12 @@ function JellySnacks() {
           />
         </mesh>
         {/* Jelly pieces - 다양한 색상 */}
-        {[
-          { pos: [-0.2, 0.2, -0.15], color: "#FF6B9D" },
-          { pos: [0.15, 0.25, 0.1], color: "#C44569" },
-          { pos: [-0.1, 0.3, 0.2], color: "#F8B500" },
-          { pos: [0.2, 0.2, -0.2], color: "#00D2FF" },
-        ].map((jelly, i) => (
+        {([
+          { pos: [-0.2, 0.2, -0.15] as [number, number, number], color: "#FF6B9D" },
+          { pos: [0.15, 0.25, 0.1] as [number, number, number], color: "#C44569" },
+          { pos: [-0.1, 0.3, 0.2] as [number, number, number], color: "#F8B500" },
+          { pos: [0.2, 0.2, -0.2] as [number, number, number], color: "#00D2FF" },
+        ] as const).map((jelly, i) => (
           <mesh key={i} position={jelly.pos} castShadow>
             <dodecahedronGeometry args={[0.12, 0]} />
             <meshStandardMaterial
