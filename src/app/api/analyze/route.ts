@@ -238,12 +238,19 @@ export async function POST(request: Request) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const fileExt = file.name?.split(".").pop()?.toLowerCase() || "jpg";
-      const userIdForPath = user?.id || guestUserId || "guest";
-      const storagePath = `${userIdForPath}/${prefix}-${crypto.randomUUID()}.${fileExt}`;
       const mimeType = file.type || "image/jpeg";
       
-      // For guest users, we might want to use temporary storage or return data URLs
-      // For now, we'll still try to upload (might need RLS policy changes)
+      // For guest users, skip upload and use data URL directly (RLS policy prevents upload)
+      if (!user) {
+        console.log("[Analyze API] Guest user - using data URL instead of storage upload");
+        const base64 = buffer.toString("base64");
+        return `data:${mimeType};base64,${base64}`;
+      }
+      
+      // Authenticated users: upload to storage
+      const userIdForPath = user.id;
+      const storagePath = `${userIdForPath}/${prefix}-${crypto.randomUUID()}.${fileExt}`;
+      
       const { error: uploadError } = await supabase.storage
         .from("uploads")
         .upload(storagePath, buffer, {
@@ -251,12 +258,8 @@ export async function POST(request: Request) {
         });
 
       if (uploadError) {
-        // For guest users, if upload fails, we can use data URL as fallback
-        if (!user && uploadError.message?.includes("permission")) {
-          console.warn("[Analyze API] Guest user upload failed, using data URL fallback");
-          const base64 = buffer.toString("base64");
-          return `data:${mimeType};base64,${base64}`;
-        }
+        // If upload fails for authenticated users, log and throw
+        console.error("[Analyze API] Upload failed for authenticated user:", uploadError.message);
         throw uploadError;
       }
 
