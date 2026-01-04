@@ -71,7 +71,7 @@ function Shipment() {
       {/* Main container body */}
       <RoundedBox args={[1.8, 0.8, 1]} radius={0.05} smoothness={4} castShadow receiveShadow>
         <meshStandardMaterial
-          color="#60A5FA"
+          color="#3B82F6"
           roughness={0.4}
           metalness={0.1}
         />
@@ -87,9 +87,9 @@ function Shipment() {
       {/* Subtle highlights for glossy effect */}
       <RoundedBox args={[1.7, 0.05, 0.9]} radius={0.05} smoothness={4} position={[0, 0.45, -0.4]}>
         <meshStandardMaterial
-          color="#34D399"
-          roughness={0.3}
-          metalness={0.15}
+          color="#10B981"
+          roughness={0.4}
+          metalness={0.1}
           transparent
           opacity={0.3}
         />
@@ -121,7 +121,7 @@ function Warehouse() {
       {/* Top box */}
       <RoundedBox args={[0.7, 0.4, 0.5]} radius={0.05} smoothness={4} position={[-0.2, 1.15, 0.2]} castShadow rotation={[0, 0, 0.05]}>
         <meshStandardMaterial
-          color="#FBBF24"
+          color="#F59E0B"
           roughness={0.4}
           metalness={0.1}
         />
@@ -196,10 +196,10 @@ function SceneContent() {
       <IsometricCamera />
       
       {/* Premium Studio Lighting */}
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.4} />
       <directionalLight
         position={[5, 10, 5]}
-        intensity={0.9}
+        intensity={0.8}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}

@@ -32,38 +32,38 @@ function IsometricCamera() {
   return null;
 }
 
-// 1. Confectionery - Abstract Marshmallow (부드러운 알약형)
+// 1. Confectionery - Abstract Marshmallow (Torus intersecting with Capsule)
 function MarshmallowAbstract() {
   return (
     <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.3}>
       <group position={[0, 0.5, 0]}>
-        {/* Main pill-shaped body */}
+        {/* Main capsule body */}
         <mesh castShadow receiveShadow>
           <capsuleGeometry args={[0.35, 0.8, 8, 16]} />
           <meshStandardMaterial
-            color="#FFE5EC"
-            roughness={0.4}
-            metalness={0.1}
+            color="#F43F5E"
+            roughness={0.9}
+            metalness={0.0}
           />
         </mesh>
-        {/* Soft highlight on top */}
-        <mesh position={[0, 0.6, 0]} castShadow>
-          <sphereGeometry args={[0.3, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial
-            color="#FFFFFF"
-            roughness={0.4}
-            metalness={0.1}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-        {/* Subtle accent torus */}
+        {/* Intersecting torus (donut shape) */}
         <mesh position={[0, 0.2, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <torusGeometry args={[0.32, 0.05, 16, 32]} />
+          <torusGeometry args={[0.38, 0.08, 16, 32]} />
           <meshStandardMaterial
-            color="#FFB6C1"
-            roughness={0.4}
-            metalness={0.1}
+            color="#F43F5E"
+            roughness={0.9}
+            metalness={0.0}
+          />
+        </mesh>
+        {/* Second intersecting torus for depth */}
+        <mesh position={[0, -0.2, 0]} rotation={[Math.PI / 2, 0, Math.PI / 4]} castShadow>
+          <torusGeometry args={[0.35, 0.06, 16, 32]} />
+          <meshStandardMaterial
+            color="#FB7185"
+            roughness={0.9}
+            metalness={0.0}
+            transparent
+            opacity={0.7}
           />
         </mesh>
       </group>
@@ -71,124 +71,76 @@ function MarshmallowAbstract() {
   );
 }
 
-// 2. Toys - Abstract Plush (3개의 구 합쳐진 추상 형태)
+// 2. Toys - Abstract Plush (Three soft spheres merging)
 function PlushAbstract() {
   return (
     <Float speed={1.2} rotationIntensity={0.4} floatIntensity={0.35}>
       <group position={[0, 0.6, 0]}>
-        {/* Main body sphere (largest) */}
-        <mesh position={[0, 0, 0]} castShadow receiveShadow>
-          <sphereGeometry args={[0.45, 32, 32]} />
+        {/* Main body sphere (largest, bottom) */}
+        <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
+          <sphereGeometry args={[0.5, 32, 32]} />
           <meshStandardMaterial
             color="#60A5FA"
             roughness={0.4}
             metalness={0.1}
           />
         </mesh>
-        {/* Head sphere (top-left) */}
-        <mesh position={[-0.15, 0.45, 0.2]} castShadow>
-          <sphereGeometry args={[0.35, 32, 32]} />
+        {/* Head sphere (top-left, merging) */}
+        <mesh position={[-0.2, 0.4, 0.15]} castShadow>
+          <sphereGeometry args={[0.38, 32, 32]} />
           <meshStandardMaterial
-            color="#3B82F6"
+            color="#60A5FA"
             roughness={0.4}
             metalness={0.1}
           />
         </mesh>
-        {/* Smaller accent sphere (top-right) */}
-        <mesh position={[0.2, 0.5, -0.15]} castShadow>
-          <sphereGeometry args={[0.25, 32, 32]} />
+        {/* Third sphere (top-right accent) */}
+        <mesh position={[0.25, 0.35, -0.1]} castShadow>
+          <sphereGeometry args={[0.28, 32, 32]} />
           <meshStandardMaterial
             color="#93C5FD"
             roughness={0.4}
             metalness={0.1}
           />
         </mesh>
-        {/* Tiny detail spheres for fuzzy texture feel */}
-        {[...Array(6)].map((_, i) => {
-          const angle = (i / 6) * Math.PI * 2;
-          const radius = 0.5;
-          return (
-            <mesh
-              key={i}
-              position={[
-                Math.cos(angle) * radius * 0.3,
-                Math.sin(angle * 0.5) * 0.2,
-                Math.sin(angle) * radius * 0.3,
-              ]}
-              castShadow
-            >
-              <sphereGeometry args={[0.08, 16, 16]} />
-              <meshStandardMaterial
-                color="#DBEAFE"
-                roughness={0.4}
-                metalness={0.1}
-              />
-            </mesh>
-          );
-        })}
       </group>
     </Float>
   );
 }
 
-// 3. Snacks - Abstract Jelly (Glass/Translucent Icosahedron)
+// 3. Snacks - Abstract Jelly (Glass Icosahedron gem)
 function JellyAbstract() {
   return (
     <Float speed={1.8} rotationIntensity={0.5} floatIntensity={0.4}>
       <group position={[0, 0.5, 0]}>
-        {/* Main icosahedron - glass effect */}
+        {/* Main icosahedron - glass gem effect */}
         <mesh castShadow receiveShadow>
           <icosahedronGeometry args={[0.5, 0]} />
           <meshPhysicalMaterial
-            color="#FF6B9D"
+            color="#34D399"
             transmission={0.6}
-            thickness={0.5}
             roughness={0.1}
+            thickness={0.5}
             metalness={0.0}
             ior={1.5}
             clearcoat={1.0}
             clearcoatRoughness={0.1}
           />
         </mesh>
-        {/* Secondary octahedron inside for depth */}
+        {/* Secondary smaller icosahedron inside for depth */}
         <mesh castShadow>
-          <octahedronGeometry args={[0.3, 0]} />
+          <icosahedronGeometry args={[0.25, 0]} />
           <meshPhysicalMaterial
-            color="#FFB6C1"
+            color="#6EE7B7"
             transmission={0.7}
-            thickness={0.3}
             roughness={0.05}
+            thickness={0.3}
             metalness={0.0}
             ior={1.4}
             transparent
-            opacity={0.4}
+            opacity={0.5}
           />
         </mesh>
-        {/* Accent small icosahedrons around */}
-        {[...Array(4)].map((_, i) => {
-          const angle = (i / 4) * Math.PI * 2;
-          return (
-            <mesh
-              key={i}
-              position={[
-                Math.cos(angle) * 0.6,
-                Math.sin(angle) * 0.3,
-                Math.sin(angle * 0.5) * 0.4,
-              ]}
-              castShadow
-            >
-              <icosahedronGeometry args={[0.15, 0]} />
-              <meshPhysicalMaterial
-                color={i % 2 === 0 ? "#C44569" : "#F8B500"}
-                transmission={0.5}
-                thickness={0.2}
-                roughness={0.1}
-                metalness={0.0}
-                ior={1.5}
-              />
-            </mesh>
-          );
-        })}
       </group>
     </Float>
   );
@@ -205,25 +157,25 @@ function SceneContent({ category }: { category: string }) {
       <IsometricCamera />
       
       {/* Premium Studio Lighting */}
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.4} />
       <directionalLight
         position={[4, 6, 4]}
-        intensity={0.9}
+        intensity={0.8}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
       <pointLight position={[-3, 2, -3]} intensity={0.3} color="#ffffff" />
       
-      {/* Environment for distinct reflections on rounded edges */}
-      <Environment preset="city" blur={1} />
+      {/* Environment for glass material sparkle */}
+      <Environment preset="lobby" />
       
       {/* Category-specific abstract model */}
       {category === "Confectionery" && <MarshmallowAbstract />}
       {category === "Toys" && <PlushAbstract />}
       {category === "Snacks" && <JellyAbstract />}
       
-      {/* Minimal platform with RoundedBox */}
+      {/* Minimal platform */}
       <mesh position={[0, 0, 0]} receiveShadow>
         <cylinderGeometry args={[1.2, 1.2, 0.05, 32]} />
         <meshStandardMaterial
@@ -235,7 +187,7 @@ function SceneContent({ category }: { category: string }) {
         />
       </mesh>
       
-      {/* Premium Contact Shadows - soft grounding */}
+      {/* Soft Contact Shadows */}
       <ContactShadows
         position={[0, -1, 0]}
         opacity={0.4}
