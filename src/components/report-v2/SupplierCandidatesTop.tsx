@@ -5,12 +5,14 @@ import { Building2, MapPin, ChevronDown } from "lucide-react";
 import { safePercent } from "@/lib/format/percent";
 
 interface SupplierMatch {
-  id?: string;
+  // Normalized fields (guaranteed by normalizeReport)
+  id: string;
+  supplierName: string;
+  supplierId: string;
   supplier_id?: string;
-  supplierId?: string;
   supplier_name?: string;
-  supplierName?: string;
-  supplierRole?: string; // Optional - don't show if undefined
+  // Optional metadata fields - do not filter out if missing
+  supplierRole?: string;
   supplierKind?: string;
   entityType?: string;
   tier?: string;
@@ -28,6 +30,11 @@ interface SupplierMatch {
   categoryMatch?: boolean;
   matchType?: "normal" | "fallback";
   // Normalized fields
+  _intel?: {
+    product_count?: number;
+    price_coverage_pct?: number;
+    last_seen_days?: number | null;
+  };
   _profile?: {
     country?: string | null;
     role?: string | null;
@@ -42,45 +49,8 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   const [showAll, setShowAll] = useState(false);
   const [showLogistics, setShowLogistics] = useState(false);
 
-  // Always log in browser (not just dev mode) for debugging
-  if (typeof window !== 'undefined') {
-    console.log('[SupplierCandidatesTop] Matches received:', {
-      count: matches?.length || 0,
-      isArray: Array.isArray(matches),
-      matches: matches?.slice(0, 2).map(m => ({
-        id: m?.id,
-        supplierName: m?.supplierName,
-        supplierId: m?.supplierId,
-        hasName: !!(m?.supplierName && m.supplierName !== "Unknown"),
-      })),
-    });
-  }
-
   if (!matches || matches.length === 0) {
-    console.warn('[SupplierCandidatesTop] No matches provided or empty array');
-    return null;
-  }
-
-  // Filter out any matches with missing supplierName (should be done at API level, but safety check)
-  // Do NOT filter out candidates when role or type fields are missing - only filter on missing name
-  const validMatches = matches.filter((m) => {
-    // Support both normalized format (supplier_name) and legacy format (supplierName)
-    const name = m?.supplier_name || m?.supplierName || m?.companyName;
-    const hasName = name && name !== "Unknown";
-    if (!hasName) {
-      console.warn('[SupplierCandidatesTop] Filtered out match without supplier name:', {
-        id: m?.id,
-        supplier_id: m?.supplier_id || m?.supplierId,
-        supplier_name: m?.supplier_name,
-        supplierName: m?.supplierName,
-      });
-    }
-    return hasName;
-  });
-  
-  if (validMatches.length === 0) {
-    console.warn('[SupplierCandidatesTop] No valid matches after filtering. Original matches:', matches);
-    // Show empty state message instead of returning null
+    // Show empty state message so the section exists
     return (
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100">
@@ -92,8 +62,10 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
       </div>
     );
   }
-  
-  console.log(`[SupplierCandidatesTop] Rendering ${validMatches.length} valid matches`);
+
+  // Use normalized matches directly - normalization helper guarantees id and supplierName exist
+  // Do NOT filter out matches - be tolerant of missing metadata
+  const validMatches = matches;
 
   const isLogistics = (match: SupplierMatch): boolean => {
     const rawRole =
@@ -234,7 +206,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
               <p className="text-[15px] font-semibold text-slate-900 mb-1">
-                {topMatch.supplier_name || topMatch.supplierName || topMatch.companyName}
+                {topMatch.supplierName}
               </p>
               {getSupplierRoleDisplay(topMatch) && (
                 <p className="text-[13px] text-slate-600 mb-2">{getSupplierRoleDisplay(topMatch)}</p>
@@ -244,6 +216,14 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                   <MapPin className="w-3.5 h-3.5" />
                   <span>{topMatch.location || topMatch.country || topMatch._profile?.country}</span>
                 </div>
+              )}
+              {/* Show intel line if available */}
+              {topMatch._intel && (topMatch._intel.product_count > 0 || topMatch._intel.price_coverage_pct > 0) && (
+                <p className="text-[12px] text-slate-500 mt-2">
+                  {topMatch._intel.product_count > 0 && `${topMatch._intel.product_count} related items`}
+                  {topMatch._intel.product_count > 0 && topMatch._intel.price_coverage_pct > 0 && " • "}
+                  {topMatch._intel.price_coverage_pct > 0 && `${Math.round(topMatch._intel.price_coverage_pct)}% pricing coverage`}
+                </p>
               )}
               <div className="flex items-center gap-2 flex-wrap mt-2">
                 {getReasonBadges(topMatch).map((badge, idx) => (
@@ -264,15 +244,23 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
 
         {remainingMatches.length > 0 && (
           <div className="space-y-3 mb-4">
-            {visibleRemaining.map((match, idx) => (
-              <div key={match.id || match.supplier_id || match.supplierId || idx} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+            {visibleRemaining.map((match) => (
+              <div key={match.id} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <p className="text-[14px] font-medium text-slate-900">
-                      {match.supplier_name || match.supplierName || match.companyName}
+                      {match.supplierName}
                     </p>
                     {getSupplierRoleDisplay(match) && (
                       <p className="text-[13px] text-slate-500">{getSupplierRoleDisplay(match)}</p>
+                    )}
+                    {/* Show intel line if available */}
+                    {match._intel && (match._intel.product_count > 0 || match._intel.price_coverage_pct > 0) && (
+                      <p className="text-[12px] text-slate-500 mt-1">
+                        {match._intel.product_count > 0 && `${match._intel.product_count} related items`}
+                        {match._intel.product_count > 0 && match._intel.price_coverage_pct > 0 && " • "}
+                        {match._intel.price_coverage_pct > 0 && `${Math.round(match._intel.price_coverage_pct)}% pricing coverage`}
+                      </p>
                     )}
                     <div className="flex items-center gap-2 flex-wrap mt-1">
                       {getReasonBadges(match).map((badge, idx) => (

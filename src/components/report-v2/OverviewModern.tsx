@@ -226,28 +226,14 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             // Use normalization helper to get matches from various sources
             const supplierMatches = getSupplierMatches(reportAny);
             
-            // Always log for debugging (not just dev mode)
+            // Minimal debug for production - log count only
             if (typeof window !== 'undefined') {
-              console.log('[OverviewModern] Supplier matches check:', {
-                normalizedCount: supplierMatches.length,
-                firstMatch: supplierMatches[0] ? {
-                  supplier_id: supplierMatches[0].supplier_id,
-                  supplier_name: supplierMatches[0].supplier_name,
-                } : null,
-                allMatches: supplierMatches.slice(0, 3).map((m: any) => ({
-                  supplier_id: m?.supplier_id,
-                  supplier_name: m?.supplier_name,
-                })),
-              });
+              console.log('[OverviewModern] Supplier matches:', supplierMatches.length);
             }
             
             if (supplierMatches.length > 0) {
-              console.log(`[OverviewModern] Rendering SupplierCandidatesTop with ${supplierMatches.length} matches`);
               return <SupplierCandidatesTop matches={supplierMatches} />;
             } else {
-              console.warn('[OverviewModern] No supplier matches, showing empty state. Report keys:', 
-                Object.keys(reportAny).filter(k => k.includes('supplier') || k.includes('factory') || k.includes('match'))
-              );
               return (
                 <SupplierCandidatesEmptyState 
                   reasonCode={reportAny.supplierEmptyReason || "no_signals"}
