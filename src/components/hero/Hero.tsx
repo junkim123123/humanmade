@@ -132,9 +132,9 @@ export default function Hero() {
 
             {/* Headline - Premium sizing */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Stop endless wholesale margin extraction.
+              Stop overpaying wholesalers.
               <br />
-              <span className="text-slate-700">End it with factory direct sourcing.</span>
+              <span className="text-slate-700">Source direct from factories.</span>
             </h1>
 
             {/* Subtext */}
