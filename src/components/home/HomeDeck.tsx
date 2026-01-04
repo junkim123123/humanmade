@@ -13,10 +13,6 @@ import { ShelfPriceProvider } from "@/contexts/ShelfPriceContext"
 import TrustSection from "@/components/marketing/TrustSection"
 import WhyUsSection from "@/components/marketing/WhyUsSection"
 
-interface HomeDeckProps {
-  products?: ProductShowcaseItem[];
-}
-
 function FinalCta() {
   return (
     <div className="landing-container py-10 lg:py-12">
@@ -50,7 +46,7 @@ function FinalCta() {
   )
 }
 
-export default function HomeDeck({ products = [] }: HomeDeckProps) {
+export default function HomeDeck() {
   const getHeaderOffset = () => {
     const header =
       (typeof document !== "undefined" && (document.querySelector("[data-site-header]") as HTMLElement | null)) ||
