@@ -53,15 +53,18 @@ export default function AssumptionsCard({ report }: AssumptionsCardProps) {
 
   const adjustSource = (source?: SourceBadge | string): SourceBadge => {
     if (!source) return "category_default";
-    // Map provenance values to SourceBadge
-    if (source === "label_ocr" || source === "label_verified") return "label_verified";
-    if (source === "vision_inferred" || source === "similar_records" || source === "hs_code_analysis") return "vision_inferred";
-    if (source === "user" || source === "user_confirmed") return "user";
-    if (labelUnreadable && source === "label_verified") return "category_default";
-    // If it's already a valid SourceBadge, return it
+    
+    // If it's already a valid SourceBadge, check label readability first
+    if (source === "label_verified" && labelUnreadable) return "category_default";
     if (source === "user" || source === "label_verified" || source === "vision_inferred" || source === "category_default") {
       return source as SourceBadge;
     }
+    
+    // Map provenance values to SourceBadge
+    if (source === "label_ocr" || source === "label_verified") return labelUnreadable ? "category_default" : "label_verified";
+    if (source === "vision_inferred" || source === "similar_records" || source === "hs_code_analysis") return "vision_inferred";
+    if (source === "user" || source === "user_confirmed") return "user";
+    
     return "category_default";
   };
 
