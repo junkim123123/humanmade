@@ -19,10 +19,6 @@ const fadeUpVariant = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1], // Custom easing for silky smooth
-    },
   },
 };
 
@@ -36,7 +32,11 @@ export function FadeUp({ children, delay = 0, className = "" }: ScrollRevealProp
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={fadeUpVariant}
-      transition={{ delay }}
+      transition={{ 
+        delay,
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1], // Custom cubic-bezier easing for silky smooth
+      }}
       className={className}
     >
       {children}
