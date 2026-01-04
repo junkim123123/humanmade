@@ -233,25 +233,6 @@ export default function ReportsPage() {
                         }}
                       />
                     )}
-                      /* Fallback - Large Icon when no image path */
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        {/* Blurred Circle Gradient Background */}
-                        <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${
-                          study.category === "Confectionery" ? "bg-gradient-to-br from-pink-400 to-rose-500" :
-                          study.category === "Toys" ? "bg-gradient-to-br from-blue-400 to-blue-600" :
-                          "bg-gradient-to-br from-emerald-400 to-green-500"
-                        }`} />
-                        
-                        {/* Large Icon */}
-                        <div className={`text-8xl font-bold opacity-20 ${
-                          study.category === "Confectionery" ? "text-rose-500" :
-                          study.category === "Toys" ? "text-blue-600" :
-                          "text-green-500"
-                        }`}>
-                          {study.category.charAt(0)}
-                        </div>
-                      </div>
-                    )}
                     
                     {/* Gradient Overlay for better text readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[1]" />

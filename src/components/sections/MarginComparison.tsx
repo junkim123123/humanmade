@@ -1,16 +1,18 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, X, Languages, Package, FileText, DollarSign } from "lucide-react";
 import { CountUp } from "@/components/animation/CountUp";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { useInView } from "framer-motion";
+import { ProofStatusBadge } from "@/components/ui/ProofStatusBadge";
 
 interface CostItem {
   label: string;
   amount: string;
   type?: "normal" | "total";
+  proofStatus?: "verified" | "assumption" | "needs-proof";
 }
 
 interface ComparisonColumnProps {
@@ -19,7 +21,7 @@ interface ComparisonColumnProps {
   totalCost: string;
   items: CostItem[];
   isHighlight?: boolean;
-  advantages?: string[];
+  advantages?: Array<{ icon: React.ComponentType<{ className?: string }>; text: string }>;
 }
 
 function ComparisonColumn({
@@ -79,17 +81,22 @@ function ComparisonColumn({
                 : ""
             }`}
           >
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span
+                className={`text-sm ${
+                  item.type === "total"
+                    ? "font-semibold text-slate-900"
+                    : "text-slate-600"
+                }`}
+              >
+                {item.label}
+              </span>
+              {item.proofStatus && (
+                <ProofStatusBadge status={item.proofStatus} className="flex-shrink-0" />
+              )}
+            </div>
             <span
-              className={`text-sm ${
-                item.type === "total"
-                  ? "font-semibold text-slate-900"
-                  : "text-slate-600"
-              }`}
-            >
-              {item.label}
-            </span>
-            <span
-              className={`text-sm tabular-nums font-medium ${
+              className={`text-sm tabular-nums font-medium flex-shrink-0 ${
                 item.type === "total"
                   ? "text-slate-900"
                   : "text-slate-700"
@@ -101,16 +108,25 @@ function ComparisonColumn({
         ))}
       </div>
 
-      {/* Advantages (only for NexSupply) */}
-      {isHighlight && advantages.length > 0 && (
+      {/* Advantages/Pain Points */}
+      {advantages && advantages.length > 0 && (
         <div className="pt-6 border-t border-slate-200">
           <div className="space-y-3">
-            {advantages.map((advantage, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-slate-700">{advantage}</span>
-              </div>
-            ))}
+            {advantages.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div key={index} className="flex items-start gap-3">
+                  {isHighlight ? (
+                    <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  )}
+                  <span className={`text-sm ${isHighlight ? "text-slate-700" : "text-slate-600"}`}>
+                    {item.text}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -119,23 +135,31 @@ function ComparisonColumn({
 }
 
 export default function MarginComparison() {
-  const wholesaleItems: CostItem[] = [
-    { label: "Wholesale price", amount: "$5.50" },
-    { label: "Total cost", amount: "$5.50", type: "total" },
+  const diyItems: CostItem[] = [
+    { label: "Alibaba sourcing", amount: "$3.50", proofStatus: "assumption" as const },
+    { label: "Hidden fees & quality issues", amount: "+$2.00", proofStatus: "assumption" as const },
+    { label: "Total cost", amount: "$5.50", type: "total", proofStatus: "assumption" as const },
   ];
 
   const nexSupplyItems: CostItem[] = [
-    { label: "Factory FOB", amount: "$1.24" },
-    { label: "Freight & duty", amount: "$0.86" },
-    { label: "NexSupply fee (7%)", amount: "$0.09" },
-    { label: "Total cost", amount: "$2.19", type: "total" },
+    { label: "Factory FOB", amount: "$1.24", proofStatus: "verified" as const },
+    { label: "Freight & duty", amount: "$0.86", proofStatus: "verified" as const },
+    { label: "NexSupply fee (7%)", amount: "$0.09", proofStatus: "verified" as const },
+    { label: "Total cost", amount: "$2.19", type: "total", proofStatus: "verified" as const },
+  ];
+
+  const diyPainPoints = [
+    { icon: Languages, text: "Language barriers" },
+    { icon: Package, text: "Quality lottery" },
+    { icon: FileText, text: "Complex customs/logistics DIY" },
+    { icon: DollarSign, text: "Hidden costs appear" },
   ];
 
   const nexSupplyAdvantages = [
-    "SMB-friendly MOQs",
-    "Verified factories with quality control",
-    "Compliance and customs support",
-    "End-to-end logistics handling",
+    { icon: Languages, text: "Korean/English dedicated communication" },
+    { icon: Package, text: "On-site QC team inspection" },
+    { icon: FileText, text: "Door-to-door full service" },
+    { icon: DollarSign, text: "Transparent 7% fixed fee" },
   ];
 
   return (
@@ -145,34 +169,37 @@ export default function MarginComparison() {
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 px-2">
-              See the margin gap
+              DIY vs NexSupply
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-4">
-              Compare buying wholesale vs going direct with NexSupply execution support.
+              Compare self-sourcing on Alibaba vs our full-service factory direct sourcing.
             </p>
           </div>
 
           {/* Comparison Table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 sm:p-6 lg:p-8">
-            <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              {/* Current Way */}
-              <ComparisonColumn
-                title="Current way (buying wholesale)"
-                label="Wholesale"
-                totalCost="$5.50"
-                items={wholesaleItems}
-              />
+            <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+              <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-w-[600px] lg:min-w-0">
+                {/* DIY Way */}
+                <ComparisonColumn
+                  title="DIY (Alibaba)"
+                  label="Self-Sourcing"
+                  totalCost="$5.50"
+                  items={diyItems}
+                  advantages={diyPainPoints}
+                />
 
-              {/* NexSupply Way */}
-              <ComparisonColumn
-                title="NexSupply way (going direct)"
-                label="NexSupply"
-                totalCost="$2.19"
-                items={nexSupplyItems}
-                isHighlight={true}
-                advantages={nexSupplyAdvantages}
-              />
-            </StaggerContainer>
+                {/* NexSupply Way */}
+                <ComparisonColumn
+                  title="NexSupply"
+                  label="Full-Service"
+                  totalCost="$2.19"
+                  items={nexSupplyItems}
+                  isHighlight={true}
+                  advantages={nexSupplyAdvantages}
+                />
+              </StaggerContainer>
+            </div>
 
             {/* Profit Unlocked Highlight */}
             <ProfitBadge />

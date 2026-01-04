@@ -132,14 +132,14 @@ export default function Hero() {
 
             {/* Headline - Premium sizing */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Stop overpaying wholesalers.
+              Stop endless wholesale margin extraction.
               <br />
-              <span className="text-slate-700">Source direct with execution.</span>
+              <span className="text-slate-700">End it with factory direct sourcing.</span>
             </h1>
 
             {/* Subtext */}
             <p className="text-lg sm:text-xl text-slate-500 leading-relaxed max-w-xl">
-              Use our free AI sourcing calculator to see your real landed cost and margins. We only succeed when you ship.
+              Use our free AI sourcing calculator to verify your real landed cost and secure 3x higher margins. We only make money when your goods arrive at the warehouse.
             </p>
 
             {/* CTAs */}
@@ -148,13 +148,13 @@ export default function Hero() {
                 href="/analyze"
                 className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-slate-900 text-white font-medium text-base hover:bg-slate-800 transition-colors shadow-lg hover:shadow-xl"
               >
-                Calculate My Savings
+                Calculate My Savings (Free)
               </Link>
               <Link
                 href="/reports/toy-example"
                 className="inline-flex items-center text-slate-700 font-medium text-base hover:text-slate-900 transition-colors"
               >
-                View sample report
+                View Sample Blueprint Report
               </Link>
             </div>
 

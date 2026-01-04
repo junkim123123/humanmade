@@ -123,17 +123,17 @@ export default function HomeDeck() {
                   ),
                 },
                 {
-                  title: "Verify ($45)",
-                  description: "Deposit $45 to get 3 vetted factory quotes, sample verification reports, and customs import feasibility review. Pricing, MOQ, and lead times confirmed.",
+                  title: "Blueprint ($45)",
+                  description: "$45 is not just a deposit—it's a professional sourcing report purchase. Get 3 vetted factory quotes with MOQ & lead times, HS code & tariff analysis, compliance checklist for beginners, and door-to-door logistics execution plan.",
                   color: "purple",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
-                      {/* Verification Status */}
+                      {/* Blueprint Header */}
                       <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100">
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-16 rounded-full bg-white border-4 border-purple-500 flex items-center justify-center">
                             <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </div>
                           <div className="flex-1">
@@ -142,15 +142,42 @@ export default function HomeDeck() {
                           </div>
                         </div>
                       </div>
-                      {/* Supplier Details */}
-                      <div className="p-6 space-y-4">
-                        <div className="space-y-2">
-                          <div className="h-3 bg-slate-200 rounded w-full"></div>
-                          <div className="h-3 bg-slate-200 rounded w-5/6"></div>
-                        </div>
-                        <div className="flex gap-3">
-                          <div className="flex-1 h-16 bg-slate-50 rounded-lg"></div>
-                          <div className="flex-1 h-16 bg-slate-50 rounded-lg"></div>
+                      {/* Blueprint Checklist */}
+                      <div className="p-6 space-y-3">
+                        <div className="space-y-2.5">
+                          <div className="flex items-start gap-3">
+                            <div className="w-5 h-5 rounded bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <svg className="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="h-3 bg-slate-200 rounded w-full mb-1"></div>
+                              <div className="h-2 bg-slate-200 rounded w-3/4"></div>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-5 h-5 rounded bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <svg className="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="h-3 bg-slate-200 rounded w-full mb-1"></div>
+                              <div className="h-2 bg-slate-200 rounded w-2/3"></div>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-5 h-5 rounded bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <svg className="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="h-3 bg-slate-200 rounded w-full mb-1"></div>
+                              <div className="h-2 bg-slate-200 rounded w-3/5"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

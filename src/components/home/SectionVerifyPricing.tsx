@@ -28,8 +28,11 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 <span className="text-xl font-medium text-slate-400">$</span>
                 <span className="text-[48px] sm:text-[56px] font-bold tracking-tight text-slate-900 leading-none">45</span>
               </div>
-              <p className="mt-2 text-slate-500 text-[14px]">Blueprint Fee (Sourcing Deposit)</p>
-              <p className="mt-1 text-slate-400 text-[12px]">Applied as a credit on first order</p>
+              <p className="mt-2 text-slate-500 text-[14px] font-semibold">Sourcing Blueprint Fee</p>
+              <p className="mt-1 text-emerald-600 text-[12px] font-medium">100% credited on first order</p>
+              <p className="mt-2 text-slate-400 text-[11px] max-w-xs mx-auto">
+                $45 is not just a deposit—it's a sourcing report purchase with full credit guarantee.
+              </p>
             </div>
 
             {/* Execution Fee */}
@@ -37,38 +40,59 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
               <div className="inline-flex items-baseline gap-1">
                 <span className="text-[32px] sm:text-[40px] font-bold tracking-tight text-slate-900 leading-none">7%</span>
               </div>
-              <p className="mt-2 text-slate-500 text-[14px]">Execution Fee</p>
-              <p className="mt-1 text-slate-400 text-[12px]">of Order Value for managing production and logistics</p>
+              <p className="mt-2 text-slate-500 text-[14px] font-semibold">Execution Fee</p>
+              <p className="mt-1 text-slate-400 text-[12px]">Only charged when your order ships</p>
+              <p className="mt-2 text-slate-400 text-[11px]">Minimum fee $350 applies</p>
             </div>
             
-            {/* Divider */}
-            <div className="my-6 h-px bg-slate-100" />
-            
-            {/* Deliverables - focused on what you get */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+            {/* Blueprint Deliverables */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">What's included in the Blueprint:</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 mt-0.5">
+                    <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-[14px] font-medium text-slate-900 block">3 vetted factory quotes</span>
+                    <span className="text-[12px] text-slate-500">With MOQ and lead times included</span>
+                  </div>
                 </div>
-                <span className="text-[14px] text-slate-700">3 vetted factory quotes with MOQ and lead time</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 mt-0.5">
+                    <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-[14px] font-medium text-slate-900 block">HS Code & tariff analysis</span>
+                    <span className="text-[12px] text-slate-500">Product-specific customs duty precision</span>
+                  </div>
                 </div>
-                <span className="text-[14px] text-slate-700">Compliance checklist included</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 mt-0.5">
+                    <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-[14px] font-medium text-slate-900 block">Compliance checklist</span>
+                    <span className="text-[12px] text-slate-500">Beginner-friendly import regulations guide</span>
+                  </div>
                 </div>
-                <span className="text-[14px] text-slate-700">Execution plan delivered in about a week</span>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 mt-0.5">
+                    <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-[14px] font-medium text-slate-900 block">Logistics execution plan</span>
+                    <span className="text-[12px] text-slate-500">FOB to door logistics roadmap</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -80,8 +104,8 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
               >
                 Start verification
               </a>
-              <p className="text-[12px] text-slate-500">
-                Blueprint Fee is credited toward your first order within 30 days
+              <p className="text-[12px] text-slate-500 text-center max-w-xs">
+                $45 is fully credited toward your first order within 60 days. Essentially free verification.
               </p>
             </div>
             
