@@ -1873,10 +1873,42 @@ export async function POST(request: Request) {
       console.log(`[Analyze API] ✓ Report verified and ready: ${finalReportId}, status: ${verifyReport.status}`);
     }
 
+    // FINAL VERIFICATION: Read the report one more time to ensure it's readable
+    if (finalReportId && user) {
+      console.log(`[Analyze API] Final verification: Reading report ${finalReportId} before returning...`);
+      const { data: finalRead, error: finalReadError } = await admin
+        .from("reports")
+        .select("id, status, user_id, product_name")
+        .eq("id", finalReportId)
+        .maybeSingle();
+      
+      if (finalReadError || !finalRead) {
+        console.error("[Analyze API] CRITICAL: Report not readable in final check:", {
+          reportId: finalReportId,
+          error: finalReadError?.message,
+          userId: user.id,
+        });
+        // Still return the reportId - let the client retry
+        return NextResponse.json({
+          success: true,
+          reportId: finalReportId,
+          savedReport: false,
+          warning: "Report created but may not be immediately readable. Please refresh if you see a 404.",
+          data: { ...result, draftInference },
+          warnings,
+        });
+      }
+      
+      console.log(`[Analyze API] ✓ Final verification passed: Report ${finalReportId} is readable`, {
+        status: finalRead.status,
+        productName: finalRead.product_name,
+      });
+    }
+
     return NextResponse.json({
       success: true,
       reportId: finalReportId,
-      savedReport,
+      savedReport: true,
       data: { ...result, draftInference },
       warnings,
     });

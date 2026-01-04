@@ -33,11 +33,32 @@ export async function GET(
 
   console.log("[Reports API] Fetching report:", reportId);
   
-  const { data, error } = await admin
-    .from("reports")
-    .select("*")
-    .eq("id", reportId)
-    .maybeSingle();
+  // Try multiple times with increasing delays
+  let data = null;
+  let error = null;
+  const maxAttempts = 3;
+  
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data: attemptData, error: attemptError } = await admin
+      .from("reports")
+      .select("*")
+      .eq("id", reportId)
+      .maybeSingle();
+    
+    data = attemptData;
+    error = attemptError;
+    
+    if (data && !error) {
+      console.log(`[Reports API] Report found on attempt ${attempt + 1}`);
+      break;
+    }
+    
+    if (attempt < maxAttempts - 1) {
+      const delay = 500 * (attempt + 1); // 500ms, 1000ms, 1500ms
+      console.log(`[Reports API] Report not found, retrying in ${delay}ms (attempt ${attempt + 1}/${maxAttempts})...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 
   if (error) {
     console.error("[Reports API] Read error:", {

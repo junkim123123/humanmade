@@ -4,8 +4,8 @@ import ReportV2Client from "./ReportV2Client";
 export const dynamic = "force-dynamic";
 
 async function getReport(reportId: string, retryCount = 0): Promise<any> {
-  const maxRetries = 5; // Increased retries
-  const retryDelay = 1500; // 1.5 seconds
+  const maxRetries = 8; // More retries
+  const retryDelay = 2000; // 2 seconds - give DB more time
   
   try {
     // Use absolute URL for server-side fetch
