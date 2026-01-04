@@ -259,11 +259,40 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           return;
         }
         
-        // Add a small delay to ensure report is committed to DB
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Add delay to ensure report is committed to DB and readable
+        console.log("[AnalyzeForm] Waiting for report to be ready...");
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay
         
-        toast.success("Analysis completed");
-        router.push(`/reports/${reportId}/v2`);
+        // Pre-verify report exists before redirecting
+        try {
+          const verifyRes = await fetch(`/api/reports/${reportId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          
+          if (verifyRes.ok) {
+            const verifyData = await verifyRes.json();
+            if (verifyData?.success && verifyData?.report) {
+              console.log("[AnalyzeForm] Report verified, redirecting...");
+              toast.success("Analysis completed");
+              router.push(`/reports/${reportId}/v2`);
+              return;
+            }
+          }
+          
+          // If verification failed, still try to redirect (might be race condition)
+          console.warn("[AnalyzeForm] Report verification failed, but redirecting anyway:", {
+            status: verifyRes.status,
+            reportId,
+          });
+          toast.success("Analysis completed");
+          router.push(`/reports/${reportId}/v2`);
+        } catch (verifyError) {
+          console.error("[AnalyzeForm] Error verifying report:", verifyError);
+          // Still redirect - let the page handle the error
+          toast.success("Analysis completed");
+          router.push(`/reports/${reportId}/v2`);
+        }
       } else {
         // Fallback: show results inline or redirect
         console.error("[AnalyzeForm] No reportId in response:", {

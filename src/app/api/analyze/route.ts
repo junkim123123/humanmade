@@ -1795,16 +1795,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify report exists in DB before returning (with retry for eventual consistency)
+    // CRITICAL: Verify report exists in DB before returning (with aggressive retry for eventual consistency)
     if (finalReportId && user) {
       let verifyReport = null;
       let verifyError = null;
-      const maxVerifyRetries = 3;
+      const maxVerifyRetries = 10; // Increased retries
+      const baseDelay = 300; // Base delay increased
+      
+      console.log(`[Analyze API] Starting report verification for ${finalReportId}...`);
       
       for (let attempt = 0; attempt < maxVerifyRetries; attempt++) {
         const { data, error } = await admin
           .from("reports")
-          .select("id, status, user_id")
+          .select("id, status, user_id, created_at, updated_at")
           .eq("id", finalReportId)
           .maybeSingle();
         
@@ -1812,34 +1815,62 @@ export async function POST(request: Request) {
         verifyError = error;
         
         if (verifyReport && !verifyError) {
+          console.log(`[Analyze API] ✓ Report verified on attempt ${attempt + 1}:`, {
+            reportId: finalReportId,
+            status: verifyReport.status,
+            user_id: verifyReport.user_id,
+            created_at: verifyReport.created_at,
+            updated_at: verifyReport.updated_at,
+          });
           break; // Found the report, exit retry loop
         }
         
         if (attempt < maxVerifyRetries - 1) {
-          // Wait before retrying (exponential backoff)
-          const delay = 200 * Math.pow(2, attempt); // 200ms, 400ms, 800ms
-          console.log(`[Analyze API] Report verification failed (attempt ${attempt + 1}/${maxVerifyRetries}), retrying in ${delay}ms...`);
+          // Exponential backoff with jitter
+          const delay = baseDelay * Math.pow(1.5, attempt) + Math.random() * 100;
+          console.log(`[Analyze API] Report verification failed (attempt ${attempt + 1}/${maxVerifyRetries}), retrying in ${Math.round(delay)}ms...`, {
+            reportId: finalReportId,
+            error: verifyError?.message,
+            hasData: !!verifyReport,
+          });
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
       
       if (verifyError || !verifyReport) {
-        console.error("[Analyze API] CRITICAL: Report ID returned but not found in DB after retries:", {
-          reportId: finalReportId,
-          error: verifyError?.message,
-          attempts: maxVerifyRetries,
-        });
-        return NextResponse.json(
-          {
-            success: false,
-            error: "REPORT_NOT_FOUND",
-            message: "Report was created but cannot be found. Please try again.",
-          },
-          { status: 500 }
-        );
+        // Last resort: try one more time with a longer delay
+        console.log(`[Analyze API] Final verification attempt after ${maxVerifyRetries} retries...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const { data: finalCheck, error: finalError } = await admin
+          .from("reports")
+          .select("id, status")
+          .eq("id", finalReportId)
+          .maybeSingle();
+        
+        if (finalCheck && !finalError) {
+          console.log(`[Analyze API] ✓ Report found on final check: ${finalReportId}`);
+          verifyReport = finalCheck;
+        } else {
+          console.error("[Analyze API] CRITICAL: Report ID returned but not found in DB after all retries:", {
+            reportId: finalReportId,
+            error: verifyError?.message || finalError?.message,
+            attempts: maxVerifyRetries + 1,
+            userId: user.id,
+            timestamp: new Date().toISOString(),
+          });
+          return NextResponse.json(
+            {
+              success: false,
+              error: "REPORT_NOT_FOUND",
+              message: "Report was created but cannot be found. Please try again or contact support.",
+              reportId: finalReportId, // Return the ID anyway so user can try manually
+            },
+            { status: 500 }
+          );
+        }
       }
       
-      console.log(`[Analyze API] Verified report exists in DB: ${finalReportId}, status: ${verifyReport.status}, user_id: ${verifyReport.user_id}`);
+      console.log(`[Analyze API] ✓ Report verified and ready: ${finalReportId}, status: ${verifyReport.status}`);
     }
 
     return NextResponse.json({
