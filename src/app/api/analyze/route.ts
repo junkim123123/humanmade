@@ -258,7 +258,19 @@ export async function POST(request: Request) {
         });
 
       if (uploadError) {
-        // If upload fails for authenticated users, log and throw
+        // If upload fails (e.g., RLS policy issue), fallback to data URL
+        const errorMsg = uploadError?.message || String(uploadError);
+        const isRLSError = errorMsg?.toLowerCase().includes("row-level security") || 
+                          errorMsg?.toLowerCase().includes("permission") ||
+                          uploadError?.status === 403;
+        
+        if (isRLSError) {
+          console.warn("[Analyze API] Storage upload failed due to RLS policy, using data URL fallback:", errorMsg);
+          const base64 = buffer.toString("base64");
+          return `data:${mimeType};base64,${base64}`;
+        }
+        
+        // For other errors, log and throw
         console.error("[Analyze API] Upload failed for authenticated user:", uploadError.message);
         throw uploadError;
       }
