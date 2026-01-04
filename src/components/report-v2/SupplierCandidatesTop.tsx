@@ -98,6 +98,11 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   const visibleRemaining = showAll ? remainingMatches : remainingMatches.slice(0, 2);
   const hiddenCount = Math.max(0, remainingMatches.length - visibleRemaining.length);
 
+  // Safely extract intel fields for topMatch with nullish coalescing
+  const productCount = topMatch._intel?.product_count ?? 0;
+  const coveragePct = topMatch._intel?.price_coverage_pct ?? 0;
+  const showIntel = productCount > 0 || coveragePct > 0;
+
   const normalizeBadgeLabel = (label: string) => {
     if (label.toLowerCase().startsWith("keyword match")) return "Keyword match";
     if (label.toLowerCase().startsWith("category aligned")) return "Category match";
@@ -218,11 +223,11 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                 </div>
               )}
               {/* Show intel line if available */}
-              {topMatch._intel && (topMatch._intel.product_count > 0 || topMatch._intel.price_coverage_pct > 0) && (
+              {showIntel && (
                 <p className="text-[12px] text-slate-500 mt-2">
-                  {topMatch._intel.product_count > 0 && `${topMatch._intel.product_count} related items`}
-                  {topMatch._intel.product_count > 0 && topMatch._intel.price_coverage_pct > 0 && " • "}
-                  {topMatch._intel.price_coverage_pct > 0 && `${Math.round(topMatch._intel.price_coverage_pct)}% pricing coverage`}
+                  {productCount > 0 ? `${productCount} related items` : null}
+                  {productCount > 0 && coveragePct > 0 ? " • " : null}
+                  {coveragePct > 0 ? `${Math.round(coveragePct)}% price coverage` : null}
                 </p>
               )}
               <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -244,24 +249,30 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
 
         {remainingMatches.length > 0 && (
           <div className="space-y-3 mb-4">
-            {visibleRemaining.map((match) => (
-              <div key={match.id} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <p className="text-[14px] font-medium text-slate-900">
-                      {match.supplierName}
-                    </p>
-                    {getSupplierRoleDisplay(match) && (
-                      <p className="text-[13px] text-slate-500">{getSupplierRoleDisplay(match)}</p>
-                    )}
-                    {/* Show intel line if available */}
-                    {match._intel && (match._intel.product_count > 0 || match._intel.price_coverage_pct > 0) && (
-                      <p className="text-[12px] text-slate-500 mt-1">
-                        {match._intel.product_count > 0 && `${match._intel.product_count} related items`}
-                        {match._intel.product_count > 0 && match._intel.price_coverage_pct > 0 && " • "}
-                        {match._intel.price_coverage_pct > 0 && `${Math.round(match._intel.price_coverage_pct)}% pricing coverage`}
+            {visibleRemaining.map((match) => {
+              // Safely extract intel fields for each match with nullish coalescing
+              const matchProductCount = match._intel?.product_count ?? 0;
+              const matchCoveragePct = match._intel?.price_coverage_pct ?? 0;
+              const matchShowIntel = matchProductCount > 0 || matchCoveragePct > 0;
+
+              return (
+                <div key={match.id} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <p className="text-[14px] font-medium text-slate-900">
+                        {match.supplierName}
                       </p>
-                    )}
+                      {getSupplierRoleDisplay(match) && (
+                        <p className="text-[13px] text-slate-500">{getSupplierRoleDisplay(match)}</p>
+                      )}
+                      {/* Show intel line if available */}
+                      {matchShowIntel && (
+                        <p className="text-[12px] text-slate-500 mt-1">
+                          {matchProductCount > 0 ? `${matchProductCount} related items` : null}
+                          {matchProductCount > 0 && matchCoveragePct > 0 ? " • " : null}
+                          {matchCoveragePct > 0 ? `${Math.round(matchCoveragePct)}% price coverage` : null}
+                        </p>
+                      )}
                     <div className="flex items-center gap-2 flex-wrap mt-1">
                       {getReasonBadges(match).map((badge, idx) => (
                         <span key={idx} className={`text-[11px] px-2 py-0.5 rounded ${badge.color}`}>
@@ -278,7 +289,8 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
