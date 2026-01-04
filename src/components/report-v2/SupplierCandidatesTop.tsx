@@ -34,40 +34,44 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   const [showAll, setShowAll] = useState(false);
   const [showLogistics, setShowLogistics] = useState(false);
 
-  // Debug logging
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  // Always log in browser (not just dev mode) for debugging
+  if (typeof window !== 'undefined') {
     console.log('[SupplierCandidatesTop] Matches received:', {
       count: matches?.length || 0,
+      isArray: Array.isArray(matches),
       matches: matches?.slice(0, 2).map(m => ({
-        id: m.id,
-        supplierName: m.supplierName,
-        supplierId: m.supplierId,
+        id: m?.id,
+        supplierName: m?.supplierName,
+        supplierId: m?.supplierId,
+        hasName: !!(m?.supplierName && m.supplierName !== "Unknown"),
       })),
     });
   }
 
   if (!matches || matches.length === 0) {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      console.warn('[SupplierCandidatesTop] No matches provided');
-    }
+    console.warn('[SupplierCandidatesTop] No matches provided or empty array');
     return null;
   }
 
   // Filter out any matches with missing supplierName (should be done at API level, but safety check)
   const validMatches = matches.filter((m) => {
-    const hasName = m.supplierName && m.supplierName !== "Unknown";
-    if (!hasName && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      console.warn('[SupplierCandidatesTop] Filtered out match without supplierName:', m.id);
+    const hasName = m?.supplierName && m.supplierName !== "Unknown";
+    if (!hasName) {
+      console.warn('[SupplierCandidatesTop] Filtered out match without supplierName:', {
+        id: m?.id,
+        supplierName: m?.supplierName,
+        supplierId: m?.supplierId,
+      });
     }
     return hasName;
   });
   
   if (validMatches.length === 0) {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      console.warn('[SupplierCandidatesTop] No valid matches after filtering');
-    }
+    console.warn('[SupplierCandidatesTop] No valid matches after filtering. Original matches:', matches);
     return null;
   }
+  
+  console.log(`[SupplierCandidatesTop] Rendering ${validMatches.length} valid matches`);
 
   const isLogistics = (match: SupplierMatch): boolean => {
     const rawRole =

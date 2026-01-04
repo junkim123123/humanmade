@@ -145,18 +145,22 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   
   const reportAny = report as any;
   
-  // Debug: Log supplier matches on mount
+  // Debug: Log supplier matches on mount (always log, not just dev)
   if (typeof window !== 'undefined') {
+    const supplierMatches = reportAny._supplierMatches;
     console.log('[OverviewModern] Report data check:', {
-      hasSupplierMatches: !!reportAny._supplierMatches,
-      supplierMatchesType: typeof reportAny._supplierMatches,
-      supplierMatchesLength: Array.isArray(reportAny._supplierMatches) ? reportAny._supplierMatches.length : 'not array',
-      firstMatch: Array.isArray(reportAny._supplierMatches) && reportAny._supplierMatches.length > 0 ? {
-        id: reportAny._supplierMatches[0].id,
-        supplierName: reportAny._supplierMatches[0].supplierName,
-        hasSupplierName: !!reportAny._supplierMatches[0].supplierName,
+      hasSupplierMatches: !!supplierMatches,
+      supplierMatchesType: typeof supplierMatches,
+      supplierMatchesLength: Array.isArray(supplierMatches) ? supplierMatches.length : 'not array',
+      firstMatch: Array.isArray(supplierMatches) && supplierMatches.length > 0 ? {
+        id: supplierMatches[0]?.id,
+        supplierName: supplierMatches[0]?.supplierName,
+        supplierId: supplierMatches[0]?.supplierId,
+        hasName: !!(supplierMatches[0]?.supplierName && supplierMatches[0].supplierName !== "Unknown"),
       } : null,
       reportKeys: Object.keys(reportAny).filter(k => k.includes('supplier') || k.includes('factory') || k.includes('match')),
+      reportId: reportAny.id,
+      isSampleReport: reportAny.id === 'sample-report',
     });
   }
   
