@@ -31,7 +31,7 @@ export default function WhatWeKnowCard({ report }: WhatWeKnowCardProps) {
   }
 
   // Show draft compliance status (never "complete")
-  const labelOcrStatus = (reportAny._proof?.inputStatus?.labelOcrStatus || reportAny.inputStatus?.labelOcrStatus);
+  const labelOcrStatus = (reportAny._proof?.inputStatus?.labelOcrStatus || reportAny.inputStatus?.labelOcrStatus || reportAny.extras?.inputStatus?.labelOcrStatus || reportAny.extras?.proof?.inputStatus?.labelOcrStatus);
   if (complianceStatus === "Incomplete") {
     bullets.push("Draft compliance snapshot (auto-inferred, not verified)");
   } else {

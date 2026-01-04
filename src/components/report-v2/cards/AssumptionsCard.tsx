@@ -48,7 +48,7 @@ export default function AssumptionsCard({ report }: AssumptionsCardProps) {
   const inferred = (report as any).baseline?.evidence?.inferredInputs || {};
   const costRanges = (report as any).baseline?.costRange?.range || {};
   const reportAny = report as any;
-  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || {};
+  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || reportAny.extras?.inputStatus || reportAny.extras?.proof?.inputStatus || {};
   const labelUnreadable = Boolean(inputStatus?.labelPhotoUploaded && inputStatus?.labelOcrStatus === "failed");
 
   const adjustSource = (source?: SourceBadge | string): SourceBadge => {

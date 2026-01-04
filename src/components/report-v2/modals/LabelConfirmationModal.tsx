@@ -12,7 +12,7 @@ interface LabelConfirmationModalProps {
 
 export default function LabelConfirmationModal({ report, onClose, onSuccess }: LabelConfirmationModalProps) {
   const reportAny = report as any;
-  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || {};
+  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || reportAny.extras?.inputStatus || reportAny.extras?.proof?.inputStatus || {};
   const labelDraft = inputStatus.labelDraft || {};
   
   // Initialize form with draft values

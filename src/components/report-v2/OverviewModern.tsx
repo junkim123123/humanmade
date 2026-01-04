@@ -41,7 +41,7 @@ function DecisionCard({ report }: { report: Report }) {
 
   // Missing input chips (up to 3)
   const missingInputs: string[] = [];
-  const inputStatus = (report as any)._proof?.inputStatus || (report as any).inputStatus || {};
+  const inputStatus = (report as any)._proof?.inputStatus || (report as any).inputStatus || (report as any).extras?.inputStatus || (report as any).extras?.proof?.inputStatus || {};
   if (!inputStatus.originConfirmed) missingInputs.push("Origin missing");
   if (inputStatus.weightDefaultUsed) missingInputs.push("Weight default used");
   if (inputStatus.boxSizeDefaultUsed) missingInputs.push("Box size default used");
@@ -165,7 +165,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
     });
   }
   
-  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus;
+  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || reportAny.extras?.inputStatus || reportAny.extras?.proof?.inputStatus;
   const uploadsOptional = !(
     inputStatus?.barcodePhotoUploaded &&
     inputStatus?.labelPhotoUploaded &&
@@ -226,10 +226,10 @@ export default function OverviewModern({ report }: OverviewModernProps) {
       </details>
 
       {/* Decision Support Cards */}
-      {reportAny._decisionSupport && (
+      {(reportAny._decisionSupport || reportAny.extras?.decisionSupport) && (
         <>
           {/* HS Code & Duty Card */}
-          <HsDutyCard decisionSupport={reportAny._decisionSupport} />
+          <HsDutyCard decisionSupport={reportAny._decisionSupport || reportAny.extras?.decisionSupport} />
 
           {/* Supplier Candidates - Always render with state-specific UI */}
           {(() => {

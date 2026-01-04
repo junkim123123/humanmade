@@ -383,6 +383,16 @@ export interface Report {
     customsCategoryDraft?: { value: string | null; confidence: number; evidenceSnippet: string };
     hsCandidatesDraft?: Array<{ code: string; confidence: number; rationale: string; evidenceSnippet: string }>;
   };
+  
+  // Extras: UI-only or sample-only fields that don't fit the core schema
+  // Allows flexibility for sample reports and UI extensions without breaking type safety
+  extras?: {
+    proof?: any;
+    decisionSupport?: any;
+    inputStatus?: any;
+    inferredInputs?: any;
+    [key: string]: any;
+  };
 }
 
 export interface ReportResponse {

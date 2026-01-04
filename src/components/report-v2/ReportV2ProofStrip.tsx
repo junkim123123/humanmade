@@ -46,9 +46,9 @@ function getEvidenceLevelLabel(level: string): string {
 
 export default function ReportV2ProofStrip({ report }: ReportV2ProofStripProps) {
   const reportAny = report as any;
-  const proof: any = reportAny._proof || {};
+  const proof: any = reportAny._proof || reportAny.extras?.proof || {};
   const coverage: any = reportAny._coverage || {};
-  const inputStatus: any = proof?.inputStatus || reportAny.inputStatus || reportAny.data?.inputStatus || {};
+  const inputStatus: any = proof?.inputStatus || reportAny.inputStatus || reportAny.extras?.inputStatus || reportAny.extras?.proof?.inputStatus || reportAny.data?.inputStatus || {};
   const uploadAudit =
     proof?.uploadAudit ||
     reportAny.pipeline_result?.uploadAudit ||

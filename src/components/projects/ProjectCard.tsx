@@ -74,7 +74,7 @@ export function ProjectCard({ project, onCancel }: ProjectCardProps) {
     if (project.status === "quoted") {
       // Route to report page with focus on verified section
       const reportId = project.reportId || "toy-example";
-      router.push(`/reports/${reportId}?focus=verified`);
+      router.push(`/reports/${reportId}/v2?focus=verified`);
     } else {
       // View details - could route to project detail page
       router.push(`/projects/${project.id}`);

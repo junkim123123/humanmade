@@ -34,7 +34,7 @@ export default function ReportsPage() {
           {mockReports.map((report) => (
             <Link
               key={report.id}
-              href={`/reports/${report.id}`}
+              href={`/reports/${report.id}/v2`}
               className="bg-white rounded-xl p-6 border border-slate-200 hover:border-electric-blue-300 hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between mb-3">

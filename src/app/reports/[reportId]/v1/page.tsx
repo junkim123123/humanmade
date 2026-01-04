@@ -1,51 +1,21 @@
-import { notFound } from "next/navigation";
-import ReportClient from "../ReportClient";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-async function getReport(reportId: string) {
-  try {
-    // Use absolute URL for server-side fetch
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-      || "http://localhost:3000";
-    
-    const res = await fetch(`${baseUrl}/api/reports/${reportId}`, {
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (res.status === 404) return null;
-
-    const json = await res.json().catch(() => null);
-    if (!json?.success || !json?.report) return null;
-
-    return json.report;
-  } catch (error) {
-    console.error("[Report V1 Page] Error fetching report:", error);
-    return null;
-  }
-}
-
+// V1 route redirects to V2
 export default async function Page({ 
   params 
 }: { 
-  params: { reportId: string }
+  params: Promise<{ reportId: string }> | { reportId: string }
 }) {
-  const { reportId } = await params;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const { reportId } = resolvedParams;
   
   if (!reportId) {
-    notFound();
+    redirect("/reports");
   }
 
-  const report = await getReport(reportId);
-  
-  if (!report) {
-    notFound();
-  }
-
-  return <ReportClient key={reportId} reportId={reportId} report={report} />;
+  // Redirect to V2
+  redirect(`/reports/${reportId}/v2`);
 }
 

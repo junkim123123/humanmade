@@ -11,7 +11,7 @@ interface LabelDraftCardProps {
 
 export default function LabelDraftCard({ report, onConfirm }: LabelDraftCardProps) {
   const reportAny = report as any;
-  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || {};
+  const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || reportAny.extras?.inputStatus || reportAny.extras?.proof?.inputStatus || {};
   
   const labelDraft = inputStatus.labelDraft;
   const extractionSource = inputStatus.labelExtractionSource;
