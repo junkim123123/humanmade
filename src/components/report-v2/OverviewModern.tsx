@@ -223,24 +223,39 @@ export default function OverviewModern({ report }: OverviewModernProps) {
           {/* Supplier Candidates - Always render with state-specific UI */}
           {(() => {
             const supplierMatches = reportAny._supplierMatches || [];
-            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+            
+            // Always log for debugging (not just dev mode)
+            if (typeof window !== 'undefined') {
               console.log('[OverviewModern] Supplier matches check:', {
                 exists: !!reportAny._supplierMatches,
+                isArray: Array.isArray(reportAny._supplierMatches),
                 length: supplierMatches.length,
                 firstMatch: supplierMatches[0] ? {
                   id: supplierMatches[0].id,
                   supplierName: supplierMatches[0].supplierName,
+                  supplierId: supplierMatches[0].supplierId,
                 } : null,
+                allMatches: supplierMatches.slice(0, 3).map(m => ({
+                  id: m?.id,
+                  supplierName: m?.supplierName,
+                })),
               });
             }
-            return supplierMatches.length > 0 ? (
-              <SupplierCandidatesTop matches={supplierMatches} />
-            ) : (
-              <SupplierCandidatesEmptyState 
-                reasonCode={reportAny.supplierEmptyReason || "no_signals"}
-                uploadsOptional={uploadsOptional}
-              />
-            );
+            
+            if (supplierMatches.length > 0) {
+              console.log(`[OverviewModern] Rendering SupplierCandidatesTop with ${supplierMatches.length} matches`);
+              return <SupplierCandidatesTop matches={supplierMatches} />;
+            } else {
+              console.warn('[OverviewModern] No supplier matches, showing empty state. Report keys:', 
+                Object.keys(reportAny).filter(k => k.includes('supplier') || k.includes('factory') || k.includes('match'))
+              );
+              return (
+                <SupplierCandidatesEmptyState 
+                  reasonCode={reportAny.supplierEmptyReason || "no_signals"}
+                  uploadsOptional={uploadsOptional}
+                />
+              );
+            }
           })()}
         </>
       )}
