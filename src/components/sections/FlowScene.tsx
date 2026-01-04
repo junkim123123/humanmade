@@ -283,8 +283,7 @@ function SceneContent() {
         rotation={[0, 0, 0]}
         polar={[-Math.PI / 6, Math.PI / 6]}
         azimuth={[-Math.PI / 4, Math.PI / 4]}
-        config={{ mass: 2, tension: 400 }}
-        snap={{ mass: 4, tension: 1500 }}
+        snap
       >
         <Float
           speed={0.3}
