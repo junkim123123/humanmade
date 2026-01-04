@@ -2,6 +2,8 @@
 
 import { PrimaryNav } from "@/components/PrimaryNav";
 import Link from "next/link";
+import { Suspense } from "react";
+import ProductCard3D from "@/components/reports/ProductCard3D";
 
 // Case study data matching NexSupply style
 const caseStudies = [
@@ -28,6 +30,7 @@ const caseStudies = [
   },
 ];
 
+
 export default function ReportsPage() {
   return (
     <div className="min-h-screen bg-white">
@@ -36,7 +39,7 @@ export default function ReportsPage() {
       <div className="landing-container py-12 lg:py-16">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-12">
             <h2 className="text-[24px] font-bold text-slate-900 sm:text-[28px]">
               Products we've sourced
             </h2>
@@ -50,11 +53,17 @@ export default function ReportsPage() {
             {caseStudies.map((study) => (
               <div
                 key={study.id}
-                className={`rounded-xl border-2 ${study.borderColor} bg-white overflow-hidden`}
+                className={`rounded-xl border-2 ${study.borderColor} bg-white overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02]`}
               >
-                {/* Placeholder image */}
-                <div className="relative aspect-[4/3] bg-slate-100 flex items-center justify-center">
-                  <div className="text-[13px] text-slate-400">Product image</div>
+                {/* 3D Product Illustration */}
+                <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-50 to-white">
+                  <Suspense fallback={
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                    </div>
+                  }>
+                    <ProductCard3D category={study.category as "Confectionery" | "Toys" | "Snacks"} />
+                  </Suspense>
                 </div>
                 {/* Content */}
                 <div className="p-4">
