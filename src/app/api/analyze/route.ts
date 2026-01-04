@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     if (!imageFile) {
       return NextResponse.json(
         {
-          success: false,
+          ok: false,
           error: "Product photo is required.",
         },
         { status: 400 }
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
           if (status === "processing" || status === "queued") {
             console.log(`[Analyze API] Report already ${status}, returning existing reportId without starting new pipeline`);
             return NextResponse.json({
-              success: true,
+              ok: true,
               reportId: existingReport.id,
               reused: true,
               status,
@@ -224,7 +224,7 @@ export async function POST(request: Request) {
           if (status === "completed") {
             console.log(`[Analyze API] Report already completed, returning existing reportId (use rerun=true to force new analysis)`);
             return NextResponse.json({
-              success: true,
+              ok: true,
               reportId: existingReport.id,
               reused: true,
               status,
@@ -239,8 +239,10 @@ export async function POST(request: Request) {
     }
     
     // If user is not logged in, always create a new report (never reuse)
+    // Guest users should not be able to run analysis (checked in AnalyzeForm)
+    // But if they somehow get here, create report with user_id = null
     if (!user) {
-      console.log(`[Analyze API] Guest user - always creating new report, never reusing`);
+      console.log(`[Analyze API] No user - creating new report with user_id = null`);
     }
 
     // Upload images to the uploads bucket with user-scoped paths
@@ -347,7 +349,7 @@ export async function POST(request: Request) {
       
       return NextResponse.json(
         {
-          success: false,
+          ok: false,
           error: missingBucket ? "BUCKET_NOT_FOUND" : forbidden ? "STORAGE_FORBIDDEN" : "UPLOAD_FAILED",
           message,
           details: process.env.NODE_ENV === "development" ? errorMsg : undefined,
@@ -399,7 +401,7 @@ export async function POST(request: Request) {
           });
           return NextResponse.json(
             {
-              success: false,
+              ok: false,
               error: "PROFILE_CREATION_FAILED",
               message: "Failed to create user profile. Please try again.",
               details: process.env.NODE_ENV === "development" ? createProfileError.message : undefined,
@@ -412,7 +414,7 @@ export async function POST(request: Request) {
         console.error("[Analyze API] Error checking profile:", profileError.message);
         return NextResponse.json(
           {
-            success: false,
+            ok: false,
             error: "PROFILE_CHECK_FAILED",
             message: "Failed to verify user profile. Please try again.",
             details: process.env.NODE_ENV === "development" ? profileError.message : undefined,
@@ -488,7 +490,7 @@ export async function POST(request: Request) {
           // Check if it's already processing
           if (existingReport.status === "processing" || existingReport.status === "queued") {
             return NextResponse.json({
-              success: true,
+              ok: true,
               reportId: existingReport.id,
               reused: true,
               status: existingReport.status,
@@ -520,7 +522,7 @@ export async function POST(request: Request) {
               console.error("[Analyze API] Admin client also failed:", adminError?.message);
               return NextResponse.json(
                 { 
-                  success: false, 
+                  ok: false, 
                   error: "REPORT_INIT_FAILED", 
                   message: upsertError.message || "Unable to create report",
                   details: process.env.NODE_ENV === "development" ? {
@@ -536,7 +538,7 @@ export async function POST(request: Request) {
             console.error("[Analyze API] Admin fallback also failed:", adminFallbackError);
             return NextResponse.json(
               { 
-                success: false, 
+                ok: false, 
                 error: "REPORT_INIT_FAILED", 
                 message: upsertError.message || "Unable to create report",
                 details: process.env.NODE_ENV === "development" ? {
@@ -582,8 +584,9 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({
-          success: true,
+          ok: true,
           reportId: finalReportId,
+          reused: false,
           status: "partial",
           phase: "fast_facts",
           message: "Fast facts extracted. Detailed analysis running in background.",
@@ -1296,8 +1299,9 @@ export async function POST(request: Request) {
       console.log("[Analyze API] Guest user - skipping DB update, returning results directly");
       // Return results without saving to DB
       return NextResponse.json({
-        success: true,
+        ok: true,
         reportId: null, // No reportId for guest users
+        reused: false,
         savedReport: false,
         isGuest: true,
         data: { ...result, draftInference },
@@ -1322,7 +1326,7 @@ export async function POST(request: Request) {
       console.error("[Analyze API] Cannot update report: finalReportId is null");
       return NextResponse.json(
         {
-          success: false,
+          ok: false,
           error: "REPORT_ID_MISSING",
           message: "Report ID is missing. Please try again.",
         },
@@ -1378,7 +1382,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          success: false,
+          ok: false,
           savedReport: false,
           error: "REPORT_SAVE_FAILED",
           details: updateError.message,
@@ -1407,7 +1411,7 @@ export async function POST(request: Request) {
         });
         return NextResponse.json(
           {
-            success: false,
+            ok: false,
             savedReport: false,
             error: "REPORT_DISAPPEARED",
             message: "Report was updated but cannot be found. Please try again.",
@@ -1798,7 +1802,7 @@ export async function POST(request: Request) {
       console.error("[Analyze API] CRITICAL: finalReportId is null but user is authenticated");
       return NextResponse.json(
         {
-          success: false,
+          ok: false,
           error: "REPORT_ID_MISSING",
           message: "Report was created but ID is missing. Please try again.",
         },
@@ -1871,7 +1875,7 @@ export async function POST(request: Request) {
           });
           return NextResponse.json(
             {
-              success: false,
+              ok: false,
               error: "REPORT_NOT_FOUND",
               message: "Report was created but cannot be found. Please try again or contact support.",
               reportId: finalReportId, // Return the ID anyway so user can try manually
@@ -1901,8 +1905,9 @@ export async function POST(request: Request) {
         });
         // Still return the reportId - let the client retry
         return NextResponse.json({
-          success: true,
+          ok: true,
           reportId: finalReportId,
+          reused: false,
           savedReport: false,
           warning: "Report created but may not be immediately readable. Please refresh if you see a 404.",
           data: { ...result, draftInference },
@@ -1917,8 +1922,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      success: true,
+      ok: true,
       reportId: finalReportId,
+      reused: false,
       savedReport: true,
       data: { ...result, draftInference },
       warnings,
@@ -1950,7 +1956,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        success: false,
+        ok: false,
         error: errorMessage || "Unknown error occurred",
         message: "Intelligence pipeline execution failed",
         details: process.env.NODE_ENV === "development" ? {

@@ -6,7 +6,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "i.ytimg.com",
-        pathname: "/vi/**",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "ytimg.com",
+        pathname: "/**",
       },
     ],
   },

@@ -201,7 +201,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       const data = await response.json().catch(() => ({}));
 
       // Handle reused report (idempotency)
-      if (response.ok && data?.success && data?.reused) {
+      if (response.ok && data?.ok && data?.reused) {
         const existingReportId = String(data.reportId || '').trim();
         console.log(`[AnalyzeForm] Server returned existing report: ${existingReportId}, status: ${data.status}`);
         
@@ -212,9 +212,15 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           return;
         }
         
-        // Verify existing report exists before redirecting
+        // Verify existing report exists and user owns it before redirecting
         try {
-          console.log("[AnalyzeForm] Verifying existing report before redirect...");
+          console.log("[AnalyzeForm] Verifying existing report ownership before redirect...");
+          
+          // Get current user id
+          const supabase = createClient();
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+          
+          // Verify report exists and check ownership
           const verifyRes = await fetch(`/api/reports/${existingReportId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
@@ -222,8 +228,22 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           
           if (verifyRes.ok) {
             const verifyData = await verifyRes.json();
-            if (verifyData?.success && verifyData?.report) {
-              console.log("[AnalyzeForm] Existing report verified, redirecting...");
+            // Use ok field, not success
+            if (verifyData?.ok && verifyData?.report) {
+              // Check ownership if report has a user_id
+              if (verifyData.report.user_id && currentUser) {
+                if (verifyData.report.user_id !== currentUser.id) {
+                  console.error("[AnalyzeForm] Ownership mismatch:", {
+                    reportUserId: verifyData.report.user_id,
+                    currentUserId: currentUser.id,
+                  });
+                  toast.error("This report belongs to another account. Starting fresh analysis...");
+                  setLoading(false);
+                  return;
+                }
+              }
+              
+              console.log("[AnalyzeForm] Existing report verified and ownership confirmed, redirecting...");
               if (data.status === "processing" || data.status === "queued") {
                 toast.info(data.message || "Analysis already in progress. Redirecting...");
               } else if (data.status === "completed") {
@@ -231,11 +251,19 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
               }
               router.push(`/reports/${existingReportId}/v2`);
               return;
+            } else if (verifyData?.ok === false) {
+              // Explicit error from API
+              if (verifyData.errorCode === "FORBIDDEN" || verifyData.errorCode === "AUTH_REQUIRED") {
+                console.error("[AnalyzeForm] Access forbidden to existing report:", verifyData.errorCode);
+                toast.error("Cannot access this report. Starting fresh analysis...");
+                setLoading(false);
+                return;
+              }
             }
           }
           
           // If verification failed, the report might not exist - start new analysis
-          console.error("[AnalyzeForm] Existing report not found, starting new analysis:", {
+          console.error("[AnalyzeForm] Existing report verification failed, starting new analysis:", {
             reportId: existingReportId,
             status: verifyRes.status,
           });
@@ -244,18 +272,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           return;
         } catch (verifyError) {
           console.error("[AnalyzeForm] Error verifying existing report:", verifyError);
-          // Still try to redirect - let the page handle the error
-          if (data.status === "processing" || data.status === "queued") {
-            toast.info(data.message || "Analysis already in progress. Redirecting...");
-          } else if (data.status === "completed") {
-            toast.info("Analysis already completed. Redirecting to existing report.");
-          }
-          router.push(`/reports/${existingReportId}/v2`);
+          toast.error("Error verifying report. Please try again.");
+          setLoading(false);
           return;
         }
       }
 
-      if (!response.ok || !data?.success) {
+      if (!response.ok || !data?.ok) {
         const errorMessage = data?.error || data?.message || data?.details || `Analysis failed (${response.status})`;
         const fullError = {
           status: response.status,
@@ -325,10 +348,14 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         console.log("[AnalyzeForm] Waiting for report to be ready...");
         await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
         
-        // Pre-verify report exists before redirecting
+        // Pre-verify report exists and user owns it before redirecting
         try {
           const verifyUrl = `/api/reports/${encodeURIComponent(reportId)}`;
-          console.log("[AnalyzeForm] Verifying report before redirect:", verifyUrl);
+          console.log("[AnalyzeForm] Verifying report ownership before redirect:", verifyUrl);
+          
+          // Get current user id for ownership check
+          const supabase = createClient();
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
           
           const verifyRes = await fetch(verifyUrl, {
             method: 'GET',
@@ -338,33 +365,50 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           
           if (verifyRes.ok) {
             const verifyData = await verifyRes.json();
-            if (verifyData?.success && verifyData?.report) {
-              console.log("[AnalyzeForm] ✓ Report verified, redirecting to:", `/reports/${reportId}/v2`);
+            // Use ok field, not success
+            if (verifyData?.ok && verifyData?.report) {
+              // Check ownership if report has a user_id
+              if (verifyData.report.user_id && currentUser) {
+                if (verifyData.report.user_id !== currentUser.id) {
+                  console.error("[AnalyzeForm] Ownership mismatch:", {
+                    reportUserId: verifyData.report.user_id,
+                    currentUserId: currentUser.id,
+                  });
+                  toast.error("This report belongs to another account. Please try again.");
+                  setLoading(false);
+                  return;
+                }
+              }
+              
+              console.log("[AnalyzeForm] ✓ Report verified and ownership confirmed, redirecting to:", `/reports/${reportId}/v2`);
               toast.success("Analysis completed");
               router.push(`/reports/${reportId}/v2`);
               return;
-            } else {
-              console.warn("[AnalyzeForm] Report verification returned success=false:", verifyData);
+            } else if (verifyData?.ok === false) {
+              // Explicit error from API
+              if (verifyData.errorCode === "FORBIDDEN" || verifyData.errorCode === "AUTH_REQUIRED") {
+                console.error("[AnalyzeForm] Access forbidden to report:", verifyData.errorCode);
+                toast.error("Cannot access this report. Please try again.");
+                setLoading(false);
+                return;
+              }
+              console.warn("[AnalyzeForm] Report verification returned ok=false:", verifyData);
             }
           } else {
             console.warn("[AnalyzeForm] Report verification failed with status:", verifyRes.status);
           }
           
-          // If verification failed, still try to redirect (might be race condition)
-          console.warn("[AnalyzeForm] Report verification failed, but redirecting anyway:", {
+          // If verification failed, don't redirect - show error
+          console.warn("[AnalyzeForm] Report verification failed, not redirecting:", {
             status: verifyRes.status,
             reportId,
-            url: `/reports/${reportId}/v2`,
           });
-          toast.success("Analysis completed");
-          router.push(`/reports/${reportId}/v2`);
+          toast.error("Report verification failed. Please try again.");
+          setLoading(false);
         } catch (verifyError) {
           console.error("[AnalyzeForm] Error verifying report:", verifyError);
-          // Still redirect - let the page handle the error
-          toast.success("Analysis completed");
-          const redirectUrl = `/reports/${reportId}/v2`;
-          console.log("[AnalyzeForm] Redirecting despite verification error to:", redirectUrl);
-          router.push(redirectUrl);
+          toast.error("Error verifying report. Please try again.");
+          setLoading(false);
         }
       } else {
         // Fallback: show results inline or redirect

@@ -144,10 +144,12 @@ export async function GET(
           ok: false,
           errorCode: "AUTH_REQUIRED",
           reportId,
-          debug: {
-            reportUserId: reportData.user_id,
-            userLoggedIn: false,
-          },
+          ...(process.env.NODE_ENV !== "production" ? {
+            debug: {
+              reportUserId: reportData.user_id,
+              userLoggedIn: false,
+            },
+          } : {}),
         },
         { status: 403 }
       );
@@ -164,10 +166,12 @@ export async function GET(
           ok: false,
           errorCode: "FORBIDDEN",
           reportId,
-          debug: {
-            reportUserId: reportData.user_id,
-            requestUserId: user.id,
-          },
+          ...(process.env.NODE_ENV !== "production" ? {
+            debug: {
+              reportUserId: reportData.user_id,
+              requestUserId: user.id,
+            },
+          } : {}),
         },
         { status: 403 }
       );

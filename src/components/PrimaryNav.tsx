@@ -14,7 +14,7 @@ const primaryNavItems = [
 ];
 
 const moreNavItems = [
-  { href: "/inbox", label: "Inbox", icon: MessageSquare },
+  { href: "/app/inbox", label: "Inbox", icon: MessageSquare },
   { href: "/admin", label: "Admin", icon: Settings, requiresAdmin: true },
   { href: "/support", label: "Help", icon: HelpCircle },
   { href: "/support?category=technical_issues", label: "Technical Issues", icon: HelpCircle },
