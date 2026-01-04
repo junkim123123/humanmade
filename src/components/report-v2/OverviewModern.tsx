@@ -144,6 +144,22 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   
   const reportAny = report as any;
+  
+  // Debug: Log supplier matches on mount
+  if (typeof window !== 'undefined') {
+    console.log('[OverviewModern] Report data check:', {
+      hasSupplierMatches: !!reportAny._supplierMatches,
+      supplierMatchesType: typeof reportAny._supplierMatches,
+      supplierMatchesLength: Array.isArray(reportAny._supplierMatches) ? reportAny._supplierMatches.length : 'not array',
+      firstMatch: Array.isArray(reportAny._supplierMatches) && reportAny._supplierMatches.length > 0 ? {
+        id: reportAny._supplierMatches[0].id,
+        supplierName: reportAny._supplierMatches[0].supplierName,
+        hasSupplierName: !!reportAny._supplierMatches[0].supplierName,
+      } : null,
+      reportKeys: Object.keys(reportAny).filter(k => k.includes('supplier') || k.includes('factory') || k.includes('match')),
+    });
+  }
+  
   const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus;
   const uploadsOptional = !(
     inputStatus?.barcodePhotoUploaded &&
