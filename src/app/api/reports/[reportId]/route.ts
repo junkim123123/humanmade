@@ -20,8 +20,19 @@ export async function GET(
   ctx: { params: Promise<{ reportId: string }> }
 ) {
   const { reportId } = await ctx.params;
+  
+  if (!reportId || typeof reportId !== 'string' || reportId.trim() === '') {
+    console.error("[Reports API] Invalid reportId:", reportId);
+    return NextResponse.json(
+      { success: false, error: "INVALID_REPORT_ID" },
+      { status: 400 }
+    );
+  }
+  
   const admin = getSupabaseAdmin();
 
+  console.log("[Reports API] Fetching report:", reportId);
+  
   const { data, error } = await admin
     .from("reports")
     .select("*")
@@ -29,20 +40,53 @@ export async function GET(
     .maybeSingle();
 
   if (error) {
-    console.error("[Reports API] Read error", error);
-    console.error("[Reports API] ReportId", reportId);
+    console.error("[Reports API] Read error:", {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      reportId,
+    });
     return NextResponse.json(
-      { success: false, error: "READ_FAILED" },
+      { 
+        success: false, 
+        error: "READ_FAILED",
+        message: error.message,
+      },
       { status: 500 }
     );
   }
 
   if (!data) {
+    console.error("[Reports API] Report not found:", reportId);
+    // Check if report exists with different query
+    const { data: checkData, error: checkError } = await admin
+      .from("reports")
+      .select("id, status, user_id")
+      .eq("id", reportId)
+      .maybeSingle();
+    
+    console.log("[Reports API] Verification query result:", {
+      found: !!checkData,
+      error: checkError?.message,
+      reportId,
+    });
+    
     return NextResponse.json(
-      { success: false, error: "NOT_FOUND" },
+      { 
+        success: false, 
+        error: "NOT_FOUND",
+        message: "Report not found in database",
+      },
       { status: 404 }
     );
   }
+  
+  console.log("[Reports API] Report found:", {
+    id: data.id,
+    status: data.status,
+    product_name: data.product_name,
+  });
 
   const reportData = data as any;
 

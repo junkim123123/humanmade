@@ -245,10 +245,21 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
       // For authenticated users or if reportId exists
       if (data?.reportId) {
+        const reportId = String(data.reportId).trim();
+        console.log("[AnalyzeForm] Redirecting to report:", reportId);
+        
+        if (!reportId || reportId === 'null' || reportId === 'undefined') {
+          console.error("[AnalyzeForm] Invalid reportId:", data.reportId);
+          toast.error("Invalid report ID. Please try again.");
+          setLoading(false);
+          return;
+        }
+        
         toast.success("Analysis completed");
-        router.push(`/reports/${data.reportId}/v2`);
+        router.push(`/reports/${reportId}/v2`);
       } else {
         // Fallback: show results inline or redirect
+        console.warn("[AnalyzeForm] No reportId in response:", data);
         toast.success("Analysis completed");
         setLoading(false);
       }
