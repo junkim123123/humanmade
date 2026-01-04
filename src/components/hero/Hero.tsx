@@ -131,7 +131,7 @@ export default function Hero() {
             </p>
 
             {/* Headline - Premium sizing */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
               Stop overpaying wholesalers.
               <br />
               <span className="text-slate-700">Source direct.</span>
