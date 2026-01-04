@@ -2,6 +2,7 @@
 
 import { PrimaryNav } from "@/components/PrimaryNav";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
@@ -18,6 +19,7 @@ const caseStudies = [
     borderColor: "border-rose-200/60",
     categoryColor: "text-rose-600",
     bgColor: "bg-rose-50/40",
+    image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
   },
   {
     id: "p-2",
@@ -29,6 +31,7 @@ const caseStudies = [
     borderColor: "border-blue-200/60",
     categoryColor: "text-blue-600",
     bgColor: "bg-blue-50/40",
+    image: "/product-photos/$0.5 장난감/mmexport1758762530965.jpg",
   },
   {
     id: "p-3",
@@ -40,6 +43,7 @@ const caseStudies = [
     borderColor: "border-emerald-200/60",
     categoryColor: "text-emerald-600",
     bgColor: "bg-emerald-50/40",
+    image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
   },
 ];
 
@@ -195,28 +199,25 @@ export default function ReportsPage() {
                   {/* Gradient Overlay */}
                   <div className={`absolute inset-0 ${study.gradientFrom} ${study.gradientTo} bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                   
-                  {/* Product Visual - Soft Gradient Background */}
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    {/* Blurred Circle Gradient Background */}
-                    <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${
-                      study.category === "Confectionery" ? "bg-gradient-to-br from-pink-400 to-rose-500" :
-                      study.category === "Toys" ? "bg-gradient-to-br from-blue-400 to-blue-600" :
-                      "bg-gradient-to-br from-emerald-400 to-green-500"
-                    }`} />
+                  {/* Product Visual - Actual Image */}
+                  <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                    {/* Product Image */}
+                    {study.image && (
+                      <Image
+                        src={study.image}
+                        alt={study.productName}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={index < 3}
+                      />
+                    )}
                     
-                    {/* Large Icon */}
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <div className={`text-8xl font-bold opacity-20 ${
-                        study.category === "Confectionery" ? "text-rose-500" :
-                        study.category === "Toys" ? "text-blue-600" :
-                        "text-green-500"
-                      }`}>
-                        {study.category.charAt(0)}
-                      </div>
-                    </div>
+                    {/* Gradient Overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                     
                     {/* Category Badge */}
-                    <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full ${study.bgColor} backdrop-blur-sm border ${study.borderColor}`}>
+                    <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full ${study.bgColor} backdrop-blur-sm border ${study.borderColor} shadow-lg`}>
                       <span className={`text-xs font-semibold ${study.categoryColor} uppercase tracking-wider`}>
                         {study.category}
                       </span>
