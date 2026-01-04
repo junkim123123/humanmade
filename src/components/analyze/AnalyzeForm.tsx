@@ -203,14 +203,29 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       }
 
       if (!response.ok || !data?.success) {
-        const errorMessage = data?.error || data?.message || `Analysis failed (${response.status})`;
-        console.error("[AnalyzeForm] API error:", {
+        const errorMessage = data?.error || data?.message || data?.details || `Analysis failed (${response.status})`;
+        const fullError = {
           status: response.status,
           statusText: response.statusText,
-          data,
-        });
-        setApiError(errorMessage);
-        toast.error(errorMessage);
+          error: data?.error,
+          message: data?.message,
+          details: data?.details,
+          fullData: data,
+        };
+        console.error("[AnalyzeForm] API error:", fullError);
+        
+        // Show more detailed error message
+        let displayMessage = errorMessage;
+        if (data?.error === "UPLOAD_FAILED" || data?.error === "STORAGE_FORBIDDEN") {
+          displayMessage = "Image upload failed. Please try again or contact support.";
+        } else if (data?.error === "REPORT_INIT_FAILED") {
+          displayMessage = "Failed to initialize report. Please try again.";
+        } else if (data?.error === "REPORT_SAVE_FAILED") {
+          displayMessage = "Failed to save report. Please try again.";
+        }
+        
+        setApiError(displayMessage);
+        toast.error(displayMessage);
         setLoading(false);
         return;
       }

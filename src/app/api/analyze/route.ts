@@ -274,6 +274,15 @@ export async function POST(request: Request) {
     let extra2ImageUrl: string | null = null;
 
     try {
+      console.log("[Analyze API] Starting image uploads...", {
+        hasProduct: !!imageFile,
+        hasBarcode: !!barcodeFile,
+        hasLabel: !!labelFile,
+        hasExtra1: !!extra1File,
+        hasExtra2: !!extra2File,
+        userId: user?.id || "guest",
+      });
+      
       const uploadPromises = [uploadImage(imageFile, "product")];
       if (barcodeFile) uploadPromises.push(uploadImage(barcodeFile, "barcode"));
       if (labelFile) uploadPromises.push(uploadImage(labelFile, "label"));
@@ -283,6 +292,8 @@ export async function POST(request: Request) {
       if (barcodeFile) barcodeImageUrl = uploadResults[1] || null;
       if (labelFile) labelImageUrl = uploadResults[barcodeFile ? 2 : 1] || null;
 
+      console.log("[Analyze API] Main images uploaded successfully");
+
       // Upload optional images if present
       if (extra1File) {
         extra1ImageUrl = await uploadImage(extra1File, "extra1");
@@ -290,22 +301,33 @@ export async function POST(request: Request) {
       if (extra2File) {
         extra2ImageUrl = await uploadImage(extra2File, "extra2");
       }
+      
+      console.log("[Analyze API] All images uploaded successfully");
     } catch (uploadError: any) {
+      const errorMsg = uploadError?.message || String(uploadError);
       const missingBucket =
-        uploadError.message?.toLowerCase().includes("bucket") || uploadError.status === 404;
-      const forbidden = uploadError.status === 403;
+        errorMsg?.toLowerCase().includes("bucket") || uploadError?.status === 404;
+      const forbidden = uploadError?.status === 403 || errorMsg?.toLowerCase().includes("row-level security") || errorMsg?.toLowerCase().includes("permission");
       const message = missingBucket
         ? "Uploads storage bucket is missing. Create a private bucket named 'uploads' in Supabase Storage and retry."
         : forbidden
           ? "Access to the uploads bucket is blocked. Check Storage RLS policies for authenticated users."
-          : uploadError.message;
+          : errorMsg || "Image upload failed";
 
-      console.error("[Analyze API] Upload failed", uploadError.message);
+      console.error("[Analyze API] Upload failed:", {
+        message: errorMsg,
+        status: uploadError?.status,
+        code: uploadError?.code,
+        details: uploadError?.details,
+        fullError: uploadError,
+      });
+      
       return NextResponse.json(
         {
           success: false,
           error: missingBucket ? "BUCKET_NOT_FOUND" : forbidden ? "STORAGE_FORBIDDEN" : "UPLOAD_FAILED",
           message,
+          details: process.env.NODE_ENV === "development" ? errorMsg : undefined,
         },
         { status: missingBucket ? 503 : forbidden ? 403 : 500 }
       );
