@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, PresentationControls, ContactShadows, Text } from "@react-three/drei";
+import { Float, PresentationControls, ContactShadows, Text, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
 // Factory Building Component
