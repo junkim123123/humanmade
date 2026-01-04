@@ -288,45 +288,73 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
       // For authenticated users or if reportId exists
       if (data?.reportId) {
-        const reportId = String(data.reportId).trim();
-        console.log("[AnalyzeForm] Redirecting to report:", reportId, {
+        const rawReportId = data.reportId;
+        const reportId = String(rawReportId).trim();
+        
+        console.log("[AnalyzeForm] Processing reportId for redirect:", {
+          raw: rawReportId,
+          trimmed: reportId,
+          type: typeof rawReportId,
           savedReport: data?.savedReport,
           success: data?.success,
           timestamp: new Date().toISOString(),
         });
         
-        if (!reportId || reportId === 'null' || reportId === 'undefined') {
-          console.error("[AnalyzeForm] Invalid reportId:", data.reportId);
+        // Validate reportId
+        if (!reportId || reportId === 'null' || reportId === 'undefined' || reportId === '') {
+          console.error("[AnalyzeForm] Invalid reportId:", {
+            raw: rawReportId,
+            trimmed: reportId,
+            data: data,
+          });
           toast.error("Invalid report ID. Please try again.");
+          setLoading(false);
+          return;
+        }
+        
+        // Validate UUID format (unless it's a special ID like "sample-report")
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (reportId !== "sample-report" && !uuidRegex.test(reportId)) {
+          console.error("[AnalyzeForm] Invalid reportId format (not UUID):", reportId);
+          toast.error("Invalid report ID format. Please try again.");
           setLoading(false);
           return;
         }
         
         // Add delay to ensure report is committed to DB and readable
         console.log("[AnalyzeForm] Waiting for report to be ready...");
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Increased delay
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
         
         // Pre-verify report exists before redirecting
         try {
-          const verifyRes = await fetch(`/api/reports/${reportId}`, {
+          const verifyUrl = `/api/reports/${encodeURIComponent(reportId)}`;
+          console.log("[AnalyzeForm] Verifying report before redirect:", verifyUrl);
+          
+          const verifyRes = await fetch(verifyUrl, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store',
           });
           
           if (verifyRes.ok) {
             const verifyData = await verifyRes.json();
             if (verifyData?.success && verifyData?.report) {
-              console.log("[AnalyzeForm] Report verified, redirecting...");
+              console.log("[AnalyzeForm] ✓ Report verified, redirecting to:", `/reports/${reportId}/v2`);
               toast.success("Analysis completed");
               router.push(`/reports/${reportId}/v2`);
               return;
+            } else {
+              console.warn("[AnalyzeForm] Report verification returned success=false:", verifyData);
             }
+          } else {
+            console.warn("[AnalyzeForm] Report verification failed with status:", verifyRes.status);
           }
           
           // If verification failed, still try to redirect (might be race condition)
           console.warn("[AnalyzeForm] Report verification failed, but redirecting anyway:", {
             status: verifyRes.status,
             reportId,
+            url: `/reports/${reportId}/v2`,
           });
           toast.success("Analysis completed");
           router.push(`/reports/${reportId}/v2`);
@@ -334,7 +362,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           console.error("[AnalyzeForm] Error verifying report:", verifyError);
           // Still redirect - let the page handle the error
           toast.success("Analysis completed");
-          router.push(`/reports/${reportId}/v2`);
+          const redirectUrl = `/reports/${reportId}/v2`;
+          console.log("[AnalyzeForm] Redirecting despite verification error to:", redirectUrl);
+          router.push(redirectUrl);
         }
       } else {
         // Fallback: show results inline or redirect

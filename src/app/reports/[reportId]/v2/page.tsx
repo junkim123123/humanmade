@@ -9,11 +9,32 @@ async function getReport(reportId: string, retryCount = 0): Promise<any> {
   
   try {
     // Use absolute URL for server-side fetch
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-      || "http://localhost:3000";
+    // Try multiple methods to get the base URL
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!baseUrl && process.env.VERCEL_URL) {
+      baseUrl = `https://${process.env.VERCEL_URL}`;
+    }
+    if (!baseUrl) {
+      // Fallback: try to construct from request headers if available
+      baseUrl = "http://localhost:3000";
+    }
     
-    const res = await fetch(`${baseUrl}/api/reports/${reportId}`, {
+    // Validate reportId before making request
+    if (!reportId || typeof reportId !== 'string' || reportId.trim() === '') {
+      console.error("[Report V2 Page] Invalid reportId in getReport:", reportId);
+      return null;
+    }
+    
+    const cleanReportId = reportId.trim();
+    const apiUrl = `${baseUrl}/api/reports/${cleanReportId}`;
+    
+    console.log(`[Report V2 Page] Fetching report from: ${apiUrl}`, {
+      reportId: cleanReportId,
+      baseUrl,
+      retryCount,
+    });
+    
+    const res = await fetch(apiUrl, {
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
@@ -79,16 +100,32 @@ async function getReport(reportId: string, retryCount = 0): Promise<any> {
 export default async function Page({
   params,
 }: {
-  params: { reportId: string };
+  params: Promise<{ reportId: string }> | { reportId: string };
 }) {
-  const { reportId } = await params;
+  // Handle both Promise and direct params (Next.js 13+ compatibility)
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const reportId = resolvedParams.reportId;
   
   if (!reportId) {
-    console.error("[Report V2 Page] No reportId provided");
+    console.error("[Report V2 Page] No reportId provided in params:", resolvedParams);
+    notFound();
+  }
+  
+  // Validate reportId format (UUID format)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isSampleReport = reportId === "sample-report";
+  
+  if (!isSampleReport && !uuidRegex.test(reportId)) {
+    console.error("[Report V2 Page] Invalid reportId format:", reportId);
     notFound();
   }
 
-  console.log("[Report V2 Page] Attempting to fetch report:", reportId);
+  console.log("[Report V2 Page] Attempting to fetch report:", {
+    reportId,
+    isValidFormat: isSampleReport || uuidRegex.test(reportId),
+    timestamp: new Date().toISOString(),
+  });
+  
   const report = await getReport(reportId);
   
   if (!report) {
