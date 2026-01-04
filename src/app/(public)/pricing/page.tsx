@@ -12,86 +12,127 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        {/* Hero */}
-        <section className="text-center mb-16">
-          <h1 className="text-[40px] font-bold text-slate-900 tracking-[-0.02em] mb-4">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50/90 to-slate-100/80 py-12 lg:py-16">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="text-center mb-10">
+          <h1 className="text-[34px] sm:text-[40px] font-bold tracking-[-0.03em] text-slate-900">
             Pricing
           </h1>
-          <p className="text-[18px] text-slate-600 mb-2">
+          <p className="mt-2 text-[16px] sm:text-[18px] text-slate-600">
             Start free. Pay a deposit only when you want verified quotes. Get it back when you order.
           </p>
-          <p className="text-[14px] text-slate-500">
+          <p className="mt-1 text-[13px] text-slate-500">
             Outreach starts within 12 hours. Quotes arrive in about a week.
           </p>
-        </section>
+        </header>
 
-        {/* Pricing Table */}
-        <section className="mb-20">
-          <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-200">
-            {/* Free */}
-            <div className="p-6 flex items-start justify-between gap-6">
+        {/* 3D main pricing card */}
+        <section
+          className="
+            rounded-3xl border border-slate-200 bg-white/95
+            shadow-[0_26px_70px_rgba(15,23,42,0.18)]
+            backdrop-blur-sm
+            overflow-hidden
+            mb-12
+          "
+        >
+          {/* Free / Verification / Execution stack */}
+          <div className="divide-y divide-slate-200">
+            {/* Free Analysis */}
+            <div className="p-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex-1">
-                <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Free Analysis</h3>
-                <p className="text-[14px] text-slate-600">
-                  Instant Landed Cost & Profit Analysis using AI and import data.
+                <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
+                  Free Analysis
+                </h2>
+                <p className="text-[14px] text-slate-600 max-w-md">
+                  Instant Landed Cost &amp; Profit Analysis using AI and import data.
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <div className="text-[28px] font-bold text-slate-900">$0</div>
+                <div className="inline-flex items-baseline gap-1 rounded-full bg-emerald-50 px-3 py-1">
+                  <span className="text-[20px] sm:text-[26px] font-bold text-slate-900">
+                    $0
+                  </span>
+                  <span className="text-[11px] text-emerald-700 font-medium">
+                    Free snapshot
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Verification */}
-            <div id="deposit" className="p-6 bg-slate-50">
-              <div className="flex items-start justify-between gap-6">
+            <div id="deposit" className="p-6 bg-slate-50/90">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
-                  <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Verification</h3>
-                  <p className="text-[14px] text-slate-600">
+                  <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
+                    Verification
+                  </h2>
+                  <p className="text-[14px] text-slate-600 max-w-md">
                     We validate the factory, negotiate MOQs, and confirm the exact landed cost blueprint.
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-[28px] font-bold text-slate-900">$45</div>
-                  <p className="text-[12px] text-slate-500 mt-1">Sourcing Deposit</p>
+                  <div className="text-[26px] font-bold text-slate-900">
+                    $45
+                  </div>
+                  <p className="text-[12px] text-slate-500 mt-1">
+                    Sourcing Deposit
+                  </p>
                 </div>
               </div>
+
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center px-3 py-1 text-[12px] font-semibold text-emerald-700 bg-emerald-100 rounded-full border border-emerald-200">
-                  100% Credited back to your first order
+                  100% credited to your first order
                 </span>
-                <span className="text-[12px] text-slate-500">Deposit per product (not a fee if you order)</span>
+                <span className="text-[12px] text-slate-500">
+                  Per product. Not a fee if you order.
+                </span>
               </div>
             </div>
 
             {/* Execution */}
             <div className="p-6">
-              <div className="flex items-start justify-between gap-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
-                  <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Execution</h3>
-                  <p className="text-[14px] text-slate-600">
+                  <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
+                    Execution
+                  </h2>
+                  <p className="text-[14px] text-slate-600 max-w-md">
                     End-to-end logistics coordination, from factory floor to your door.
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-[28px] font-bold text-slate-900">10%</div>
-                  <p className="text-[12px] text-slate-500">of FOB, only when you place an order</p>
+                  <div className="text-[26px] font-bold text-slate-900">
+                    10%
+                  </div>
+                  <p className="text-[12px] text-slate-500">
+                    of FOB, only when you place an order
+                  </p>
                 </div>
               </div>
-              <p className="text-[12px] text-slate-500 mt-3 italic">
-                (Logistics costs are passed through at cost, we charge 10% service fee on FOB to manage the chaos.)
+              <p className="mt-3 text-[12px] text-slate-500 italic max-w-md">
+                Logistics costs are passed through at cost. We charge a 10% service fee on FOB to manage the chaos.
               </p>
             </div>
           </div>
         </section>
 
-        {/* What You Get */}
-        <section className="mb-20">
-          <h2 className="text-[24px] font-bold text-slate-900 mb-8 text-center">What you get</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* What You Get - 3D Card Grid */}
+        <section className="mb-12">
+          <h2 className="text-[24px] font-bold text-slate-900 mb-8 text-center">
+            What you get
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Free */}
-            <div className="rounded-xl border border-slate-200 bg-white p-6">
+            <div
+              className="
+                rounded-2xl border border-slate-200 bg-white/90 p-6
+                shadow-[0_16px_40px_rgba(15,23,42,0.12)]
+                transition-all hover:translate-y-[-2px] hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)]
+              "
+            >
               <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Free Analysis</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
@@ -114,7 +155,13 @@ export default function PricingPage() {
             </div>
 
             {/* Verification */}
-            <div className="rounded-xl border border-slate-900 bg-white p-6">
+            <div
+              className="
+                rounded-2xl border-2 border-slate-900 bg-white/95 p-6
+                shadow-[0_18px_45px_rgba(15,23,42,0.15)]
+                transition-all hover:translate-y-[-2px] hover:shadow-[0_22px_55px_rgba(15,23,42,0.22)]
+              "
+            >
               <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Verification</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
@@ -133,7 +180,13 @@ export default function PricingPage() {
             </div>
 
             {/* Execution */}
-            <div className="rounded-xl border border-slate-200 bg-white p-6">
+            <div
+              className="
+                rounded-2xl border border-slate-200 bg-white/90 p-6
+                shadow-[0_16px_40px_rgba(15,23,42,0.12)]
+                transition-all hover:translate-y-[-2px] hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)]
+              "
+            >
               <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Execution</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
@@ -153,9 +206,63 @@ export default function PricingPage() {
           </div>
         </section>
 
+        {/* Verification Timeline - Vertical Timeline Card */}
+        <section className="mb-12">
+          <h2 className="text-[24px] font-bold text-slate-900 mb-8 text-center">
+            Verification timeline
+          </h2>
+          <div
+            className="
+              rounded-3xl border border-slate-200 bg-white/95
+              shadow-[0_22px_60px_rgba(15,23,42,0.15)]
+              backdrop-blur-sm
+              p-6 lg:p-8
+            "
+          >
+            <div className="space-y-6">
+              {[
+                { step: 1, title: "Start outreach", time: "within 12h", desc: "We confirm specs and start outreach." },
+                { step: 2, title: "Validate quotes", time: "regular updates", desc: "We share updates while validating quotes and details." },
+                { step: 3, title: "Deliver quotes", time: "about 1 week", desc: "At least 3 viable quotes with MOQ and lead time" },
+              ].map((item, index) => (
+                <div key={item.step} className="flex gap-4">
+                  {/* Step Pill */}
+                  <div className="shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-[16px]">
+                      {item.step}
+                    </div>
+                    {index < 2 && (
+                      <div className="w-0.5 h-full bg-slate-200 mx-auto mt-2 min-h-[60px]" />
+                    )}
+                  </div>
+                  {/* Content Card */}
+                  <div
+                    className="
+                      flex-1 rounded-2xl border border-slate-200 bg-slate-50/90 p-4
+                      shadow-[0_8px_20px_rgba(15,23,42,0.08)]
+                      transition-all hover:shadow-[0_12px_30px_rgba(15,23,42,0.12)]
+                    "
+                  >
+                    <h3 className="text-[15px] font-semibold text-slate-900 mb-1">
+                      Step {item.step}: {item.title}
+                    </h3>
+                    <p className="text-[13px] text-slate-600 font-medium mb-2">{item.time}</p>
+                    <p className="text-[13px] text-slate-500">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Proof and Assumptions */}
-        <section className="mb-20">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center">
+        <section className="mb-12">
+          <div
+            className="
+              rounded-2xl border border-slate-200 bg-slate-50/90 p-8 text-center
+              shadow-[0_16px_40px_rgba(15,23,42,0.12)]
+            "
+          >
             <div className="max-w-xl mx-auto space-y-2">
               <p className="text-[15px] text-slate-700">When we find matching import shipments, we attach them.</p>
               <p className="text-[15px] text-slate-700">If we cannot, we show assumptions clearly.</p>
@@ -164,33 +271,19 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Verification Timeline */}
-        <section className="mb-20">
-          <h2 className="text-[24px] font-bold text-slate-900 mb-10 text-center">Verification timeline</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: 1, title: "Start outreach", time: "within 12h", desc: "We confirm specs and start outreach." },
-              { step: 2, title: "Validate quotes", time: "regular updates", desc: "We share updates while validating quotes and details." },
-              { step: 3, title: "Deliver quotes", time: "about 1 week", desc: "At least 3 viable quotes with MOQ and lead time" },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-[18px] mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h3 className="text-[15px] font-semibold text-slate-900 mb-1">Step {item.step}: {item.title}</h3>
-                <p className="text-[13px] text-slate-600 font-medium mb-2">{item.time}</p>
-                <p className="text-[13px] text-slate-500">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* FAQ */}
-        <section className="mb-16">
+        <section className="mb-12">
           <h2 className="text-[24px] font-bold text-slate-900 mb-8 text-center">
             Frequently asked questions
           </h2>
-          <div className="max-w-2xl mx-auto divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div
+            className="
+              max-w-2xl mx-auto divide-y divide-slate-200
+              rounded-2xl border border-slate-200 bg-white/95
+              shadow-[0_16px_40px_rgba(15,23,42,0.12)]
+              overflow-hidden
+            "
+          >
             {[
               {
                 q: "How accurate is the free estimate?",
@@ -232,7 +325,7 @@ export default function PricingPage() {
         </section>
 
         {/* Footer */}
-        <section className="text-center pt-8 border-t border-slate-200">
+        <section className="text-center pt-8 border-t border-slate-200/50">
           <p className="text-[14px] text-slate-600">
             Want an estimate now?{" "}
             <Link
@@ -244,7 +337,7 @@ export default function PricingPage() {
           </p>
         </section>
       </div>
-    </div>
+    </main>
   );
 }
 

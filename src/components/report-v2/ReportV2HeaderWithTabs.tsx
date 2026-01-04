@@ -26,7 +26,13 @@ function getEvidenceBadge(report: Report & { _similarRecordsCount?: number }) {
   }).length;
 
   const plural = verifiedSignalsCount === 1 ? "signal" : "signals";
-  const label = verifiedSignalsCount === 0 ? "Proof pending" : `Proof found ${verifiedSignalsCount} ${plural}`;
+  let label = verifiedSignalsCount === 0 ? "Proof pending" : `Proof found ${verifiedSignalsCount} ${plural}`;
+  // Add action text for non-high evidence levels
+  if (verifiedSignalsCount < 3 && verifiedSignalsCount > 0) {
+    label += " — upgrade to verified plan";
+  } else if (verifiedSignalsCount === 0) {
+    label += " — verify to unlock";
+  }
   if (verifiedSignalsCount >= 3) return { label, color: "bg-emerald-100 text-emerald-800", count: verifiedSignalsCount };
   if (verifiedSignalsCount >= 1) return { label, color: "bg-blue-100 text-blue-800", count: verifiedSignalsCount };
   return { label, color: "bg-slate-100 text-slate-800", count: 0 };
@@ -140,7 +146,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
                 {evidenceBadge.label}
               </span>
               <span className="text-[13px] text-slate-500">
-                Start verification to get 3 real factory options and a buy plan.
+                Draft buy plan — we&apos;ll lock numbers after verification.
               </span>
             </div>
           </div>
@@ -151,8 +157,8 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white shadow-lg">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <p className="text-[14px] text-slate-600">
-            <span className="hidden sm:inline">We start outreach within 12 hours. Quotes arrive in about a week with MOQ and lead time.</span>
-            <span className="sm:hidden">Outreach starts within 12 hours.</span>
+            <span className="hidden sm:inline">Start verification to convert this draft into a confirmed buy plan.</span>
+            <span className="sm:hidden">Convert draft to confirmed buy plan.</span>
           </p>
           <button
             onClick={handleRequestVerification}

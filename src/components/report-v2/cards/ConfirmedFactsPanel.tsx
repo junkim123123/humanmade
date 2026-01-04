@@ -84,7 +84,7 @@ export default function ConfirmedFactsPanel({ report }: ConfirmedFactsPanelProps
         <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
           <Shield className="w-5 h-5 text-slate-600" />
         </div>
-        <h3 className="text-[16px] font-semibold text-slate-900">Verified facts</h3>
+        <h3 className="text-[16px] font-semibold text-slate-900">Facts</h3>
       </div>
 
       <div className="px-6 py-5 space-y-3">

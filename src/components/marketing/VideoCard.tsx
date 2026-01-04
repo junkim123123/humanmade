@@ -17,7 +17,13 @@ export function VideoCard({ video }: VideoCardProps) {
   return (
     <Link
       href={`/proof/${video.slug}`}
-      className="group block overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow hover:shadow-md"
+      className="
+        group block overflow-hidden
+        rounded-2xl border border-slate-200 bg-white/90
+        shadow-[0_18px_45px_rgba(15,23,42,0.14)]
+        transition-all hover:shadow-[0_24px_60px_rgba(15,23,42,0.22)]
+        hover:-translate-y-[2px]
+      "
     >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden bg-slate-100">

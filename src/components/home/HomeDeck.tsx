@@ -83,6 +83,7 @@ export default function HomeDeck({ products = [] }: HomeDeckProps) {
     <ShelfPriceProvider>
       <div className="relative">
         <div className="landing-scroll-container">
+          {/* 1. Hero */}
           <section
             id="hero"
             className="bg-white"
@@ -90,20 +91,24 @@ export default function HomeDeck({ products = [] }: HomeDeckProps) {
             <Hero />
           </section>
 
-          <section id="how-it-works">
+          {/* 2. Flow Diorama - How it works */}
+          <section id="how-it-works" className="bg-white">
             <FlowDiorama />
           </section>
 
-          <section id="receipt-compare">
+          {/* 3. Margin Comparison */}
+          <section id="receipt-compare" className="bg-white">
             <MarginComparison />
           </section>
 
-          <section id="evidence" className="bg-slate-50/40">
-            <SectionEvidence />
+          {/* 4. Proof Showcase - Social proof */}
+          <section id="products" className="bg-white">
+            <ProofShowcase />
           </section>
 
-          <section id="products" className="bg-slate-50/40">
-            <ProofShowcase />
+          {/* Existing sections below */}
+          <section id="evidence" className="bg-slate-50/40">
+            <SectionEvidence />
           </section>
 
           <section id="why-us" className="bg-slate-50/40">
@@ -114,7 +119,7 @@ export default function HomeDeck({ products = [] }: HomeDeckProps) {
             <SectionVerifyPricing />
           </section>
 
-          <section id="faq">
+          <section id="faq" className="bg-white">
             <SectionFAQ />
           </section>
 

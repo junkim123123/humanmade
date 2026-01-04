@@ -58,7 +58,7 @@ export function ProductGallery({ products }: ProductGalleryProps) {
   return (
     <>
       {/* Grid - Product Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sortedProducts.map((product) => {
           const sanitized = product.sanitized;
           // Generate a label (mock data - in production, this could come from product data)
@@ -73,13 +73,21 @@ export function ProductGallery({ products }: ProductGalleryProps) {
           return (
             <div
               key={product.slug}
-              className="group relative rounded-xl border border-slate-200 bg-white overflow-hidden transition-shadow hover:shadow-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+              className="
+                group relative
+                rounded-2xl border border-slate-200 bg-white/90
+                shadow-[0_18px_45px_rgba(15,23,42,0.14)]
+                overflow-hidden
+                transition-all hover:shadow-[0_24px_60px_rgba(15,23,42,0.22)]
+                hover:-translate-y-[2px]
+                focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2
+              "
             >
               {/* Image */}
               <button
                 type="button"
                 onClick={() => openLightbox(product)}
-                className="relative aspect-square w-full overflow-hidden bg-slate-100"
+                className="relative aspect-square w-full overflow-hidden bg-slate-100 rounded-t-2xl"
               >
                 {product.images[0] && (
                   <Image
@@ -128,9 +136,18 @@ export function ProductGallery({ products }: ProductGalleryProps) {
         })}
       </div>
 
-      {/* Disclaimer */}
-      <div className="mt-8 p-4 rounded-lg border border-amber-200 bg-amber-50">
-        <p className="text-[13px] text-amber-800 leading-relaxed">
+      {/* Disclaimer - 3D Toast Card */}
+      <div
+        className="
+          max-w-5xl mx-auto mt-6
+          rounded-2xl border border-amber-200 bg-amber-50/90
+          px-4 py-3 text-[12px] text-amber-800
+          flex gap-2 items-start
+          shadow-[0_8px_20px_rgba(15,23,42,0.08)]
+        "
+      >
+        <span className="text-amber-600 mt-0.5">⚠️</span>
+        <p className="leading-relaxed">
           <strong>Note:</strong> Branded or character merchandise requires valid IP authorization documents for import. We strictly adhere to US Customs regulations.
         </p>
       </div>

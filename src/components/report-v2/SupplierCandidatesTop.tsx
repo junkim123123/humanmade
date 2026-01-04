@@ -186,8 +186,8 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
             <Building2 className="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <h3 className="text-[16px] font-semibold text-slate-900">Candidate factories</h3>
-            <p className="text-[12px] text-slate-500">Suggested based on product and trade data. Not yet verified.</p>
+            <h3 className="text-[16px] font-semibold text-slate-900">Candidate factories (suggested, not verified)</h3>
+            <p className="text-[12px] text-slate-500">Suggested by trade data — verify before ordering.</p>
           </div>
         </div>
         <button
@@ -211,7 +211,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
               <p className="text-[15px] font-semibold text-slate-900 mb-1">
-                {topMatch.supplierName}
+                🏭 Top-Rated Supplier [Hidden]
               </p>
               {getSupplierRoleDisplay(topMatch) && (
                 <p className="text-[13px] text-slate-600 mb-2">{getSupplierRoleDisplay(topMatch)}</p>
@@ -237,7 +237,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                   </span>
                 ))}
               </div>
-              <span className="text-[12px] text-slate-500 mt-2 block">Status: Not verified</span>
+              <span className="text-[12px] text-slate-500 mt-2 block">Suggested by trade data — verify before ordering.</span>
             </div>
             {topMatch.matchScore && (
               <span className="text-[12px] font-medium px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded">
@@ -260,7 +260,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <p className="text-[14px] font-medium text-slate-900">
-                        {match.supplierName}
+                        🏭 Top-Rated Supplier [Hidden]
                       </p>
                       {getSupplierRoleDisplay(match) && (
                         <p className="text-[13px] text-slate-500">{getSupplierRoleDisplay(match)}</p>
@@ -280,7 +280,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                         </span>
                       ))}
                     </div>
-                    <span className="text-[12px] text-slate-500 mt-1 block">Status: Not verified</span>
+                    <span className="text-[12px] text-slate-500 mt-1 block">Suggested by trade data — verify before ordering.</span>
                   </div>
                   {match.matchScore && (
                     <span className="text-[12px] text-slate-600">
@@ -308,7 +308,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
 
       <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
         <p className="text-[12px] text-slate-500">
-          {getEvidenceFooterText(topMatch)} Contacts shared after verification starts.
+          {getEvidenceFooterText(topMatch)} Start verification to convert this draft into a confirmed buy plan.
         </p>
       </div>
     </div>

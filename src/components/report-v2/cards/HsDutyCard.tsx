@@ -23,10 +23,10 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-[16px] font-semibold text-slate-900">HS code & Duty</h3>
+            <h3 className="text-[16px] font-semibold text-slate-900">Estimate</h3>
             <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-700">Draft</span>
           </div>
-          <p className="text-[13px] text-slate-500">Draft HS code suggestion based on category. Confirmed during verification.</p>
+          <p className="text-[13px] text-slate-500">Draft range (duty, freight, unit landed cost). Confirmed during verification.</p>
         </div>
         
         <div className="px-6 py-5 space-y-5">
@@ -61,7 +61,7 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
         
         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
           <p className="text-[12px] text-slate-500">
-            Upload a clear label photo to confirm HS classification and origin.
+            Start verification to confirm HS classification, origin, and duty rate.
           </p>
         </div>
       </div>
@@ -80,12 +80,12 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
       <div className="px-6 py-5 border-b border-slate-100">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-[16px] font-semibold text-slate-900">HS code & Duty</h3>
+          <h3 className="text-[16px] font-semibold text-slate-900">Estimate</h3>
           {hs.status === "DRAFT" && (
             <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-700">Draft</span>
           )}
         </div>
-        <p className="text-[13px] text-slate-500">Draft HS code suggestion based on category. Confirmed during verification.</p>
+        <p className="text-[13px] text-slate-500">Draft range (duty, freight, unit landed cost). Confirmed during verification.</p>
       </div>
 
       <div className="px-6 py-5 space-y-5">
@@ -183,7 +183,7 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
 
       <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
         <p className="text-[12px] text-slate-500">
-          Confirmed during verification with documents and origin.
+          Start verification to confirm HS classification, origin, and duty rate.
         </p>
       </div>
     </div>

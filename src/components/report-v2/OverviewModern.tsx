@@ -55,6 +55,7 @@ function DecisionCard({ report }: { report: Report }) {
       <div className="px-6 py-5 border-b border-slate-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-[16px] font-semibold text-slate-900 mb-1">Decision</h3>
+          <p className="text-[12px] text-slate-500 mb-2">Pre-verification estimate. Final numbers may change after supplier responses.</p>
           <div className="flex items-center gap-3 mb-1">
             <span className="text-[28px] font-bold text-slate-900 tracking-tight">
               ${bestEstimate.toFixed(2)}
@@ -64,7 +65,10 @@ function DecisionCard({ report }: { report: Report }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>{safeStrength.charAt(0).toUpperCase() + safeStrength.slice(1)} evidence</span>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>
+            {safeStrength.charAt(0).toUpperCase() + safeStrength.slice(1)} evidence
+            {safeStrength !== "high" && " — upgrade to verified plan"}
+          </span>
           <span className="text-[13px] text-slate-600">{evidenceSummary}</span>
         </div>
       </div>
@@ -77,7 +81,6 @@ function DecisionCard({ report }: { report: Report }) {
       )}
       <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50 border-t border-slate-100">
         <div className="flex gap-2">
-          <button className="bg-slate-900 text-white rounded-full px-4 py-2 text-[14px] font-medium hover:bg-slate-800 transition-colors">Start verification</button>
           <button className="bg-slate-100 text-slate-900 rounded-full px-4 py-2 text-[14px] font-medium border border-slate-200 hover:bg-slate-200 transition-colors">Upload missing photos</button>
         </div>
       </div>
@@ -102,6 +105,11 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   
   const reportAny = report as any;
+  
+  // Check for IP/brand keywords in product name
+  const ipKeywords = ['pokemon', 'disney', 'marvel', 'star wars', 'nintendo', 'sony', 'warner', 'universal', 'pixar', 'dreamworks', 'hasbro', 'mattel', 'lego'];
+  const productNameLower = (report.productName || '').toLowerCase();
+  const hasIPKeyword = ipKeywords.some(keyword => productNameLower.includes(keyword));
   
   // Debug: Log supplier matches on mount (always log, not just dev)
   if (typeof window !== 'undefined') {
@@ -140,6 +148,21 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   
   return (
     <div className="space-y-6">
+      {/* IP/Brand Licensing Alert */}
+      {hasIPKeyword && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">⚠️</span>
+            <div className="flex-1">
+              <p className="text-[14px] font-semibold text-amber-900 mb-1">Licensing Alert</p>
+              <p className="text-[13px] text-amber-800">
+                Brand authorization required for import. We can verify this for you.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Decision Summary Section - Verdict, Action Plan, Sensitivity */}
       {decisionSummary ? (
         <>

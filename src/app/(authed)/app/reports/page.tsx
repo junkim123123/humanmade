@@ -110,11 +110,11 @@ export default async function AppReportsPage() {
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl py-10">
           <div className="text-center">
             <h1 className="text-[32px] sm:text-[40px] font-bold text-white leading-tight mb-3">
-              Sourcing, Verification, Logistics —<br />
-              <span className="text-slate-300">All in One View.</span>
+              Sourcing, verification, logistics —<br />
+              <span className="text-slate-300">all in one place.</span>
             </h1>
             <p className="text-[15px] text-slate-400 max-w-md mx-auto mb-6">
-              From factory floor to your door. We manage the execution so you can focus on selling.
+              From factory floor to your door. We run the chaos so you can keep selling.
             </p>
             <Link
               href="/app/analyze"
@@ -218,7 +218,7 @@ export default async function AppReportsPage() {
 
                 {/* View CTA */}
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[13px] text-slate-500">Start verification to move this into orders.</p>
+                  <p className="text-[13px] text-slate-500">Ready to move? Start verification and we&apos;ll take it to production.</p>
                   <ReportListCTA reportId={report.id} status={report.status} />
                 </div>
               </div>
@@ -253,7 +253,7 @@ export default async function AppReportsPage() {
                 <div>
                   <p className="text-[14px] font-medium text-slate-900">Suggested next step</p>
                   <p className="text-[13px] text-slate-600 mt-0.5">
-                    Pick a completed report and request verification before moving to production. We will queue a factory audit and sample check.
+                    Pick any completed report and request verification to kick off production. We&apos;ll queue a factory audit and sample check for you.
                   </p>
                 </div>
               </div>
@@ -279,9 +279,9 @@ export default async function AppReportsPage() {
                 Quick reminders
               </div>
               <ul className="space-y-1.5 text-[13px] text-slate-600">
-                <li>Signed-in users only; RLS guards your data.</li>
-                <li>Uploads live in the uploads bucket under your user ID.</li>
-                <li>Need help? Start with a new analysis and share the report link.</li>
+                <li>Only you can see this workspace — row-level security keeps your data isolated.</li>
+                <li>Uploads are stored in your own uploads bucket, tied to your user ID.</li>
+                <li>Need help? Run a new analysis and just share the report link with us.</li>
               </ul>
             </div>
           </div>

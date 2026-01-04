@@ -93,8 +93,8 @@ function SignUpPageContent() {
           <div className="flex flex-col gap-6">
             <div className="space-y-1">
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Create account</p>
-              <h1 className="text-[28px] font-bold text-slate-900">Get started</h1>
-              <p className="text-[14px] text-slate-600">Create an account to save reports and track verifications.</p>
+              <h1 className="text-[28px] font-bold text-slate-900">Create account</h1>
+              <p className="text-[14px] text-slate-600">Get a free NexSupply workspace for your sourcing reports.</p>
             </div>
 
             {error && (
@@ -206,7 +206,9 @@ function SignUpPageContent() {
                   {loading ? "Creating account..." : "Create account"}
                 </button>
 
-                <p className="text-[12px] text-slate-500">We keep your reports private. Questions? Email support@nexsupply.com.</p>
+                <p className="text-[12px] text-slate-500">Free forever — no credit card required.</p>
+                <p className="text-[12px] text-slate-500">Save unlimited reports and verification history.</p>
+                <p className="text-[12px] text-slate-500">Questions? Email support@nexsupply.com.</p>
                 <p className="text-[12px] text-slate-500">By continuing, you agree to our <Link href="/terms" className="text-slate-700 hover:underline">Terms</Link> and <Link href="/privacy" className="text-slate-700 hover:underline">Privacy Policy</Link>.</p>
                 <p className="text-[14px] text-slate-600">Already have an account? <Link href="/signin" className="text-slate-900 font-medium hover:underline">Sign in</Link>.</p>
               </form>
@@ -217,25 +219,25 @@ function SignUpPageContent() {
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 space-y-5">
             <div>
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Why create an account</p>
-              <h2 className="text-[22px] font-bold text-slate-900 mt-1">Unlock full features</h2>
-              <p className="text-[14px] text-slate-600 mt-1">Get the most out of NexSupply with a free account.</p>
+              <h2 className="text-[22px] font-bold text-slate-900 mt-1">Unlock full sourcing history.</h2>
+              <p className="text-[14px] text-slate-600 mt-1">Build your sourcing intelligence OS — all your reports and decisions in one place.</p>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong className="font-medium">Save every report</strong> and revisit anytime.</span>
+                <span>Save every report and revisit anytime.</span>
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong className="font-medium">Keep your reports private</strong> and controlled.</span>
+                <span>Keep your reports private and under your control.</span>
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong className="font-medium">Request verification</strong> and track orders in one place.</span>
+                <span>Request verification and track orders in one place.</span>
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong className="font-medium">Free forever</strong> — no credit card required.</span>
+                <span>Free forever — no credit card required.</span>
               </li>
             </ul>
             <p className="text-[12px] text-slate-500 pt-3 border-t border-slate-200">By signing up you agree to our <Link href="/terms" className="text-slate-700 hover:underline">Terms</Link> and <Link href="/privacy" className="text-slate-700 hover:underline">Privacy</Link>.</p>
