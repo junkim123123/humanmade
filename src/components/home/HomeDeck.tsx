@@ -124,7 +124,7 @@ export default function HomeDeck() {
                 },
                 {
                   title: "Verify ($45)",
-                  description: "Deposit $45 to start factory validation. We reach out to verified suppliers and confirm pricing, MOQ, and lead times.",
+                  description: "Deposit $45 to get 3 vetted factory quotes, sample verification reports, and customs import feasibility review. Pricing, MOQ, and lead times confirmed.",
                   color: "purple",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">

@@ -139,7 +139,7 @@ export default function Hero() {
 
             {/* Subtext */}
             <p className="text-lg sm:text-xl text-slate-500 leading-relaxed max-w-xl">
-              Use our free AI sourcing calculator to see your real landed cost and margins. We only get paid when you decide to order.
+              Use our free AI sourcing calculator to see your real landed cost and margins. We only succeed when you ship.
             </p>
 
             {/* CTAs */}
@@ -148,7 +148,7 @@ export default function Hero() {
                 href="/analyze"
                 className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-slate-900 text-white font-medium text-base hover:bg-slate-800 transition-colors shadow-lg hover:shadow-xl"
               >
-                Start free analysis
+                Calculate My Savings
               </Link>
               <Link
                 href="/reports/toy-example"

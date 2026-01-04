@@ -29,7 +29,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 <span className="text-[48px] sm:text-[56px] font-bold tracking-tight text-slate-900 leading-none">45</span>
               </div>
               <p className="mt-2 text-slate-500 text-[14px]">Blueprint Fee (Sourcing Deposit)</p>
-              <p className="mt-1 text-slate-400 text-[12px]">Refundable on first order</p>
+              <p className="mt-1 text-slate-400 text-[12px]">Applied as a credit on first order</p>
             </div>
 
             {/* Execution Fee */}
@@ -81,7 +81,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 Start verification
               </a>
               <p className="text-[12px] text-slate-500">
-                Blueprint Fee is refunded on your first order within 30 days
+                Blueprint Fee is credited toward your first order within 30 days
               </p>
             </div>
             

@@ -15,7 +15,7 @@ const proofStates = [
     icon: CheckCircle,
     color: "text-emerald-600",
     bgColor: "bg-emerald-50",
-    shortDesc: "Proof attached from customs or supplier",
+    shortDesc: "Proof attached from customs or supplier (invoices, customs entries)",
     detail: "The number is locked to a verified source. Badge stays green.",
   },
   {
@@ -48,7 +48,7 @@ export const SectionEvidence = forwardRef<HTMLDivElement, SectionEvidenceProps>(
             Proof rides along with the number
           </h2>
           <p className="mt-2 text-[15px] text-slate-600">
-            Cost shows its source. Confidence updates as inputs change.
+            Based on actual invoices and customs entry data—not AI guesses. Cost shows its source. Confidence updates as inputs change.
           </p>
         </div>
 

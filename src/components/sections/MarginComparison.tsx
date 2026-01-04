@@ -65,7 +65,7 @@ function ComparisonColumn({
         <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 mb-1">
           <CountUp from={0} to={parseFloat(totalCost.replace("$", ""))} decimals={2} prefix="$" />
         </div>
-        <div className="text-xs sm:text-sm text-slate-500">total cost</div>
+        <div className="text-xs sm:text-sm text-slate-500">Total Landed Cost</div>
       </div>
 
       {/* Cost Breakdown */}
@@ -132,7 +132,7 @@ export default function MarginComparison() {
   ];
 
   const nexSupplyAdvantages = [
-    "Flexible MOQs (no bulk minimums)",
+    "SMB-friendly MOQs",
     "Verified factories with quality control",
     "Compliance and customs support",
     "End-to-end logistics handling",
@@ -167,7 +167,7 @@ export default function MarginComparison() {
               <ComparisonColumn
                 title="NexSupply way (going direct)"
                 label="NexSupply"
-                totalCost="$2.22"
+                totalCost="$2.19"
                 items={nexSupplyItems}
                 isHighlight={true}
                 advantages={nexSupplyAdvantages}
