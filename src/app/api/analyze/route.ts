@@ -406,7 +406,12 @@ export async function POST(request: Request) {
 
       if (upsertError) {
         // If upsert fails, try to fetch existing report
-        console.error("[Analyze API] Upsert failed, attempting to fetch existing report", upsertError.message);
+        console.error("[Analyze API] Upsert failed, attempting to fetch existing report", {
+          error: upsertError.message,
+          code: upsertError.code,
+          details: upsertError.details,
+          hint: upsertError.hint,
+        });
         
         const { data: existingReport, error: fetchError } = await supabase
           .from("reports")
@@ -433,11 +438,54 @@ export async function POST(request: Request) {
           finalReportId = existingReport.id as string;
           console.log(`[Analyze API] Reusing existing report: ${finalReportId}`);
         } else {
-          console.error("[Analyze API] Failed to create or fetch placeholder report", upsertError.message);
-          return NextResponse.json(
-            { success: false, error: "REPORT_INIT_FAILED", message: upsertError.message || "Unable to create report" },
-            { status: 500 }
-          );
+          // Try using admin client as fallback
+          console.warn("[Analyze API] Regular client failed, trying admin client as fallback");
+          try {
+            const admin = getSupabaseAdmin();
+            const { data: adminUpserted, error: adminError } = await admin
+              .from("reports")
+              .upsert(reportData, {
+                onConflict: "input_key",
+                ignoreDuplicates: false,
+              })
+              .select("id, status")
+              .single();
+            
+            if (!adminError && adminUpserted) {
+              finalReportId = adminUpserted.id as string;
+              console.log(`[Analyze API] Admin client succeeded: ${finalReportId}`);
+            } else {
+              console.error("[Analyze API] Admin client also failed:", adminError?.message);
+              return NextResponse.json(
+                { 
+                  success: false, 
+                  error: "REPORT_INIT_FAILED", 
+                  message: upsertError.message || "Unable to create report",
+                  details: process.env.NODE_ENV === "development" ? {
+                    upsertError: upsertError.message,
+                    fetchError: fetchError?.message,
+                    adminError: adminError?.message,
+                  } : undefined,
+                },
+                { status: 500 }
+              );
+            }
+          } catch (adminFallbackError: any) {
+            console.error("[Analyze API] Admin fallback also failed:", adminFallbackError);
+            return NextResponse.json(
+              { 
+                success: false, 
+                error: "REPORT_INIT_FAILED", 
+                message: upsertError.message || "Unable to create report",
+                details: process.env.NODE_ENV === "development" ? {
+                  upsertError: upsertError.message,
+                  fetchError: fetchError?.message,
+                  adminFallbackError: adminFallbackError?.message,
+                } : undefined,
+              },
+              { status: 500 }
+            );
+          }
         }
       } else {
         finalReportId = upsertedReport.id as string;
