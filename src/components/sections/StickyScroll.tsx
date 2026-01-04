@@ -24,9 +24,11 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
   });
 
   // Calculate which step is active based on scroll progress
+  // Adjusted to give each step more screen time
   const activeStep = useTransform(scrollYProgress, (progress) => {
-    const stepProgress = progress * (steps.length - 1);
-    return Math.min(Math.floor(stepProgress), steps.length - 1);
+    const adjustedProgress = progress * (steps.length + 0.5);
+    const step = Math.min(Math.floor(adjustedProgress), steps.length - 1);
+    return Math.max(0, step);
   });
 
   return (
@@ -49,14 +51,18 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start">
-          {/* Left Column - Scrolling Steps - 60% height per step */}
-          <div className="space-y-20 sm:space-y-28 lg:space-y-[60vh]">
+          {/* Left Column - Scrolling Steps - Increased spacing for better scroll experience */}
+          <div className="space-y-32 sm:space-y-40 lg:space-y-[80vh] pb-32 sm:pb-40 lg:pb-[60vh]">
             {steps.map((step, index) => {
               const stepRef = useRef<HTMLDivElement>(null);
+              // Adjusted scroll ranges to give each step more screen time
+              const stepStart = index / (steps.length + 0.5);
+              const stepEnd = (index + 1.2) / (steps.length + 0.5);
               const stepProgress = useTransform(
                 scrollYProgress,
-                [index / steps.length, (index + 1) / steps.length],
-                [0, 1]
+                [stepStart, stepEnd],
+                [0, 1],
+                { clamp: true }
               );
 
               const opacity = useTransform(stepProgress, [0, 0.15, 0.4, 0.6, 0.85, 1], [0.4, 0.8, 1, 1, 0.8, 0.4]);

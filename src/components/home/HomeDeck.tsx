@@ -91,7 +91,7 @@ export default function HomeDeck() {
           <section id="how-it-works" className="bg-white">
             <StickyScroll
               title="How it works"
-              subtitle="From product photo to landed cost, then to your door."
+              subtitle="Photo to cost to door."
               steps={[
                 {
                   title: "Analyze (Free)",
