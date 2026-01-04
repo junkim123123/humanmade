@@ -200,8 +200,30 @@ export default function ReportsPage() {
                   
                   {/* Product Visual - Actual Image */}
                   <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                    {/* Fallback background - always shown */}
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    {/* Product Image */}
+                    {study.image ? (
+                      <img
+                        src={study.image}
+                        alt={study.productName}
+                        className="absolute inset-0 w-full h-full object-cover z-10"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        onError={(e) => {
+                          // Hide image on error, show fallback
+                          console.error('Image failed to load:', study.image);
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                        onLoad={(e) => {
+                          // Hide fallback when image loads successfully
+                          const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
+                          if (fallback) fallback.style.display = 'none';
+                        }}
+                      />
+                    ) : null}
+                    
+                    {/* Fallback background - shown when image fails or doesn't exist */}
+                    <div className={`image-fallback absolute inset-0 flex items-center justify-center ${study.image ? 'hidden' : ''}`}>
                       <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${
                         study.category === "Confectionery" ? "bg-gradient-to-br from-pink-400 to-rose-500" :
                         study.category === "Toys" ? "bg-gradient-to-br from-blue-400 to-blue-600" :
@@ -215,24 +237,6 @@ export default function ReportsPage() {
                         {study.category.charAt(0)}
                       </div>
                     </div>
-                    
-                    {/* Product Image - overlays fallback */}
-                    {study.image && (
-                      <img
-                        src={study.image}
-                        alt={study.productName}
-                        className="absolute inset-0 w-full h-full object-cover z-10"
-                        loading={index < 3 ? "eager" : "lazy"}
-                        onError={(e) => {
-                          // Hide image on error, fallback will show through
-                          e.currentTarget.style.display = 'none';
-                        }}
-                        onLoad={(e) => {
-                          // Ensure image is visible when loaded
-                          e.currentTarget.style.display = 'block';
-                        }}
-                      />
-                    )}
                     
                     {/* Gradient Overlay for better text readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[1]" />
