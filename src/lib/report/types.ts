@@ -363,7 +363,7 @@ export interface Report {
     hsConfidence: number;
     labelTerms: string[];
     labelUploaded?: boolean;
-    labelOcrStatus?: string;
+    labelOcrStatus?: "SUCCESS" | "PARTIAL" | "FAILED" | "success" | "partial" | "failed" | "pending" | "PENDING";
     labelOcrFailureReason?: string | null;
     labelTermsFromDb?: string[];
     labelOcrCheckedAt?: string | null;
