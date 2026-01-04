@@ -1306,7 +1306,20 @@ export async function POST(request: Request) {
     const admin = getSupabaseAdmin();
 
     // Update report with pipeline outputs (authenticated users only)
-    const { error: updateError } = await supabase
+    // Use admin client to ensure update succeeds even with RLS policies
+    if (!finalReportId) {
+      console.error("[Analyze API] Cannot update report: finalReportId is null");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "REPORT_ID_MISSING",
+          message: "Report ID is missing. Please try again.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const { error: updateError } = await admin
       .from("reports")
       .update({
         product_name: report.productName,
@@ -1336,16 +1349,19 @@ export async function POST(request: Request) {
         status: "completed",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", finalReportId)
-      .eq("user_id", user.id);
+      .eq("id", finalReportId);
 
     if (updateError) {
-      console.error("[Analyze API] Failed to update report with pipeline output", updateError.message);
-      await supabase
+      console.error("[Analyze API] Failed to update report with pipeline output", {
+        message: updateError.message,
+        code: updateError.code,
+        details: updateError.details,
+        reportId: finalReportId,
+      });
+      await admin
         .from("reports")
         .update({ status: "failed", updated_at: new Date().toISOString() })
-        .eq("id", finalReportId)
-        .eq("user_id", user.id);
+        .eq("id", finalReportId);
 
       return NextResponse.json(
         {
@@ -1730,6 +1746,19 @@ export async function POST(request: Request) {
       status: "completed",
       warnings: warnings.length > 0 ? warnings : "none",
     });
+
+    // Ensure finalReportId exists before returning
+    if (!finalReportId && user) {
+      console.error("[Analyze API] CRITICAL: finalReportId is null but user is authenticated");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "REPORT_ID_MISSING",
+          message: "Report was created but ID is missing. Please try again.",
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
