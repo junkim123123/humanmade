@@ -131,10 +131,10 @@ export default function Hero() {
             </p>
 
             {/* Headline - Premium sizing */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1]">
               Stop overpaying wholesalers.
               <br />
-              <span className="text-slate-700">Source direct from factories.</span>
+              <span className="text-slate-700">Source direct.</span>
             </h1>
 
             {/* Subtext */}
