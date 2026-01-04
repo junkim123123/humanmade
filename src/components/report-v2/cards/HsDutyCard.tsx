@@ -6,10 +6,72 @@ import { ConfidencePill, EvidenceTooltip } from "@/components/ui/draft-primitive
 import { safePercent } from "@/lib/format/percent";
 
 interface HsDutyCardProps {
-  decisionSupport: DecisionSupport;
+  decisionSupport?: DecisionSupport;
+  hsCandidates?: Array<{
+    code: string;
+    confidence: number;
+    rationale: string;
+    evidenceSnippet?: string | null;
+    status?: string;
+  }>;
 }
 
-export default function HsDutyCard({ decisionSupport }: HsDutyCardProps) {
+export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCardProps) {
+  // Use hsCandidates if decisionSupport is not available
+  if (!decisionSupport && hsCandidates && hsCandidates.length > 0) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-[16px] font-semibold text-slate-900">HS code & Duty</h3>
+            <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-700">Draft</span>
+          </div>
+          <p className="text-[13px] text-slate-500">Draft HS code suggestion based on category. Confirmed during verification.</p>
+        </div>
+        
+        <div className="px-6 py-5 space-y-5">
+          <div>
+            <p className="text-[12px] text-slate-500 font-medium mb-3">HS Code Candidates</p>
+            <div className="space-y-2">
+              {hsCandidates.map((candidate, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-start justify-between p-4 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-mono font-semibold text-slate-900">
+                        {candidate.code}
+                      </p>
+                      <span className="text-[11px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-medium">
+                        Draft
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-slate-500">{candidate.rationale}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                    <ConfidencePill confidence={candidate.confidence} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[12px] text-amber-700 mt-3">Confidence is low; confirm with customs before finalizing.</p>
+          </div>
+        </div>
+        
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
+          <p className="text-[12px] text-slate-500">
+            Upload a clear label photo to confirm HS classification and origin.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!decisionSupport) {
+    return null;
+  }
+  
   const { hs, dutyRate } = decisionSupport;
 
   const toRatio = (value?: number) => safePercent(value) / 100;

@@ -96,10 +96,42 @@ export default function AssumptionsCard({ report }: AssumptionsCardProps) {
     },
     {
       label: "Unit weight",
-      value: formatNumber(inferred.unitWeightG?.value, " g"),
-      rangeText: formatRange(inferred.unitWeightG?.range, (n) => `${Number(n).toFixed(0)} g`),
-      source: adjustSource(inferred.unitWeightG?.provenance as SourceBadge),
-      rationale: inferred.unitWeightG?.explanation,
+      value: formatNumber(
+        reportAny._inputs?.unitWeight?.grams || reportAny._resolvedWeight || inferred.unitWeightG?.value, 
+        " g"
+      ),
+      rangeText: (() => {
+        const weight = reportAny._inputs?.unitWeight;
+        if (weight?.rangeGrams) {
+          return `${weight.rangeGrams.min} g – ${weight.rangeGrams.max} g`;
+        }
+        if (reportAny._resolvedWeightRange) {
+          return `${reportAny._resolvedWeightRange.min} g – ${reportAny._resolvedWeightRange.max} g`;
+        }
+        return formatRange(inferred.unitWeightG?.range, (n) => `${Number(n).toFixed(0)} g`);
+      })(),
+      source: (() => {
+        const weight = reportAny._inputs?.unitWeight;
+        if (weight?.source === "user" || weight?.source === "label") {
+          return "user"; // Show as "Verified"
+        }
+        if (weight?.source === "gemini_photo") {
+          return "vision_inferred"; // Show as "Inferred"
+        }
+        if (weight?.source === "category_default") {
+          return "category_default"; // Show as "Default"
+        }
+        return reportAny._resolvedWeightSource 
+          ? adjustSource(reportAny._resolvedWeightSource as SourceBadge)
+          : adjustSource(inferred.unitWeightG?.provenance as SourceBadge);
+      })(),
+      rationale: reportAny._inputs?.unitWeight?.rationale || 
+        inferred.unitWeightG?.explanation || 
+        (reportAny._resolvedWeightSource === "category_default" ? "Estimated from category with deterministic variation" : null),
+      // Add confidence display for gemini_photo
+      confidence: reportAny._inputs?.unitWeight?.source === "gemini_photo" 
+        ? reportAny._inputs.unitWeight.confidence 
+        : undefined,
     },
     {
       label: "Box volume",

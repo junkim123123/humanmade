@@ -18,6 +18,7 @@ import ExtractionSummary from "./ExtractionSummary";
 import VerdictCard from "./cards/VerdictCard";
 import ActionPlan48hCard from "./cards/ActionPlan48hCard";
 import SensitivityCard from "./cards/SensitivityCard";
+import OriginSimulator from "./cards/OriginSimulator";
 
 // --- New DecisionCard for top of report ---
 function DecisionCard({ report }: { report: Report }) {
@@ -148,7 +149,17 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             nudge={reportAny._nudge}
           />
           <ActionPlan48hCard actionPlan={decisionSummary._actionPlan48h} />
-          <SensitivityCard sensitivity={decisionSummary._sensitivity} />
+          {(() => {
+            // Only render SensitivityCard if there are computable scenarios
+            const computableScenarios = decisionSummary._sensitivity.scenarios.filter((s: any) => {
+              const hasCost = s.impactOnLandedCost.newCost !== null;
+              const hasChange = s.impactOnLandedCost.change !== 0;
+              return hasCost || hasChange;
+            });
+            return computableScenarios.length > 0 ? (
+              <SensitivityCard sensitivity={{ scenarios: computableScenarios }} />
+            ) : null;
+          })()}
         </>
       ) : (
         // Fallback when decision summary is missing
@@ -184,7 +195,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </summary>
-        <div className="px-6 pb-6 space-y-4 border-t border-slate-100 pt-4">
+        <div id="uploadsSection" className="px-6 pb-6 space-y-4 border-t border-slate-100 pt-4">
           {/* Vision Label Draft Card (if OCR failed and Vision extracted) */}
           {hasVisionDraft && (
             <LabelDraftCard 
@@ -211,23 +222,13 @@ export default function OverviewModern({ report }: OverviewModernProps) {
 
       {/* Decision Support Cards */}
       <>
-        {/* HS Code & Duty Card - show even if empty with message */}
-        {(reportAny._decisionSupport || reportAny.extras?.decisionSupport) ? (
-          <HsDutyCard decisionSupport={reportAny._decisionSupport || reportAny.extras?.decisionSupport} />
-        ) : (
-          // Empty state for HS code when no candidates found
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100">
-              <h3 className="text-[16px] font-semibold text-slate-900">HS code & Duty</h3>
-              <p className="text-[13px] text-slate-500 mt-1">Draft HS code suggestion based on category. Confirmed during verification.</p>
-            </div>
-            <div className="px-6 py-5">
-              <p className="text-[14px] text-slate-700">
-                HS code suggestion unavailable. Upload a clear label photo to extract ingredients and origin.
-              </p>
-            </div>
-          </div>
-        )}
+        {/* HS Code & Duty Card - always show if candidates exist, even if Draft */}
+        {(reportAny._decisionSupport || reportAny.extras?.decisionSupport || (reportAny._hsCandidates && reportAny._hsCandidates.length > 0)) ? (
+          <HsDutyCard 
+            decisionSupport={reportAny._decisionSupport || reportAny.extras?.decisionSupport} 
+            hsCandidates={reportAny._hsCandidates}
+          />
+        ) : null}
 
         {/* Supplier Candidates - Always render with state-specific UI */}
         {(() => {

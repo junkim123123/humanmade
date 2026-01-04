@@ -100,6 +100,46 @@ export function normalizeReport(report: any): any {
   if (!Array.isArray(normalized._hsCandidates)) {
     normalized._hsCandidates = [];
   }
+  
+  // If HS candidates are missing and label is missing/unreadable, generate Draft candidates
+  if ((normalized._hsCandidates.length === 0 || !normalized._hsCandidates) && normalized.productName) {
+    const inputStatus = normalized.inputStatus || normalized.data?.inputStatus || normalized._proof?.inputStatus || normalized.extras?.inputStatus || {};
+    const labelMissing = !inputStatus.labelPhotoUploaded || 
+      inputStatus.labelOcrStatus === "failed" || 
+      inputStatus.labelOcrStatus === "FAILED" ||
+      !inputStatus.labelTextPresent;
+    
+    if (labelMissing) {
+      try {
+        const { generateDraftHsCandidates } = require("./localSimulators");
+        normalized._hsCandidates = generateDraftHsCandidates(normalized);
+        normalized._hsConfidence = 0.4; // Low confidence for Draft
+      } catch (error) {
+        console.warn("[normalizeReport] Failed to generate Draft HS candidates:", error);
+      }
+    }
+  }
+  
+  // Resolve unit weight (will be done in analyze route, but ensure structure exists)
+  if (!normalized._inputs) {
+    normalized._inputs = {};
+  }
+  
+  // If weight already resolved, keep it
+  if (normalized._inputs.unitWeight) {
+    // Already resolved
+  } else {
+    // Fallback to old resolved weight if exists
+    if (normalized._resolvedWeight) {
+      normalized._inputs.unitWeight = {
+        grams: normalized._resolvedWeight,
+        rangeGrams: normalized._resolvedWeightRange || { min: 0, max: 0 },
+        source: normalized._resolvedWeightSource || "category_default",
+        confidence: normalized._resolvedWeightSource === "user" || normalized._resolvedWeightSource === "label" ? 1.0 : 0.3,
+        rationale: "Legacy weight data",
+      };
+    }
+  }
 
   // Ensure decision summary exists (from data._decisionSummary or compute if missing)
   if (!normalized._decisionSummary) {

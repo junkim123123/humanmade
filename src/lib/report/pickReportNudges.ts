@@ -50,6 +50,19 @@ function stableHash(reportId: string): number {
  */
 const ACTION_CATALOG: ActionDefinition[] = [
   {
+    key: "weight_scale_photo",
+    priority: 0.5, // Higher priority than label_retake
+    target: "weight",
+    severity: "high",
+    actionText: "Upload a photo of the item on a scale",
+    tipText: "Place item on a scale and capture the display clearly.",
+    condition: (flags, category) => {
+      // Check if weight source is gemini_photo with low confidence or category_default
+      // This will be checked in pickReportNudge function
+      return false; // Will be set dynamically
+    },
+  },
+  {
     key: "label_retake",
     priority: 1,
     target: "label",
@@ -239,8 +252,76 @@ export function pickReportNudge(report: any): ReportNudge {
   // Compute flags
   const flags = computeFlags(report);
   
+  // Check weight source and confidence for next action
+  const unitWeight = report._inputs?.unitWeight || report.data?._inputs?.unitWeight;
+  const weightConfidence = unitWeight?.confidence || 0;
+  const unitScope = unitWeight?.unitScope || "unknown";
+  const packCountConfidence = unitWeight?.packCountConfidence || 0;
+  
+  // Check for multipack uncertainty (higher priority than low confidence)
+  const hasMultipackUncertainty = unitWeight?.source === "gemini_photo" && (
+    unitScope === "unknown" || 
+    (unitScope === "outer_pack" && packCountConfidence < 0.6) ||
+    (unitScope === "inner_unit" && packCountConfidence < 0.6)
+  );
+  
+  // Determine weight-related action based on confidence tiers
+  let weightAction: ActionDefinition | null = null;
+  
+  if (hasMultipackUncertainty) {
+    // Priority 1: Multipack uncertainty - show multipack confirmation
+    weightAction = {
+      key: "multipack_confirm",
+      priority: 0.3, // Highest priority
+      target: "weight",
+      severity: "high",
+      actionText: "Upload a photo showing the multipack structure to confirm unit count",
+      tipText: "Show both the outer pack and individual inner packs clearly. Count how many inner units are inside.",
+      condition: () => false, // Not used in filter
+    };
+  } else if (weightConfidence >= 0.85) {
+    // Tier 1: High confidence - move to next priority
+    // Don't show weight action, let other actions take priority
+    weightAction = null;
+  } else if (weightConfidence >= 0.55) {
+    // Tier 2: Medium confidence - suggest confirmation
+    weightAction = {
+      key: "weight_confirm_medium",
+      priority: 0.7,
+      target: "weight",
+      severity: "medium",
+      actionText: "Confirm weight with label or scale photo to lock shipping cost and margin",
+      tipText: "Capture the net weight section clearly, or place the unit on a scale showing the display.",
+      condition: () => false,
+    };
+  } else {
+    // Tier 3: Low confidence or category default - require scale photo
+    weightAction = {
+      key: "weight_scale_photo",
+      priority: 0.5,
+      target: "weight",
+      severity: "high",
+      actionText: "Upload a photo of the item on a scale",
+      tipText: "Place item on a scale and capture the display clearly.",
+      condition: () => false,
+    };
+  }
+  
+  const needsWeightAction = weightAction !== null;
+  
   // Get all applicable actions
-  let applicableActions = ACTION_CATALOG.filter(action => action.condition(flags, category));
+  let applicableActions = ACTION_CATALOG.filter(action => {
+    // Skip weight actions from catalog - we'll add custom ones based on confidence
+    if (action.key === "weight_scale_photo" || action.key === "weight_confirm") {
+      return false;
+    }
+    return action.condition(flags, category);
+  });
+  
+  // Add weight action if needed
+  if (needsWeightAction && weightAction) {
+    applicableActions.push(weightAction);
+  }
   
   // Adjust priorities based on category
   applicableActions = adjustPriorities(applicableActions, category);

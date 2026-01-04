@@ -20,6 +20,7 @@ import { createPartialReportAndQueueUpgrade } from "@/lib/analyze-fast-helper";
 import { buildSignalsFromUploads } from "@/lib/report/signals";
 import { normalizeEvidence } from "@/lib/report/evidence";
 import { computeDecisionSummary } from "@/lib/report/decision-summary";
+import { resolveUnitWeight } from "@/lib/report/weightResolver";
 
 // Force Node.js runtime to avoid edge runtime issues with admin client and Gemini
 export const runtime = "nodejs";
@@ -1296,6 +1297,55 @@ export async function POST(request: Request) {
     // Explicitly remove imageUrl from analysis if it exists
     if (sanitizedPipelineResult.analysis && 'imageUrl' in sanitizedPipelineResult.analysis) {
       delete (sanitizedPipelineResult.analysis as any).imageUrl;
+    }
+
+    // Resolve unit weight before normalizing evidence
+    let unitWeightResult = null;
+    try {
+      // Get label text from various sources
+      const labelText = extractedLabelTerms?.join(" ") || 
+        labelData?.rawText || 
+        labelData?.text ||
+        (report as any).labelText || 
+        (report as any).data?.labelText || 
+        (report as any).pipeline_result?.labelText ||
+        (report as any).baseline?.evidence?.labelText ||
+        null;
+      
+      // Get image URLs (use public URLs if available, otherwise data URLs)
+      const productImagePublicUrl = productImageUrl || null;
+      const labelImagePublicUrl = labelImageUrl || null;
+      
+      unitWeightResult = await resolveUnitWeight({
+        reportId: finalReportId,
+        inputStatus: {
+          ...(report as any).inputStatus,
+          ...uploadFlags,
+        },
+        labelText,
+        productImageUrl: productImagePublicUrl,
+        labelImageUrl: labelImagePublicUrl,
+        category: report.category,
+        productName: report.productName || result?.analysis?.productName,
+        baseline: report.baseline,
+      });
+      
+      // Store in report data
+      if (!(report as any).data) {
+        (report as any).data = {};
+      }
+      if (!(report as any).data._inputs) {
+        (report as any).data._inputs = {};
+      }
+      (report as any).data._inputs.unitWeight = unitWeightResult;
+      
+      console.log("[Analyze API] Unit weight resolved:", {
+        grams: unitWeightResult.grams,
+        source: unitWeightResult.source,
+        confidence: unitWeightResult.confidence,
+      });
+    } catch (error) {
+      console.warn("[Analyze API] Failed to resolve unit weight:", error);
     }
 
     const normalizedEvidence = normalizeEvidence({

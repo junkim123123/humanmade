@@ -93,12 +93,22 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
         {/* Next best action and tip */}
         {nudge && (
           <div className="mt-4 pt-4 border-t border-slate-200">
-            <p className="text-[13px] font-medium text-slate-900 mb-1.5">
-              {nudge.actionText}
-            </p>
-            <p className="text-[12px] text-slate-600 italic">
-              {nudge.tipText}
-            </p>
+            <button
+              onClick={() => {
+                const uploadsSection = document.getElementById("uploadsSection");
+                if (uploadsSection) {
+                  uploadsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }}
+              className="text-left w-full"
+            >
+              <p className="text-[13px] font-medium text-slate-900 mb-1.5 hover:text-slate-700 transition-colors">
+                {nudge.actionText}
+              </p>
+              <p className="text-[12px] text-slate-600 italic">
+                {nudge.tipText}
+              </p>
+            </button>
           </div>
         )}
       </div>
