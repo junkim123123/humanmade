@@ -202,14 +202,57 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
       // Handle reused report (idempotency)
       if (response.ok && data?.success && data?.reused) {
-        console.log(`[AnalyzeForm] Server returned existing report: ${data.reportId}, status: ${data.status}`);
-        if (data.status === "processing" || data.status === "queued") {
-          toast.info(data.message || "Analysis already in progress. Redirecting...");
-        } else if (data.status === "completed") {
-          toast.info("Analysis already completed. Redirecting to existing report.");
+        const existingReportId = String(data.reportId || '').trim();
+        console.log(`[AnalyzeForm] Server returned existing report: ${existingReportId}, status: ${data.status}`);
+        
+        if (!existingReportId || existingReportId === 'null' || existingReportId === 'undefined') {
+          console.error("[AnalyzeForm] Invalid existing reportId:", data.reportId);
+          toast.error("Existing report ID is invalid. Starting new analysis...");
+          setLoading(false);
+          return;
         }
-        router.push(`/reports/${data.reportId}/v2`);
-        return;
+        
+        // Verify existing report exists before redirecting
+        try {
+          console.log("[AnalyzeForm] Verifying existing report before redirect...");
+          const verifyRes = await fetch(`/api/reports/${existingReportId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          
+          if (verifyRes.ok) {
+            const verifyData = await verifyRes.json();
+            if (verifyData?.success && verifyData?.report) {
+              console.log("[AnalyzeForm] Existing report verified, redirecting...");
+              if (data.status === "processing" || data.status === "queued") {
+                toast.info(data.message || "Analysis already in progress. Redirecting...");
+              } else if (data.status === "completed") {
+                toast.info("Analysis already completed. Redirecting to existing report.");
+              }
+              router.push(`/reports/${existingReportId}/v2`);
+              return;
+            }
+          }
+          
+          // If verification failed, the report might not exist - start new analysis
+          console.error("[AnalyzeForm] Existing report not found, starting new analysis:", {
+            reportId: existingReportId,
+            status: verifyRes.status,
+          });
+          toast.error("Existing report not found. Please try again.");
+          setLoading(false);
+          return;
+        } catch (verifyError) {
+          console.error("[AnalyzeForm] Error verifying existing report:", verifyError);
+          // Still try to redirect - let the page handle the error
+          if (data.status === "processing" || data.status === "queued") {
+            toast.info(data.message || "Analysis already in progress. Redirecting...");
+          } else if (data.status === "completed") {
+            toast.info("Analysis already completed. Redirecting to existing report.");
+          }
+          router.push(`/reports/${existingReportId}/v2`);
+          return;
+        }
       }
 
       if (!response.ok || !data?.success) {
