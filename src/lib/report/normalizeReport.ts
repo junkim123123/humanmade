@@ -3,6 +3,40 @@
  * Ensures UI always has a consistent supplier candidates array
  */
 
+/**
+ * Normalize a report object to ensure consistent structure
+ * Applies supplier match normalization and ensures required fields exist
+ */
+export function normalizeReport(report: any): any {
+  if (!report) {
+    return report;
+  }
+
+  // Create a normalized copy
+  const normalized = { ...report };
+
+  // Normalize supplier matches
+  const matches = getSupplierMatches(normalized);
+  if (matches.length > 0) {
+    normalized._supplierMatches = matches;
+  }
+
+  // Ensure productName exists (handle both camelCase and snake_case)
+  if (!normalized.productName && normalized.product_name) {
+    normalized.productName = normalized.product_name;
+  }
+  if (!normalized.product_name && normalized.productName) {
+    normalized.product_name = normalized.productName;
+  }
+
+  // Ensure id exists
+  if (!normalized.id && normalized.reportId) {
+    normalized.id = normalized.reportId;
+  }
+
+  return normalized;
+}
+
 export interface NormalizedSupplierMatch {
   id: string;
   supplierName: string;
