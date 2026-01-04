@@ -157,8 +157,8 @@ export default function HomeDeck() {
                   ),
                 },
                 {
-                  title: "Execute (10%)",
-                  description: "We handle production, quality control, and logistics. You pay 10% fee only when your order ships.",
+                  title: "Execute (7%)",
+                  description: "We handle production, quality control, and logistics. You pay 7% fee only when your order ships.",
                   color: "emerald",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">

@@ -35,7 +35,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
             {/* Execution Fee */}
             <div className="text-center mb-6 pb-6 border-b border-slate-100">
               <div className="inline-flex items-baseline gap-1">
-                <span className="text-[32px] sm:text-[40px] font-bold tracking-tight text-slate-900 leading-none">10%</span>
+                <span className="text-[32px] sm:text-[40px] font-bold tracking-tight text-slate-900 leading-none">7%</span>
               </div>
               <p className="mt-2 text-slate-500 text-[14px]">Execution Fee</p>
               <p className="mt-1 text-slate-400 text-[12px]">of Order Value for managing production and logistics</p>

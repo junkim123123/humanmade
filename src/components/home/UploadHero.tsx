@@ -9,7 +9,7 @@ interface UploadHeroProps {
 const breakdown = [
   { label: "Factory FOB", value: "$1.24" },
   { label: "Freight & Duty", value: "$0.86" },
-  { label: "NexSupply Fee (10%)", value: "$0.12" },
+  { label: "NexSupply Fee (7%)", value: "$0.09" },
 ];
 
 export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {

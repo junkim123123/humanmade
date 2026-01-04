@@ -23,7 +23,7 @@ const steps = [
     number: 3,
     title: "Execute (Order)",
     desc: "We handle production, QC, and logistics. You just receive the goods.",
-    price: "10% fee",
+    price: "7% fee",
   },
 ]
 

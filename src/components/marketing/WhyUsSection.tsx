@@ -13,7 +13,7 @@ export default function WhyUsSection() {
   const nexSupplyBenefits = [
     "On-the-Ground Team",
     "Total Logistics Handling",
-    "Transparent 10% Fee",
+    "Transparent 7% Fee",
   ]
 
   return (

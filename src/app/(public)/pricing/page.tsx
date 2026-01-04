@@ -105,7 +105,7 @@ export default function PricingPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[26px] font-bold text-slate-900">
-                    10%
+                    7%
                   </div>
                   <p className="text-[12px] text-slate-500">
                     of FOB, only when you place an order
@@ -113,7 +113,7 @@ export default function PricingPage() {
                 </div>
               </div>
               <p className="mt-3 text-[12px] text-slate-500 italic max-w-md">
-                Logistics costs are passed through at cost. We charge a 10% service fee on FOB to manage the chaos.
+                Logistics costs are passed through at cost. We charge a 7% service fee on FOB to manage the chaos.
               </p>
             </div>
           </div>

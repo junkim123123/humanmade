@@ -52,10 +52,10 @@ export default function FlowDiorama() {
           <div className="text-center md:text-left">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-              <h3 className="text-lg font-semibold text-slate-900">Execute (10%)</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Execute (7%)</h3>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              We handle production, quality control, and logistics. You pay 10% fee only when your order ships.
+              We handle production, quality control, and logistics. You pay 7% fee only when your order ships.
             </p>
           </div>
         </div>

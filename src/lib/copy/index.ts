@@ -12,7 +12,7 @@ export const SLA_UPDATE = "Regular updates while we validate quotes.";
 // Pricing Copy
 export const DEPOSIT_LINE = "$45 planning deposit per product. Credited back when you place an order.";
 export const DEPOSIT_RECEIVED = "Deposit received";
-export const EXECUTION_FEE_LINE = "Execution fee: 10% of FOB, only when you place an order.";
+export const EXECUTION_FEE_LINE = "Execution fee: 7% of FOB, only when you place an order.";
 export const HOME_EXECUTION_NOTE = "We manage production and logistics through arrival at your destination country port; execution fee only applies when you place an order.";
 
 // Baseline Copy

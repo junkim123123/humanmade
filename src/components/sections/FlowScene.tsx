@@ -315,7 +315,7 @@ function SceneContent() {
             <StepCard
               position={[2.5, 1.5, 0]}
               label="Execute"
-              price="10%"
+              price="7%"
               color="#10B981"
             />
           </group>

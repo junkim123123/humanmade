@@ -85,8 +85,8 @@ export default function ReceiptCompare() {
   const nexSupply: ReceiptItem[] = [
     { label: "Factory FOB", amount: "$1.24" },
     { label: "Freight & Duty", amount: "$0.86" },
-    { label: "NexSupply Fee (10%)", amount: "$0.12" },
-    { label: "Total Cost", amount: "$2.22", type: "total" },
+    { label: "NexSupply Fee (7%)", amount: "$0.09" },
+    { label: "Total Cost", amount: "$2.19", type: "total" },
   ]
 
   return (
@@ -104,7 +104,7 @@ export default function ReceiptCompare() {
       {/* Receipt Cards */}
       <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">
         <ReceiptCard title="Current Way (Buying Wholesale)" items={wholesale} />
-        <ReceiptCard title="NexSupply Way (Going Direct)" items={nexSupply} badge="PROFIT UNLOCKED: +$3.28 / unit" variant="highlight" />
+        <ReceiptCard title="NexSupply Way (Going Direct)" items={nexSupply} badge="PROFIT UNLOCKED: +$3.31 / unit" variant="highlight" />
       </div>
     </div>
   )

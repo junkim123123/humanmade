@@ -31,13 +31,13 @@ function ComparisonColumn({
   advantages = [],
 }: ComparisonColumnProps) {
   return (
-    <div
-      className={`rounded-xl border-2 p-6 lg:p-8 ${
-        isHighlight
-          ? "border-slate-900 bg-white shadow-lg"
-          : "border-slate-200 bg-slate-50"
-      }`}
-    >
+        <div
+          className={`rounded-xl border-2 p-4 sm:p-6 lg:p-8 ${
+            isHighlight
+              ? "border-slate-900 bg-white shadow-lg"
+              : "border-slate-200 bg-slate-50"
+          }`}
+        >
       {/* Label Chip */}
       <div className="mb-4">
         <span
@@ -127,8 +127,8 @@ export default function MarginComparison() {
   const nexSupplyItems: CostItem[] = [
     { label: "Factory FOB", amount: "$1.24" },
     { label: "Freight & duty", amount: "$0.86" },
-    { label: "NexSupply fee (10%)", amount: "$0.12" },
-    { label: "Total cost", amount: "$2.22", type: "total" },
+    { label: "NexSupply fee (7%)", amount: "$0.09" },
+    { label: "Total cost", amount: "$2.19", type: "total" },
   ];
 
   const nexSupplyAdvantages = [
@@ -139,22 +139,22 @@ export default function MarginComparison() {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-slate-50 to-violet-50 py-32">
+    <section className="bg-gradient-to-b from-slate-50 to-violet-50 py-16 sm:py-24 lg:py-32">
       <FadeUp>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 px-2">
               See the margin gap
             </h2>
-            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-4">
               Compare buying wholesale vs going direct with NexSupply execution support.
             </p>
           </div>
 
           {/* Comparison Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 lg:p-8">
-            <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 sm:p-6 lg:p-8">
+            <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
               {/* Current Way */}
               <ComparisonColumn
                 title="Current way (buying wholesale)"
@@ -207,7 +207,7 @@ function ProfitBadge() {
             Profit unlocked
           </div>
           <div className="text-3xl lg:text-4xl font-black text-emerald-600">
-            <CountUp from={0} to={3.28} decimals={2} prefix="+$" suffix=" / unit" />
+            <CountUp from={0} to={3.31} decimals={2} prefix="+$" suffix=" / unit" />
           </div>
         </div>
         <div className="text-sm text-slate-500 text-center sm:text-right">

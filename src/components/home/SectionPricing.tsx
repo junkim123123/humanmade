@@ -60,7 +60,7 @@ const PLANS: PlanData[] = [
   {
     label: "ORDER",
     title: "Execution support",
-    priceMain: "10% of FOB",
+    priceMain: "7% of FOB",
     priceSub: "Only when you place an order",
     description: "We manage production and logistics through arrival at your destination port.",
     bullets: [
