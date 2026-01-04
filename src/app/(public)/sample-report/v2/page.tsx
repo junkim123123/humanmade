@@ -1,5 +1,7 @@
 import ReportV2Client from "@/app/reports/[reportId]/v2/ReportV2Client";
 
+export const dynamic = 'force-dynamic';
+
 async function getSampleReport() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
