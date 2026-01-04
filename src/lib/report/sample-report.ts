@@ -204,7 +204,9 @@ export const sampleReport: Report = {
     {
       id: "supplier-1",
       supplierId: "FACTORY_SH_001",
+      supplier_id: "FACTORY_SH_001",
       supplierName: "Shanghai Confectionery Co., Ltd.",
+      supplier_name: "Shanghai Confectionery Co., Ltd.",
       supplierRole: "Manufacturer",
       matchMode: "normal",
       confidence: "high",
@@ -221,6 +223,8 @@ export const sampleReport: Report = {
       moq: 2000,
       lead_time: 35,
       currency: "USD",
+      exact_match_count: 12,
+      inferred_match_count: 0,
       flags: {
         evidence_strength: "strong",
         matched_anchors: ["product_name", "hs_code"],
@@ -242,6 +246,25 @@ export const sampleReport: Report = {
       country: "China",
       last_seen_date: "2024-11-15",
       shipment_count_12m: 24,
+      _intel: {
+        product_count: 45,
+        price_coverage_pct: 78,
+        last_seen_days: 45,
+      },
+      _enrichment: null,
+      _profile: {
+        country: "China",
+        last_seen_date: "2024-11-15",
+        shipment_count_12m: 24,
+        role: "Manufacturer",
+        role_reason: "Verified manufacturer with FDA registration",
+      },
+      _supplierType: "Manufacturer",
+      _companyType: "Manufacturer",
+      _exampleProducts: [
+        { product_name: "Fruit Gummies 12-pack", category: "confectionery", unit_price: 1.08 },
+        { product_name: "Mixed Fruit Jelly", category: "confectionery", unit_price: 0.95 },
+      ],
     },
     {
       id: "supplier-2",
