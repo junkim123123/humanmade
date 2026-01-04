@@ -22,16 +22,21 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
 
           {/* Pricing Card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-            {/* Verification Deposit */}
+            {/* Monthly Free Credit */}
             <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 border border-emerald-200 mb-4">
+                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Monthly Free Credit</span>
+              </div>
               <div className="inline-flex items-baseline gap-1">
                 <span className="text-xl font-medium text-slate-400">$</span>
                 <span className="text-[48px] sm:text-[56px] font-bold tracking-tight text-slate-900 leading-none">45</span>
               </div>
               <p className="mt-2 text-slate-500 text-[14px] font-semibold">Sourcing Blueprint Fee</p>
-              <p className="mt-1 text-emerald-600 text-[12px] font-medium">100% credited on first order</p>
+              <p className="mt-3 text-base font-bold text-emerald-600">
+                Every user gets 1 FREE sourcing credit ($45 value) every month
+              </p>
               <p className="mt-2 text-slate-400 text-[11px] max-w-xs mx-auto">
-                $45 is not just a deposit—it's a sourcing report purchase with full credit guarantee.
+                Use your monthly credit for Blueprint reports. Credits reset each month.
               </p>
             </div>
 

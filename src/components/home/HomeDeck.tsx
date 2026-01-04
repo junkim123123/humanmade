@@ -12,6 +12,9 @@ import { SectionFAQ } from "@/components/home/SectionFAQ"
 import { ShelfPriceProvider } from "@/contexts/ShelfPriceContext"
 import TrustSection from "@/components/marketing/TrustSection"
 import WhyUsSection from "@/components/marketing/WhyUsSection"
+import { AnnouncementBar } from "@/components/ui/AnnouncementBar"
+import { ZoomBookingSection } from "@/components/sections/ZoomBookingSection"
+import { LocalBadge } from "@/components/ui/LocalBadge"
 
 function FinalCta() {
   return (
@@ -78,6 +81,9 @@ export default function HomeDeck() {
   return (
     <ShelfPriceProvider>
       <div className="relative">
+        {/* Top Announcement Bar */}
+        <AnnouncementBar />
+        
         <div className="landing-scroll-container">
           {/* 1. Hero */}
           <section
@@ -245,6 +251,11 @@ export default function HomeDeck() {
             <ProofShowcase />
           </section>
 
+          {/* 5. Zoom Booking Section */}
+          <section className="bg-white">
+            <ZoomBookingSection />
+          </section>
+
           {/* Existing sections below */}
           <section id="evidence" className="bg-slate-50/40">
             <SectionEvidence />
@@ -268,6 +279,11 @@ export default function HomeDeck() {
           >
             <FinalCta />
           </section>
+
+          {/* Local Badge */}
+          <div className="py-8 flex justify-center">
+            <LocalBadge />
+          </div>
         </div>
       </div>
     </ShelfPriceProvider>

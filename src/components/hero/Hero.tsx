@@ -158,6 +158,14 @@ export default function Hero() {
               </Link>
             </div>
 
+            {/* Urgency Micro-copy */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 border border-amber-200/60">
+              <span className="text-lg">🔥</span>
+              <p className="text-sm text-amber-800">
+                <span className="font-semibold">Current Trend:</span> Toys & Confectionery categories are seeing 15% faster lead times this month.
+              </p>
+            </div>
+
             {/* Trust Line */}
             <p className="text-sm text-slate-500">
               No credit card required. 3 minutes.
