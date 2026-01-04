@@ -360,16 +360,18 @@ export async function POST(request: Request) {
       // We'll run the pipeline and return results directly
     } else {
       // Ensure user profile exists before creating report
-      const { data: existingProfile, error: profileError } = await supabase
+      // Use admin client to bypass RLS policies
+      const admin = getSupabaseAdmin();
+      const { data: existingProfile, error: profileError } = await admin
         .from("profiles")
         .select("id")
         .eq("id", user.id)
         .maybeSingle();
       
       if (!existingProfile && !profileError) {
-        // Profile doesn't exist, create it
+        // Profile doesn't exist, create it using admin client
         console.log("[Analyze API] Creating missing profile for user:", user.id);
-        const { error: createProfileError } = await supabase
+        const { error: createProfileError } = await admin
           .from("profiles")
           .insert({
             id: user.id,
@@ -378,12 +380,18 @@ export async function POST(request: Request) {
           });
         
         if (createProfileError) {
-          console.error("[Analyze API] Failed to create profile:", createProfileError.message);
+          console.error("[Analyze API] Failed to create profile:", {
+            message: createProfileError.message,
+            code: createProfileError.code,
+            details: createProfileError.details,
+            hint: createProfileError.hint,
+          });
           return NextResponse.json(
             {
               success: false,
               error: "PROFILE_CREATION_FAILED",
               message: "Failed to create user profile. Please try again.",
+              details: process.env.NODE_ENV === "development" ? createProfileError.message : undefined,
             },
             { status: 500 }
           );
@@ -396,6 +404,7 @@ export async function POST(request: Request) {
             success: false,
             error: "PROFILE_CHECK_FAILED",
             message: "Failed to verify user profile. Please try again.",
+            details: process.env.NODE_ENV === "development" ? profileError.message : undefined,
           },
           { status: 500 }
         );
