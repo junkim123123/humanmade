@@ -7,112 +7,6 @@ import { sampleReport } from "@/lib/report/sample-report";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type GetReportResult =
-  | { report: any; error?: undefined }
-  | { report?: undefined; error: "NOT_FOUND" | "FORBIDDEN" };
-
-async function getReport(reportId: string): Promise<GetReportResult> {
-  try {
-    // Validate reportId before making request
-    if (!reportId || typeof reportId !== "string" || reportId.trim() === "") {
-      console.error("[Report V2 Page] Invalid reportId:", reportId);
-      return { error: "NOT_FOUND" };
-    }
-    
-    const cleanReportId = reportId.trim();
-    
-    // Handle sample report
-    if (cleanReportId === "sample-report") {
-      return { report: sampleReport };
-    }
-    
-    // Read report directly from DB using admin client
-    const admin = getSupabaseAdmin();
-    
-    console.log(`[Report V2 Page] Reading report from DB:`, {
-      reportId: cleanReportId,
-    });
-    
-    // Try reading with retries (for eventual consistency)
-    let reportData = null;
-    let readError = null;
-    const maxAttempts = 3;
-    
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const { data, error } = await admin
-        .from("reports")
-        .select("*")
-        .eq("id", cleanReportId)
-        .maybeSingle();
-      
-      reportData = data;
-      readError = error;
-      
-      if (data && !error) {
-        console.log(`[Report V2 Page] Report found on attempt ${attempt + 1}`);
-        break;
-      }
-      
-      if (attempt < maxAttempts - 1) {
-        const delay = 500 * (attempt + 1); // 500ms, 1000ms, 1500ms
-        console.log(`[Report V2 Page] Report not found, retrying in ${delay}ms (attempt ${attempt + 1}/${maxAttempts})...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-    
-    if (readError) {
-      console.error("[Report V2 Page] DB read error:", {
-        message: readError.message,
-        code: readError.code,
-        reportId: cleanReportId,
-      });
-      return { error: "NOT_FOUND" };
-    }
-    
-    if (!reportData) {
-      console.error("[Report V2 Page] Report not found in DB:", cleanReportId);
-      return { error: "NOT_FOUND" };
-    }
-    
-    // Get current user for ownership check
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // Enforce access rules
-    // If report.user_id is null, allow anyone
-    // If report.user_id exists, require authenticated user and must match
-    const reportDataAny = reportData as any;
-    if (reportDataAny.user_id !== null && reportDataAny.user_id !== undefined) {
-      // Report has an owner - require authentication and ownership
-      if (!user) {
-        console.log("[Report V2 Page] Report requires auth but user not logged in:", cleanReportId);
-        return { error: "FORBIDDEN" as const };
-      }
-      
-      if (user.id !== reportDataAny.user_id) {
-        console.log("[Report V2 Page] User mismatch:", {
-          reportUserId: reportDataAny.user_id,
-          requestUserId: user.id,
-          reportId: cleanReportId,
-        });
-        return { error: "FORBIDDEN" as const };
-      }
-    }
-    
-    console.log("[Report V2 Page] Report access granted:", {
-      reportId: cleanReportId,
-      productName: reportDataAny.product_name,
-      status: reportDataAny.status,
-      userId: reportDataAny.user_id,
-    });
-
-    return { report: reportDataAny };
-  } catch (error) {
-    console.error("[Report V2 Page] Error reading report:", error);
-    return { error: "NOT_FOUND" };
-  }
-}
-
 // Forbidden UI component
 function ForbiddenUI() {
   return (
@@ -128,6 +22,25 @@ function ForbiddenUI() {
         >
           Sign In
         </a>
+      </div>
+    </div>
+  );
+}
+
+// V2 SSR Badge component
+function V2SSRBadge({ reportId, schemaVersion }: { reportId: string; schemaVersion?: number | string }) {
+  return (
+    <div className="fixed top-4 right-4 z-50">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 text-[11px] font-medium shadow-sm">
+        <span>V2 SSR</span>
+        <span className="text-blue-600">•</span>
+        <span className="font-mono text-[10px]">{reportId.slice(0, 8)}...</span>
+        {schemaVersion && (
+          <>
+            <span className="text-blue-600">•</span>
+            <span>v{schemaVersion}</span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -156,35 +69,72 @@ export default async function Page({
     notFound();
   }
 
-  console.log("[Report V2 Page] Reading report from DB:", {
-    reportId,
-    isValidFormat: isSampleReport || uuidRegex.test(reportId),
-    timestamp: new Date().toISOString(),
-  });
-  
   const cleanReportId = reportId.trim();
-  const result = await getReport(cleanReportId);
   
-  if (result.error === "NOT_FOUND") {
-    console.error("[Report V2 Page] Report not found:", cleanReportId);
+  // Handle sample report
+  if (isSampleReport) {
+    const report = sampleReport as any;
+    const schemaVersion = report?.schemaVersion || report?.schema_version;
+    return (
+      <>
+        <V2SSRBadge reportId={cleanReportId} schemaVersion={schemaVersion} />
+        <ReportV2Page key={cleanReportId} reportId={cleanReportId} report={report} />
+      </>
+    );
+  }
+  
+  // Read report directly from DB using admin client
+  const admin = getSupabaseAdmin();
+  
+  const { data: reportData, error: readError } = await admin
+    .from("reports")
+    .select("*")
+    .eq("id", cleanReportId)
+    .single();
+  
+  // Handle not found explicitly
+  if (readError || !reportData) {
+    console.error("[Report V2 Page] Report not found:", {
+      reportId: cleanReportId,
+      error: readError?.message,
+    });
     notFound();
   }
   
-  if (result.error === "FORBIDDEN") {
-    console.error("[Report V2 Page] Access forbidden:", cleanReportId);
-    return <ForbiddenUI />;
+  // Get current user for ownership check
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // Enforce access rules
+  const reportDataAny = reportData as any;
+  
+  // If report.user_id is null, allow anyone
+  // If report.user_id exists, require authenticated user and must match
+  if (reportDataAny.user_id !== null && reportDataAny.user_id !== undefined) {
+    // Report has an owner - require authentication and ownership
+    if (!user) {
+      console.log("[Report V2 Page] Report requires auth but user not logged in:", cleanReportId);
+      return <ForbiddenUI />;
+    }
+    
+    if (user.id !== reportDataAny.user_id) {
+      console.log("[Report V2 Page] User mismatch:", {
+        reportUserId: reportDataAny.user_id,
+        requestUserId: user.id,
+        reportId: cleanReportId,
+      });
+      return <ForbiddenUI />;
+    }
   }
-
-  // At this point, TypeScript knows result.report exists and result.error is undefined
-  const report = result.report;
-
-  console.log("[Report V2 Page] Successfully loaded report:", {
-    reportId: cleanReportId,
-    productName: report?.product_name || report?.productName,
-    status: report?.status,
-    schemaVersion: report?.schemaVersion || report?.schema_version,
-  });
-
-  return <ReportV2Page key={cleanReportId} reportId={cleanReportId} report={report} />;
+  
+  // Report access granted - render with V2 SSR badge
+  const schemaVersion = reportDataAny.schemaVersion || reportDataAny.schema_version;
+  
+  return (
+    <>
+      <V2SSRBadge reportId={cleanReportId} schemaVersion={schemaVersion} />
+      <ReportV2Page key={cleanReportId} reportId={cleanReportId} report={reportDataAny} />
+    </>
+  );
 }
 

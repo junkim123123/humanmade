@@ -56,7 +56,22 @@ export default function ReportV2Page({ reportId, report, initialReport }: Report
 
   if (!resolvedReport) {
     console.error('[ReportV2Page] No report provided');
-    return null;
+    // Explicit error box instead of skeleton or null
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-xl p-8">
+          <h2 className="text-xl font-semibold text-red-900 mb-2">Report prop missing in ReportV2Page</h2>
+          <p className="text-red-700 text-sm mb-4">
+            The report data was not provided to the component. This is a temporary debug message.
+          </p>
+          <div className="text-xs text-red-600 font-mono bg-red-100 p-3 rounded">
+            <div>reportId: {reportId || "undefined"}</div>
+            <div>report: {report ? "present" : "missing"}</div>
+            <div>initialReport: {initialReport ? "present" : "missing"}</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
