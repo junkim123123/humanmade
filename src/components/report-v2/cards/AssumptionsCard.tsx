@@ -16,7 +16,16 @@ const sourceMeta: Record<SourceBadge, { text: string; color: string }> = {
 };
 
 function EvidenceLabel({ source }: { source: SourceBadge }) {
-  const { text, color } = sourceMeta[source];
+  const meta = sourceMeta[source];
+  if (!meta) {
+    // Fallback for unknown source types
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700">
+        Unknown
+      </span>
+    );
+  }
+  const { text, color } = meta;
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
       {text}
@@ -42,10 +51,18 @@ export default function AssumptionsCard({ report }: AssumptionsCardProps) {
   const inputStatus = reportAny._proof?.inputStatus || reportAny.inputStatus || {};
   const labelUnreadable = Boolean(inputStatus?.labelPhotoUploaded && inputStatus?.labelOcrStatus === "failed");
 
-  const adjustSource = (source?: SourceBadge): SourceBadge => {
+  const adjustSource = (source?: SourceBadge | string): SourceBadge => {
     if (!source) return "category_default";
+    // Map provenance values to SourceBadge
+    if (source === "label_ocr" || source === "label_verified") return "label_verified";
+    if (source === "vision_inferred" || source === "similar_records" || source === "hs_code_analysis") return "vision_inferred";
+    if (source === "user" || source === "user_confirmed") return "user";
     if (labelUnreadable && source === "label_verified") return "category_default";
-    return source;
+    // If it's already a valid SourceBadge, return it
+    if (source === "user" || source === "label_verified" || source === "vision_inferred" || source === "category_default") {
+      return source as SourceBadge;
+    }
+    return "category_default";
   };
 
   const volumeRangeText = () => {
