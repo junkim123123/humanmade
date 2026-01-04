@@ -20,7 +20,7 @@ export default function PricingPage() {
             Pricing
           </h1>
           <p className="text-[18px] text-slate-600 mb-2">
-            Start free. Pay only when you want real quotes and execution support.
+            Start free. Pay a deposit only when you want verified quotes. Get it back when you order.
           </p>
           <p className="text-[14px] text-slate-500">
             Outreach starts within 12 hours. Quotes arrive in about a week.
@@ -33,9 +33,9 @@ export default function PricingPage() {
             {/* Free */}
             <div className="p-6 flex items-start justify-between gap-6">
               <div className="flex-1">
-                <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Free</h3>
+                <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Free Analysis</h3>
                 <p className="text-[14px] text-slate-600">
-                  Fast estimates from category benchmarks and available import signals
+                  Instant Landed Cost & Profit Analysis using AI and import data.
                 </p>
               </div>
               <div className="text-right shrink-0">
@@ -49,22 +49,20 @@ export default function PricingPage() {
                 <div className="flex-1">
                   <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Verification</h3>
                   <p className="text-[14px] text-slate-600">
-                    Outreach starts within 12 hours. In about a week, you get at least 3 viable quotes.
+                    We validate the factory, negotiate MOQs, and confirm the exact landed cost blueprint.
                   </p>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[28px] font-bold text-slate-900">$45</div>
+                  <p className="text-[12px] text-slate-500 mt-1">Sourcing Deposit</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center px-3 py-1 text-[12px] font-medium text-emerald-700 bg-emerald-100 rounded-full">
-                  Credited back if you place an order within 30 days
+                <span className="inline-flex items-center px-3 py-1 text-[12px] font-semibold text-emerald-700 bg-emerald-100 rounded-full border border-emerald-200">
+                  100% Credited back to your first order
                 </span>
-                <span className="text-[12px] text-slate-500">Planning deposit per product</span>
+                <span className="text-[12px] text-slate-500">Deposit per product (not a fee if you order)</span>
               </div>
-              <p className="text-[13px] text-slate-500 mt-2">
-                We align specs, confirm key risks, and build a ready to buy plan.
-              </p>
             </div>
 
             {/* Execution */}
@@ -73,7 +71,7 @@ export default function PricingPage() {
                 <div className="flex-1">
                   <h3 className="text-[18px] font-semibold text-slate-900 mb-1">Execution</h3>
                   <p className="text-[14px] text-slate-600">
-                    We manage production and logistics to the port in your destination country
+                    End-to-end logistics coordination, from factory floor to your door.
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -81,8 +79,8 @@ export default function PricingPage() {
                   <p className="text-[12px] text-slate-500">of FOB, only when you place an order</p>
                 </div>
               </div>
-              <p className="text-[12px] text-slate-500 mt-3">
-                Domestic delivery after the port can be arranged separately.
+              <p className="text-[12px] text-slate-500 mt-3 italic">
+                (Logistics costs are passed through at cost, we charge 10% service fee on FOB to manage the chaos.)
               </p>
             </div>
           </div>
@@ -94,7 +92,7 @@ export default function PricingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Free */}
             <div className="rounded-xl border border-slate-200 bg-white p-6">
-              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Free</h3>
+              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Free Analysis</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -103,6 +101,10 @@ export default function PricingPage() {
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
                   <span>Delivered cost range and factory price range</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
+                  <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                  <span>Profit Margin Calculation</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -196,7 +198,7 @@ export default function PricingPage() {
               },
               {
                 q: "What do I get for $45?",
-                a: "Outreach starts within 12 hours. In about a week you get at least 3 viable quotes with MOQ, lead time, and label/origin checks. The deposit is credited back if you place an order within 30 days.",
+                a: "Outreach starts within 12 hours. In about a week you get at least 3 viable quotes with MOQ, lead time, and label/origin checks. The $45 is a deposit, not a fee—100% credited back to your first order.",
               },
               {
                 q: "When is evidence attached?",

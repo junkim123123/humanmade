@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, ArrowUpRight, ArrowDownRight, Clock, Gift, RefreshCw, HelpCircle } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle } from "lucide-react";
 import { fetchMyCredits, fetchMyCreditTransactions } from "./actions";
 import type { CreditTransaction } from "@/server/actions/credits";
 
 const CREDIT_VALUE = 45; // $45 per credit
 
 const transactionTypeConfig: Record<string, { label: string; icon: any; color: string }> = {
-  monthly_grant: { label: "Monthly bonus", icon: Gift, color: "text-emerald-600" },
-  admin_grant: { label: "Balance added", icon: ArrowUpRight, color: "text-emerald-600" },
-  verification_used: { label: "Verification", icon: ArrowDownRight, color: "text-red-600" },
-  refund: { label: "Refund", icon: RefreshCw, color: "text-blue-600" },
+  admin_grant: { label: "Credit added", icon: ArrowUpRight, color: "text-emerald-600" },
+  verification_used: { label: "Verification deposit", icon: ArrowDownRight, color: "text-red-600" },
+  refund: { label: "Deposit refunded", icon: RefreshCw, color: "text-blue-600" },
   adjustment: { label: "Adjustment", icon: RefreshCw, color: "text-slate-600" },
 };
 
@@ -65,9 +64,9 @@ export default function BillingPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-4xl py-8">
       <div className="mb-8">
-        <h1 className="text-[28px] font-bold text-slate-900">Billing</h1>
+        <h1 className="text-[28px] font-bold text-slate-900">Sourcing Credits</h1>
         <p className="mt-2 text-[14px] text-slate-600">
-          Manage your balance and view transaction history
+          Manage your credits and view transaction history
         </p>
       </div>
 
@@ -76,25 +75,18 @@ export default function BillingPage() {
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[13px] text-slate-300 uppercase tracking-wide font-medium mb-2">
-              Available Balance
+              Available Credits
             </p>
             <div className="flex items-baseline gap-1">
               <span className="text-[20px] font-medium text-slate-400">$</span>
               <span className="text-[48px] font-bold">{balanceInDollars}</span>
             </div>
             <p className="text-[14px] text-slate-400 mt-2">
-              {balance} verification{balance !== 1 ? "s" : ""} available
+              {balance} Credit{balance !== 1 ? "s" : ""} Available
             </p>
           </div>
           <div className="p-4 rounded-xl bg-white/10">
             <Wallet className="w-8 h-8 text-white" />
-          </div>
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-white/20">
-          <div className="flex items-center gap-2 text-[13px] text-slate-300">
-            <Gift className="w-4 h-4" />
-            <span>$45 free every month</span>
           </div>
         </div>
       </div>
@@ -110,40 +102,38 @@ export default function BillingPage() {
             <ul className="space-y-2 text-[14px] text-slate-600">
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold">•</span>
-                <span>Each verification costs <strong>$45</strong></span>
+                <span>Each verification requires a <strong>$45 deposit</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold">•</span>
-                <span>You receive <strong>$45 free every month</strong></span>
+                <span>This deposit is <strong>100% credited back</strong> to you when you place an order</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold">•</span>
-                <span>Add funds via bank transfer or card</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-500 font-bold">•</span>
-                <span>Unused balance carries over</span>
+                <span>Credits never expire</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Add Funds CTA */}
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 mb-8">
+      {/* Add Credit CTA */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-[16px] font-semibold text-slate-900">Need to add funds?</h3>
+            <h3 className="text-[16px] font-semibold text-slate-900">Add Credit</h3>
             <p className="text-[14px] text-slate-600 mt-1">
-              Contact us to top up your account balance
+              Purchase a $45 credit to start verification
             </p>
           </div>
-          <a
-            href="/support"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-[14px] font-medium rounded-full hover:bg-slate-800 transition-colors"
+          <button
+            onClick={() => {
+              alert("Payment gateway connecting...");
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-[15px] font-semibold rounded-full hover:bg-slate-800 transition-colors"
           >
-            Contact Support
-          </a>
+            Add Credit ($45)
+          </button>
         </div>
       </div>
 
@@ -190,7 +180,7 @@ export default function BillingPage() {
                       {isPositive ? "+" : "-"}${amountInDollars}
                     </p>
                     <p className="text-[12px] text-slate-400">
-                      Balance: ${balanceAfterInDollars}
+                      Credits: ${balanceAfterInDollars}
                     </p>
                   </div>
                 </div>

@@ -82,8 +82,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
   }, [mode]);
 
   const hasValidInput = useMemo(() => {
-    return !!files.product && !!files.barcode && !!files.label;
-  }, [files.product, files.barcode, files.label]);
+    return !!files.product; // Only product photo is required
+  }, [files.product]);
 
   // Unit conversion utilities
   const convertToSI = (value: string, type: "weight" | "length") => {
@@ -128,11 +128,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     setValidationErrors({});
     setApiError(null);
 
-    // Validate all 3 required photos
+    // Validate only product photo is required
     const errors: { product?: string; barcode?: string; label?: string } = {};
     if (!files.product) errors.product = "Product photo is required";
-    if (!files.barcode) errors.barcode = "Barcode photo is required";
-    if (!files.label) errors.label = "Label photo is required";
+    // barcode and label are optional
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -145,36 +144,18 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       shippingMode: form.shippingMode || "air",
       linkUrl: form.linkUrl.trim() || undefined,
       front: files.product,
-      barcode: files.barcode,
-      label: files.label,
+      barcode: files.barcode || undefined,
+      label: files.label || undefined,
     });
 
     if (!parsed.success) {
       return;
     }
 
-    // Public mode: store draft and redirect to signin
+    // Public mode: allow guest users to run analysis
+    // We'll show sign up modal after results are generated
     if (mode === "public") {
-      try {
-        window.localStorage.setItem(
-          DRAFT_KEY,
-          JSON.stringify({
-            destination: parsed.data.destination,
-            shippingMode: parsed.data.shippingMode,
-            linkUrl: parsed.data.linkUrl,
-            shelfPrice: form.shelfPrice || undefined,
-            weight: form.weight || undefined,
-            length: form.length || undefined,
-            width: form.width || undefined,
-            height: form.height || undefined,
-          })
-        );
-      } catch (storageError) {
-        console.warn("[AnalyzeForm] Failed to save draft", storageError);
-      }
-      toast.info("Sign in to run analysis — Your draft is saved");
-      router.push("/signin?next=/analyze");
-      return;
+      // Continue to API call - guest users can run analysis
     }
 
     // App mode: run analysis via API
@@ -189,8 +170,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
       const formData = new FormData();
       formData.append("image", parsed.data.front as File);
-      formData.append("barcode", parsed.data.barcode as File);
-      formData.append("label", parsed.data.label as File);
+      if (parsed.data.barcode) formData.append("barcode", parsed.data.barcode as File);
+      if (parsed.data.label) formData.append("label", parsed.data.label as File);
       if (files.extra1) formData.append("extra1", files.extra1);
       if (files.extra2) formData.append("extra2", files.extra2);
       if (parsed.data.destination) formData.append("destination", parsed.data.destination);
@@ -221,7 +202,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         return;
       }
 
-      if (!response.ok || !data?.success || !data?.reportId) {
+      if (!response.ok || !data?.success) {
         const errorMessage = data?.error || data?.message || "Analysis failed";
         setApiError(errorMessage);
         toast.error(errorMessage);
@@ -229,8 +210,34 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         return;
       }
 
-      toast.success("Analysis completed");
-      router.push(`/reports/${data.reportId}/v2`);
+      // For guest users, show sign up modal after results
+      if (mode === "public" && data?.isGuest) {
+        // Guest user - results returned without DB save
+        // Store results in sessionStorage and show sign up modal
+        try {
+          window.sessionStorage.setItem("guestAnalysisResult", JSON.stringify(data));
+          toast.success("Analysis completed! Sign up to save your results.");
+          // Redirect to signup with a flag to show the results after signup
+          router.push("/signup?next=/analyze&guest=true");
+          return;
+        } catch (storageError) {
+          console.warn("[AnalyzeForm] Failed to save guest results", storageError);
+          // Fallback: still show success message
+          toast.success("Analysis completed! Please sign up to save your results.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      // For authenticated users or if reportId exists
+      if (data?.reportId) {
+        toast.success("Analysis completed");
+        router.push(`/reports/${data.reportId}/v2`);
+      } else {
+        // Fallback: show results inline or redirect
+        toast.success("Analysis completed");
+        setLoading(false);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to process analysis";
       setApiError(errorMessage);
@@ -297,9 +304,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 <div className="mt-1 text-[14px] font-medium text-slate-900">United States</div>
               </div>
 
-              {/* Retail Price */}
+              {/* Target Sell Price */}
               <div>
-                <label className="text-[14px] font-medium text-slate-900">Retail price (optional)</label>
+                <label className="text-[14px] font-medium text-slate-900">Target Sell Price ($)</label>
                 <div className="mt-2 relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-slate-400">$</span>
                   <input
@@ -310,7 +317,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                     className="w-full h-10 rounded-lg border border-slate-200 bg-white pl-7 pr-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors"
                   />
                 </div>
-                <p className="mt-1.5 text-[13px] text-slate-500">Add retail price to see margin.</p>
+                <p className="mt-1.5 text-[13px] text-slate-500">Required to calculate your profit margin.</p>
               </div>
 
               {/* Advanced */}
@@ -391,7 +398,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                       : "bg-slate-900 text-white hover:bg-slate-800"
                   )}
                 >
-                  {loading ? "Analyzing..." : "Run analysis"}
+                  {loading ? "Calculating..." : "Calculate Landed Cost"}
                 </button>
                 {mode === "public" && (
                   <p className="mt-3 text-center text-[13px] text-slate-500">

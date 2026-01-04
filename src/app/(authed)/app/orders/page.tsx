@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getUserOrders } from "@/server/actions/orders";
 import Link from "next/link";
-import { Package, ArrowRight } from "lucide-react";
+import { Package, ArrowRight, Factory, Search, Ship } from "lucide-react";
 
 type OrderStatus =
   | "awaiting_contact"
@@ -79,8 +79,8 @@ export default function OrdersPage() {
               <Package className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-[24px] font-bold text-slate-900">Orders</h1>
-              <p className="text-[14px] text-slate-500">Manage and track your supply orders</p>
+              <h1 className="text-[24px] font-bold text-slate-900">Active Shipments</h1>
+              <p className="text-[14px] text-slate-500">Track production status, QC reports, and freight location in real-time.</p>
             </div>
           </div>
         </div>
@@ -106,18 +106,49 @@ export default function OrdersPage() {
         {/* Empty State */}
         {!loading && !error && orders.length === 0 && (
           <div className="text-center py-16">
-            <div className="inline-flex p-5 rounded-xl bg-slate-100 mb-5">
-              <Package className="w-12 h-12 text-slate-400" />
+            {/* 3-Step Icon Flow */}
+            <div className="flex items-center justify-center gap-4 mb-8 max-w-md mx-auto">
+              {/* Step 1: Production */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
+                  <Factory className="w-8 h-8 text-blue-600" />
+                </div>
+                <span className="text-[12px] font-medium text-slate-600">Production</span>
+              </div>
+              
+              {/* Arrow */}
+              <ArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
+              
+              {/* Step 2: QC Check */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                  <Search className="w-8 h-8 text-amber-600" />
+                </div>
+                <span className="text-[12px] font-medium text-slate-600">QC Check</span>
+              </div>
+              
+              {/* Arrow */}
+              <ArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
+              
+              {/* Step 3: Ocean Freight */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                  <Ship className="w-8 h-8 text-emerald-600" />
+                </div>
+                <span className="text-[12px] font-medium text-slate-600">Ocean Freight</span>
+              </div>
             </div>
-            <h3 className="text-[20px] font-bold text-slate-900 mb-2">No orders yet</h3>
-            <p className="text-[14px] text-slate-500 mb-6 max-w-sm mx-auto">
-              Orders start after you complete verification and receive quotes from suppliers
+
+            <h3 className="text-[24px] font-bold text-slate-900 mb-3">Your supply chain is waiting.</h3>
+            <p className="text-[15px] text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
+              Once you approve a quote in Reports, we take over. Watch your product move from the factory floor to your door right here.
             </p>
             <Link
               href="/app/reports"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-[14px] font-medium rounded-full hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-[15px] font-semibold rounded-full hover:bg-slate-800 transition-colors"
             >
-              View Reports
+              Go to Verified Quotes
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         )}

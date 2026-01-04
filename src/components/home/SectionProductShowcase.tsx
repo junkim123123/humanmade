@@ -10,6 +10,30 @@ export interface ProductShowcaseItem {
   images: string[];
 }
 
+// Sanitize product names to remove IP-specific references
+function sanitizeProductName(name: string): string {
+  const ipPatterns = [
+    { pattern: /pokemon/gi, replacement: "Licensed Character Fan (Auth Required)" },
+    { pattern: /one piece/gi, replacement: "Anime Figure" },
+    { pattern: /disney/gi, replacement: "Licensed Character Product (Auth Required)" },
+    { pattern: /doraemon/gi, replacement: "Character Fan" },
+    { pattern: /demon slayer/gi, replacement: "Anime Keyring" },
+    { pattern: /chiikawa/gi, replacement: "Character Product" },
+    { pattern: /crayon shin-chan/gi, replacement: "Character Product" },
+    { pattern: /minions/gi, replacement: "Character Product" },
+  ];
+
+  let sanitized = name;
+  for (const { pattern, replacement } of ipPatterns) {
+    if (pattern.test(sanitized)) {
+      sanitized = replacement;
+      break;
+    }
+  }
+
+  return sanitized;
+}
+
 interface SectionProductShowcaseProps {
   products: ProductShowcaseItem[];
 }
@@ -40,9 +64,27 @@ const caseStudies = [
  * Case studies section showing measurable outcomes.
  */
 export function SectionProductShowcase({ products }: SectionProductShowcaseProps) {
+  // Filter out IP-specific products and sanitize names
+  const sanitizedProducts = products
+    .filter(product => {
+      const lowerName = product.displayName.toLowerCase();
+      // Keep generic products, filter out obvious IP products
+      const ipKeywords = ['pokemon', 'one piece', 'disney', 'doraemon', 'demon slayer', 'chiikawa', 'shin-chan', 'minions'];
+      return !ipKeywords.some(keyword => lowerName.includes(keyword));
+    })
+    .map(product => ({
+      ...product,
+      displayName: sanitizeProductName(product.displayName),
+    }))
+    .slice(0, 3);
+  
   // Use actual product images if available, otherwise show case studies
-  const displayProducts = products.slice(0, 3);
-  const hasRealProducts = displayProducts.length >= 3;
+  const displayProducts = sanitizedProducts.length >= 3 ? sanitizedProducts : [
+    { slug: "p-1", displayName: "3D Jelly", images: [] },
+    { slug: "p-2", displayName: "Plush Toys", images: [] },
+    { slug: "p-3", displayName: "Assorted Jelly", images: [] },
+  ];
+  const hasRealProducts = sanitizedProducts.length >= 3;
 
   return (
     <div className="landing-container py-12 lg:py-16">
@@ -119,8 +161,15 @@ export function SectionProductShowcase({ products }: SectionProductShowcaseProps
           )}
         </div>
 
-        {/* Link to full gallery */}
+        {/* Disclaimer */}
         <div className="mt-6 text-center">
+          <p className="text-[12px] text-slate-500 max-w-2xl mx-auto">
+            We strictly comply with IP laws. Branded goods require official authorization.
+          </p>
+        </div>
+
+        {/* Link to full gallery */}
+        <div className="mt-4 text-center">
           <Link
             href="/proof#products"
             className="inline-flex items-center gap-2 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors"

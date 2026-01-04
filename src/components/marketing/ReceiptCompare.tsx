@@ -29,7 +29,11 @@ function ReceiptCard({
       <div className="flex items-center justify-between">
         <h3 className="text-[15px] font-semibold text-slate-900">{title}</h3>
         {badge && (
-          <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+          <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+            variant === "highlight"
+              ? "bg-emerald-500 text-white font-semibold"
+              : "bg-emerald-100 text-emerald-700"
+          }`}>
             {badge}
           </span>
         )}
@@ -73,20 +77,16 @@ function ReceiptCard({
 }
 
 export default function ReceiptCompare() {
-  const asIs: ReceiptItem[] = [
-    { label: "Factory + freight", amount: "$3.16" },
-    { label: "Import duties", amount: "$0.22" },
-    { label: "Clearance & fees", amount: "$0.12" },
-    { label: "Risk buffer", amount: "$0.30", helper: "Buffer covers variance until verified" },
-    { label: "Total delivered", amount: "$3.80", type: "total" },
+  const wholesale: ReceiptItem[] = [
+    { label: "Wholesale Price", amount: "$5.50" },
+    { label: "Total Cost", amount: "$5.50", type: "total" },
   ]
 
-  const withNexSupply: ReceiptItem[] = [
-    { label: "Factory + freight", amount: "$2.66" },
-    { label: "Import duties", amount: "$0.19" },
-    { label: "Clearance & fees", amount: "$0.08" },
-    { label: "Verified savings", amount: "-$0.27", type: "savings" },
-    { label: "Total delivered", amount: "$2.66", type: "total" },
+  const nexSupply: ReceiptItem[] = [
+    { label: "Factory FOB", amount: "$1.24" },
+    { label: "Freight & Duty", amount: "$0.86" },
+    { label: "NexSupply Fee (10%)", amount: "$0.12" },
+    { label: "Total Cost", amount: "$2.22", type: "total" },
   ]
 
   return (
@@ -94,17 +94,17 @@ export default function ReceiptCompare() {
       {/* Header */}
       <div className="max-w-2xl">
         <h2 className="text-[28px] leading-[1.2] font-bold tracking-[-0.02em] text-slate-900 sm:text-[32px]">
-          See the impact on the receipt
+          See the margin gap
         </h2>
         <p className="mt-3 text-[15px] leading-[1.6] text-slate-600">
-          Side-by-side receipts with real line items and clear delivered totals.
+          Compare buying wholesale vs. going direct with execution support.
         </p>
       </div>
 
       {/* Receipt Cards */}
       <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">
-        <ReceiptCard title="As is" items={asIs} />
-        <ReceiptCard title="With NexSupply" items={withNexSupply} badge="Potential savings" variant="highlight" />
+        <ReceiptCard title="Current Way (Buying Wholesale)" items={wholesale} />
+        <ReceiptCard title="NexSupply Way (Going Direct)" items={nexSupply} badge="PROFIT UNLOCKED: +$3.28 / unit" variant="highlight" />
       </div>
     </div>
   )

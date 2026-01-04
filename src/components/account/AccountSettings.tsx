@@ -57,6 +57,7 @@ export function AccountSettings({
   const [state, setState] = useState(profile?.shipping_state || "");
   const [postalCode, setPostalCode] = useState(profile?.shipping_postal_code || "");
   const [country, setCountry] = useState(profile?.shipping_country || "United States");
+  const [taxId, setTaxId] = useState(""); // EIN / Tax ID (placeholder for future DB field)
   const [savingCompany, setSavingCompany] = useState(false);
 
   const canSave = useMemo(() => {
@@ -164,7 +165,9 @@ export function AccountSettings({
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900">
           {email}
         </div>
-        <SignOutButton />
+        <div className="flex justify-end">
+          <SignOutButton />
+        </div>
       </section>
 
       {/* Billing Section */}
@@ -173,7 +176,10 @@ export function AccountSettings({
           <div>
             <h3 className="text-base font-semibold text-slate-900">💳 Billing</h3>
             <p className="text-sm text-slate-600">
-              Balance: <span className="font-semibold text-emerald-600">${balanceInDollars}</span>
+              Available Credits: <span className="font-semibold text-emerald-600">${balanceInDollars}</span>
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              Credits from your deposits are applied to future execution fees.
             </p>
           </div>
           <Link
@@ -332,15 +338,15 @@ export function AccountSettings({
         )}
       </section>
 
-      {/* Company Info / Shipping Section */}
+      {/* Import Settings Section */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">🏢 Company Info</h3>
+            <h3 className="text-base font-semibold text-slate-900">🏢 Import Settings</h3>
             <p className="text-sm text-slate-600">
               {profile?.shipping_city && profile?.shipping_country
                 ? `${profile.shipping_city}, ${profile.shipping_state || ""} ${profile.shipping_country}`
-                : "Add shipping address for quotes"
+                : "Shipping Address and EIN / Tax ID required for Customs Clearance"
               }
             </p>
           </div>
@@ -355,70 +361,95 @@ export function AccountSettings({
 
         {companyOpen && (
           <div className="mt-4 space-y-3">
-            <label className="flex flex-col gap-1 text-sm text-slate-700">
-              Address line 1
-              <input
-                type="text"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                value={addressLine1}
-                onChange={(e) => setAddressLine1(e.target.value)}
-                placeholder="123 Main Street"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm text-slate-700">
-              Address line 2
-              <input
-                type="text"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                value={addressLine2}
-                onChange={(e) => setAddressLine2(e.target.value)}
-                placeholder="Suite 100 (optional)"
-              />
-            </label>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 mb-2">
+              <p className="text-xs text-blue-800 font-medium">
+                Required for Customs Clearance: Shipping Address and EIN / Tax ID
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-slate-900">Shipping Address</h4>
               <label className="flex flex-col gap-1 text-sm text-slate-700">
-                City
+                Address line 1
                 <input
                   type="text"
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="New York"
+                  value={addressLine1}
+                  onChange={(e) => setAddressLine1(e.target.value)}
+                  placeholder="123 Main Street"
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm text-slate-700">
-                State / Province
+                Address line 2
                 <input
                   type="text"
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="NY"
+                  value={addressLine2}
+                  onChange={(e) => setAddressLine2(e.target.value)}
+                  placeholder="Suite 100 (optional)"
                 />
+              </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  City
+                  <input
+                    type="text"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="New York"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  State / Province
+                  <input
+                    type="text"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="NY"
+                  />
+                </label>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  Postal code
+                  <input
+                    type="text"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    placeholder="10001"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  Country
+                  <input
+                    type="text"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    placeholder="United States"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-3 border-t border-slate-200">
+              <h4 className="text-sm font-semibold text-slate-900">Tax Information</h4>
+              <label className="flex flex-col gap-1 text-sm text-slate-700">
+                EIN / Tax ID
+                <input
+                  type="text"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                  placeholder="12-3456789"
+                />
+                <p className="text-xs text-slate-500 mt-1">Required for US Customs clearance</p>
               </label>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                Postal code
-                <input
-                  type="text"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  placeholder="10001"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                Country
-                <input
-                  type="text"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  placeholder="United States"
-                />
-              </label>
-            </div>
+
             <div className="flex justify-end">
               <button
                 type="button"
@@ -426,11 +457,27 @@ export function AccountSettings({
                 disabled={savingCompany}
                 className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {savingCompany ? "Saving..." : "Save company info"}
+                {savingCompany ? "Saving..." : "Save import settings"}
               </button>
             </div>
           </div>
         )}
+      </section>
+
+      {/* Sourcing Support Section */}
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">💬 Sourcing Support</h3>
+            <p className="text-sm text-slate-600">Get help with sourcing questions or issues</p>
+          </div>
+          <Link
+            href="/support"
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors"
+          >
+            Contact Support →
+          </Link>
+        </div>
       </section>
 
       {/* Password Section */}

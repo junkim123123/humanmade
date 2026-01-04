@@ -65,11 +65,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     scrollToFirstMissing: () => {
       if (!slots.product.file && productSlotRef.current) {
         productSlotRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else if (!slots.barcode.file && barcodeSlotRef.current) {
-        barcodeSlotRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else if (!slots.label.file && labelSlotRef.current) {
-        labelSlotRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+      // barcode and label are optional, so don't scroll to them
     }
   }));
 
@@ -198,7 +195,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     inputRef: React.RefObject<HTMLInputElement | null>,
     slotRef?: React.RefObject<HTMLDivElement | null>,
     isRequired = false,
-    secondaryText?: string
+    tooltipText?: string
   ) => {
     const slot = slots[slotType];
     const hasImage = !!slot.file;
@@ -217,8 +214,16 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                 Required
               </span>
             )}
+            {!isRequired && (
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
+                Optional
+              </span>
+            )}
           </div>
           <p className="text-[13px] text-slate-600 leading-relaxed">{helperText}</p>
+          {tooltipText && (
+            <p className="mt-1 text-[12px] text-slate-500 italic">{tooltipText}</p>
+          )}
         </div>
 
         {/* Upload Area */}
@@ -302,16 +307,16 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     <div className="space-y-6">
       {/* Section Header */}
       <div className="border-l-4 border-slate-900 pl-4">
-        <h3 className="text-[18px] font-bold text-slate-900">Required photos</h3>
-        <p className="mt-1 text-[14px] text-slate-600">Upload 3 photos to run analysis.</p>
-        <p className="mt-0.5 text-[13px] text-slate-500">3 photos. 3 minutes. Assumptions are always labeled.</p>
+        <h3 className="text-[18px] font-bold text-slate-900">Product photos</h3>
+        <p className="mt-1 text-[14px] text-slate-600">Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy.</p>
+        <p className="mt-0.5 text-[13px] text-slate-500">3 minutes. Assumptions are always labeled.</p>
       </div>
       
       {/* Upload Grid */}
       <div className="grid gap-5 sm:grid-cols-3">
         {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productInputRef, productSlotRef, true)}
-        {renderSlot("barcode", "Barcode photo", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeInputRef, barcodeSlotRef, true)}
-        {renderSlot("label", "Label photo", "Back label with net weight, materials, warnings, and origin if shown.", labelInputRef, labelSlotRef, true)}
+        {renderSlot("barcode", "Barcode photo (optional)", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeInputRef, barcodeSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
+        {renderSlot("label", "Label photo (optional)", "Back label with net weight, materials, warnings, and origin if shown.", labelInputRef, labelSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
       </div>
 
       {/* Optional Section */}

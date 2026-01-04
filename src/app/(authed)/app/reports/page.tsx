@@ -110,11 +110,11 @@ export default async function AppReportsPage() {
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl py-10">
           <div className="text-center">
             <h1 className="text-[32px] sm:text-[40px] font-bold text-white leading-tight mb-3">
-              We bring it to your port.<br />
-              <span className="text-slate-400">You take it from there.</span>
+              Sourcing, Verification, Logistics —<br />
+              <span className="text-slate-300">All in One View.</span>
             </h1>
             <p className="text-[15px] text-slate-400 max-w-md mx-auto mb-6">
-              Factory sourcing, verification, samples, and shipping — handled.
+              From factory floor to your door. We manage the execution so you can focus on selling.
             </p>
             <Link
               href="/app/analyze"
@@ -127,6 +127,12 @@ export default async function AppReportsPage() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 max-w-5xl py-8">
+        {/* Control Center Header */}
+        <div className="mb-6">
+          <h2 className="text-[18px] font-semibold text-slate-900 mb-1">Supply Chain Control Center</h2>
+          <p className="text-[13px] text-slate-500">Monitor your sourcing pipeline from analysis to delivery</p>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-3 mb-8">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -134,7 +140,7 @@ export default async function AppReportsPage() {
               <div className="p-2 rounded-lg bg-slate-100">
                 <Hourglass className="w-5 h-5 text-slate-600" />
               </div>
-              <span className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Pending</span>
+              <span className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Analyzing</span>
             </div>
             <div className="text-[32px] font-bold text-slate-900 leading-none">{pendingCount}</div>
             <p className="text-[14px] text-slate-500 mt-1">Awaiting verification</p>
@@ -145,10 +151,10 @@ export default async function AppReportsPage() {
               <div className="p-2 rounded-lg bg-amber-50">
                 <Clock className="w-5 h-5 text-amber-600" />
               </div>
-              <span className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Active</span>
+              <span className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Verifying</span>
             </div>
             <div className="text-[32px] font-bold text-slate-900 leading-none">{inVerificationCount}</div>
-            <p className="text-[14px] text-amber-600 mt-1">In verification</p>
+            <p className="text-[14px] text-amber-600 mt-1">In progress</p>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -156,7 +162,7 @@ export default async function AppReportsPage() {
               <div className="p-2 rounded-lg bg-emerald-50">
                 <Check className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Done</span>
+              <span className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Ready to Order</span>
             </div>
             <div className="text-[32px] font-bold text-slate-900 leading-none">{completedCount}</div>
             <p className="text-[14px] text-emerald-600 mt-1">Verification complete</p>
@@ -164,6 +170,9 @@ export default async function AppReportsPage() {
         </div>
 
         {/* Reports List */}
+        <div className="mb-6">
+          <h2 className="text-[18px] font-semibold text-slate-900 mb-4">Your Products</h2>
+        </div>
         <div className="space-y-4 mb-8">
           {reports.map((report) => {
             const costTarget = formatCost(report.baseline);
@@ -220,18 +229,18 @@ export default async function AppReportsPage() {
         {/* Empty State */}
         {reports.length === 0 && (
           <div className="text-center py-16 px-4">
-            <div className="inline-flex p-5 rounded-xl bg-slate-100 mb-5">
-              <FileText className="w-12 h-12 text-slate-400" />
+            <div className="inline-flex p-5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 mb-5">
+              <FileText className="w-12 h-12 text-blue-600" />
             </div>
-            <h3 className="text-[20px] font-bold text-slate-900 mb-2">No reports yet</h3>
-            <p className="text-[14px] text-slate-500 mb-6 max-w-sm mx-auto">
-              Start your first product analysis to unlock sourcing intelligence and cost insights
+            <h3 className="text-[24px] font-bold text-slate-900 mb-2">Your High-Margin Product is Waiting.</h3>
+            <p className="text-[15px] text-slate-600 mb-6 max-w-md mx-auto">
+              Upload a photo to calculate your potential profit instantly. It takes 3 minutes.
             </p>
             <Link
               href="/app/analyze"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-[14px] font-medium rounded-full hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-[15px] font-semibold rounded-full hover:bg-slate-800 transition-colors"
             >
-              Start your first analysis
+              Start Free Analysis
             </Link>
           </div>
         )}

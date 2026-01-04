@@ -65,37 +65,46 @@ export async function POST(request: Request) {
     const shippingCost = 150;
     const fee = 0;
 
-    // Validate required fields: all 3 images are mandatory
-    if (!imageFile || !barcodeFile || !labelFile) {
+    // Validate required fields: only product image is mandatory
+    if (!imageFile) {
       return NextResponse.json(
         {
           ok: false,
           error: { 
-            code: "IMAGES_REQUIRED", 
-            message: "Upload 3 required photos: product, barcode, and label." 
+            code: "IMAGE_REQUIRED", 
+            message: "Product photo is required." 
           },
         },
         { status: 400 }
       );
     }
 
-    // Convert File to data URL for pipeline and generate image hashes for all 3 images
+    // Convert File to data URL for pipeline and generate image hashes
     const arrayBuffer = await imageFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString("base64");
     const mimeType = imageFile.type || "image/jpeg";
     const imageDataUrl = `data:${mimeType};base64,${base64}`;
     
-    // Generate data URLs for barcode and label for Vision extraction
-    const barcodeBuffer = Buffer.from(await barcodeFile.arrayBuffer());
-    const barcodeBase64 = barcodeBuffer.toString("base64");
-    const barcodeMimeType = barcodeFile.type || "image/jpeg";
-    const barcodeDataUrl = `data:${barcodeMimeType};base64,${barcodeBase64}`;
+    // Generate data URLs for barcode and label for Vision extraction (optional)
+    let barcodeDataUrl: string | null = null;
+    let labelDataUrl: string | null = null;
+    let barcodeBuffer: Buffer | null = null;
+    let labelBuffer: Buffer | null = null;
     
-    const labelBuffer = Buffer.from(await labelFile.arrayBuffer());
-    const labelBase64 = labelBuffer.toString("base64");
-    const labelMimeType = labelFile.type || "image/jpeg";
-    const labelDataUrl = `data:${labelMimeType};base64,${labelBase64}`;
+    if (barcodeFile) {
+      barcodeBuffer = Buffer.from(await barcodeFile.arrayBuffer());
+      const barcodeBase64 = barcodeBuffer.toString("base64");
+      const barcodeMimeType = barcodeFile.type || "image/jpeg";
+      barcodeDataUrl = `data:${barcodeMimeType};base64,${barcodeBase64}`;
+    }
+    
+    if (labelFile) {
+      labelBuffer = Buffer.from(await labelFile.arrayBuffer());
+      const labelBase64 = labelBuffer.toString("base64");
+      const labelMimeType = labelFile.type || "image/jpeg";
+      labelDataUrl = `data:${labelMimeType};base64,${labelBase64}`;
+    }
     
     // Generate data URL for extra1 if present (for case pack inference)
     let extra1DataUrl: string | null = null;
@@ -106,22 +115,25 @@ export async function POST(request: Request) {
       extra1DataUrl = `data:${extra1MimeType};base64,${extra1Base64}`;
     }
     
-    // Generate hashes for all three required images for input key
+    // Generate hashes for images for input key (barcode and label are optional)
     const imageHash = hashBuffer(buffer);
-    const barcodeHash = hashBuffer(barcodeBuffer);
-    const labelHash = hashBuffer(labelBuffer);
+    const barcodeHash = barcodeBuffer ? hashBuffer(barcodeBuffer) : null;
+    const labelHash = labelBuffer ? hashBuffer(labelBuffer) : null;
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Allow guest users to run analysis (we'll show sign up modal after results)
+    // For guest users, we'll use a temporary user ID or handle differently
+    let guestUserId: string | null = null;
     if (!user) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "UNAUTHENTICATED",
-        message: "Please sign in to run analysis. Your reports will be saved securely."
-      }, { status: 401 });
+      // Generate a temporary guest ID for this session
+      // In production, you might want to create an anonymous user or use session storage
+      guestUserId = `guest_${crypto.randomUUID()}`;
+      console.log("[Analyze API] Guest user detected, using temporary ID:", guestUserId);
+    } else {
+      userId = user.id;
     }
-    userId = user.id;
 
     // Use server-side defaults (already set above)
     const parsedQuantity = quantity;
@@ -150,30 +162,30 @@ export async function POST(request: Request) {
     if (rerun) {
       inputKey = makeInputKey({
         imageHash,
-        barcodeHash,
-        labelHash,
+        barcodeHash: barcodeHash || "",
+        labelHash: labelHash || "",
         quantity: parsedQuantity,
         dutyRate: parsedDutyRate,
         shippingCost: parsedShippingCost,
         fee: parsedFee,
         destination,
         shippingMode,
-        userId: user.id,
+        userId: user?.id || guestUserId || "",
         pipelineVersion: PIPELINE_VERSION,
       }) + "_" + crypto.randomUUID();
       console.log(`[Analyze API] Rerun requested, generated unique input_key with nonce`);
     } else {
       inputKey = makeInputKey({
         imageHash,
-        barcodeHash,
-        labelHash,
+        barcodeHash: barcodeHash || "",
+        labelHash: labelHash || "",
         quantity: parsedQuantity,
         dutyRate: parsedDutyRate,
         shippingCost: parsedShippingCost,
         fee: parsedFee,
         destination,
         shippingMode,
-        userId: user.id,
+        userId: user?.id || guestUserId || "",
         pipelineVersion: PIPELINE_VERSION,
       });
     }
@@ -181,7 +193,8 @@ export async function POST(request: Request) {
     console.log(`[Analyze API] Generated input_key: ${inputKey.substring(0, 16)}...`);
     
     // Check if a report with this input_key already exists (idempotency)
-    if (!rerun) {
+    // Only check for authenticated users
+    if (!rerun && user) {
       const { data: existingReport, error: existingError } = await supabase
         .from("reports")
         .select("id, status, product_name")
@@ -222,14 +235,18 @@ export async function POST(request: Request) {
       }
     }
 
-    // Upload all 3 images to the uploads bucket with user-scoped paths
+    // Upload images to the uploads bucket with user-scoped paths
+    // For guest users, use temporary storage or skip storage (return data URLs)
     const uploadImage = async (file: File, prefix: string) => {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const fileExt = file.name?.split(".").pop()?.toLowerCase() || "jpg";
-      const storagePath = `${user.id}/${prefix}-${crypto.randomUUID()}.${fileExt}`;
+      const userIdForPath = user?.id || guestUserId || "guest";
+      const storagePath = `${userIdForPath}/${prefix}-${crypto.randomUUID()}.${fileExt}`;
       const mimeType = file.type || "image/jpeg";
       
+      // For guest users, we might want to use temporary storage or return data URLs
+      // For now, we'll still try to upload (might need RLS policy changes)
       const { error: uploadError } = await supabase.storage
         .from("uploads")
         .upload(storagePath, buffer, {
@@ -237,6 +254,12 @@ export async function POST(request: Request) {
         });
 
       if (uploadError) {
+        // For guest users, if upload fails, we can use data URL as fallback
+        if (!user && uploadError.message?.includes("permission")) {
+          console.warn("[Analyze API] Guest user upload failed, using data URL fallback");
+          const base64 = buffer.toString("base64");
+          return `data:${mimeType};base64,${base64}`;
+        }
         throw uploadError;
       }
 
@@ -245,21 +268,20 @@ export async function POST(request: Request) {
     };
 
     let productImageUrl: string;
-    let barcodeImageUrl: string;
-    let labelImageUrl: string;
+    let barcodeImageUrl: string | null = null;
+    let labelImageUrl: string | null = null;
     let extra1ImageUrl: string | null = null;
     let extra2ImageUrl: string | null = null;
 
     try {
-      const requiredUploads = await Promise.all([
-        uploadImage(imageFile, "product"),
-        uploadImage(barcodeFile, "barcode"),
-        uploadImage(labelFile, "label"),
-      ]);
+      const uploadPromises = [uploadImage(imageFile, "product")];
+      if (barcodeFile) uploadPromises.push(uploadImage(barcodeFile, "barcode"));
+      if (labelFile) uploadPromises.push(uploadImage(labelFile, "label"));
       
-      productImageUrl = requiredUploads[0];
-      barcodeImageUrl = requiredUploads[1];
-      labelImageUrl = requiredUploads[2];
+      const uploadResults = await Promise.all(uploadPromises);
+      productImageUrl = uploadResults[0];
+      if (barcodeFile) barcodeImageUrl = uploadResults[1] || null;
+      if (labelFile) labelImageUrl = uploadResults[barcodeFile ? 2 : 1] || null;
 
       // Upload optional images if present
       if (extra1File) {
@@ -291,104 +313,111 @@ export async function POST(request: Request) {
 
     const uploadFlags = {
       productPhotoUploaded: true,
-      barcodePhotoUploaded: true,
-      labelPhotoUploaded: true,
-      hasBarcodeImage: true,
-      hasLabelImage: true,
+      barcodePhotoUploaded: !!barcodeFile,
+      labelPhotoUploaded: !!labelFile,
+      hasBarcodeImage: !!barcodeFile,
+      hasLabelImage: !!labelFile,
     };
 
-    // Create placeholder report row before pipeline runs
-    // Use upsert to handle race conditions where duplicate requests arrive simultaneously
-    const reportData = {
-      user_id: user.id,
-      input_key: inputKey,
-      product_name: "Pending analysis",
-      category: "pending",
-      confidence: "low",
-      status: "processing",
-      image_url: productImageUrl, // Main product image for backward compatibility
-      signals: {},
-      baseline: {},
-      data: {
-        product_image_url: productImageUrl,
-        barcode_image_url: barcodeImageUrl,
-        label_image_url: labelImageUrl,
-        extra_image_url_1: extra1ImageUrl,
-        extra_image_url_2: extra2ImageUrl,
-        ...uploadFlags,
-        inputStatus: {
-          ...uploadFlags,
-          unitsPerCase: 1,
-        },
-      },
-      pipeline_result: { 
-        queued: true, 
-        productImagePath: productImageUrl,
-        barcodeImagePath: barcodeImageUrl,
-        labelImagePath: labelImageUrl,
-        extra1ImagePath: extra1ImageUrl,
-        extra2ImagePath: extra2ImageUrl,
-        uploadAudit: uploadFlags,
-      },
-      schema_version: 1,
-    };
-    
-    // Try upsert with conflict handling on input_key
-    const { data: upsertedReport, error: upsertError } = await supabase
-      .from("reports")
-      .upsert(reportData, {
-        onConflict: "input_key",
-        ignoreDuplicates: false, // Update the existing row
-      })
-      .select("id, status")
-      .single();
-
-    if (upsertError) {
-      // If upsert fails, try to fetch existing report
-      console.error("[Analyze API] Upsert failed, attempting to fetch existing report", upsertError.message);
-      
-      const { data: existingReport, error: fetchError } = await supabase
-        .from("reports")
-        .select("id, status")
-        .eq("input_key", inputKey)
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      if (!fetchError && existingReport) {
-        console.log(`[Analyze API] Found existing report after upsert conflict: reportId=${existingReport.id}, status=${existingReport.status}`);
-        
-        // Check if it's already processing
-        if (existingReport.status === "processing" || existingReport.status === "queued") {
-          return NextResponse.json({
-            success: true,
-            reportId: existingReport.id,
-            reused: true,
-            status: existingReport.status,
-            message: `Analysis already ${existingReport.status}. Redirecting to existing report.`,
-          });
-        }
-        
-        // Use the existing report ID
-        finalReportId = existingReport.id as string;
-        console.log(`[Analyze API] Reusing existing report: ${finalReportId}`);
-      } else {
-        console.error("[Analyze API] Failed to create or fetch placeholder report", upsertError.message);
-        return NextResponse.json(
-          { success: false, error: "REPORT_INIT_FAILED", message: upsertError.message || "Unable to create report" },
-          { status: 500 }
-        );
-      }
+    // Guest user flow: Skip DB operations and run pipeline directly
+    if (!user) {
+      console.log("[Analyze API] Guest user - running pipeline without DB save");
+      // Skip all DB operations for guest users
+      // We'll run the pipeline and return results directly
     } else {
-      finalReportId = upsertedReport.id as string;
-      console.log(`[Analyze API] Created/updated placeholder report: ${finalReportId}, input_key=${inputKey.substring(0, 16)}...`);
+      // Authenticated user: Create placeholder report row before pipeline runs
+      const reportData = {
+        user_id: user.id,
+        input_key: inputKey,
+        product_name: "Pending analysis",
+        category: "pending",
+        confidence: "low",
+        status: "processing",
+        image_url: productImageUrl, // Main product image for backward compatibility
+        signals: {},
+        baseline: {},
+        data: {
+          product_image_url: productImageUrl,
+          barcode_image_url: barcodeImageUrl,
+          label_image_url: labelImageUrl,
+          extra_image_url_1: extra1ImageUrl,
+          extra_image_url_2: extra2ImageUrl,
+          ...uploadFlags,
+          inputStatus: {
+            ...uploadFlags,
+            unitsPerCase: 1,
+          },
+        },
+        pipeline_result: { 
+          queued: true, 
+          productImagePath: productImageUrl,
+          barcodeImagePath: barcodeImageUrl,
+          labelImagePath: labelImageUrl,
+          extra1ImagePath: extra1ImageUrl,
+          extra2ImagePath: extra2ImageUrl,
+          uploadAudit: uploadFlags,
+        },
+        schema_version: 1,
+      };
+      
+      // Try upsert with conflict handling on input_key
+      const { data: upsertedReport, error: upsertError } = await supabase
+        .from("reports")
+        .upsert(reportData, {
+          onConflict: "input_key",
+          ignoreDuplicates: false, // Update the existing row
+        })
+        .select("id, status")
+        .single();
+
+      if (upsertError) {
+        // If upsert fails, try to fetch existing report
+        console.error("[Analyze API] Upsert failed, attempting to fetch existing report", upsertError.message);
+        
+        const { data: existingReport, error: fetchError } = await supabase
+          .from("reports")
+          .select("id, status")
+          .eq("input_key", inputKey)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (!fetchError && existingReport) {
+          console.log(`[Analyze API] Found existing report after upsert conflict: reportId=${existingReport.id}, status=${existingReport.status}`);
+          
+          // Check if it's already processing
+          if (existingReport.status === "processing" || existingReport.status === "queued") {
+            return NextResponse.json({
+              success: true,
+              reportId: existingReport.id,
+              reused: true,
+              status: existingReport.status,
+              message: `Analysis already ${existingReport.status}. Redirecting to existing report.`,
+            });
+          }
+          
+          // Use the existing report ID
+          finalReportId = existingReport.id as string;
+          console.log(`[Analyze API] Reusing existing report: ${finalReportId}`);
+        } else {
+          console.error("[Analyze API] Failed to create or fetch placeholder report", upsertError.message);
+          return NextResponse.json(
+            { success: false, error: "REPORT_INIT_FAILED", message: upsertError.message || "Unable to create report" },
+            { status: 500 }
+          );
+        }
+      } else {
+        finalReportId = upsertedReport.id as string;
+        console.log(`[Analyze API] Created/updated placeholder report: ${finalReportId}, input_key=${inputKey.substring(0, 16)}...`);
+      }
     }
 
     // ============================================================================
     // FAST MODE: Optional 3-second response with background upgrade
     // If ANALYZE_FAST_MODE=true, return partial report with fast facts only
     // Heavy analysis (supplier matching, HS inference) runs in background job
+    // Skip for guest users (they get full results immediately)
     // ============================================================================
-    if (process.env.ANALYZE_FAST_MODE === "true" && finalReportId) {
+    if (process.env.ANALYZE_FAST_MODE === "true" && finalReportId && user) {
       try {
         const requestId = crypto.randomUUID();
         console.log(`[Analyze API] FAST_MODE enabled, using 2-phase response (requestId: ${requestId})`);
@@ -450,8 +479,10 @@ export async function POST(request: Request) {
     }, warnOnce);
 
     // Build report from pipeline result
+    // For guest users, use a temporary reportId
+    const tempReportId = finalReportId || `guest_${crypto.randomUUID()}`;
     const report = buildReportFromPipeline({
-      reportId: finalReportId,
+      reportId: tempReportId,
       inputKey,
       pipeline: result,
     });
@@ -1094,9 +1125,32 @@ export async function POST(request: Request) {
       },
     });
 
+    // For guest users, skip DB updates and return results directly
+    if (!user) {
+      console.log("[Analyze API] Guest user - skipping DB update, returning results directly");
+      // Return results without saving to DB
+      return NextResponse.json({
+        success: true,
+        reportId: null, // No reportId for guest users
+        savedReport: false,
+        isGuest: true,
+        data: { ...result, draftInference },
+        report: {
+          ...report,
+          product_image_url: productImageUrl,
+          barcode_image_url: barcodeImageUrl,
+          label_image_url: labelImageUrl,
+          extra_image_url_1: extra1ImageUrl,
+          extra_image_url_2: extra2ImageUrl,
+        },
+        pipeline_result: sanitizedPipelineResult,
+        warnings,
+      });
+    }
+
     const admin = getSupabaseAdmin();
 
-    // Update report with pipeline outputs
+    // Update report with pipeline outputs (authenticated users only)
     const { error: updateError } = await supabase
       .from("reports")
       .update({
@@ -1152,10 +1206,12 @@ export async function POST(request: Request) {
 
     // Persist trade data audit fields in a separate non-blocking update
     // Includes: attempted, result_count, used, reason, provider, checked_at + label audit + Vision extraction
-    try {
-      await supabase
-        .from("reports")
-        .update({
+    // Skip for guest users
+    if (user) {
+      try {
+        await supabase
+          .from("reports")
+          .update({
           external_trade_data_attempted: externalTradeDataAttempted,
           external_trade_data_result_count: externalTradeDataResultCount,
           used_external_trade_data: usedExternalTradeData,
@@ -1189,17 +1245,19 @@ export async function POST(request: Request) {
           compliance_notes: JSON.stringify(complianceNotes),
           updated_at: new Date().toISOString(),
         })
-        .eq("id", finalReportId)
-        .eq("user_id", user.id);
-    } catch (e: any) {
-      // Compact warning and continue - never fail report due to schema cache
-      console.warn("[Analyze API] Audit fields not persisted (schema cache)");
-      // Dev note: If you just added columns in Supabase and still see schema cache errors,
-      // run NOTIFY pgrst, 'reload schema' or restart the API.
+          .eq("id", finalReportId)
+          .eq("user_id", user.id);
+      } catch (e: any) {
+        // Compact warning and continue - never fail report due to schema cache
+        console.warn("[Analyze API] Audit fields not persisted (schema cache)");
+        // Dev note: If you just added columns in Supabase and still see schema cache errors,
+        // run NOTIFY pgrst, 'reload schema' or restart the API.
+      }
     }
 
-    // Save supplier matches to product_supplier_matches table
-    try {
+    // Save supplier matches to product_supplier_matches table (authenticated users only)
+    if (user && finalReportId) {
+      try {
       const supplierMatchesToSave: Array<{
         report_id: string;
         supplier_id: string;
@@ -1489,22 +1547,26 @@ export async function POST(request: Request) {
           console.warn("[Analyze API] Error saving supplier enrichment:", error instanceof Error ? error.message : String(error));
           // Don't fail the request, just log the warning
         }
-      } else {
-        console.log("[Analyze API] SUPPLIER_ENRICHMENT_ENABLED=false, skipping enrichment step");
+        } else {
+          console.log("[Analyze API] SUPPLIER_ENRICHMENT_ENABLED=false, skipping enrichment step");
+        }
+      } catch (error) {
+        console.error("[Analyze API] Error saving supplier matches:", error);
+        // Don't fail the request, just log the error
       }
-    } catch (error) {
-      console.error("[Analyze API] Error saving supplier matches:", error);
-      // Don't fail the request, just log the error
     }
 
-    // readback으로 진짜 저장됐는지 검증
-    const { data: readback, error: readbackError } = await admin
-      .from("reports")
-      .select("id")
-      .eq("id", finalReportId)
-      .maybeSingle();
+    // readback으로 진짜 저장됐는지 검증 (authenticated users only)
+    let savedReport = false;
+    if (user && finalReportId) {
+      const { data: readback, error: readbackError } = await admin
+        .from("reports")
+        .select("id")
+        .eq("id", finalReportId)
+        .maybeSingle();
 
-    const savedReport = !!readback && !readbackError;
+      savedReport = !!readback && !readbackError;
+    }
     
     console.log(`[Analyze API] ✓ Pipeline completed successfully:`, {
       reportId: finalReportId,

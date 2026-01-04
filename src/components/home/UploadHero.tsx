@@ -7,9 +7,9 @@ interface UploadHeroProps {
 }
 
 const breakdown = [
-  { label: "FOB", value: "$1.24" },
-  { label: "Freight", value: "$0.62" },
-  { label: "Duty", value: "$0.24" },
+  { label: "Factory FOB", value: "$1.24" },
+  { label: "Freight & Duty", value: "$0.86" },
+  { label: "NexSupply Fee (10%)", value: "$0.12" },
 ];
 
 export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
@@ -30,10 +30,10 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
           <div className="flex flex-col gap-6">
             <div className="space-y-4">
               <h1 className="text-[36px] leading-[1.1] font-bold tracking-[-0.02em] text-slate-900 sm:text-[48px]">
-                Know costs<br />before you buy
+                Stop Overpaying Wholesalers.<br />Source Direct with Execution.
               </h1>
               <p className="text-[17px] leading-[1.5] text-slate-600 max-w-md">
-                We use AI and match import records when available. Gaps stay labeled.
+                Use our Free AI Sourcing Calculator to see your real margins. We only get paid when you decide to order.
               </p>
             </div>
 
@@ -43,7 +43,7 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
                 onClick={handlePrimary}
                 className="inline-flex h-12 items-center justify-center rounded-full bg-slate-900 px-6 text-[15px] font-medium text-white transition-all hover:bg-slate-800 active:scale-[0.98] whitespace-nowrap"
               >
-                Upload photos
+                Start Free Analysis
               </button>
               <a
                 className="inline-flex h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-[15px] font-medium text-slate-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] whitespace-nowrap"
@@ -55,7 +55,7 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
             
             {/* Micro-copy */}
             <p className="text-[13px] text-slate-500">
-              3 photos. 3 minutes. Assumptions are always labeled.
+              No credit card required. 3 minutes.
             </p>
           </div>
 
@@ -71,10 +71,8 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
               </div>
 
               {/* Main Price */}
-              <div className="mt-5 flex items-baseline gap-3">
+              <div className="mt-5">
                 <span className="text-[40px] font-semibold tracking-tight text-slate-900 tabular-nums">$2.22</span>
-                <span className="text-[15px] text-slate-400">to</span>
-                <span className="text-[40px] font-semibold tracking-tight text-slate-900 tabular-nums">$2.66</span>
               </div>
 
               {/* Divider */}

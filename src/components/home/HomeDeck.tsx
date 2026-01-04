@@ -11,6 +11,7 @@ import { SectionProductShowcase, type ProductShowcaseItem } from "@/components/h
 import { ShelfPriceProvider } from "@/contexts/ShelfPriceContext"
 import ReceiptCompare from "@/components/marketing/ReceiptCompare"
 import TrustSection from "@/components/marketing/TrustSection"
+import WhyUsSection from "@/components/marketing/WhyUsSection"
 
 interface HomeDeckProps {
   products?: ProductShowcaseItem[];
@@ -110,6 +111,10 @@ export default function HomeDeck({ products = [] }: HomeDeckProps) {
               <SectionProductShowcase products={products} />
             </section>
           )}
+
+          <section id="why-us" className="bg-slate-50/40">
+            <WhyUsSection />
+          </section>
 
           <section id="verify-pricing" className="bg-slate-50/50">
             <SectionVerifyPricing />

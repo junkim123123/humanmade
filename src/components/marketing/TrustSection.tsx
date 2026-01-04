@@ -7,27 +7,30 @@ const steps = [
   {
     icon: Upload,
     number: 1,
-    title: "Upload product, barcode, and label",
-    desc: "We identify the product and pull available data.",
+    title: "Analyze (Free)",
+    desc: "Upload a photo. Our AI estimates the landed cost using real import data.",
+    price: "Free",
   },
   {
     icon: Calculator,
     number: 2,
-    title: "Get landed cost range",
-    desc: "Add retail price to see margin.",
+    title: "Verify ($45)",
+    desc: "We validate the factory, negotiate MOQs, and confirm precise costs.",
+    price: "$45",
   },
   {
     icon: FileCheck,
     number: 3,
-    title: "Verify with real quotes",
-    desc: "Lock in pricing with vetted suppliers.",
+    title: "Execute (Order)",
+    desc: "We handle production, QC, and logistics. You just receive the goods.",
+    price: "10% fee",
   },
 ]
 
 const timeline = [
-  { label: "Estimate in minutes" },
-  { label: "Outreach within 12 hours" },
-  { label: "3 quotes in about a week" },
+  { label: "Free analysis in 3 minutes" },
+  { label: "Verification within 12 hours" },
+  { label: "Execution on your order" },
 ]
 
 export default function TrustSection() {
@@ -46,11 +49,18 @@ export default function TrustSection() {
               key={step.number}
               className="rounded-xl border border-slate-200 bg-white p-5"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-[13px] font-semibold">
-                  {step.number}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-[13px] font-semibold">
+                    {step.number}
+                  </div>
+                  <step.icon className="h-5 w-5 text-slate-400" />
                 </div>
-                <step.icon className="h-5 w-5 text-slate-400" />
+                {step.price && (
+                  <span className="text-[12px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
+                    {step.price}
+                  </span>
+                )}
               </div>
               <h3 className="text-[15px] font-semibold text-slate-900">{step.title}</h3>
               <p className="mt-1.5 text-[13px] text-slate-500">{step.desc}</p>

@@ -16,19 +16,29 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
           {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-[24px] font-bold text-slate-900 sm:text-[28px]">
-              Get real quotes
+              Pricing & Terms
             </h2>
           </div>
 
           {/* Pricing Card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-            {/* Price */}
-            <div className="text-center">
+            {/* Verification Deposit */}
+            <div className="text-center mb-6">
               <div className="inline-flex items-baseline gap-1">
                 <span className="text-xl font-medium text-slate-400">$</span>
                 <span className="text-[48px] sm:text-[56px] font-bold tracking-tight text-slate-900 leading-none">45</span>
               </div>
-              <p className="mt-2 text-slate-500 text-[14px]">planning deposit per product</p>
+              <p className="mt-2 text-slate-500 text-[14px]">Blueprint Fee (Sourcing Deposit)</p>
+              <p className="mt-1 text-slate-400 text-[12px]">Refundable on first order</p>
+            </div>
+
+            {/* Execution Fee */}
+            <div className="text-center mb-6 pb-6 border-b border-slate-100">
+              <div className="inline-flex items-baseline gap-1">
+                <span className="text-[32px] sm:text-[40px] font-bold tracking-tight text-slate-900 leading-none">10%</span>
+              </div>
+              <p className="mt-2 text-slate-500 text-[14px]">Execution Fee</p>
+              <p className="mt-1 text-slate-400 text-[12px]">of Order Value for managing production and logistics</p>
             </div>
             
             {/* Divider */}
@@ -71,7 +81,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 Start verification
               </a>
               <p className="text-[12px] text-slate-500">
-                Deposit is credited on your first order within 30 days
+                Blueprint Fee is refunded on your first order within 30 days
               </p>
             </div>
             

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { sanitizeProductName, sortProductsBySafety, type SanitizedProduct } from "@/lib/productSanitizer";
 
 export interface ProductItem {
   folderName: string;
@@ -15,11 +16,22 @@ interface ProductGalleryProps {
   products: ProductItem[];
 }
 
+interface ProductWithSanitized extends ProductItem {
+  sanitized: SanitizedProduct;
+}
+
 export function ProductGallery({ products }: ProductGalleryProps) {
-  const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
+  // Sanitize and sort products
+  const sanitizedProducts: ProductWithSanitized[] = products.map((product) => ({
+    ...product,
+    sanitized: sanitizeProductName(product.displayName),
+  }));
+
+  const sortedProducts = sortProductsBySafety(sanitizedProducts);
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithSanitized | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const openLightbox = (product: ProductItem) => {
+  const openLightbox = (product: ProductWithSanitized) => {
     setSelectedProduct(product);
     setCurrentImageIndex(0);
   };
@@ -45,38 +57,82 @@ export function ProductGallery({ products }: ProductGalleryProps) {
 
   return (
     <>
-      {/* Grid */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {products.map((product) => (
-          <button
-            key={product.slug}
-            type="button"
-            onClick={() => openLightbox(product)}
-            className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            {product.images[0] && (
-              <Image
-                src={product.images[0]}
-                alt={product.displayName}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
-              />
-            )}
-            {/* Overlay with name */}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-              <p className="text-[13px] font-medium text-white line-clamp-2">
-                {product.displayName}
-              </p>
-              {product.images.length > 1 && (
-                <p className="text-[11px] text-white/70">
-                  {product.images.length} photos
-                </p>
-              )}
+      {/* Grid - Product Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {sortedProducts.map((product) => {
+          const sanitized = product.sanitized;
+          // Generate a label (mock data - in production, this could come from product data)
+          const labels = [
+            "Cost Reduced by 30%",
+            "MOQ: 500",
+            "Lead Time: 4 weeks",
+            "Verified Supplier",
+          ];
+          const label = labels[Math.floor(Math.random() * labels.length)];
+
+          return (
+            <div
+              key={product.slug}
+              className="group relative rounded-xl border border-slate-200 bg-white overflow-hidden transition-shadow hover:shadow-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+            >
+              {/* Image */}
+              <button
+                type="button"
+                onClick={() => openLightbox(product)}
+                className="relative aspect-square w-full overflow-hidden bg-slate-100"
+              >
+                {product.images[0] && (
+                  <Image
+                    src={product.images[0]}
+                    alt={sanitized.sanitizedName}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                )}
+              </button>
+
+              {/* Card Content */}
+              <div className="p-4">
+                {/* Product Name */}
+                <h3 className="text-[14px] font-semibold text-slate-900 mb-2 line-clamp-2">
+                  {sanitized.sanitizedName}
+                </h3>
+
+                {/* Label */}
+                <div className="mb-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    {label}
+                  </span>
+                </div>
+
+                {/* License Required Badge */}
+                {sanitized.requiresLicense && (
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                      License Required
+                    </span>
+                  </div>
+                )}
+
+                {/* Photo count */}
+                {product.images.length > 1 && (
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    {product.images.length} photos
+                  </p>
+                )}
+              </div>
             </div>
-          </button>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* Disclaimer */}
+      <div className="mt-8 p-4 rounded-lg border border-amber-200 bg-amber-50">
+        <p className="text-[13px] text-amber-800 leading-relaxed">
+          <strong>Note:</strong> Branded or character merchandise requires valid IP authorization documents for import. We strictly adhere to US Customs regulations.
+        </p>
       </div>
 
       {/* Lightbox */}
@@ -136,7 +192,7 @@ export function ProductGallery({ products }: ProductGalleryProps) {
             {/* Caption */}
             <div className="mt-4 text-center">
               <h3 className="text-lg font-semibold text-white">
-                {selectedProduct.displayName}
+                {sanitizeProductName(selectedProduct.displayName).sanitizedName}
               </h3>
               {selectedProduct.images.length > 1 && (
                 <p className="mt-1 text-sm text-white/60">
