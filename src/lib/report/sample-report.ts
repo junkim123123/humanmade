@@ -498,7 +498,7 @@ export const sampleReport: Report = {
     hsConfidence: 85,
     labelTerms: ["Gelatin", "Sugar", "Natural flavors"],
     labelUploaded: true,
-    labelOcrStatus: "PROVIDED_OCR_OK",
+    labelOcrStatus: "SUCCESS",
     labelOcrFailureReason: null,
     labelTermsFromDb: ["Gelatin", "Sugar", "Natural flavors"],
     labelOcrCheckedAt: "2024-02-15T12:00:00.000Z",
