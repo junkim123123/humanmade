@@ -552,14 +552,14 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   <span>Edit assumptions</span>
                 </summary>
                 <div className="mt-4 space-y-5 pl-5 border-l-2 border-slate-200/60">
-                  <p className="text-[13px] text-slate-500">Only if you know the shipping box size and weight.</p>
+                  <p className="text-xs text-slate-500">Only if you know the shipping box size and weight.</p>
                   
                   <div>
-                    <label className="text-[14px] font-medium text-slate-700">Shipping mode</label>
+                    <label className="text-sm font-semibold text-slate-700 mb-2 block">Shipping mode</label>
                     <select
                       value={form.shippingMode}
                       onChange={(e) => setForm((prev) => ({ ...prev, shippingMode: e.target.value }))}
-                      className="mt-2 w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-[14px] text-slate-900 focus:border-slate-400 focus:outline-none transition-colors"
+                      className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-4 text-sm text-slate-900 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                     >
                       <option value="air">Air</option>
                       <option value="ocean">Ocean</option>
@@ -567,7 +567,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   </div>
 
                   <div>
-                    <label className="text-[14px] font-medium text-slate-700">
+                    <label className="text-sm font-semibold text-slate-700 mb-2 block">
                       Weight {unitSystem === "imperial" ? "(lb)" : "(kg)"}
                     </label>
                     <input
@@ -575,35 +575,35 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                       placeholder={unitSystem === "imperial" ? "1.2" : "0.5"}
                       value={form.weight}
                       onChange={(e) => setForm((prev) => ({ ...prev, weight: e.target.value }))}
-                      className="mt-2 w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors"
+                      className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[14px] font-medium text-slate-700">
+                    <label className="text-sm font-semibold text-slate-700 mb-2 block">
                       Dimensions {unitSystem === "imperial" ? "(in)" : "(cm)"}
                     </label>
-                    <div className="mt-2 grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <input
                         type="text"
                         placeholder="L"
                         value={form.length}
                         onChange={(e) => setForm((prev) => ({ ...prev, length: e.target.value }))}
-                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors"
+                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                       />
                       <input
                         type="text"
                         placeholder="W"
                         value={form.width}
                         onChange={(e) => setForm((prev) => ({ ...prev, width: e.target.value }))}
-                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors"
+                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                       />
                       <input
                         type="text"
                         placeholder="H"
                         value={form.height}
                         onChange={(e) => setForm((prev) => ({ ...prev, height: e.target.value }))}
-                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-[14px] text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors"
+                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -611,27 +611,27 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
               </details>
 
               {/* Submit */}
-              <div className="pt-4 border-t border-slate-100">
+              <div className="pt-6 border-t border-slate-200/60">
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={loading || !hasValidInput}
                   className={cn(
-                    "w-full h-12 rounded-full text-[15px] font-medium transition-colors",
+                    "w-full h-12 rounded-xl text-base font-semibold transition-all shadow-lg",
                     !hasValidInput
-                      ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-slate-900 text-white hover:bg-slate-800"
+                      ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+                      : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-xl active:scale-[0.98]"
                   )}
                 >
                   {loading ? "Calculating..." : "Calculate Landed Cost"}
                 </button>
                 {mode === "public" && (
-                  <p className="mt-3 text-center text-[13px] text-slate-500">
+                  <p className="mt-3 text-center text-xs text-slate-500">
                     Save results requires sign in
                   </p>
                 )}
                 {mode === "app" && (
-                  <p className="mt-3 text-center text-[13px] text-slate-500">
+                  <p className="mt-3 text-center text-xs text-slate-500">
                     Signed in saves your report to Reports.
                   </p>
                 )}

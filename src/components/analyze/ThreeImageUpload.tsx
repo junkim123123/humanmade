@@ -220,49 +220,49 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     return (
       <div ref={slotRef} className="flex flex-col h-full">
         {/* Header */}
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-[14px] font-semibold text-slate-900">{label}</h4>
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <h4 className="text-base font-semibold text-slate-900">{label}</h4>
             {isRequired && (
-              <span className="rounded bg-red-100 px-1.5 py-0.5 text-[11px] font-medium text-red-700">
+              <span className="rounded-full bg-red-50 border border-red-200 px-2.5 py-0.5 text-xs font-semibold text-red-700">
                 Required
               </span>
             )}
             {!isRequired && (
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
+              <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
                 Optional
               </span>
             )}
           </div>
-          <p className="text-[13px] text-slate-600 leading-relaxed">{helperText}</p>
+          <p className="text-sm text-slate-600 leading-relaxed">{helperText}</p>
           {tooltipText && (
-            <p className="mt-1 text-[12px] text-slate-500 italic">{tooltipText}</p>
+            <p className="mt-1.5 text-xs text-slate-500">{tooltipText}</p>
           )}
         </div>
 
         {/* Upload Area */}
         <div
           className={cn(
-            "relative rounded-xl border transition-colors overflow-hidden group flex-1 flex items-center justify-center",
+            "relative rounded-2xl border-2 transition-all overflow-hidden group flex-1 flex items-center justify-center shadow-sm",
             hasImage
-              ? "border-emerald-300 bg-emerald-50/50"
+              ? "border-emerald-300/60 bg-emerald-50/40 shadow-emerald-100/50"
               : hasAnyError
-              ? "border-red-300 bg-red-50"
-              : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100 cursor-pointer"
+              ? "border-red-300/60 bg-red-50/40 shadow-red-100/50"
+              : "border-slate-200/60 bg-white/70 backdrop-blur-sm hover:border-slate-300 hover:bg-white hover:shadow-md cursor-pointer"
           )}
           onDrop={(e) => handleDrop(slotType, e)}
           onDragOver={(e) => e.preventDefault()}
           onPaste={(e) => handlePaste(slotType, e)}
         >
           {hasImage && slot.preview ? (
-            <div className="relative w-full h-full min-h-[200px]">
-              <img src={slot.preview} alt={label} className="h-full w-full object-contain p-3" />
-              <div className="absolute right-2 top-2 flex gap-1.5">
+            <div className="relative w-full h-full min-h-[240px] bg-white">
+              <img src={slot.preview} alt={label} className="h-full w-full object-contain p-4" />
+              <div className="absolute right-3 top-3 flex gap-2">
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
                   disabled={disabled}
-                  className="rounded-full bg-white border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  className="rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 shadow-md px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-lg transition-all disabled:opacity-50"
                 >
                   Replace
                 </button>
@@ -270,23 +270,23 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                   type="button"
                   onClick={() => handleFileRemove(slotType)}
                   disabled={disabled}
-                  className="rounded-full bg-white border border-slate-200 p-1.5 text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors disabled:opacity-50"
+                  className="rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 shadow-md p-1.5 text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-3 p-6">
-              <div className="rounded-lg bg-slate-200 p-3">
-                <ImageIcon className="h-6 w-6 text-slate-500" />
+            <div className="w-full h-full min-h-[240px] flex flex-col items-center justify-center gap-4 p-6">
+              <div className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 p-4">
+                <ImageIcon className="h-8 w-8 text-slate-400" />
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-xs">
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
                   disabled={disabled}
-                  className="flex-1 rounded-lg bg-white border border-slate-300 px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-white border-2 border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm hover:shadow disabled:opacity-50"
                 >
                   Choose photos
                 </button>
@@ -294,12 +294,12 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={disabled}
-                  className="flex-1 rounded-lg bg-slate-900 text-white px-4 py-2.5 text-[13px] font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-slate-900 text-white px-4 py-3 text-sm font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
                 >
                   Take photo
                 </button>
               </div>
-              <p className="text-[12px] text-slate-500">Or drop, paste files here</p>
+              <p className="text-xs text-slate-500">Or drop, paste files here</p>
             </div>
           )}
           {/* Gallery input (multiple selection, no capture) */}
@@ -340,8 +340,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
 
         {/* Error Messages */}
         {(validationError || submissionError) && (
-          <div className="mt-2 p-2.5 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-[12px] text-red-700 font-medium">
+          <div className="mt-3 p-3 rounded-xl bg-red-50/80 backdrop-blur-sm border border-red-200/60">
+            <p className="text-xs text-red-700 font-semibold">
               {validationError || submissionError}
             </p>
           </div>
@@ -351,40 +351,40 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Section Header */}
-      <div className="border-l-4 border-slate-900 pl-4">
-        <h3 className="text-[18px] font-bold text-slate-900">Product photos</h3>
-        <p className="mt-1 text-[14px] text-slate-600">Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy.</p>
-        <p className="mt-0.5 text-[13px] text-slate-500">3 minutes. Assumptions are always labeled.</p>
+      <div>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Product photos</h3>
+        <p className="text-base text-slate-600 leading-relaxed">Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy.</p>
+        <p className="mt-1 text-sm text-slate-500">3 minutes. Assumptions are always labeled.</p>
       </div>
       
       {/* Upload Grid */}
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-3">
         {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true)}
         {renderSlot("barcode", "Barcode photo (optional)", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
         {renderSlot("label", "Label photo (optional)", "Back label with net weight, materials, warnings, and origin if shown.", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
       </div>
 
       {/* Optional Section */}
-      <div className="pt-6 border-t border-slate-200">
+      <div className="pt-8 border-t border-slate-200/60">
         {!showOptional ? (
           <button
             type="button"
             onClick={() => setShowOptional(true)}
             disabled={disabled}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-200/60 bg-white/70 backdrop-blur-sm px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-white hover:border-slate-300 transition-all shadow-sm hover:shadow disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
             Add extra photos (optional)
           </button>
         ) : (
-          <div className="space-y-5">
-            <div className="border-l-4 border-amber-400 pl-4">
-              <h3 className="text-[16px] font-semibold text-slate-900">Extra photos (optional)</h3>
-              <p className="mt-1 text-[14px] text-slate-600">Helps with variants and inner packaging.</p>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Extra photos (optional)</h3>
+              <p className="text-sm text-slate-600">Helps with variants and inner packaging.</p>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2">
               {renderSlot("extra1", "Packaging details", "Side of box, shipping label, or outer packaging.", extra1GalleryInputRef, extra1CameraInputRef)}
               {renderSlot("extra2", "What's inside", "Close-up of the item, materials, or construction.", extra2GalleryInputRef, extra2CameraInputRef)}
             </div>
@@ -396,7 +396,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                 handleFileRemove("extra2");
               }}
               disabled={disabled}
-              className="text-[13px] text-slate-500 hover:text-red-600 font-medium transition-colors disabled:opacity-50"
+              className="text-sm text-slate-500 hover:text-red-600 font-semibold transition-colors disabled:opacity-50"
             >
               Remove extra photos
             </button>
