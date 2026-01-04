@@ -2,14 +2,14 @@
 
 import React, { useCallback, useEffect } from "react"
 
-import UploadHero from "@/components/home/UploadHero"
+import Hero from "@/components/hero/Hero"
+import FlowDiorama from "@/components/sections/FlowDiorama"
+import MarginComparison from "@/components/sections/MarginComparison"
+import ProofShowcase from "@/components/sections/ProofShowcase"
 import { SectionEvidence } from "@/components/home/SectionEvidence"
 import { SectionVerifyPricing } from "@/components/home/SectionVerifyPricing"
 import { SectionFAQ } from "@/components/home/SectionFAQ"
-import { SectionProofVideo } from "@/components/home/SectionProofVideo"
-import { SectionProductShowcase, type ProductShowcaseItem } from "@/components/home/SectionProductShowcase"
 import { ShelfPriceProvider } from "@/contexts/ShelfPriceContext"
-import ReceiptCompare from "@/components/marketing/ReceiptCompare"
 import TrustSection from "@/components/marketing/TrustSection"
 import WhyUsSection from "@/components/marketing/WhyUsSection"
 
@@ -87,30 +87,24 @@ export default function HomeDeck({ products = [] }: HomeDeckProps) {
             id="hero"
             className="bg-white"
           >
-            <UploadHero />
+            <Hero />
           </section>
 
           <section id="how-it-works">
-            <TrustSection />
-          </section>
-
-          <section id="proof-video" className="bg-slate-50/40">
-            <SectionProofVideo />
+            <FlowDiorama />
           </section>
 
           <section id="receipt-compare">
-            <ReceiptCompare />
+            <MarginComparison />
           </section>
 
           <section id="evidence" className="bg-slate-50/40">
             <SectionEvidence />
           </section>
 
-          {products.length > 0 && (
-            <section id="products">
-              <SectionProductShowcase products={products} />
-            </section>
-          )}
+          <section id="products" className="bg-slate-50/40">
+            <ProofShowcase />
+          </section>
 
           <section id="why-us" className="bg-slate-50/40">
             <WhyUsSection />

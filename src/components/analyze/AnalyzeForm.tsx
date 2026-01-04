@@ -50,6 +50,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     extra2: null,
   });
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<number | undefined>(undefined);
+  const [loadingStep, setLoadingStep] = useState<string | undefined>(undefined);
   const [restoredDraft, setRestoredDraft] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
@@ -312,11 +314,11 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       // For authenticated users or if reportId exists
       if (data?.reportId) {
         const rawReportId = data.reportId;
-        const reportId = String(rawReportId).trim();
+        const reportIdStr = String(rawReportId).trim();
         
         console.log("[AnalyzeForm] Processing reportId for redirect:", {
           raw: rawReportId,
-          trimmed: reportId,
+          trimmed: reportIdStr,
           type: typeof rawReportId,
           savedReport: data?.savedReport,
           success: data?.success,
@@ -324,10 +326,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         });
         
         // Validate reportId
-        if (!reportId || reportId === 'null' || reportId === 'undefined' || reportId === '') {
+        if (!reportIdStr || reportIdStr === 'null' || reportIdStr === 'undefined' || reportIdStr === '') {
           console.error("[AnalyzeForm] Invalid reportId:", {
             raw: rawReportId,
-            trimmed: reportId,
+            trimmed: reportIdStr,
             data: data,
           });
           toast.error("Invalid report ID. Please try again.");
@@ -337,79 +339,101 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         
         // Validate UUID format (unless it's a special ID like "sample-report")
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (reportId !== "sample-report" && !uuidRegex.test(reportId)) {
-          console.error("[AnalyzeForm] Invalid reportId format (not UUID):", reportId);
+        if (reportIdStr !== "sample-report" && !uuidRegex.test(reportIdStr)) {
+          console.error("[AnalyzeForm] Invalid reportId format (not UUID):", reportIdStr);
           toast.error("Invalid report ID format. Please try again.");
           setLoading(false);
           return;
         }
         
-        // Add delay to ensure report is committed to DB and readable
-        console.log("[AnalyzeForm] Waiting for report to be ready...");
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
+        // Start polling for progress
+        setLoadingStep("Initializing analysis...");
+        setLoadingProgress(5);
         
-        // Pre-verify report exists and user owns it before redirecting
-        try {
-          const verifyUrl = `/api/reports/${encodeURIComponent(reportId)}`;
-          console.log("[AnalyzeForm] Verifying report ownership before redirect:", verifyUrl);
-          
-          // Get current user id for ownership check
-          const supabase = createClient();
-          const { data: { user: currentUser } } = await supabase.auth.getUser();
-          
-          const verifyRes = await fetch(verifyUrl, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            cache: 'no-store',
-          });
-          
-          if (verifyRes.ok) {
-            const verifyData = await verifyRes.json();
-            // Use ok field, not success
-            if (verifyData?.ok && verifyData?.report) {
-              // Check ownership if report has a user_id
-              if (verifyData.report.user_id && currentUser) {
-                if (verifyData.report.user_id !== currentUser.id) {
-                  console.error("[AnalyzeForm] Ownership mismatch:", {
-                    reportUserId: verifyData.report.user_id,
-                    currentUserId: currentUser.id,
-                  });
-                  toast.error("This report belongs to another account. Please try again.");
-                  setLoading(false);
+        // Poll for report status and progress
+        const pollInterval = setInterval(async () => {
+          try {
+            const verifyUrl = `/api/reports/${encodeURIComponent(reportIdStr)}`;
+            const verifyRes = await fetch(verifyUrl, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
+            });
+            
+            if (verifyRes.ok) {
+              const verifyData = await verifyRes.json();
+              if (verifyData?.ok && verifyData?.report) {
+                const report = verifyData.report;
+                const status = report.status || report.data?.status;
+                
+                // Update progress based on status
+                if (status === "processing" || status === "queued") {
+                  // Estimate progress: start at 10%, slowly increase
+                  const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
+                  const estimatedTotal = 180000; // 3 minutes
+                  const progress = Math.min(90, 10 + (elapsed / estimatedTotal) * 80);
+                  setLoadingProgress(progress);
+                  
+                  // Update step based on elapsed time
+                  if (elapsed < 30000) {
+                    setLoadingStep("Analyzing product images...");
+                  } else if (elapsed < 90000) {
+                    setLoadingStep("Searching supplier database...");
+                  } else if (elapsed < 150000) {
+                    setLoadingStep("Calculating costs and margins...");
+                  } else {
+                    setLoadingStep("Finalizing report...");
+                  }
+                } else if (status === "completed") {
+                  // Report is complete
+                  clearInterval(pollInterval);
+                  setLoadingProgress(100);
+                  setLoadingStep("Analysis complete!");
+                  
+                  // Get current user id for ownership check
+                  const supabase = createClient();
+                  const { data: { user: currentUser } } = await supabase.auth.getUser();
+                  
+                  // Check ownership if report has a user_id
+                  if (report.user_id && currentUser) {
+                    if (report.user_id !== currentUser.id) {
+                      console.error("[AnalyzeForm] Ownership mismatch:", {
+                        reportUserId: report.user_id,
+                        currentUserId: currentUser.id,
+                      });
+                      toast.error("This report belongs to another account. Please try again.");
+                      setLoading(false);
+                      return;
+                    }
+                  }
+                  
+                  // Small delay to show completion
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  
+                  console.log("[AnalyzeForm] ✓ Report completed, redirecting to:", `/reports/${reportIdStr}/v2`);
+                  toast.success("Analysis completed");
+                  router.push(`/reports/${reportIdStr}/v2`);
                   return;
                 }
               }
-              
-              console.log("[AnalyzeForm] ✓ Report verified and ownership confirmed, redirecting to:", `/reports/${reportId}/v2`);
-              toast.success("Analysis completed");
-              router.push(`/reports/${reportId}/v2`);
-              return;
-            } else if (verifyData?.ok === false) {
-              // Explicit error from API
-              if (verifyData.errorCode === "FORBIDDEN" || verifyData.errorCode === "AUTH_REQUIRED") {
-                console.error("[AnalyzeForm] Access forbidden to report:", verifyData.errorCode);
-                toast.error("Cannot access this report. Please try again.");
-                setLoading(false);
-                return;
-              }
-              console.warn("[AnalyzeForm] Report verification returned ok=false:", verifyData);
             }
-          } else {
-            console.warn("[AnalyzeForm] Report verification failed with status:", verifyRes.status);
+          } catch (pollError) {
+            console.warn("[AnalyzeForm] Polling error:", pollError);
+            // Continue polling on error
           }
-          
-          // If verification failed, don't redirect - show error
-          console.warn("[AnalyzeForm] Report verification failed, not redirecting:", {
-            status: verifyRes.status,
-            reportId,
-          });
-          toast.error("Report verification failed. Please try again.");
-          setLoading(false);
-        } catch (verifyError) {
-          console.error("[AnalyzeForm] Error verifying report:", verifyError);
-          toast.error("Error verifying report. Please try again.");
-          setLoading(false);
-        }
+        }, 2000); // Poll every 2 seconds
+        
+        // Timeout after 5 minutes
+        setTimeout(() => {
+          clearInterval(pollInterval);
+          if (loading) {
+            toast.error("Analysis is taking longer than expected. Please check your reports.");
+            setLoading(false);
+          }
+        }, 300000);
+        
+        // Store interval for cleanup
+        (window as any).__analyzePollInterval = pollInterval;
       } else {
         // Fallback: show results inline or redirect
         console.error("[AnalyzeForm] No reportId in response:", {
@@ -426,8 +450,23 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       setApiError(errorMessage);
       toast.error(errorMessage);
       setLoading(false);
+      // Clean up polling interval if exists
+      if ((window as any).__analyzePollInterval) {
+        clearInterval((window as any).__analyzePollInterval);
+        delete (window as any).__analyzePollInterval;
+      }
     }
   };
+  
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if ((window as any).__analyzePollInterval) {
+        clearInterval((window as any).__analyzePollInterval);
+        delete (window as any).__analyzePollInterval;
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full">
@@ -435,7 +474,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         {/* Left: Photo Upload */}
         <div className="lg:col-span-2">
           {loading ? (
-            <LoadingState />
+            <LoadingState 
+              progress={loadingProgress}
+              currentStep={loadingStep}
+            />
           ) : (
             <ThreeImageUpload 
               ref={uploadRef}
