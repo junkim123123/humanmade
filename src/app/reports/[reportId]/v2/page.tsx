@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
-import { headers, cookies } from "next/headers";
 import ReportV2Page from "@/components/report/ReportV2Page";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
+import { sampleReport } from "@/lib/report/sample-report";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -9,107 +11,126 @@ type GetReportResult =
   | { report: any; error?: undefined }
   | { report?: undefined; error: "NOT_FOUND" | "FORBIDDEN" };
 
-async function getReport(reportId: string, headersList: Headers, retryCount = 0): Promise<GetReportResult> {
-  const maxRetries = 8; // More retries
-  const retryDelay = 2000; // 2 seconds - give DB more time
-  
+async function getReport(reportId: string): Promise<GetReportResult> {
   try {
     // Validate reportId before making request
     if (!reportId || typeof reportId !== "string" || reportId.trim() === "") {
-      console.error("[Report V2 Page] Invalid reportId in getReport:", reportId);
+      console.error("[Report V2 Page] Invalid reportId:", reportId);
       return { error: "NOT_FOUND" };
     }
     
     const cleanReportId = reportId.trim();
-    // Use relative URL to stay same origin
-    const apiUrl = `/api/reports/${encodeURIComponent(cleanReportId)}`;
     
-    // Get cookies to forward authentication
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    // Handle sample report
+    if (cleanReportId === "sample-report") {
+      return { report: sampleReport };
+    }
     
-    console.log(`[Report V2 Page] Fetching report from: ${apiUrl}`, {
+    // Read report directly from DB using admin client
+    const admin = getSupabaseAdmin();
+    
+    console.log(`[Report V2 Page] Reading report from DB:`, {
       reportId: cleanReportId,
-      retryCount,
-      hasCookies: !!cookieHeader,
     });
     
-    const res = await fetch(apiUrl, {
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-        ...(cookieHeader ? { cookie: cookieHeader } : {}),
-      },
-    });
-
-    if (res.status === 403) {
-      // Auth error - don't retry, return error to show user-friendly message
-      console.error("[Report V2 Page] Access forbidden (403):", reportId);
-      const json = await res.json().catch(() => ({}));
-      return { error: "FORBIDDEN" as const };
-    }
-
-    if (res.status === 404) {
-      // If report not found and we haven't exhausted retries, wait and retry
-      if (retryCount < maxRetries) {
-        console.log(`[Report V2 Page] Report not found (404), retrying... (${retryCount + 1}/${maxRetries}):`, reportId);
-        await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
-        return getReport(reportId, headersList, retryCount + 1);
-      }
-      console.error("[Report V2 Page] Report not found after retries (404):", reportId);
-      return { error: "NOT_FOUND" as const };
-    }
-
-    if (!res.ok) {
-      // For server errors, retry
-      if (retryCount < maxRetries && res.status >= 500) {
-        console.log(`[Report V2 Page] API error (${res.status}), retrying... (${retryCount + 1}/${maxRetries}):`, reportId);
-        await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
-        return getReport(reportId, headersList, retryCount + 1);
-      }
-      console.error("[Report V2 Page] API error:", res.status, res.statusText);
-      return { error: "NOT_FOUND" as const };
-    }
-
-    const json = await res.json().catch((err) => {
-      console.error("[Report V2 Page] JSON parse error:", err);
-      // If JSON parse fails, treat as NOT_FOUND
-      return { ok: false, errorCode: "NOT_FOUND" };
-    });
+    // Try reading with retries (for eventual consistency)
+    let reportData = null;
+    let readError = null;
+    const maxAttempts = 3;
     
-    if (!json?.ok) {
-      // Check for auth errors
-      if (json?.errorCode === "AUTH_REQUIRED" || json?.errorCode === "FORBIDDEN") {
-        console.error("[Report V2 Page] Auth error:", json?.errorCode);
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const { data, error } = await admin
+        .from("reports")
+        .select("*")
+        .eq("id", cleanReportId)
+        .maybeSingle();
+      
+      reportData = data;
+      readError = error;
+      
+      if (data && !error) {
+        console.log(`[Report V2 Page] Report found on attempt ${attempt + 1}`);
+        break;
+      }
+      
+      if (attempt < maxAttempts - 1) {
+        const delay = 500 * (attempt + 1); // 500ms, 1000ms, 1500ms
+        console.log(`[Report V2 Page] Report not found, retrying in ${delay}ms (attempt ${attempt + 1}/${maxAttempts})...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    if (readError) {
+      console.error("[Report V2 Page] DB read error:", {
+        message: readError.message,
+        code: readError.code,
+        reportId: cleanReportId,
+      });
+      return { error: "NOT_FOUND" };
+    }
+    
+    if (!reportData) {
+      console.error("[Report V2 Page] Report not found in DB:", cleanReportId);
+      return { error: "NOT_FOUND" };
+    }
+    
+    // Get current user for ownership check
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    // Enforce access rules
+    // If report.user_id is null, allow anyone
+    // If report.user_id exists, require authenticated user and must match
+    const reportDataAny = reportData as any;
+    if (reportDataAny.user_id !== null && reportDataAny.user_id !== undefined) {
+      // Report has an owner - require authentication and ownership
+      if (!user) {
+        console.log("[Report V2 Page] Report requires auth but user not logged in:", cleanReportId);
         return { error: "FORBIDDEN" as const };
       }
       
-      // If ok=false but not auth error, it might be a temporary issue
-      if (retryCount < maxRetries && json?.errorCode !== "NOT_FOUND") {
-        console.log(`[Report V2 Page] API returned ok=false (${json?.errorCode}), retrying... (${retryCount + 1}/${maxRetries}):`, reportId);
-        await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
-        return getReport(reportId, headersList, retryCount + 1);
+      if (user.id !== reportDataAny.user_id) {
+        console.log("[Report V2 Page] User mismatch:", {
+          reportUserId: reportDataAny.user_id,
+          requestUserId: user.id,
+          reportId: cleanReportId,
+        });
+        return { error: "FORBIDDEN" as const };
       }
-      console.error("[Report V2 Page] API returned ok=false:", json?.errorCode);
-      return { error: "NOT_FOUND" as const };
     }
     
-    if (!json?.report) {
-      console.error("[Report V2 Page] API returned no report data");
-      return { error: "NOT_FOUND" as const };
-    }
+    console.log("[Report V2 Page] Report access granted:", {
+      reportId: cleanReportId,
+      productName: reportDataAny.product_name,
+      status: reportDataAny.status,
+      userId: reportDataAny.user_id,
+    });
 
-    return { report: json.report };
+    return { report: reportDataAny };
   } catch (error) {
-    // Retry on network errors
-    if (retryCount < maxRetries) {
-      console.log(`[Report V2 Page] Network error, retrying... (${retryCount + 1}/${maxRetries}):`, reportId);
-      await new Promise(resolve => setTimeout(resolve, retryDelay * (retryCount + 1)));
-      return getReport(reportId, headersList, retryCount + 1);
-    }
-    console.error("[Report V2 Page] Error fetching report:", error);
+    console.error("[Report V2 Page] Error reading report:", error);
     return { error: "NOT_FOUND" };
   }
+}
+
+// Forbidden UI component
+function ForbiddenUI() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="max-w-md w-full bg-white rounded-xl border border-slate-200 p-8 text-center">
+        <h1 className="text-2xl font-semibold text-slate-900 mb-2">Access Restricted</h1>
+        <p className="text-slate-600 mb-6">
+          This report belongs to another account. Please sign in to view your own reports.
+        </p>
+        <a
+          href="/auth/signin"
+          className="inline-block bg-slate-900 text-white rounded-full px-6 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
+        >
+          Sign In
+        </a>
+      </div>
+    </div>
+  );
 }
 
 export default async function Page({
@@ -121,15 +142,12 @@ export default async function Page({
   const resolvedParams = params instanceof Promise ? await params : params;
   const reportId = resolvedParams.reportId;
   
-  // Get headers for baseUrl construction
-  const headersList = await headers();
-  
   if (!reportId) {
     console.error("[Report V2 Page] No reportId provided in params:", resolvedParams);
     notFound();
   }
   
-  // Validate reportId format (UUID format)
+  // Validate reportId format (UUID format or sample-report)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const isSampleReport = reportId === "sample-report";
   
@@ -138,47 +156,33 @@ export default async function Page({
     notFound();
   }
 
-  console.log("[Report V2 Page] Attempting to fetch report:", {
+  console.log("[Report V2 Page] Reading report from DB:", {
     reportId,
     isValidFormat: isSampleReport || uuidRegex.test(reportId),
     timestamp: new Date().toISOString(),
   });
   
   const cleanReportId = reportId.trim();
-  const result = await getReport(cleanReportId, headersList);
+  const result = await getReport(cleanReportId);
   
   if (result.error === "NOT_FOUND") {
-    console.error("[Report V2 Page] Failed to fetch report after all retries:", cleanReportId);
+    console.error("[Report V2 Page] Report not found:", cleanReportId);
     notFound();
   }
   
   if (result.error === "FORBIDDEN") {
-    // Show user-friendly message for auth errors
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="max-w-md w-full bg-white rounded-xl border border-slate-200 p-8 text-center">
-          <h1 className="text-2xl font-semibold text-slate-900 mb-2">Access Restricted</h1>
-          <p className="text-slate-600 mb-6">
-            This report belongs to another account. Please sign in to view your own reports.
-          </p>
-          <a
-            href="/auth/signin"
-            className="inline-block bg-slate-900 text-white rounded-full px-6 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
-          >
-            Sign In
-          </a>
-        </div>
-      </div>
-    );
+    console.error("[Report V2 Page] Access forbidden:", cleanReportId);
+    return <ForbiddenUI />;
   }
 
   // At this point, TypeScript knows result.report exists and result.error is undefined
   const report = result.report;
 
-  console.log("[Report V2 Page] Successfully fetched report:", {
+  console.log("[Report V2 Page] Successfully loaded report:", {
     reportId: cleanReportId,
-    productName: report?.productName,
+    productName: report?.product_name || report?.productName,
     status: report?.status,
+    schemaVersion: report?.schemaVersion || report?.schema_version,
   });
 
   return <ReportV2Page key={cleanReportId} reportId={cleanReportId} report={report} />;
