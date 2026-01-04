@@ -13,6 +13,10 @@ export interface UnitWeightResult {
   source: "user" | "label" | "gemini_photo" | "category_default";
   confidence: number; // 0..1
   rationale: string;
+  // Multipack metadata (only for gemini_photo source)
+  unitScope?: "outer_pack" | "inner_unit" | "unknown";
+  packCount?: number | null;
+  packCountConfidence?: number;
 }
 
 interface ReportContext {
