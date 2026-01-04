@@ -1319,7 +1319,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { error: updateError } = await admin
+    const { data: updateData, error: updateError } = await admin
       .from("reports")
       .update({
         product_name: report.productName,
@@ -1349,7 +1349,9 @@ export async function POST(request: Request) {
         status: "completed",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", finalReportId);
+      .eq("id", finalReportId)
+      .select("id, status")
+      .maybeSingle();
 
     if (updateError) {
       console.error("[Analyze API] Failed to update report with pipeline output", {
@@ -1374,6 +1376,38 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Verify update succeeded
+    if (!updateData || updateData.id !== finalReportId) {
+      console.error("[Analyze API] Report update returned no data or wrong ID", {
+        reportId: finalReportId,
+        updateData,
+      });
+      // Try to verify report still exists
+      const { data: verifyData } = await admin
+        .from("reports")
+        .select("id, status")
+        .eq("id", finalReportId)
+        .maybeSingle();
+      
+      if (!verifyData) {
+        console.error("[Analyze API] CRITICAL: Report disappeared after update attempt", {
+          reportId: finalReportId,
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            savedReport: false,
+            error: "REPORT_DISAPPEARED",
+            message: "Report was updated but cannot be found. Please try again.",
+            data: result,
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    console.log(`[Analyze API] Report updated successfully: ${finalReportId}, status: ${updateData?.status || 'unknown'}`);
 
     // Persist trade data audit fields in a separate non-blocking update
     // Includes: attempted, result_count, used, reason, provider, checked_at + label audit + Vision extraction
