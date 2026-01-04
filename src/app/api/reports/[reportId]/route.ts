@@ -62,21 +62,38 @@ export async function GET(
     // Check if report exists with different query
     const { data: checkData, error: checkError } = await admin
       .from("reports")
-      .select("id, status, user_id")
+      .select("id, status, user_id, created_at")
       .eq("id", reportId)
       .maybeSingle();
     
-    console.log("[Reports API] Verification query result:", {
-      found: !!checkData,
-      error: checkError?.message,
+    // Also check recent reports to see if there's a pattern
+    const { data: recentReports } = await admin
+      .from("reports")
+      .select("id, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5);
+    
+    console.error("[Reports API] Report not found - diagnostic info:", {
       reportId,
+      verificationQuery: {
+        found: !!checkData,
+        error: checkError?.message,
+        data: checkData,
+      },
+      recentReports: recentReports?.map(r => ({ id: r.id, status: r.status, created_at: r.created_at })),
+      timestamp: new Date().toISOString(),
     });
     
     return NextResponse.json(
       { 
         success: false, 
         error: "NOT_FOUND",
-        message: "Report not found in database",
+        message: `Report ${reportId} not found in database. Please check if the analysis completed successfully.`,
+        diagnostic: {
+          reportId,
+          checkedAt: new Date().toISOString(),
+          recentReportsCount: recentReports?.length || 0,
+        },
       },
       { status: 404 }
     );

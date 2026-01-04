@@ -246,7 +246,11 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       // For authenticated users or if reportId exists
       if (data?.reportId) {
         const reportId = String(data.reportId).trim();
-        console.log("[AnalyzeForm] Redirecting to report:", reportId);
+        console.log("[AnalyzeForm] Redirecting to report:", reportId, {
+          savedReport: data?.savedReport,
+          success: data?.success,
+          timestamp: new Date().toISOString(),
+        });
         
         if (!reportId || reportId === 'null' || reportId === 'undefined') {
           console.error("[AnalyzeForm] Invalid reportId:", data.reportId);
@@ -255,12 +259,19 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           return;
         }
         
+        // Add a small delay to ensure report is committed to DB
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         toast.success("Analysis completed");
         router.push(`/reports/${reportId}/v2`);
       } else {
         // Fallback: show results inline or redirect
-        console.warn("[AnalyzeForm] No reportId in response:", data);
-        toast.success("Analysis completed");
+        console.error("[AnalyzeForm] No reportId in response:", {
+          data,
+          responseStatus: response.status,
+          timestamp: new Date().toISOString(),
+        });
+        toast.error("Analysis completed but report ID is missing. Please check your reports.");
         setLoading(false);
       }
     } catch (err) {

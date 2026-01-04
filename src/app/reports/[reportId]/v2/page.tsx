@@ -84,14 +84,32 @@ export default async function Page({
   const { reportId } = await params;
   
   if (!reportId) {
+    console.error("[Report V2 Page] No reportId provided");
     notFound();
   }
 
+  console.log("[Report V2 Page] Attempting to fetch report:", reportId);
   const report = await getReport(reportId);
   
   if (!report) {
+    console.error("[Report V2 Page] Failed to fetch report after all retries:", reportId);
+    // Log additional diagnostic info
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+      || "http://localhost:3000";
+    console.error("[Report V2 Page] Diagnostic info:", {
+      reportId,
+      baseUrl: baseUrl ? `${baseUrl}/api/reports/${reportId}` : "unknown",
+      timestamp: new Date().toISOString(),
+    });
     notFound();
   }
+
+  console.log("[Report V2 Page] Successfully fetched report:", {
+    reportId,
+    productName: (report as any)?.productName,
+    status: (report as any)?.status,
+  });
 
   return <ReportV2Client key={reportId} reportId={reportId} report={report} />;
 }
