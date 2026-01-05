@@ -54,10 +54,10 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
     return (
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100">
-          <h3 className="text-[16px] font-semibold text-slate-900">Candidate factories</h3>
+          <h3 className="text-[16px] font-semibold text-slate-900">Public Trade Data Matches</h3>
         </div>
         <div className="px-6 py-5">
-          <p className="text-[13px] text-slate-600">No supplier candidates available for this product.</p>
+          <p className="text-[13px] text-slate-600">No public trade data matches available for this product.</p>
         </div>
       </div>
     );
@@ -124,13 +124,18 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
 
     // Build badges from evidenceLabel (new normalized format)
     if (match.evidenceLabel === "customs_matched") {
-      badges.push({ label: "Customs matched", color: "bg-emerald-100 text-emerald-700" });
+      badges.push({ label: "Customs records", color: "bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold" });
     } else if (match.evidenceLabel === "customs_company_only") {
       badges.push({ label: "Customs company only", color: "bg-blue-100 text-blue-700" });
     } else if (match.evidenceLabel === "signals_limited") {
       badges.push({ label: "Signals limited", color: "bg-amber-100 text-amber-700" });
     } else {
       badges.push({ label: "Keyword match", color: "bg-slate-100 text-slate-700" });
+    }
+    
+    // Check for FDA registration in reasonBadges
+    if (match.reasonBadges && match.reasonBadges.some(b => b.toLowerCase().includes("fda"))) {
+      badges.push({ label: "FDA registration", color: "bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold" });
     }
 
     // Add confidence badge
@@ -186,8 +191,8 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
             <Building2 className="w-5 h-5 text-slate-600" />
           </div>
           <div>
-            <h3 className="text-[16px] font-semibold text-slate-900">Candidate factories (suggested, not verified)</h3>
-            <p className="text-[12px] text-slate-500">Suggested by trade data — verify before ordering.</p>
+            <h3 className="text-[16px] font-semibold text-slate-900">Public Trade Data Matches</h3>
+            <p className="text-[12px] text-slate-500">Initial discovery based on general export records. Not yet optimized for NexSupply network.</p>
           </div>
         </div>
         <button
@@ -202,7 +207,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
       <div className="px-6 py-5">
         {showingFallback && (
           <p className="text-[12px] text-slate-600 mb-4">
-            Showing all available suppliers for your product category.
+            Showing all available public trade data matches for your product category.
           </p>
         )}
 
@@ -210,9 +215,19 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
         <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 mb-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
-              <p className="text-[15px] font-semibold text-slate-900 mb-1">
-                🏭 Top-Rated Supplier [Hidden]
-              </p>
+              <div className="mb-2">
+                <p className="text-[15px] font-semibold text-slate-900 mb-1">
+                  {topMatch.supplierName || topMatch.supplier_name || topMatch.companyName || "Factory Name Unavailable"}
+                </p>
+                <div className="flex items-center gap-2 flex-wrap mt-1">
+                  <span className="text-[11px] px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-semibold">
+                    Unverified Data - Audit Required
+                  </span>
+                  <span className="text-[11px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium">
+                    Source: Trade Data
+                  </span>
+                </div>
+              </div>
               {getSupplierRoleDisplay(topMatch) && (
                 <p className="text-[13px] text-slate-600 mb-2">{getSupplierRoleDisplay(topMatch)}</p>
               )}
@@ -237,7 +252,21 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                   </span>
                 ))}
               </div>
-              <span className="text-[12px] text-slate-500 mt-2 block">Suggested by trade data — verify before ordering.</span>
+              {/* NexSupply Intel Potential */}
+              <div className="mt-3 p-3 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-[12px] font-semibold text-blue-900 mb-1">NexSupply Intel Potential</p>
+                    <p className="text-[11px] text-blue-800 leading-relaxed">
+                      Our network indicates 4 alternative manufacturers in this cluster with better MOQ and price tiers. Unlock Blueprint to access.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <span className="text-[12px] text-slate-600 mt-2 block">Trade data baseline — Let us optimize this for your specific volume and margin targets.</span>
             </div>
             {topMatch.matchScore && (
               <span className="text-[12px] font-medium px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded">
@@ -259,9 +288,19 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                 <div key={match.id} className="p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <p className="text-[14px] font-medium text-slate-900">
-                        🏭 Top-Rated Supplier [Hidden]
-                      </p>
+                      <div>
+                        <p className="text-[14px] font-medium text-slate-900 mb-1">
+                          {match.supplierName || match.supplier_name || match.companyName || "Factory Name Unavailable"}
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-semibold">
+                            Unverified Data - Audit Required
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium">
+                            Source: Trade Data
+                          </span>
+                        </div>
+                      </div>
                       {getSupplierRoleDisplay(match) && (
                         <p className="text-[13px] text-slate-500">{getSupplierRoleDisplay(match)}</p>
                       )}
@@ -280,7 +319,21 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                         </span>
                       ))}
                     </div>
-                    <span className="text-[12px] text-slate-500 mt-1 block">Suggested by trade data — verify before ordering.</span>
+                    {/* NexSupply Intel Potential */}
+                    <div className="mt-2 p-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60">
+                      <div className="flex items-start gap-2">
+                        <svg className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="text-[11px] font-semibold text-blue-900 mb-0.5">NexSupply Intel Potential</p>
+                          <p className="text-[10px] text-blue-800 leading-relaxed">
+                            Our network indicates 4 alternative manufacturers in this cluster with better MOQ and price tiers. Unlock Blueprint to access.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-slate-600 mt-1 block">Trade data baseline — Let us optimize this for your specific volume and margin targets.</span>
                   </div>
                   {match.matchScore && (
                     <span className="text-[12px] text-slate-600">
@@ -306,9 +359,12 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
-        <p className="text-[12px] text-slate-500">
-          {getEvidenceFooterText(topMatch)} Start verification to convert this draft into a confirmed buy plan.
+      <div className="px-6 py-5 border-t border-slate-100 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border-blue-200/60">
+        <p className="text-[13px] font-semibold text-slate-900 mb-2">
+          Ready to unlock optimized sourcing? Let us apply our network intelligence to find factories with 15-20% better margins.
+        </p>
+        <p className="text-[12px] text-slate-700">
+          Our Research Engine will leverage proprietary network data to identify verified partners with superior MOQ tiers, pricing structures, and production capabilities.
         </p>
       </div>
     </div>

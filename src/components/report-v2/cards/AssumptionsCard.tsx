@@ -86,13 +86,21 @@ export default function AssumptionsCard({ report }: AssumptionsCardProps) {
     return "Auto from category template";
   };
 
+  // Calculate pilot batch: 500 units or $1,000 total value (whichever is more realistic)
+  const unitPrice = (report as any).baseline?.costRange?.standard?.unitPrice || 0;
+  const pilotBatchUnits = unitPrice > 0 && unitPrice < 2 ? 500 : 500; // Default to 500 units for pilot batch
+  const pilotBatchValue = pilotBatchUnits * unitPrice;
+  const displayPilotBatch = pilotBatchValue >= 1000 
+    ? `${pilotBatchUnits} units (~$${Math.round(pilotBatchValue)})`
+    : `${pilotBatchUnits} units`;
+
   const rows = [
     {
       label: "Units per shipment",
-      value: `${inferred.unitsPerCase ?? 1} unit`,
-      rangeText: "Locked",
+      value: displayPilotBatch,
+      rangeText: "Pilot Batch (LCL/Air min)",
       source: adjustSource(inferred.cartonPack?.provenance as SourceBadge),
-      rationale: "Always assume a 1 unit shipment; no case pack requested.",
+      rationale: "B2B imports require bulk shipping. Assumes pilot batch for realistic margin calculation.",
     },
     {
       label: "Unit weight",
@@ -166,9 +174,16 @@ export default function AssumptionsCard({ report }: AssumptionsCardProps) {
         <ul className="mb-2 space-y-1.5 text-[13px] text-slate-600">
           {inputStatus.weightDefaultUsed && <li className="flex items-start gap-2"><span className="text-slate-400 mt-0.5">•</span>Weight default used</li>}
           {inputStatus.boxSizeDefaultUsed && <li className="flex items-start gap-2"><span className="text-slate-400 mt-0.5">•</span>Box volume default used</li>}
-          {!inputStatus.originConfirmed && <li className="flex items-start gap-2"><span className="text-slate-400 mt-0.5">•</span>Origin missing</li>}
+          {!inputStatus.originConfirmed && (
+            <li className="flex items-start gap-2">
+              <svg className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span className="text-amber-700 font-medium">Origin missing</span>
+            </li>
+          )}
         </ul>
-        <p className="text-[13px] text-slate-500">This estimate assumes 1 unit. Shipping uses category defaults when missing.</p>
+        <p className="text-[13px] text-slate-500">This estimate assumes a pilot batch for realistic B2B import scenarios. Shipping uses category defaults when missing.</p>
       </div>
 
       <div className="divide-y divide-slate-100">

@@ -32,7 +32,7 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
   });
 
   return (
-    <section ref={containerRef} className="relative bg-white py-16 sm:py-24 lg:py-32">
+    <section ref={containerRef} className="relative py-16 sm:py-24 lg:py-32 bg-gradient-to-b from-white via-slate-50/30 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         {(title || subtitle) && (
@@ -51,8 +51,11 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start">
-          {/* Left Column - Scrolling Steps - Increased spacing for better scroll experience */}
-          <div className="space-y-32 sm:space-y-40 lg:space-y-[80vh] pb-32 sm:pb-40 lg:pb-[60vh]">
+          {/* Left Column - Scrolling Steps with Connecting Lines */}
+          <div className="relative space-y-32 sm:space-y-40 lg:space-y-[80vh] pb-32 sm:pb-40 lg:pb-[60vh]">
+            {/* Progress Line - Vertical connecting line */}
+            <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-200 via-purple-200 to-emerald-200 opacity-30"></div>
+            
             {steps.map((step, index) => {
               const stepRef = useRef<HTMLDivElement>(null);
               // Adjusted scroll ranges to give each step more screen time
@@ -67,20 +70,59 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
 
               const opacity = useTransform(stepProgress, [0, 0.15, 0.4, 0.6, 0.85, 1], [0.4, 0.8, 1, 1, 0.8, 0.4]);
               const y = useTransform(stepProgress, [0, 0.5, 1], [20, 0, -20]);
+              
+              // Check if this step is active (convert to number for useTransform)
+              const isActiveNumber = useTransform(activeStep, (active) => active === index ? 1 : 0);
 
               return (
                 <motion.div
                   key={index}
                   ref={stepRef}
                   style={{ opacity, y }}
-                  className="relative"
+                  className="relative pl-10"
                 >
-                  <div className={`inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border ${
-                    step.color === "blue" ? "bg-blue-50 border-blue-200" :
-                    step.color === "purple" ? "bg-purple-50 border-purple-200" :
-                    step.color === "emerald" ? "bg-emerald-50 border-emerald-200" :
-                    "bg-slate-50 border-slate-200"
-                  }`}>
+                  {/* Step Indicator Dot - Connected to progress line */}
+                  <motion.div
+                    className="absolute left-[-2px] top-6 w-4 h-4 rounded-full border-2 border-white z-10"
+                    style={{
+                      backgroundColor: useTransform(
+                        isActiveNumber,
+                        [0, 1],
+                        [
+                          step.color === "blue" ? "#DBEAFE" :
+                          step.color === "purple" ? "#F3E8FF" :
+                          step.color === "emerald" ? "#D1FAE5" : "#F1F5F9",
+                          step.color === "blue" ? "#3B82F6" :
+                          step.color === "purple" ? "#A855F7" :
+                          step.color === "emerald" ? "#10B981" : "#64748B"
+                        ]
+                      ),
+                      scale: useTransform(isActiveNumber, [0, 1], [1, 1.3]),
+                      boxShadow: useTransform(
+                        isActiveNumber,
+                        [0, 1],
+                        [
+                          "none",
+                          step.color === "blue" ? "0 0 0 4px rgba(59, 130, 246, 0.2)" :
+                          step.color === "purple" ? "0 0 0 4px rgba(168, 85, 247, 0.2)" :
+                          step.color === "emerald" ? "0 0 0 4px rgba(16, 185, 129, 0.2)" : "0 0 0 4px rgba(100, 116, 139, 0.2)"
+                        ]
+                      ),
+                    }}
+                  />
+                  
+                  {/* Sticky Step Badge */}
+                  <motion.div
+                    className={`inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border backdrop-blur-sm ${
+                      step.color === "blue" ? "bg-blue-50/90 border-blue-200" :
+                      step.color === "purple" ? "bg-purple-50/90 border-purple-200" :
+                      step.color === "emerald" ? "bg-emerald-50/90 border-emerald-200" :
+                      "bg-slate-50/90 border-slate-200"
+                    }`}
+                    style={{
+                      scale: useTransform(isActiveNumber, [0, 1], [1, 1.05]),
+                    }}
+                  >
                     <div className={`w-2 h-2 rounded-full ${
                       step.color === "blue" ? "bg-blue-500" :
                       step.color === "purple" ? "bg-purple-500" :
@@ -95,7 +137,7 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
                     }`}>
                       Step {index + 1}
                     </span>
-                  </div>
+                  </motion.div>
                   <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 sm:mb-4">
                     {step.title}
                   </h3>

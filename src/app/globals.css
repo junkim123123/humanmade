@@ -479,6 +479,15 @@ body {
 }
 
 /* Mesh Gradient Blob Animation */
+@keyframes slide {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 20px;
+  }
+}
+
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);

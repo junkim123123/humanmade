@@ -2,9 +2,10 @@
 
 import { PrimaryNav } from "@/components/PrimaryNav";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Candy, ToyBrick, Cookie } from "lucide-react";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 // Case study data matching Swell premium style
 const caseStudies = [
@@ -19,6 +20,7 @@ const caseStudies = [
     categoryColor: "text-rose-600",
     bgColor: "bg-rose-50/40",
     image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
+    icon: Candy,
   },
   {
     id: "p-2",
@@ -31,6 +33,7 @@ const caseStudies = [
     categoryColor: "text-blue-600",
     bgColor: "bg-blue-50/40",
     image: "/product-photos/$0.5 장난감/mmexport1758762530965.jpg",
+    icon: ToyBrick,
   },
   {
     id: "p-3",
@@ -43,15 +46,90 @@ const caseStudies = [
     categoryColor: "text-emerald-600",
     bgColor: "bg-emerald-50/40",
     image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
+    icon: Cookie,
   },
 ];
 
-// Stats for hero section
-const stats = [
-  { value: "150+", label: "Products Sourced" },
-  { value: "$2.4M", label: "Total Savings" },
-  { value: "98%", label: "Quality Score" },
-];
+// Product Image Component with proper error handling
+function ProductImage({ 
+  imagePath, 
+  productName, 
+  category,
+  index,
+  Icon
+}: { 
+  imagePath: string | undefined; 
+  productName: string;
+  category: string;
+  index: number;
+  Icon?: React.ComponentType<{ className?: string }>;
+}) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Helper to get fallback gradient colors
+  const getCategoryColors = () => {
+    if (category === "Confectionery") {
+      return {
+        gradient: "bg-gradient-to-br from-pink-400 to-rose-500",
+        text: "text-rose-500"
+      };
+    } else if (category === "Toys") {
+      return {
+        gradient: "bg-gradient-to-br from-blue-400 to-blue-600",
+        text: "text-blue-600"
+      };
+    } else {
+      return {
+        gradient: "bg-gradient-to-br from-emerald-400 to-green-500",
+        text: "text-green-500"
+      };
+    }
+  };
+
+  const colors = getCategoryColors();
+
+  // Encode the image path for proper URL handling
+  const getImageUrl = () => {
+    if (!imagePath) return null;
+    // Split path and encode each segment
+    const segments = imagePath.split('/').filter(Boolean);
+    const encodedSegments = segments.map(segment => encodeURIComponent(segment));
+    return '/' + encodedSegments.join('/');
+  };
+
+  const imageUrl = getImageUrl();
+
+  return (
+                  <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 rounded-t-2xl">
+      {/* Fallback background - always rendered behind */}
+      <div className={`absolute inset-0 flex items-center justify-center ${imageLoaded && !imageError ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
+        <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${colors.gradient}`} />
+        {Icon ? (
+          <Icon className={`w-24 h-24 ${colors.text} opacity-40 drop-shadow-lg`} />
+        ) : (
+          <div className={`text-8xl font-bold opacity-20 ${colors.text}`}>
+            {category.charAt(0)}
+          </div>
+        )}
+      </div>
+
+      {/* Actual Product Image */}
+      {imageUrl && !imageError && (
+        <img
+          src={imageUrl}
+          alt={productName}
+          className={`absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          loading={index < 3 ? "eager" : "lazy"}
+          onError={() => {
+            console.error('Image failed to load:', imageUrl);
+            setImageError(true);
+          }}
+          onLoad={() => {
+            setImageLoaded(true);
+          }}
+        />
+      )}
 
 // Simple Price Comparison Card (2D Fintech Style)
 function PriceComparisonCard() {
@@ -199,54 +277,23 @@ export default function ReportsPage() {
                   <div className={`absolute inset-0 ${study.gradientFrom} ${study.gradientTo} bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                   
                   {/* Product Visual - Actual Image */}
-                  <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                    {/* Product Image */}
-                    {study.image ? (
-                      <img
-                        src={study.image}
-                        alt={study.productName}
-                        className="absolute inset-0 w-full h-full object-cover z-10"
-                        loading={index < 3 ? "eager" : "lazy"}
-                        onError={(e) => {
-                          // Hide image on error, show fallback
-                          console.error('Image failed to load:', study.image);
-                          e.currentTarget.style.display = 'none';
-                          const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
-                          if (fallback) fallback.style.display = 'flex';
-                        }}
-                        onLoad={(e) => {
-                          // Hide fallback when image loads successfully
-                          const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
-                          if (fallback) fallback.style.display = 'none';
-                        }}
-                      />
-                    ) : null}
-                    
-                    {/* Fallback background - shown when image fails or doesn't exist */}
-                    <div className={`image-fallback absolute inset-0 flex items-center justify-center ${study.image ? 'hidden' : ''}`}>
-                      <div className={`absolute top-0 right-0 w-48 h-48 rounded-full opacity-30 blur-3xl ${
-                        study.category === "Confectionery" ? "bg-gradient-to-br from-pink-400 to-rose-500" :
-                        study.category === "Toys" ? "bg-gradient-to-br from-blue-400 to-blue-600" :
-                        "bg-gradient-to-br from-emerald-400 to-green-500"
-                      }`} />
-                      <div className={`text-8xl font-bold opacity-20 ${
-                        study.category === "Confectionery" ? "text-rose-500" :
-                        study.category === "Toys" ? "text-blue-600" :
-                        "text-green-500"
-                      }`}>
-                        {study.category.charAt(0)}
-                      </div>
-                    </div>
-                    
-                    {/* Gradient Overlay for better text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[1]" />
+                  <ProductImage 
+                    imagePath={study.image} 
+                    productName={study.productName}
+                    category={study.category}
+                    index={index}
+                    Icon={study.icon}
+                  />
                     
                     {/* Category Badge */}
-                    <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full ${study.bgColor} backdrop-blur-sm border ${study.borderColor} shadow-lg z-[2]`}>
+                    <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full ${study.bgColor} backdrop-blur-sm border ${study.borderColor} shadow-lg z-[3]`}>
                       <span className={`text-xs font-semibold ${study.categoryColor} uppercase tracking-wider`}>
                         {study.category}
                       </span>
                     </div>
+                    
+                    {/* Gradient Overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[2]" />
                   </div>
                   
                   {/* Content */}

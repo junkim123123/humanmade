@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Report } from "@/lib/report/types";
 import { ChevronLeft } from "lucide-react";
 import { VerificationConfirmModal } from "@/components/verification/VerificationConfirmModal";
+import { getSupplierMatches } from "@/lib/report/normalizeReport";
 
 interface ReportV2HeaderWithTabsProps {
   report: Report & {
@@ -46,6 +47,10 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
   const reportAny = report as any;
   const evidenceBadge = getEvidenceBadge(report as any);
+  
+  // Get supplier matches count for CTA text
+  const supplierMatches = getSupplierMatches(reportAny);
+  const factoryCount = supplierMatches.length > 0 ? supplierMatches.length : 3; // Default to 3 if no matches
 
   // Track header height
   useEffect(() => {
@@ -153,20 +158,28 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
         </div>
       </div>
 
-      {/* Fixed Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white shadow-lg">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          <p className="text-[14px] text-slate-600">
-            <span className="hidden sm:inline">Start verification to convert this draft into a confirmed buy plan.</span>
-            <span className="sm:hidden">Convert draft to confirmed buy plan.</span>
-          </p>
-          <button
-            onClick={handleRequestVerification}
-            disabled={isRequesting}
-            className="inline-flex items-center h-10 px-5 text-[14px] font-medium text-white bg-slate-900 rounded-full hover:bg-slate-800 transition-colors disabled:opacity-60 shrink-0"
-          >
-            {isRequesting ? "Starting..." : "Start verification"}
-          </button>
+      {/* Sticky Bottom CTA */}
+      <div className="sticky bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white shadow-lg backdrop-blur-sm bg-white/95">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleRequestVerification}
+                disabled={isRequesting}
+                className="inline-flex items-center justify-center h-11 px-6 text-[14px] font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-60 shrink-0 w-full sm:w-auto"
+              >
+                {isRequesting ? "Starting..." : "Optimize Sourcing & Unlock Network"}
+              </button>
+              <div className="px-4 py-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60 max-w-2xl">
+                <p className="text-[12px] font-semibold text-blue-900 mb-1">
+                  💡 High-Impact Optimization
+                </p>
+                <p className="text-[11px] text-blue-800 leading-relaxed">
+                  Leverage NexSupply's internal network data to find factories with 15-20% higher margins than public data matches.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

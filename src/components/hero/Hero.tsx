@@ -56,7 +56,7 @@ function FloatingUICard() {
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative backdrop-blur-md bg-white/70 rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-6 lg:p-8 cursor-pointer"
+        className="relative backdrop-blur-md bg-white/80 rounded-2xl shadow-2xl shadow-purple-500/10 border-2 border-slate-200/50 p-4 sm:p-6 lg:p-8 cursor-pointer"
         style={{
           rotateX,
           rotateY,
@@ -126,12 +126,12 @@ export default function Hero() {
           {/* Left Column - Copy */}
           <div className="flex flex-col gap-6 sm:gap-8 lg:gap-12 w-full lg:w-1/2">
             {/* Eyebrow */}
-            <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+            <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
               Sourcing Intelligence OS
             </p>
 
             {/* Headline - Premium sizing - Updated to concise messaging */}
-            <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
               Triple Your Margin.
               <br />
               <span className="text-slate-700">Go Factory Direct.</span>
@@ -143,24 +143,24 @@ export default function Hero() {
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex flex-col items-start gap-3">
               <Link
                 href="/analyze"
-                className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-slate-900 text-white font-medium text-base hover:bg-slate-800 transition-colors shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-base hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-100"
               >
                 Calculate My Savings (Free)
               </Link>
               <Link
                 href="/reports/toy-example"
-                className="inline-flex items-center text-slate-700 font-medium text-base hover:text-slate-900 transition-colors"
+                className="inline-flex items-center text-slate-600 font-medium text-sm hover:text-slate-900 transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-slate-500"
               >
-                View Sample Blueprint Report
+                View Sample AI Report
               </Link>
             </div>
 
             {/* Urgency Micro-copy */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 border border-amber-200/60">
-              <span className="text-lg">🔥</span>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200/60">
+              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-amber-500"></div>
               <p className="text-sm text-amber-800">
                 <span className="font-semibold">Current Trend:</span> Toys & Confectionery categories are seeing 15% faster lead times this month.
               </p>

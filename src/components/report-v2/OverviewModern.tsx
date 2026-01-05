@@ -55,13 +55,22 @@ function DecisionCard({ report }: { report: Report }) {
       <div className="px-6 py-5 border-b border-slate-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-[16px] font-semibold text-slate-900 mb-1">Decision</h3>
-          <p className="text-[12px] text-slate-500 mb-2">Pre-verification estimate. Final numbers may change after supplier responses.</p>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-[28px] font-bold text-slate-900 tracking-tight">
-              ${bestEstimate.toFixed(2)}
-            </span>
-            <span className="text-[13px] text-slate-500">per unit</span>
-            <span className="text-[13px] text-slate-400">({`Range: $${normalized.min.toFixed(2)} – $${normalized.max.toFixed(2)}`})</span>
+          <p className="text-[12px] text-slate-500 mb-2">Initial Intelligence Draft. Our Research Engine will now apply proprietary data design to find the absolute floor price among verified partners.</p>
+          <div className="flex flex-col gap-2 mb-1">
+            <div className="flex items-center gap-3">
+              <span className="text-[28px] font-bold text-slate-900 tracking-tight">
+                ${bestEstimate.toFixed(2)}
+              </span>
+              <span className="text-[13px] text-slate-500">per unit</span>
+            </div>
+            <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+              <p className="text-[13px] font-semibold text-amber-800 mb-1">
+                Uncertainty Range: ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
+              </p>
+              <p className="text-[12px] text-amber-700">
+                Only verification can lock the exact price. Range reflects missing data assumptions.
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -73,15 +82,39 @@ function DecisionCard({ report }: { report: Report }) {
         </div>
       </div>
       {missingInputs.length > 0 && (
-        <div className="px-6 py-2 flex flex-wrap gap-2">
+        <div className="px-6 py-3">
           {missingInputs.slice(0, 3).map((chip, i) => (
-            <span key={i} className="bg-slate-100 text-slate-500 text-xs px-2 py-0.5 rounded-full border border-slate-200">{chip}</span>
+            chip === "Origin missing" ? (
+              <div key={i} className="p-3 rounded-lg bg-amber-50 border-2 border-amber-300 mb-2">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-semibold text-amber-900 mb-1">Critical: Origin missing</p>
+                    <p className="text-[12px] text-amber-800">Professional verification required to confirm country of origin for accurate duty calculation and compliance.</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <span 
+                key={i} 
+                className="inline-block text-xs px-2 py-0.5 rounded-full border bg-slate-100 text-slate-500 border-slate-200 mr-2 mb-2"
+              >
+                {chip}
+              </span>
+            )
           ))}
         </div>
       )}
-      <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50 border-t border-slate-100">
+      <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-amber-50/50 border-t border-amber-100">
         <div className="flex gap-2">
-          <button className="bg-slate-100 text-slate-900 rounded-full px-4 py-2 text-[14px] font-medium border border-slate-200 hover:bg-slate-200 transition-colors">Upload missing photos</button>
+          <button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full px-5 py-2.5 text-[14px] font-semibold border border-amber-400 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            Upload missing photos
+          </button>
         </div>
       </div>
     </div>
@@ -192,7 +225,10 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             <p className="text-[13px] text-slate-600 mb-4">
               Upload a clear label photo to unlock a stronger verdict and action plan.
             </p>
-            <button className="bg-slate-900 text-white rounded-full px-4 py-2 text-[14px] font-medium hover:bg-slate-800 transition-colors">
+            <button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full px-5 py-2.5 text-[14px] font-semibold border border-amber-400 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
               Upload missing photos
             </button>
           </div>

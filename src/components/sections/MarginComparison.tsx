@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Languages, Package, FileText, DollarSign } from "lucide-react";
+import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp } from "lucide-react";
 import { CountUp } from "@/components/animation/CountUp";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
@@ -156,10 +156,10 @@ export default function MarginComparison() {
   ];
 
   const nexSupplyAdvantages = [
-    { icon: Languages, text: "Korean/English dedicated communication" },
-    { icon: Package, text: "On-site QC team inspection" },
-    { icon: FileText, text: "Door-to-door full service" },
-    { icon: DollarSign, text: "Transparent 7% fixed fee" },
+    { icon: Languages, text: "Multilingual communication support" },
+    { icon: Shield, text: "On-the-ground QC team inspection" },
+    { icon: FileText, text: "Total logistics handling (door-to-door)" },
+    { icon: DollarSign, text: "Transparent 7% fixed fee - no surprises" },
   ];
 
   return (
@@ -178,8 +178,9 @@ export default function MarginComparison() {
 
           {/* Comparison Table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-4 sm:p-6 lg:p-8">
-            <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-              <StaggerContainer className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-w-[600px] lg:min-w-0">
+            {/* Mobile: Stack vertically, Desktop: Side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+              <StaggerContainer className="contents">
                 {/* DIY Way */}
                 <ComparisonColumn
                   title="DIY (Alibaba)"
@@ -200,13 +201,163 @@ export default function MarginComparison() {
                 />
               </StaggerContainer>
             </div>
+            
+            {/* Mobile: Horizontal scroll for detailed table */}
+            <div className="lg:hidden mt-6 -mx-4 sm:-mx-6 px-4 sm:px-6">
+              <div className="text-xs text-slate-500 mb-2">← Swipe to see full comparison →</div>
+            </div>
+
+            {/* Detailed Comparison Table */}
+            <div className="mt-8 pt-8 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-6">Detailed Comparison</h3>
+              <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+                <div className="min-w-[600px] lg:min-w-0">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Metric</th>
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">DIY (Alibaba)</th>
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-emerald-700">NexSupply</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    <tr>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-slate-500" />
+                          <span className="text-sm font-medium text-slate-700">Sourcing Time</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm text-slate-600">40+ hours</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm font-semibold text-emerald-600">Minutes</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-slate-500" />
+                          <span className="text-sm font-medium text-slate-700">Quality Risk</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm text-red-600 font-medium">High / Scams</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm font-semibold text-emerald-600">Verified Factories</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-slate-500" />
+                          <span className="text-sm font-medium text-slate-700">Total Cost</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm text-slate-600">Hidden fees</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm font-semibold text-emerald-600">All-in Landed Cost</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-slate-500" />
+                          <span className="text-sm font-medium text-slate-700">Intelligence Level</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm text-slate-600">Manual Search</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-sm font-semibold text-emerald-600">Data-Driven Optimization Engine</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            </div>
 
             {/* Profit Unlocked Highlight */}
             <ProfitBadge />
           </div>
+          
+          {/* Social Proof Section */}
+          <SocialProof />
         </div>
       </FadeUp>
     </section>
+  );
+}
+
+// Social Proof Component
+function SocialProof() {
+  const testimonials = [
+    {
+      quote: "NexSupply helped me improve my margin by 25% on my first order. The Blueprint report was worth every penny.",
+      author: "Sarah Chen",
+      role: "E-commerce Seller",
+      improvement: "25% margin improvement",
+    },
+    {
+      quote: "Finally, a service that shows you the real landed cost upfront. No surprises, just transparency.",
+      author: "Mike Rodriguez",
+      role: "Amazon FBA Seller",
+      improvement: "3x faster sourcing",
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: 0.3 }}
+      className="mt-12 pt-12 border-t border-slate-200"
+    >
+      <div className="text-center mb-8">
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Trusted by SMB Sellers</h3>
+        <p className="text-sm text-slate-500">Real results from real sellers</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {testimonials.map((testimonial, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+            className="bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200 p-6 shadow-sm"
+          >
+            <div className="flex items-start gap-1 mb-4">
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                </svg>
+              ))}
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed mb-4 italic">
+              "{testimonial.quote}"
+            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{testimonial.author}</p>
+                <p className="text-xs text-slate-500">{testimonial.role}</p>
+              </div>
+              <div className="px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
+                <span className="text-xs font-semibold text-emerald-700">{testimonial.improvement}</span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 

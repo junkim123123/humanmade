@@ -37,6 +37,9 @@ const config: Config = {
       borderRadius: {
         "3xl": "1.5rem",
       },
+      animation: {
+        slide: "slide 20s linear infinite",
+      },
     },
   },
   plugins: [],

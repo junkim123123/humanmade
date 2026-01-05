@@ -14,12 +14,12 @@ interface ProofStatusBadgeProps {
 const statusConfig = {
   verified: {
     icon: CheckCircle2,
-    label: "Verified match",
+    label: "Network Optimized",
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-200",
     textColor: "text-emerald-700",
     iconColor: "text-emerald-600",
-    tooltip: "Matches customs/invoice data. 99% accuracy",
+    tooltip: "Optimized via proprietary intelligence network. Higher margin potential than public data.",
   },
   assumption: {
     icon: AlertCircle,

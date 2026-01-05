@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Candy, ToyBrick, Cookie } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 
@@ -13,6 +13,7 @@ interface ProductCard {
   metric: string;
   category: string;
   colorClass?: string;
+  icon?: React.ReactNode;
 }
 
 // Sample product data - can be replaced with real data later
@@ -23,6 +24,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Estimated $0.42 saved per unit",
     category: "Confectionery",
     colorClass: "bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200",
+    icon: <Candy className="w-16 h-16 text-rose-500" />,
   },
   {
     id: "2",
@@ -30,6 +32,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Lead time cut by 2 weeks",
     category: "Toys",
     colorClass: "bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200",
+    icon: <ToyBrick className="w-16 h-16 text-blue-600" />,
   },
   {
     id: "3",
@@ -37,6 +40,7 @@ const sampleProducts: ProductCard[] = [
     metric: "3 vetted quotes in 5 days",
     category: "Snacks",
     colorClass: "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200",
+    icon: <Cookie className="w-16 h-16 text-purple-600" />,
   },
 ];
 
@@ -46,7 +50,7 @@ interface ProofShowcaseProps {
 
 export default function ProofShowcase({ products = sampleProducts }: ProofShowcaseProps) {
   return (
-    <section className="bg-white py-32">
+    <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <FadeUp>
@@ -80,8 +84,8 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                   }}
                 />
                 
-                {/* Product Visual Area */}
-                <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-white/40 backdrop-blur-sm">
+                {/* Product Visual Area - More compact */}
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bg-white/40 backdrop-blur-sm">
                   {product.image ? (
                     <Image
                       src={product.image}
@@ -99,13 +103,26 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                         product.colorClass?.includes("blue") ? "bg-gradient-to-br from-blue-200 to-cyan-300" :
                         "bg-gradient-to-br from-purple-200 to-violet-300"
                       } blur-2xl`} />
-                      {/* Category letter */}
-                      <div className={`relative text-7xl font-bold opacity-30 ${
+                      {/* Category icon or letter - prefer icon if available */}
+                      <div className={`relative ${
                         product.colorClass?.includes("pink") ? "text-rose-500" :
                         product.colorClass?.includes("blue") ? "text-blue-600" :
                         "text-purple-600"
                       }`}>
-                        {product.category.charAt(0)}
+                        {product.icon ? (
+                          <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 0.7 }}
+                            transition={{ duration: 0.5 }}
+                            className="drop-shadow-lg"
+                          >
+                            {product.icon}
+                          </motion.div>
+                        ) : (
+                          <div className="text-7xl font-bold opacity-30">
+                            {product.category.charAt(0)}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
