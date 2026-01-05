@@ -33,4 +33,8 @@ export const adminNavSections: AdminNavSection[] = [
     label: "User Mgmt",
     href: "/admin/users",
   },
+  {
+    label: "Upload",
+    href: "/admin/upload",
+  },
 ];
