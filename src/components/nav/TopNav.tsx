@@ -180,7 +180,7 @@ export function PublicNavbar({ user }: PublicNavbarProps) {
     () => [
       { href: "/analyze", label: "Analyze" },
       { href: "/pricing", label: "Pricing" },
-      { href: "/sample-report/v2", label: "Sample report" },
+      { href: "/sample-report", label: "Sample report" },,
       { href: "/proof", label: "Proof" },
     ],
     []

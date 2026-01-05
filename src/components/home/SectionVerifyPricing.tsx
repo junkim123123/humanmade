@@ -128,7 +128,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 Start verification
               </a>
               <Link
-                href="/sample-report/v2"
+                href="/sample-report"
                 className="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium underline underline-offset-2 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

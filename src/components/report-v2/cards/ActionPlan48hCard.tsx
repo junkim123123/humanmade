@@ -64,7 +64,7 @@ export default function ActionPlan48hCard({ actionPlan }: ActionPlan48hCardProps
         {/* Blueprint Sample Preview */}
         <div className="pt-6 border-t border-slate-100">
           <Link 
-            href="/sample-report/v2"
+            href="/sample-report"
             className="group/blueprint block"
           >
             <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-br from-purple-50/50 to-blue-50/30 border border-purple-200/60 hover:border-purple-300 transition-colors">

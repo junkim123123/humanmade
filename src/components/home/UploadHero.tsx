@@ -47,7 +47,7 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
               </button>
               <a
                 className="inline-flex h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-[15px] font-medium text-slate-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] whitespace-nowrap"
-                href="/sample-report/v2"
+                href="/sample-report"
               >
                 View sample report
               </a>

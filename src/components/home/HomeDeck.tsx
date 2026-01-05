@@ -38,7 +38,7 @@ function FinalCta() {
                 Calculate My Savings (Free)
               </a>
               <a
-                href="/sample-report/v2"
+                href="/sample-report"
                 className="inline-flex h-14 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm px-6 text-base sm:text-lg font-semibold text-white transition-all hover:bg-white/20 hover:border-white/30"
               >
                 View Sample AI Reports

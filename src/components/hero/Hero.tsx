@@ -151,7 +151,7 @@ export default function Hero() {
                 Calculate My Savings (Free)
               </Link>
               <Link
-                href="/sample-report/v2"
+                href="/sample-report"
                 className="inline-flex items-center text-slate-600 font-medium text-sm hover:text-slate-900 transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-slate-500"
               >
                 View Sample AI Report

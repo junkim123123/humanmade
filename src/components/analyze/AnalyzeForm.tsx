@@ -132,11 +132,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     Object.entries(form).forEach(([key, value]) => {
       formData.append(key, String(value));
     });
-    if (files.product) formData.append("product", files.product);
+    if (files.product) formData.append("image", files.product);
     if (files.barcode) formData.append("barcode", files.barcode);
     if (files.label) formData.append("label", files.label);
     if (files.extra1) formData.append("extra1", files.extra1);
     if (files.extra2) formData.append("extra2", files.extra2);
+
+
 
     try {
       const response = await fetch("/api/analyze", {
