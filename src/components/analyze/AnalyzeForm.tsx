@@ -470,9 +470,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
-        {/* Left: Photo Upload */}
-        <div className="max-w-full">
+      <div className="grid gap-6 lg:grid-cols-[65fr_35fr] lg:gap-8">
+        {/* Left: Main Workflow Area (65%) */}
+        <div className="space-y-6">
           {loading ? (
             <LoadingState 
               progress={loadingProgress}
@@ -486,10 +486,44 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
               validationErrors={submitted ? validationErrors : {}}
             />
           )}
+          
+          {/* Smart Input Group - Marketplace Context */}
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Marketplace Context</h3>
+              <div className="flex flex-wrap gap-2">
+                {["Amazon FBA", "Shopify", "eBay", "Other"].map((channel) => (
+                  <button
+                    key={channel}
+                    type="button"
+                    className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                  >
+                    {channel}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Target Price - Emphasized */}
+            <div>
+              <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-700">$</span>
+                <input
+                  type="text"
+                  placeholder="9.99"
+                  value={form.shelfPrice}
+                  onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
+                  className="w-full h-14 rounded-xl border-2 border-slate-200 bg-white pl-8 pr-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                />
+              </div>
+              <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin</p>
+            </div>
+          </div>
         </div>
 
-        {/* Right: Settings - Sticky Sidebar */}
-        <div className="lg:sticky lg:top-24 lg:self-start space-y-4 sm:space-y-6">
+        {/* Right: Live Margin Calculator Sidebar (35%) - Sticky */}
+        <div className="lg:sticky lg:top-6 lg:self-start">
           {apiError && (
             <div className="p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-sm text-red-700">
               {apiError}
@@ -501,65 +535,51 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
             </div>
           )}
 
-          <div className="rounded-2xl border border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-lg shadow-slate-200/50 overflow-hidden">
-            {/* Header */}
-            <div className="p-4 sm:p-6 border-b border-slate-200/60 bg-gradient-to-br from-slate-50/50 to-transparent">
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Assumptions</h3>
-              <ul className="space-y-2 text-sm text-slate-500">
-                <li className="flex items-start gap-2">
-                  <span className="text-slate-300 mt-0.5">•</span>
-                  <span>Per-unit estimate</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-slate-300 mt-0.5">•</span>
-                  <span>Missing weight or box size uses category defaults</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-slate-300 mt-0.5">•</span>
-                  <span>Defaults are labeled and editable</span>
-                </li>
-              </ul>
+          <div className="rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+            {/* Live Calculator Header */}
+            <div className="p-5 border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white">
+              <h3 className="text-base font-semibold text-slate-900 mb-1">Live Margin Calculator</h3>
+              <p className="text-xs text-slate-500">Updates as you fill in details</p>
             </div>
 
             {/* Form */}
-            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
-              {/* Destination */}
-              <div>
+            <div className="p-5 space-y-4">
+              {/* Destination - Compact */}
+              <div className="pb-4 border-b border-slate-100">
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">Destination</div>
-                <div className="text-base font-semibold text-slate-900">United States</div>
+                <div className="text-sm font-semibold text-slate-900">United States</div>
               </div>
-
-              {/* Target Sell Price */}
-              <div>
-                <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-slate-600">$</span>
-                  <input
-                    type="text"
-                    placeholder="9.99"
-                    value={form.shelfPrice}
-                    onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
-                    className="w-full h-12 rounded-xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm pl-8 pr-4 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:border-slate-600 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
-                  />
+              
+              {/* Live Preview Placeholder */}
+              <div className="py-4 space-y-3 border-b border-slate-100">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Estimated Cost</span>
+                  <span className="text-sm font-semibold text-slate-900">--</span>
                 </div>
-                <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin.</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Profit Margin</span>
+                  <span className="text-sm font-semibold text-slate-900">--</span>
+                </div>
               </div>
 
-              {/* Advanced */}
+              {/* Edit Assumptions - Accordion */}
               <details className="group">
-                <summary className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer hover:text-slate-900 transition-colors select-none">
-                  <span className="text-slate-400 group-open:rotate-90 transition-transform text-xs">▶</span>
-                  <span>Edit assumptions</span>
+                <summary className="flex items-center justify-between text-sm font-semibold text-slate-700 cursor-pointer hover:text-slate-900 transition-colors select-none py-2">
+                  <span className="flex items-center gap-2">
+                    <span className="text-slate-400 group-open:rotate-90 transition-transform text-xs">▶</span>
+                    <span>Edit Assumptions</span>
+                  </span>
+                  <span className="text-xs text-slate-400">Optional</span>
                 </summary>
-                <div className="mt-4 space-y-5 pl-5 border-l-2 border-slate-200/60">
-                  <p className="text-xs text-slate-500">Only if you know the shipping box size and weight.</p>
+                <div className="mt-4 space-y-4 pl-4 border-l-2 border-slate-200">
+                  <p className="text-xs text-slate-500">Defaults used if not specified</p>
                   
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-2 block">Shipping mode</label>
+                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Shipping mode</label>
                     <select
                       value={form.shippingMode}
                       onChange={(e) => setForm((prev) => ({ ...prev, shippingMode: e.target.value }))}
-                      className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-4 text-sm text-slate-900 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                      className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                     >
                       <option value="air">Air</option>
                       <option value="ocean">Ocean</option>
@@ -567,7 +587,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
                       Weight {unitSystem === "imperial" ? "(lb)" : "(kg)"}
                     </label>
                     <input
@@ -575,12 +595,12 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                       placeholder={unitSystem === "imperial" ? "1.2" : "0.5"}
                       value={form.weight}
                       onChange={(e) => setForm((prev) => ({ ...prev, weight: e.target.value }))}
-                      className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                      className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
                       Dimensions {unitSystem === "imperial" ? "(in)" : "(cm)"}
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -589,49 +609,49 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                         placeholder="L"
                         value={form.length}
                         onChange={(e) => setForm((prev) => ({ ...prev, length: e.target.value }))}
-                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                       />
                       <input
                         type="text"
                         placeholder="W"
                         value={form.width}
                         onChange={(e) => setForm((prev) => ({ ...prev, width: e.target.value }))}
-                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                       />
                       <input
                         type="text"
                         placeholder="H"
                         value={form.height}
                         onChange={(e) => setForm((prev) => ({ ...prev, height: e.target.value }))}
-                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
                 </div>
               </details>
 
-              {/* Submit */}
-              <div className="pt-4 sm:pt-6 border-t border-slate-200/60">
+              {/* Submit - Full Width CTA */}
+              <div className="pt-4 border-t border-slate-200 -mx-5 -mb-5 px-5 pb-5 bg-slate-50/50">
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={loading || !hasValidInput}
                   className={cn(
-                    "w-full h-12 rounded-xl text-base font-semibold transition-all shadow-lg touch-manipulation",
+                    "w-full h-14 rounded-xl text-base font-semibold transition-all shadow-lg touch-manipulation",
                     !hasValidInput
-                      ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
-                      : "bg-gradient-to-r from-slate-700 to-slate-900 text-white hover:from-slate-800 hover:to-slate-950 hover:shadow-xl active:scale-[0.98]"
+                      ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                      : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-xl active:scale-[0.98]"
                   )}
                 >
                   {loading ? "Calculating..." : "Calculate Landed Cost"}
                 </button>
                 {mode === "public" && (
-                  <p className="mt-3 text-center text-xs text-slate-500">
+                  <p className="mt-2 text-center text-xs text-slate-500">
                     Save results requires sign in
                   </p>
                 )}
                 {mode === "app" && (
-                  <p className="mt-3 text-center text-xs text-slate-500">
+                  <p className="mt-2 text-center text-xs text-slate-500">
                     Signed in saves your report to Reports.
                   </p>
                 )}

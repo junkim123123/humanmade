@@ -397,26 +397,26 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
 
   return (
     <div className="space-y-6">
-      {/* Main Upload - Large */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-bold text-slate-900 mb-1">Product photo</h3>
-          <p className="text-xs text-slate-500">Required • Clear front photo of the product</p>
-        </div>
-        {/* Main upload card - full width, large */}
-        <div className="max-w-2xl">
+      {/* Hero Upload Section - 60:40 Layout */}
+      <div className="grid gap-6 lg:grid-cols-[60fr_40fr]">
+        {/* Main Dropzone (60%) */}
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Product Photo</h3>
+            <p className="text-xs text-slate-500">Required • Drag & drop your product image here</p>
+          </div>
           {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true, "", false)}
         </div>
-      </div>
-
-      {/* Optional Uploads - Compact */}
-      <div className="space-y-4 pt-6 border-t border-slate-200">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-600">Optional (recommended for accuracy)</span>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
-          {renderSlot("barcode", "Barcode", "UPC or EAN close-up", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "", true)}
-          {renderSlot("label", "Label", "Back label with details", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "", true)}
+        
+        {/* Sub Dropzone (40%) - Stacked */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">Optional</h3>
+          </div>
+          <div className="space-y-4">
+            {renderSlot("barcode", "Barcode", "UPC or EAN close-up", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "", true)}
+            {renderSlot("label", "Label", "Back label with details", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "", true)}
+          </div>
         </div>
       </div>
 
