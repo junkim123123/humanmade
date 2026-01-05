@@ -162,7 +162,7 @@ export default function Hero() {
             <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200/60">
               <div className="flex-shrink-0 w-2 h-2 rounded-full bg-amber-500"></div>
               <p className="text-sm text-amber-800">
-                <span className="font-semibold">Current Trend:</span> Toys & Confectionery categories are seeing 15% faster lead times this month.
+                <span className="font-semibold">Trend:</span> Toys & Confectionery categories are seeing 15% faster lead times this month.
               </p>
             </div>
 
