@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Report } from "@/lib/report/types";
+import { motion, useSpring, useTransform } from "framer-motion";
 import { normalizeRange } from "@/lib/calc/cost-normalization";
 import { computeDataQuality } from "@/lib/report/data-quality";
 import { getSupplierMatches } from "@/lib/report/normalizeReport";
@@ -44,6 +45,15 @@ function DecisionCard({ report }: { report: Report }) {
 
   const handleShelfPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShelfPriceInput(e.target.value);
+    // Real-time calculation preview (without committing)
+    const cleaned = e.target.value.trim().replace(/^\$/, "").replace(/,/g, "");
+    const parsed = parseFloat(cleaned);
+    if (!isNaN(parsed) && parsed > 0) {
+      // Show preview but don't commit until blur/Enter
+      setShelfPriceCommitted(parsed);
+    } else if (cleaned === "") {
+      setShelfPriceCommitted(null);
+    }
   };
 
   const handleShelfPriceBlur = () => {
@@ -64,9 +74,20 @@ function DecisionCard({ report }: { report: Report }) {
     }
   };
 
-  // Calculate margin if shelf price exists
-  const profitPerUnit = targetSellPrice && bestEstimate > 0 ? targetSellPrice - bestEstimate : null;
-  const marginPercent = profitPerUnit && targetSellPrice ? ((profitPerUnit / targetSellPrice) * 100) : null;
+  // Calculate margin with real-time preview
+  const previewPrice = useMemo(() => {
+    if (shelfPriceInput !== "") {
+      const cleaned = shelfPriceInput.trim().replace(/^\$/, "").replace(/,/g, "");
+      const parsed = parseFloat(cleaned);
+      if (!isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+    return targetSellPrice;
+  }, [shelfPriceInput, targetSellPrice]);
+
+  const profitPerUnit = previewPrice && bestEstimate > 0 ? previewPrice - bestEstimate : null;
+  const marginPercent = profitPerUnit && previewPrice ? ((profitPerUnit / previewPrice) * 100) : null;
 
   // Evidence badge logic
   const { strength, reason: evidenceSummary } = computeDataQuality(report);
@@ -110,7 +131,7 @@ function DecisionCard({ report }: { report: Report }) {
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>
             {safeStrength.charAt(0).toUpperCase() + safeStrength.slice(1)} evidence
-            {safeStrength !== "high" && " — upgrade to verified plan"}
+            {safeStrength !== "high" && " — upgrade"}
           </span>
           <span className="text-[13px] text-slate-600">{evidenceSummary}</span>
         </div>
@@ -119,7 +140,7 @@ function DecisionCard({ report }: { report: Report }) {
         <div className="px-6 py-3">
           {missingInputs.slice(0, 3).map((chip, i) => (
             chip === "Origin missing" ? (
-              <div key={i} className="p-3 rounded-lg bg-amber-50 border-2 border-amber-300 mb-2">
+              <div key={i} className="p-3 rounded-lg bg-amber-50 border-2 border-amber-300 mb-2 animate-subtle-pulse">
                 <div className="flex items-start gap-2">
                   <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -146,7 +167,7 @@ function DecisionCard({ report }: { report: Report }) {
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
           <div className="flex-1">
             <label htmlFor="shelf-price-input" className="block text-xs font-semibold text-slate-700 mb-2">
-              선반 가격 (Shelf Price)
+              Shelf Price
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">$</span>
@@ -162,29 +183,61 @@ function DecisionCard({ report }: { report: Report }) {
                 className="w-full pl-7 pr-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all bg-white"
               />
             </div>
-            <p className="text-xs text-slate-500 mt-1.5">제품 판매 가격을 입력하시면 마진을 계산해드립니다</p>
+            <p className="text-xs text-slate-500 mt-1.5">Enter your retail price to see calculated margin</p>
           </div>
 
-          {/* Margin Display */}
-          {targetSellPrice && profitPerUnit !== null && marginPercent !== null && (
+          {/* Margin Display - Real-time animated */}
+          {previewPrice && profitPerUnit !== null && marginPercent !== null && (
             <div className="flex-shrink-0 sm:w-48">
-              <div className="bg-white rounded-lg border-2 border-emerald-200 p-4 shadow-sm">
-                <p className="text-xs font-semibold text-slate-600 mb-2">예상 마진</p>
+              <motion.div 
+                className="bg-white rounded-lg border-2 border-emerald-200 p-4 shadow-sm"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p className="text-xs font-semibold text-slate-600 mb-2">Expected Margin</p>
                 <div className="space-y-1.5">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-xs text-slate-500">단가당 이익:</span>
-                    <span className={`text-lg font-bold ${profitPerUnit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    <span className="text-xs text-slate-500">Profit per unit:</span>
+                    <motion.span 
+                      className={`text-lg font-bold ${profitPerUnit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                      key={`profit-${profitPerUnit?.toFixed(2)}`}
+                      initial={{ scale: 1.1, opacity: 0.8 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
                       {profitPerUnit >= 0 ? '+' : ''}${profitPerUnit.toFixed(2)}
-                    </span>
+                    </motion.span>
                   </div>
                   <div className="flex items-baseline justify-between gap-2 pt-1.5 border-t border-slate-100">
-                    <span className="text-xs text-slate-500">마진률:</span>
-                    <span className={`text-xl font-bold ${marginPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    <span className="text-xs text-slate-500">Margin %:</span>
+                    <motion.span 
+                      className={`text-xl font-bold ${marginPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                      key={`margin-${marginPercent?.toFixed(1)}`}
+                      initial={{ scale: 1.1, opacity: 0.8 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
                       {marginPercent >= 0 ? '+' : ''}{marginPercent.toFixed(1)}%
-                    </span>
+                    </motion.span>
                   </div>
                 </div>
-              </div>
+                
+                {/* Visual Margin Bar */}
+                {marginPercent !== null && (
+                  <div className="mt-3 pt-2 border-t border-slate-100">
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <motion.div
+                        className={`h-full ${marginPercent >= 0 ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(Math.abs(marginPercent), 100)}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1 text-center">Margin visualization</p>
+                  </div>
+                )}
+              </motion.div>
             </div>
           )}
         </div>
@@ -424,3 +477,4 @@ export default function OverviewModern({ report }: OverviewModernProps) {
     </div>
   );
 }
+

@@ -30,9 +30,9 @@ function getEvidenceBadge(report: Report & { _similarRecordsCount?: number }) {
   let label = verifiedSignalsCount === 0 ? "Proof pending" : `Proof found ${verifiedSignalsCount} ${plural}`;
   // Add action text for non-high evidence levels
   if (verifiedSignalsCount < 3 && verifiedSignalsCount > 0) {
-    label += " — upgrade to verified plan";
+    label += " — upgrade";
   } else if (verifiedSignalsCount === 0) {
-    label += " — verify to unlock";
+    label += " — verify";
   }
   if (verifiedSignalsCount >= 3) return { label, color: "bg-emerald-100 text-emerald-800", count: verifiedSignalsCount };
   if (verifiedSignalsCount >= 1) return { label, color: "bg-blue-100 text-blue-800", count: verifiedSignalsCount };
@@ -172,7 +172,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
               </button>
               <div className="px-4 py-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60 max-w-2xl">
                 <p className="text-[12px] font-semibold text-blue-900 mb-1">
-                  💡 High-Impact Optimization
+                  High-Impact Optimization
                 </p>
                 <p className="text-[11px] text-blue-800 leading-relaxed">
                   Leverage NexSupply's internal network data to find factories with 15-20% higher margins than public data matches.

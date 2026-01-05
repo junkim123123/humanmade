@@ -135,7 +135,7 @@ export function computeDataQuality(report: Report): DataQualityResult {
 
   const reason = presentSignals.length > 0
     ? `${presentSignals[0].label} confirmed`
-    : "Some signals missing";
+    : "Signals missing";
 
   const helperText = buildHelperText(profile, missingSignals.slice(0, 3));
 

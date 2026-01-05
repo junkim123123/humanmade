@@ -41,14 +41,14 @@ const caseStudies = [
   {
     id: "p-2",
     category: "Toys",
-    productName: "Plush Toy Collection",
-    benefit: "Lead time cut by 2 weeks",
+    productName: "Demon Slayer Keychain",
+    benefit: "Data-driven factory matching",
     gradientFrom: "from-blue-100/50",
     gradientTo: "to-cyan-100/30",
     borderColor: "border-blue-200/60",
     categoryColor: "text-blue-600",
     bgColor: "bg-blue-50/40",
-    image: "/product-photos/$0.5 장난감/mmexport1758762530965.jpg",
+    image: "/product-photos/귀멸의 칼날 키링/mmexport1758763260109.jpg",
     icon: ToyBrick,
   },
   {

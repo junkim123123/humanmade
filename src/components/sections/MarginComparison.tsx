@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp, CheckCircle2, Camera, MessageSquare, BadgeCheck, MapPin } from "lucide-react";
+import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp, CheckCircle2, Camera, MessageSquare, MapPin } from "lucide-react";
 import { CountUp } from "@/components/animation/CountUp";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
@@ -359,12 +359,6 @@ function SocialProof() {
             transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
             className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden hover:shadow-md transition-shadow duration-200 group/card"
           >
-            {/* Verified by NexSupply OS Seal */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 backdrop-blur-sm z-10 group-hover/card:border-blue-300 transition-colors duration-200">
-              <BadgeCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span className="text-[10px] font-bold text-blue-900">Verified by NexSupply OS</span>
-            </div>
-
             {/* Verified Badge */}
             <div className="flex items-center gap-2 mb-3">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />

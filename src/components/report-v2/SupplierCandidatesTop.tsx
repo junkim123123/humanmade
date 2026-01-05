@@ -253,15 +253,21 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                 ))}
               </div>
               {/* NexSupply Intel Potential */}
-              <div className="mt-3 p-3 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60">
+              <div className="mt-3 p-3 rounded-lg bg-gradient-to-br from-blue-100/90 to-indigo-100/70 border-2 border-blue-300/80 shadow-md">
                 <div className="flex items-start gap-2">
                   <svg className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-[12px] font-semibold text-blue-900 mb-1">NexSupply Intel Potential</p>
+                    <p className="text-[12px] font-bold text-blue-900 mb-1">NexSupply Intel Potential</p>
                     <p className="text-[11px] text-blue-800 leading-relaxed">
-                      Our network indicates 4 alternative manufacturers in this cluster with better MOQ and price tiers. Unlock Blueprint to access.
+                      Our network indicates 4 alternative manufacturers in this cluster with better MOQ and price tiers.{" "}
+                      <span className="inline-flex items-center gap-1 font-semibold">
+                        <svg className="w-3 h-3 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Unlock Blueprint to access
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -320,15 +326,21 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                       ))}
                     </div>
                     {/* NexSupply Intel Potential */}
-                    <div className="mt-2 p-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60">
+                    <div className="mt-2 p-2.5 rounded-lg bg-gradient-to-br from-blue-100/90 to-indigo-100/70 border-2 border-blue-300/80 shadow-md">
                       <div className="flex items-start gap-2">
                         <svg className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         <div className="flex-1">
-                          <p className="text-[11px] font-semibold text-blue-900 mb-0.5">NexSupply Intel Potential</p>
+                          <p className="text-[11px] font-bold text-blue-900 mb-0.5">NexSupply Intel Potential</p>
                           <p className="text-[10px] text-blue-800 leading-relaxed">
-                            Our network indicates 4 alternative manufacturers in this cluster with better MOQ and price tiers. Unlock Blueprint to access.
+                            Our network indicates 4 alternative manufacturers in this cluster with better MOQ and price tiers.{" "}
+                            <span className="inline-flex items-center gap-1 font-semibold">
+                              <svg className="w-3 h-3 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                              Unlock Blueprint to access
+                            </span>
                           </p>
                         </div>
                       </div>

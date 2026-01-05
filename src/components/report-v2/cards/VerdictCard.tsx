@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, AlertCircle, XCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, XCircle, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 interface VerdictCardProps {
   verdict: {
@@ -121,6 +122,25 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
                 {nudge.tipText}
               </p>
             </button>
+          </div>
+        )}
+
+        {/* CTA buttons for NO GO verdict */}
+        {decision === "NO" && (
+          <div className="mt-4 pt-4 border-t border-slate-200 space-y-3">
+            <Link
+              href="/analyze"
+              className="inline-flex items-center justify-center w-full px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Analyze Another Product
+            </Link>
+            <Link
+              href="/reports"
+              className="inline-flex items-center justify-center w-full px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all"
+            >
+              Browse High-Margin Categories
+            </Link>
           </div>
         )}
       </div>

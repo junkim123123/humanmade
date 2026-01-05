@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle, Gift, Check, X } from "lucide-react";
 import { fetchMyCredits, fetchMyCreditTransactions } from "./actions";
 import type { CreditTransaction } from "@/server/actions/credits";
 
@@ -18,6 +18,9 @@ export default function BillingPage() {
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [codeInput, setCodeInput] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeMessage, setCodeMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Convert credits to dollar amount
   const balanceInDollars = balance * CREDIT_VALUE;
@@ -51,6 +54,49 @@ export default function BillingPage() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const handleRedeemCode = async () => {
+    if (!codeInput.trim()) {
+      setCodeMessage({ type: "error", text: "Please enter a code" });
+      return;
+    }
+
+    setCodeLoading(true);
+    setCodeMessage(null);
+
+    try {
+      const response = await fetch("/api/credits/redeem-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: codeInput.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCodeMessage({ type: "success", text: data.message });
+        setCodeInput("");
+        // Reload credits and transactions
+        const [creditsRes, txRes] = await Promise.all([
+          fetchMyCredits(),
+          fetchMyCreditTransactions()
+        ]);
+        if (creditsRes.success) {
+          setBalance(creditsRes.balance || 0);
+        }
+        if (txRes.success) {
+          setTransactions(txRes.transactions || []);
+        }
+      } else {
+        setCodeMessage({ type: "error", text: data.error || "Failed to redeem code" });
+      }
+    } catch (error) {
+      console.error("Failed to redeem code", error);
+      setCodeMessage({ type: "error", text: "Failed to redeem code. Please try again." });
+    } finally {
+      setCodeLoading(false);
+    }
   };
 
   if (loading) {
@@ -114,6 +160,76 @@ export default function BillingPage() {
               </li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      {/* Redeem Code Section */}
+      <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 p-6 mb-8">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-blue-100">
+            <Gift className="w-5 h-5 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-[16px] font-semibold text-slate-900 mb-1">Redeem Code</h3>
+            <p className="text-[13px] text-slate-600">
+              Enter a code to add $45 credit to your account
+            </p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={codeInput}
+              onChange={(e) => {
+                setCodeInput(e.target.value.toUpperCase());
+                setCodeMessage(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !codeLoading) {
+                  handleRedeemCode();
+                }
+              }}
+              placeholder="Enter code (e.g. ATMNX)"
+              className="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all uppercase"
+              disabled={codeLoading}
+            />
+            <button
+              onClick={handleRedeemCode}
+              disabled={codeLoading || !codeInput.trim()}
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {codeLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Gift className="w-4 h-4" />
+                  Redeem
+                </>
+              )}
+            </button>
+          </div>
+          {codeMessage && (
+            <div className={`flex items-center gap-2 p-3 rounded-lg ${
+              codeMessage.type === "success" 
+                ? "bg-emerald-50 border border-emerald-200" 
+                : "bg-red-50 border border-red-200"
+            }`}>
+              {codeMessage.type === "success" ? (
+                <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              ) : (
+                <X className="w-4 h-4 text-red-600 flex-shrink-0" />
+              )}
+              <p className={`text-sm font-medium ${
+                codeMessage.type === "success" ? "text-emerald-800" : "text-red-800"
+              }`}>
+                {codeMessage.text}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
