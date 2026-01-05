@@ -7,9 +7,9 @@ export default function SampleReportPage() {
   return (
     <div className="bg-gray-50 font-sans">
       <PrimaryNav />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-10">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Fruit Gummies Variety Pack (12 count)
@@ -25,9 +25,9 @@ export default function SampleReportPage() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             {/* High-Impact Optimization */}
             <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
               <CardHeader>
@@ -68,7 +68,7 @@ export default function SampleReportPage() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8 mt-8 lg:mt-0">
             {/* Decision Summary */}
             <Card className="shadow-md">
               <CardHeader>

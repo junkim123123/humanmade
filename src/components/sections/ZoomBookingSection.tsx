@@ -1,10 +1,25 @@
 "use client";
 
 import { Calendar, MapPin, Gift, Clock } from "lucide-react";
-import Link from "next/link";
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 export function ZoomBookingSection() {
+  const [showModal, setShowModal] = useState(false);
+  const [contact, setContact] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  // Simulate admin notification (replace with real API call as needed)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setContact("");
+      setSubmitted(false);
+    }, 1500);
+  };
+
   return (
     <section id="zoom-booking" className="bg-gradient-to-b from-white via-blue-50/30 to-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,13 +65,41 @@ export function ZoomBookingSection() {
 
           {/* CTA */}
           <div className="text-center">
-            <Link
-              href="/contact?type=consultation"
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105"
             >
               <Calendar className="w-5 h-5" />
-              Book Your Free Consultation
-            </Link>
+              Book Your Offline Consultation
+            </button>
+            {showModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="bg-white rounded-xl p-8 shadow-2xl w-full max-w-sm relative">
+                  <button className="absolute top-2 right-2 text-slate-400 hover:text-slate-700" onClick={() => setShowModal(false)}>&times;</button>
+                  <h3 className="text-lg font-bold mb-2 text-slate-900">Leave your email or phone</h3>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Email or phone number"
+                      className="w-full border rounded px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      value={contact}
+                      onChange={e => setContact(e.target.value)}
+                      disabled={submitted}
+                    />
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition"
+                      disabled={submitted}
+                    >
+                      {submitted ? "Submitting..." : "Submit"}
+                    </button>
+                  </form>
+                  {submitted && <p className="text-green-600 text-center mt-2">Submitted! We'll contact you soon.</p>}
+                </div>
+              </div>
+            )}
             <p className="mt-4 text-sm text-slate-500">
               Available until March 31st, 2026. Limited spots remaining.
             </p>

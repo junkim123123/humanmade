@@ -146,7 +146,7 @@ export default function HomeDeck() {
                 },
                 {
                   title: "Blueprint ($45)",
-                  description: "$45 is not just a deposit—it's a professional sourcing report purchase. Get 3 optimized factory quotes sourced via our proprietary intelligence network with MOQ & lead times, HS code & tariff analysis, compliance checklist for beginners, and door-to-door logistics execution plan.",
+                  description: "$45 gets you a pro sourcing report: 3 optimized factory quotes, MOQ & lead times, HS code & tariff info, compliance basics, and a door-to-door logistics plan.",
                   color: "purple",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">

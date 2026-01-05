@@ -1,6 +1,16 @@
 "use client";
 
-import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp, CheckCircle2, Camera, MessageSquare, MapPin } from "lucide-react";
+import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp, CheckCircle2, MessageSquare, MapPin } from "lucide-react";
+
+// Simple Document-Check SVG icon
+function DocumentCheckIcon({ className = "w-6 h-6 text-slate-400" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" fill="none" />
+      <path d="M9 12l2 2l4-4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 import { CountUp } from "@/components/animation/CountUp";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
@@ -420,7 +430,7 @@ function SocialProof() {
                   <div className="w-20 h-20 rounded-lg border-2 border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-200">
                     {/* Blurred background pattern to simulate QC photo */}
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:8px_8px] opacity-50"></div>
-                    <Camera className="w-6 h-6 text-slate-400 group-hover/qc:text-blue-500 group-hover/qc:scale-110 transition-all duration-200 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    <DocumentCheckIcon className="w-6 h-6 text-slate-400 group-hover/qc:text-blue-500 group-hover/qc:scale-110 transition-all duration-200 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white text-[9px] px-1.5 py-1 text-center">
                       QC Report
                     </div>

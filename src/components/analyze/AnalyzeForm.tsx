@@ -27,14 +27,9 @@ interface AnalyzeFormProps {
 export function AnalyzeForm({ mode }: AnalyzeFormProps) {
   const router = useRouter();
   const uploadRef = useRef<ThreeImageUploadHandle>(null);
-  const [unitSystem, setUnitSystem] = useState<"imperial" | "metric">("imperial");
   const [form, setForm] = useState({
     ...defaultValues,
-    shelfPrice: "",
-    weight: "", // in lb (imperial) or kg (metric)
-    length: "", // in in (imperial) or cm (metric)
-    width: "",  // in in (imperial) or cm (metric)
-    height: "", // in in (imperial) or cm (metric)
+    shelfPrice: ""
   });
   const [files, setFiles] = useState<{ 
     product: File | null; 
@@ -88,42 +83,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     return !!files.product; // Only product photo is required
   }, [files.product]);
 
-  // Unit conversion utilities
-  const convertToSI = (value: string, type: "weight" | "length") => {
-    if (!value) return "";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "";
-    if (unitSystem === "imperial") {
-      // lb to kg or in to cm
-      return type === "weight" ? (num * 0.453592).toFixed(3) : (num * 2.54).toFixed(2);
-    }
-    return num.toFixed(type === "weight" ? 3 : 2);
-  };
-
-  const handleUnitToggle = (newUnit: "imperial" | "metric") => {
-    setUnitSystem(newUnit);
-    // Convert existing values
-    setForm((prev) => {
-      const conversionFactor = newUnit === "imperial" ? 1 / 0.453592 : 0.453592;
-      const lengthFactor = newUnit === "imperial" ? 1 / 2.54 : 2.54;
-      
-      return {
-        ...prev,
-        weight: prev.weight 
-          ? (parseFloat(prev.weight) * conversionFactor).toFixed(2)
-          : "",
-        length: prev.length 
-          ? (parseFloat(prev.length) * lengthFactor).toFixed(2)
-          : "",
-        width: prev.width 
-          ? (parseFloat(prev.width) * lengthFactor).toFixed(2)
-          : "",
-        height: prev.height 
-          ? (parseFloat(prev.height) * lengthFactor).toFixed(2)
-          : "",
-      };
-    });
-  };
+  // Removed unit conversion and toggle logic
 
   const handleSubmit = async () => {
     if (loading) return; // Already submitting, ignore duplicate clicks
@@ -173,13 +133,6 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     // App mode: run analysis via API
     setLoading(true);
     try {
-      const payloadForm = { ...form };
-      // Autofill advanced shipping defaults when missing
-      if (!payloadForm.weight) payloadForm.weight = unitSystem === "imperial" ? "1.1" : "0.5";
-      if (!payloadForm.length) payloadForm.length = unitSystem === "imperial" ? "10" : "25";
-      if (!payloadForm.width) payloadForm.width = unitSystem === "imperial" ? "6" : "15";
-      if (!payloadForm.height) payloadForm.height = unitSystem === "imperial" ? "4" : "10";
-
       const formData = new FormData();
       formData.append("image", parsed.data.front as File);
       if (parsed.data.barcode) formData.append("barcode", parsed.data.barcode as File);
@@ -190,10 +143,6 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       if (parsed.data.shippingMode) formData.append("shippingMode", parsed.data.shippingMode);
       if (parsed.data.linkUrl) formData.append("linkUrl", parsed.data.linkUrl);
       if (form.shelfPrice) formData.append("shelfPrice", form.shelfPrice);
-      if (payloadForm.weight) formData.append("weight", convertToSI(payloadForm.weight, "weight"));
-      if (payloadForm.length) formData.append("length", convertToSI(payloadForm.length, "length"));
-      if (payloadForm.width) formData.append("width", convertToSI(payloadForm.width, "length"));
-      if (payloadForm.height) formData.append("height", convertToSI(payloadForm.height, "length"));
 
       const response = await fetch("/api/analyze", {
         method: "POST",
@@ -470,7 +419,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-6 lg:grid-cols-[65fr_35fr] lg:gap-8">
+      <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[65fr_35fr]">
         {/* Left: Main Workflow Area (65%) */}
         <div className="space-y-6">
           {loading ? (
@@ -523,7 +472,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         </div>
 
         {/* Right: Live Margin Calculator Sidebar (35%) - Sticky */}
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        <div className="lg:sticky lg:top-6 lg:self-start mt-8 lg:mt-0">
           {apiError && (
             <div className="p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-sm text-red-700">
               {apiError}

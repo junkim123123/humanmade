@@ -67,7 +67,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                       Based on FOB value. Minimum fee $350 applies.
                     </p>
                     <p className="text-xs text-blue-700 bg-blue-50/80 border border-blue-200 rounded-lg px-3 py-2 leading-relaxed">
-                      💡 <span className="font-semibold">Optimization Advantage:</span> Our optimization engine typically finds $3 - $5 more in per-unit savings than public Alibaba listings, more than covering our service fee.
+                      <span className="font-semibold">Optimization Advantage:</span> Our optimization engine typically finds $3 - $5 more in per-unit savings than public Alibaba listings, more than covering our service fee.
                     </p>
                   </div>
                 </div>

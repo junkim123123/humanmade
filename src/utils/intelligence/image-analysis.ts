@@ -42,14 +42,17 @@ export async function analyzeProductImage(
   const model = genAI.getGenerativeModel({ model: modelName });
 
   const prompt = `
-Analyze this product image and extract the following information:
+Analyze this product image and infer the following information directly from the image (do NOT rely on user input):
 1. Product name (be specific and descriptive)
 2. Detailed description
 3. Product category
-4. Key attributes (material, color, size, dimensions, etc.)
-5. Relevant keywords for supplier matching
+4. Key attributes (material, color, size, weight, dimensions, etc. — estimate if not explicit)
+5. Estimated weight (in grams or kg, inferred visually)
+6. Estimated dimensions (L x W x H in cm, inferred visually)
+7. Estimated retail price (in USD, if possible, inferred visually)
+8. Relevant keywords for supplier matching
 
-Return the information in a structured format that can be used for supplier matching and cost calculation.
+Return the information in a structured JSON format that can be used for supplier matching and cost calculation. If you are unsure, provide your best estimate based on the image only.
 `;
 
   try {

@@ -397,8 +397,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
 
   return (
     <div className="space-y-6">
-      {/* Hero Upload Section - 60:40 Layout */}
-      <div className="grid gap-6 lg:grid-cols-[60fr_40fr]">
+      {/* Hero Upload Section - Responsive Layout */}
+      <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[60fr_40fr]">
         {/* Main Dropzone (60%) */}
         <div className="space-y-3">
           <div>
@@ -407,8 +407,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
           </div>
           {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true, "", false)}
         </div>
-        
-        {/* Sub Dropzone (40%) - Stacked */}
+        {/* Sub Dropzone (40%) - Stacked, below on mobile */}
         <div className="space-y-4">
           <div>
             <h3 className="text-sm font-semibold text-slate-700 mb-3">Optional</h3>
