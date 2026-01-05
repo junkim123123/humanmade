@@ -158,7 +158,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         }, 2000); // Poll every 2 seconds
           toast.error("Existing report ID is invalid. Starting new analysis...");
           setLoading(false);
-          return;
+          // Do not continue further after error
         }
         
         // Verify existing report exists and user owns it before redirecting
@@ -188,7 +188,17 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   });
                   toast.error("This report belongs to another account. Starting fresh analysis...");
                   setLoading(false);
-                  return;
+                  // Do not continue further after error
+                  // Instead of return, use else to prevent further execution
+                } else {
+                  console.log("[AnalyzeForm] Existing report verified and ownership confirmed, redirecting...");
+                  if (data.status === "processing" || data.status === "queued") {
+                    toast.info(data.message || "Analysis already in progress. Redirecting...");
+                  } else if (data.status === "completed") {
+                    toast.info("Analysis already completed. Redirecting to existing report.");
+                  }
+                  router.push(`/reports/${existingReportId}/v2`);
+                }
                 }
               }
               
@@ -199,31 +209,25 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 toast.info("Analysis already completed. Redirecting to existing report.");
               }
               router.push(`/reports/${existingReportId}/v2`);
-              return;
+              // Do not continue further after redirect
             } else if (verifyData?.ok === false) {
               // Explicit error from API
               if (verifyData.errorCode === "FORBIDDEN" || verifyData.errorCode === "AUTH_REQUIRED") {
                 console.error("[AnalyzeForm] Access forbidden to existing report:", verifyData.errorCode);
                 toast.error("Cannot access this report. Starting fresh analysis...");
                 setLoading(false);
-                return;
+                // Do not continue further after error
               }
             }
           }
           
           // If verification failed, the report might not exist - start new analysis
-          console.error("[AnalyzeForm] Existing report verification failed, starting new analysis:", {
-            reportId: existingReportId,
-            status: verifyRes.status,
-          });
-          toast.error("Existing report not found. Please try again.");
-          setLoading(false);
-          return;
+          console.error("[AnalyzeForm] Existing report verification failed, starting new analysis:", { reportId: existingReportId, status: verifyRes.status }); toast.error("Existing report not found. Please try again."); setLoading(false);
         } catch (verifyError) {
           console.error("[AnalyzeForm] Error verifying existing report:", verifyError);
           toast.error("Error verifying report. Please try again.");
           setLoading(false);
-          return;
+          // Do not continue further after error
         }
       }
 

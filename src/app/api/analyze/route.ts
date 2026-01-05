@@ -149,8 +149,8 @@ export async function POST(request: Request) {
       shippingCost: parsedShippingCost,
       fee: parsedFee,
       imageSize: imageFile.size,
-      barcodeSize: barcodeFile.size,
-      labelSize: labelFile.size,
+      barcodeSize: barcodeFile?.size,
+      labelSize: labelFile?.size,
       hasExtra1: !!extra1File,
       hasExtra2: !!extra2File,
     });
