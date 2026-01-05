@@ -15,6 +15,14 @@ export function normalizeReport(report: any): any {
   // Create a normalized copy
   const normalized = { ...report };
 
+  // Ensure pipeline_result and scenarios exist
+  if (!normalized.pipeline_result) {
+    normalized.pipeline_result = {};
+  }
+  if (!normalized.pipeline_result.scenarios) {
+    normalized.pipeline_result.scenarios = [];
+  }
+
   // Normalize supplier matches
   const matches = getSupplierMatches(normalized);
   if (matches.length > 0) {
