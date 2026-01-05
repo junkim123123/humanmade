@@ -22,6 +22,9 @@ import OriginSimulator from "./cards/OriginSimulator";
 
 // --- New DecisionCard for top of report ---
 function DecisionCard({ report }: { report: Report }) {
+  const [shelfPriceInput, setShelfPriceInput] = useState<string>("");
+  const [shelfPriceCommitted, setShelfPriceCommitted] = useState<number | null>(null);
+
   // Delivered cost logic
   const costRange = report.baseline?.costRange || { conservative: { totalLandedCost: 0 }, standard: { totalLandedCost: 0 } };
   const bestEstimate = costRange.standard?.totalLandedCost || 0;
@@ -33,6 +36,37 @@ function DecisionCard({ report }: { report: Report }) {
   if (bestEstimate > maxCost) maxCost = bestEstimate;
   if (minCost > maxCost) maxCost = minCost;
   const normalized = normalizeRange({ min: minCost, mid: bestEstimate, max: maxCost }, "DecisionCard");
+
+  // Shelf price and margin calculation
+  const reportAny = report as any;
+  const existingShelfPrice = reportAny.targetSellPrice || (reportAny._proof?.inputStatus?.shelfPrice) || null;
+  const targetSellPrice = shelfPriceCommitted !== null ? shelfPriceCommitted : existingShelfPrice;
+
+  const handleShelfPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShelfPriceInput(e.target.value);
+  };
+
+  const handleShelfPriceBlur = () => {
+    const cleaned = shelfPriceInput.trim().replace(/^\$/, "").replace(/,/g, "");
+    const parsed = parseFloat(cleaned);
+    if (!isNaN(parsed) && parsed > 0) {
+      setShelfPriceCommitted(parsed);
+    } else if (cleaned === "") {
+      setShelfPriceCommitted(null);
+      setShelfPriceInput("");
+    }
+  };
+
+  const handleShelfPriceKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleShelfPriceBlur();
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+  // Calculate margin if shelf price exists
+  const profitPerUnit = targetSellPrice && bestEstimate > 0 ? targetSellPrice - bestEstimate : null;
+  const marginPercent = profitPerUnit && targetSellPrice ? ((profitPerUnit / targetSellPrice) * 100) : null;
 
   // Evidence badge logic
   const { strength, reason: evidenceSummary } = computeDataQuality(report);
@@ -107,6 +141,55 @@ function DecisionCard({ report }: { report: Report }) {
           ))}
         </div>
       )}
+      {/* Shelf Price Input & Margin Calculator */}
+      <div className="px-6 py-4 border-t border-slate-100 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="flex-1">
+            <label htmlFor="shelf-price-input" className="block text-xs font-semibold text-slate-700 mb-2">
+              선반 가격 (Shelf Price)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">$</span>
+              <input
+                id="shelf-price-input"
+                type="text"
+                inputMode="decimal"
+                placeholder={existingShelfPrice ? existingShelfPrice.toFixed(2) : "e.g. 14.99"}
+                value={shelfPriceInput !== "" ? shelfPriceInput : (targetSellPrice ? targetSellPrice.toFixed(2) : "")}
+                onChange={handleShelfPriceChange}
+                onBlur={handleShelfPriceBlur}
+                onKeyDown={handleShelfPriceKeyDown}
+                className="w-full pl-7 pr-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all bg-white"
+              />
+            </div>
+            <p className="text-xs text-slate-500 mt-1.5">제품 판매 가격을 입력하시면 마진을 계산해드립니다</p>
+          </div>
+
+          {/* Margin Display */}
+          {targetSellPrice && profitPerUnit !== null && marginPercent !== null && (
+            <div className="flex-shrink-0 sm:w-48">
+              <div className="bg-white rounded-lg border-2 border-emerald-200 p-4 shadow-sm">
+                <p className="text-xs font-semibold text-slate-600 mb-2">예상 마진</p>
+                <div className="space-y-1.5">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-xs text-slate-500">단가당 이익:</span>
+                    <span className={`text-lg font-bold ${profitPerUnit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {profitPerUnit >= 0 ? '+' : ''}${profitPerUnit.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2 pt-1.5 border-t border-slate-100">
+                    <span className="text-xs text-slate-500">마진률:</span>
+                    <span className={`text-xl font-bold ${marginPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {marginPercent >= 0 ? '+' : ''}{marginPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-amber-50/50 border-t border-amber-100">
         <div className="flex gap-2">
           <button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full px-5 py-2.5 text-[14px] font-semibold border border-amber-400 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">

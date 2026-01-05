@@ -357,10 +357,10 @@ function SocialProof() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
-            className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden"
+            className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden hover:shadow-md transition-shadow duration-200 group/card"
           >
             {/* Verified by NexSupply OS Seal */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 backdrop-blur-sm z-10">
+            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 backdrop-blur-sm z-10 group-hover/card:border-blue-300 transition-colors duration-200">
               <BadgeCheck className="w-3.5 h-3.5 text-blue-600" />
               <span className="text-[10px] font-bold text-blue-900">Verified by NexSupply OS</span>
             </div>
@@ -422,14 +422,19 @@ function SocialProof() {
               
               {/* QC Inspection Photo / Sourcing Report Preview */}
               {testimonial.qcPhoto && (
-                <div className="flex-shrink-0">
-                  <div className="w-20 h-20 rounded-lg border-2 border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden group cursor-pointer hover:border-blue-300 transition-colors">
+                <div className="flex-shrink-0 relative group/qc">
+                  <div className="w-20 h-20 rounded-lg border-2 border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-200">
                     {/* Blurred background pattern to simulate QC photo */}
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:8px_8px] opacity-50"></div>
-                    <Camera className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    <Camera className="w-6 h-6 text-slate-400 group-hover/qc:text-blue-500 group-hover/qc:scale-110 transition-all duration-200 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white text-[9px] px-1.5 py-1 text-center">
                       QC Report
                     </div>
+                  </div>
+                  {/* Tooltip on hover */}
+                  <div className="absolute right-0 bottom-full mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover/qc:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20">
+                    View report excerpt
+                    <div className="absolute top-full right-4 -mt-1 w-2 h-2 bg-slate-900 rotate-45"></div>
                   </div>
                 </div>
               )}
@@ -441,7 +446,7 @@ function SocialProof() {
       {/* Discord Community Link */}
       <div className="mt-8 text-center">
         <a
-          href="https://discord.gg/nexsupply"
+          href="https://discord.gg/GT2Zvx6C8g"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
