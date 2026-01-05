@@ -72,7 +72,7 @@ export function AdminNav({ badgeCounts }: AdminNavProps) {
           </div>
           <div className="flex items-center gap-4">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               className="text-slate-300 hover:text-white hover:bg-slate-800"
               asChild

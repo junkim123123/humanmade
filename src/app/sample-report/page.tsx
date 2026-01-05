@@ -37,7 +37,7 @@ export default function SampleReportPage() {
                 <p className="text-lg mb-4">
                   Leverage NexSupply's internal network data to find factories with 15-20% higher margins than public data matches.
                 </p>
-                <Button variant="secondary" className="bg-white/20 hover:bg-white/30">
+                <Button variant="outline" className="bg-white/20 hover:bg-white/30">
                   Unlock Blueprint
                 </Button>
               </CardContent>

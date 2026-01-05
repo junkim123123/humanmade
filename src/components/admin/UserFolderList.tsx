@@ -60,8 +60,8 @@ export default function UserFolderList({
               <CardDescription>{user.email}</CardDescription>
             </div>
             <Button
-              size="icon"
-              variant="ghost"
+              size="sm"
+              variant="outline"
               onClick={() =>
                 setOpenUserId(openUserId === user.id ? null : user.id)
               }

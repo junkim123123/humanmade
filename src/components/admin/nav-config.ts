@@ -10,6 +10,7 @@ export interface AdminNavSection {
   label: string;
   href: string;
   items?: AdminNavItem[];
+  badgeKey?: AdminNavBadgeKey;
 }
 
 export const adminNavSections: AdminNavSection[] = [
