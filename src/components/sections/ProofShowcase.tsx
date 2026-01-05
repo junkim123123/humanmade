@@ -72,24 +72,24 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
           {products.map((product, index) => (
             <FadeUp key={product.id} delay={index * 0.1}>
               <motion.div
-                className={`group relative rounded-2xl border-2 overflow-hidden p-6 h-full ${
+                className={`group relative rounded-2xl border border-slate-200 shadow-md overflow-hidden p-4 sm:p-6 h-full ${
                   product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                 }`}
-                style={{ minHeight: '440px' }} // 기존 높이 약 400px 기준, 10% 증가
-                whileHover={{ scale: 1.03, y: -4 }}
+                style={{ minHeight: '500px' }} // 더 시원하게
+                whileHover={{ scale: 1.04, y: -6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
                 {/* Blurred Circle Gradient Background */}
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 blur-3xl"
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 blur-3xl pointer-events-none"
                   style={{
                     background: product.colorClass?.includes("pink") ? "linear-gradient(135deg, #f472b6, #ec4899)" :
                                product.colorClass?.includes("blue") ? "linear-gradient(135deg, #60a5fa, #3b82f6)" :
                                "linear-gradient(135deg, #a78bfa, #8b5cf6)"
                   }}
                 />
-                
-                {/* Product Visual Area - More compact */}
-                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bg-white/40 backdrop-blur-sm">
+                {/* Product Visual Area - 더 크게 */}
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-white/50 backdrop-blur-sm shadow-sm"
+                  style={{ height: '300px' }}>
                   {product.image ? (
                     <img
                       src={product.image.split('/').map(segment => encodeURIComponent(segment)).join('/')}
@@ -129,21 +129,18 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                     </div>
                   )}
                 </div>
-
                 {/* Category Tag */}
-                <div className="mb-3 relative z-10">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/80 backdrop-blur-sm text-slate-700 border border-slate-200/50">
+                <div className="mb-2 relative z-10">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-slate-700 border border-slate-200/50 shadow-sm">
                     {product.category}
                   </span>
                 </div>
-
                 {/* Product Name */}
-                <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 relative z-10">
+                <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2 relative z-10">
                   {product.name}
                 </h3>
-
                 {/* Key Metric */}
-                <p className="text-sm font-medium text-slate-500 relative z-10">
+                <p className="text-base font-medium text-slate-500 relative z-10">
                   {product.metric}
                 </p>
               </motion.div>

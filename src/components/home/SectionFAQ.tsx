@@ -40,35 +40,34 @@ export const SectionFAQ = forwardRef<HTMLDivElement, SectionFAQProps>(
       <div ref={ref} className="landing-container py-12 lg:py-16">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <h2 className="text-[24px] font-bold text-center text-slate-900 sm:text-[28px]">
+          <h2 className="text-[28px] font-bold text-center text-slate-900 sm:text-[34px]" style={{ fontSize: '34px' }}>
             Questions
           </h2>
 
           {/* FAQ Accordion */}
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white divide-y divide-slate-100">
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100" style={{ fontSize: '20px' }}>
             {faqs.map((faq, idx) => (
               <div key={faq.q}>
                 <button
                   type="button"
                   onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
-                  className="flex w-full items-center justify-between gap-4 p-4 text-left transition-colors hover:bg-slate-50"
+                  className="flex w-full items-center justify-between gap-4 p-6 text-left transition-colors hover:bg-slate-50 text-[20px] font-medium"
                   aria-expanded={openIndex === idx}
                 >
-                  <span className="text-[14px] font-medium text-slate-900">{faq.q}</span>
+                  <span className="text-[20px] font-semibold text-slate-900">{faq.q}</span>
                   <ChevronDown 
-                    className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${
+                    className={`h-6 w-6 shrink-0 text-slate-400 transition-transform ${
                       openIndex === idx ? "rotate-180" : ""
                     }`} 
                   />
                 </button>
-                
                 <div
                   className={`overflow-hidden transition-all duration-200 ${
-                    openIndex === idx ? "max-h-40" : "max-h-0"
+                    openIndex === idx ? "max-h-60" : "max-h-0"
                   }`}
                 >
-                  <div className="px-4 pb-4">
-                    <p className="text-[13px] text-slate-600">{faq.a}</p>
+                  <div className="px-6 pb-6">
+                    <p className="text-[18px] text-slate-600">{faq.a}</p>
                   </div>
                 </div>
               </div>

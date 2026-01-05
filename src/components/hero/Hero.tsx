@@ -117,10 +117,9 @@ function FloatingUICard() {
 
 export default function Hero() {
   return (
-    <div className="relative flex flex-col lg:flex-row items-center justify-between min-h-[90vh] bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden">
+    <div className="relative flex flex-col lg:flex-row items-center justify-between min-h-[90vh] bg-gradient-to-br from-slate-50 via-slate-50 to-blue-50 overflow-hidden">
       {/* Animated Mesh Gradient Background */}
       <MeshGradient />
-      
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 sm:py-16 lg:py-24">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 lg:gap-16">
           {/* Left Column - Copy */}
@@ -151,7 +150,7 @@ export default function Hero() {
                 Calculate My Savings (Free)
               </Link>
               <Link
-                href="/sample-report"
+                href="/reports/sample-report/v2"
                 className="inline-flex items-center text-slate-600 font-medium text-sm hover:text-slate-900 transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-slate-500"
               >
                 View Sample AI Report
