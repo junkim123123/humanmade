@@ -130,7 +130,7 @@ export default function Hero() {
               Sourcing Intelligence OS
             </p>
 
-            {/* Headline - Premium sizing */}
+            {/* Headline - Premium sizing - Updated to concise messaging */}
             <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
               Triple Your Margin.
               <br />
