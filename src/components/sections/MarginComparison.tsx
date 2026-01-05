@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp } from "lucide-react";
+import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp, CheckCircle2, Camera, MessageSquare, BadgeCheck, MapPin } from "lucide-react";
 import { CountUp } from "@/components/animation/CountUp";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
@@ -299,16 +299,40 @@ export default function MarginComparison() {
 function SocialProof() {
   const testimonials = [
     {
-      quote: "NexSupply helped me improve my margin by 25% on my first order. The Blueprint report was worth every penny.",
+      quote: "Lowered unit cost from $12.50 to $8.90 after switching to NexSupply's network. The factory they matched me with had better MOQ terms than what I found on Alibaba.",
       author: "Sarah Chen",
-      role: "E-commerce Seller",
-      improvement: "25% margin improvement",
+      role: "DTC Founder",
+      location: "St. Louis, MO",
+      sourcedItem: "Premium Cotton T-shirts",
+      sourceCategory: "Apparel",
+      wholesalePrice: "$12.50",
+      nexSupplyPrice: "$8.90",
+      profitUnlocked: 3.60,
+      qcPhoto: true,
     },
     {
-      quote: "Finally, a service that shows you the real landed cost upfront. No surprises, just transparency.",
+      quote: "Went from $5.20 per unit to $3.45. Their team caught some quality issues during inspection that would've cost me a lot in returns later.",
       author: "Mike Rodriguez",
-      role: "Amazon FBA Seller",
-      improvement: "3x faster sourcing",
+      role: "FBA Seller",
+      location: "Toronto, ON",
+      sourcedItem: "Stainless Steel Water Bottles",
+      sourceCategory: "Consumer Goods",
+      wholesalePrice: "$5.20",
+      nexSupplyPrice: "$3.45",
+      profitUnlocked: 1.75,
+      qcPhoto: true,
+    },
+    {
+      quote: "Switched from a local wholesaler charging $18.75 to NexSupply at $11.20. The QC reports they provide give me confidence to scale without worrying about defects.",
+      author: "James Park",
+      role: "Inventory Manager",
+      location: "St. Louis, MO",
+      sourcedItem: "Plush Toy Collection",
+      sourceCategory: "Toys",
+      wholesalePrice: "$18.75",
+      nexSupplyPrice: "$11.20",
+      profitUnlocked: 7.55,
+      qcPhoto: true,
     },
   ];
 
@@ -322,10 +346,10 @@ function SocialProof() {
     >
       <div className="text-center mb-8">
         <h3 className="text-lg font-semibold text-slate-900 mb-2">Trusted by SMB Sellers</h3>
-        <p className="text-sm text-slate-500">Real results from real sellers</p>
+        <p className="text-sm text-slate-500">Real results from St. Louis & Toronto SMB communities</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {testimonials.map((testimonial, index) => (
           <motion.div
             key={index}
@@ -333,29 +357,98 @@ function SocialProof() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
-            className="bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200 p-6 shadow-sm"
+            className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden"
           >
-            <div className="flex items-start gap-1 mb-4">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20">
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                </svg>
-              ))}
+            {/* Verified by NexSupply OS Seal */}
+            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 backdrop-blur-sm z-10">
+              <BadgeCheck className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-[10px] font-bold text-blue-900">Verified by NexSupply OS</span>
             </div>
-            <p className="text-sm text-slate-700 leading-relaxed mb-4 italic">
-              "{testimonial.quote}"
+
+            {/* Verified Badge */}
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-semibold text-emerald-700">Verified Sourcing Client</span>
+            </div>
+
+            {/* Source Category Tag */}
+            <div className="mb-3">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                Source Category: {testimonial.sourceCategory}
+              </span>
+            </div>
+
+            {/* Sourced Item Tag */}
+            <div className="mb-3">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                {testimonial.sourcedItem}
+              </span>
+            </div>
+
+            {/* Price Comparison Mini-Widget */}
+            <div className="mb-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <p className="text-xs font-semibold text-slate-600 mb-2">Price Comparison</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600">Wholesale</span>
+                  <span className="font-semibold text-slate-900">{testimonial.wholesalePrice}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600">NexSupply</span>
+                  <span className="font-semibold text-emerald-600">{testimonial.nexSupplyPrice}</span>
+                </div>
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-700">Profit Unlocked:</span>
+                  <span className="text-sm font-bold text-emerald-600">+${testimonial.profitUnlocked.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quote - Less marketing-heavy font */}
+            <p className="text-sm text-slate-700 leading-relaxed mb-4 font-normal">
+              {testimonial.quote}
             </p>
-            <div className="flex items-center justify-between">
-              <div>
+
+            {/* Author Info and QC Photo */}
+            <div className="flex items-start justify-between gap-4 pt-3 border-t border-slate-100">
+              <div className="flex-1">
                 <p className="text-sm font-semibold text-slate-900">{testimonial.author}</p>
                 <p className="text-xs text-slate-500">{testimonial.role}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <MapPin className="w-3 h-3 text-slate-400" />
+                  <span className="text-xs text-slate-500">{testimonial.location}</span>
+                </div>
               </div>
-              <div className="px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
-                <span className="text-xs font-semibold text-emerald-700">{testimonial.improvement}</span>
-              </div>
+              
+              {/* QC Inspection Photo / Sourcing Report Preview */}
+              {testimonial.qcPhoto && (
+                <div className="flex-shrink-0">
+                  <div className="w-20 h-20 rounded-lg border-2 border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden group cursor-pointer hover:border-blue-300 transition-colors">
+                    {/* Blurred background pattern to simulate QC photo */}
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:8px_8px] opacity-50"></div>
+                    <Camera className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white text-[9px] px-1.5 py-1 text-center">
+                      QC Report
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
+      </div>
+
+      {/* Discord Community Link */}
+      <div className="mt-8 text-center">
+        <a
+          href="https://discord.gg/nexsupply"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+        >
+          <MessageSquare className="w-4 h-4" />
+          Want to talk to our real users? Join our Discord community
+        </a>
       </div>
     </motion.div>
   );

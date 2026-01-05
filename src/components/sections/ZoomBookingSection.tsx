@@ -34,7 +34,7 @@ export function ZoomBookingSection() {
             <div className="text-center p-4 rounded-xl bg-blue-50/50">
               <MapPin className="w-6 h-6 text-blue-600 mx-auto mb-2" />
               <h3 className="font-semibold text-slate-900 mb-1">St. Louis & Toronto</h3>
-              <p className="text-sm text-slate-600">In-person or Zoom meetings</p>
+                <p className="text-sm text-slate-600">In-person or virtual meetings</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-emerald-50/50">
               <Gift className="w-6 h-6 text-emerald-600 mx-auto mb-2" />

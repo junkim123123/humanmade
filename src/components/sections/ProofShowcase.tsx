@@ -16,30 +16,33 @@ interface ProductCard {
   icon?: React.ReactNode;
 }
 
-// Sample product data - can be replaced with real data later
+// Real product examples with actual photos
 const sampleProducts: ProductCard[] = [
   {
     id: "1",
     name: "Fruit Lover Marshmallow",
-    metric: "Estimated $0.42 saved per unit",
+    metric: "Optimized sourcing via network intelligence",
     category: "Confectionery",
     colorClass: "bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200",
+    image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
     icon: <Candy className="w-16 h-16 text-rose-500" />,
   },
   {
     id: "2",
-    name: "Plush Toy Collection",
-    metric: "Lead time cut by 2 weeks",
+    name: "Survival Dart Game",
+    metric: "Data-driven factory matching",
     category: "Toys",
     colorClass: "bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200",
+    image: "/product-photos/$0.5 장난감/mmexport1758762530965.jpg",
     icon: <ToyBrick className="w-16 h-16 text-blue-600" />,
   },
   {
     id: "3",
-    name: "Assorted Jelly Snacks",
-    metric: "3 vetted quotes in 5 days",
+    name: "3D Jelly Snacks",
+    metric: "Network-optimized quotes delivered",
     category: "Snacks",
     colorClass: "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200",
+    image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
     icon: <Cookie className="w-16 h-16 text-purple-600" />,
   },
 ];
@@ -87,13 +90,11 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                 {/* Product Visual Area - More compact */}
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bg-white/40 backdrop-blur-sm">
                   {product.image ? (
-                    <Image
-                      src={product.image}
+                    <img
+                      src={product.image.split('/').map(segment => encodeURIComponent(segment)).join('/')}
                       alt={product.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover"
-                      loading="lazy"
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? "eager" : "lazy"}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center relative">
