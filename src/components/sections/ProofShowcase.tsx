@@ -75,6 +75,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                 className={`group relative rounded-2xl border-2 overflow-hidden p-6 h-full ${
                   product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                 }`}
+                style={{ minHeight: '440px' }} // 기존 높이 약 400px 기준, 10% 증가
                 whileHover={{ scale: 1.03, y: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
@@ -152,7 +153,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
 
         {/* Proof CTA Section */}
         <FadeUp>
-          <div className="text-center pt-12 border-t border-slate-200">
+          <div className="text-center pt-12">
             <Link
               href="/proof"
               className="inline-flex items-center gap-2 text-base font-semibold text-slate-900 hover:text-slate-700 transition-colors mb-3"
