@@ -117,8 +117,8 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
   return (
     <>
-      <div ref={headerRef} className="bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={headerRef} className="bg-white/95 backdrop-blur-sm border-b border-slate-200/80 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Row 1: Back link */}
           <div className="py-3">
             <Link
@@ -133,7 +133,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           {/* Row 2: Product Info */}
           <div className="pb-4">
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-[24px] font-bold text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
                 {report.productName}
               </h1>
               {/* V2 Badge - visible marker to confirm correct renderer (dev only) */}
@@ -159,8 +159,8 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
       </div>
 
       {/* Sticky Bottom CTA */}
-      <div className="sticky bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white shadow-lg backdrop-blur-sm bg-white/95">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="sticky bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 backdrop-blur-md shadow-lg">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
               <button

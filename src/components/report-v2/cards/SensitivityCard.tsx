@@ -23,7 +23,7 @@ export default function SensitivityCard({ sensitivity }: SensitivityCardProps) {
   const { scenarios } = sensitivity;
   
   return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="px-6 py-5 border-b border-slate-100">
         <h3 className="text-[16px] font-semibold text-slate-900">What changes your profit the most</h3>
         <p className="text-[13px] text-slate-500 mt-1">Sensitivity analysis based on key assumptions</p>

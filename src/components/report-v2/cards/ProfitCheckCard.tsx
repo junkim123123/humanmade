@@ -133,7 +133,7 @@ export default function ProfitCheckCard({ report }: ProfitCheckCardProps) {
   // If no committed price, show input form
   if (!targetSellPrice) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
         <div className="flex items-center gap-2 mb-4">
           <DollarSign className="w-5 h-5 text-green-600" />
           <h3 className="font-semibold text-slate-900">Profit check</h3>
@@ -183,7 +183,7 @@ export default function ProfitCheckCard({ report }: ProfitCheckCardProps) {
   const totalProfit = profit * selectedQuantity;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <DollarSign className="w-5 h-5 text-green-600" />

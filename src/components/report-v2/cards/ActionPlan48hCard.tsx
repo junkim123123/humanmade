@@ -13,7 +13,7 @@ export default function ActionPlan48hCard({ actionPlan }: ActionPlan48hCardProps
   const { today, tomorrow } = actionPlan;
   
   return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="px-6 py-5 border-b border-slate-100">
         <h3 className="text-[16px] font-semibold text-slate-900">Next 48 hours</h3>
         <p className="text-[13px] text-slate-500 mt-1">Action plan to move forward</p>

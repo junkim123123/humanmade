@@ -52,7 +52,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
   if (!matches || matches.length === 0) {
     // Show empty state message so the section exists
     return (
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
         <div className="px-6 py-5 border-b border-slate-100">
           <h3 className="text-[16px] font-semibold text-slate-900">Public Trade Data Matches</h3>
         </div>

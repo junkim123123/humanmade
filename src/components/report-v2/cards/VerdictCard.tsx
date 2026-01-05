@@ -43,13 +43,25 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
       bgColor: "bg-red-50",
       label: "No Go",
     },
+    VOLUME_SENSITIVE: {
+      icon: AlertCircle,
+      color: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      bgColor: "bg-yellow-50",
+      label: "Volume Sensitive",
+    },
+    REQUIRES_VERIFICATION: {
+      icon: AlertCircle,
+      color: "bg-blue-100 text-blue-700 border-blue-200",
+      bgColor: "bg-blue-50",
+      label: "Requires Verification",
+    },
   };
   
   const config = decisionConfig[decision];
   const Icon = config.icon;
   
   return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="px-6 py-5 border-b border-slate-100">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-[16px] font-semibold text-slate-900">Verdict</h3>

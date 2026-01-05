@@ -130,6 +130,9 @@ function ProductImage({
           }}
         />
       )}
+    </div>
+  );
+}
 
 // Simple Price Comparison Card (2D Fintech Style)
 function PriceComparisonCard() {

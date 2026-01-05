@@ -85,17 +85,17 @@ function DecisionCard({ report }: { report: Report }) {
   if (inputStatus.boxSizeDefaultUsed) missingInputs.push("Box size default used");
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="px-6 py-5 border-b border-slate-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-[16px] font-semibold text-slate-900 mb-1">Decision</h3>
           <p className="text-[12px] text-slate-500 mb-2">Initial Intelligence Draft. Our Research Engine will now apply proprietary data design to find the absolute floor price among verified partners.</p>
           <div className="flex flex-col gap-2 mb-1">
-            <div className="flex items-center gap-3">
-              <span className="text-[28px] font-bold text-slate-900 tracking-tight">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
                 ${bestEstimate.toFixed(2)}
               </span>
-              <span className="text-[13px] text-slate-500">per unit</span>
+              <span className="text-sm text-slate-500">per unit</span>
             </div>
             <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
               <p className="text-[13px] font-semibold text-amber-800 mb-1">
@@ -263,10 +263,10 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   const decisionSummary = (reportAny._decisionSummary || reportAny.data?._decisionSummary) as any;
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* IP/Brand Licensing Alert */}
       {hasIPKeyword && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
           <div className="flex items-start gap-3">
             <span className="text-xl">⚠️</span>
             <div className="flex-1">
@@ -302,7 +302,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
         </>
       ) : (
         // Fallback when decision summary is missing
-        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
           <div className="px-6 py-5">
             <h3 className="text-[16px] font-semibold text-slate-900 mb-2">Decision Summary</h3>
             <p className="text-[13px] text-slate-600 mb-4">

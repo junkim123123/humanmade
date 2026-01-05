@@ -22,7 +22,7 @@ export default function ProfitScenariosCard({
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5 text-emerald-600" />
         <h3 className="font-semibold text-slate-900">Profit Scenarios</h3>
