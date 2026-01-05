@@ -132,13 +132,9 @@ export default function Hero() {
 
             {/* Headline - Premium sizing */}
             <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Stop endless
+              Triple Your Margin.
               <br />
-              wholesale margin
-              <br />
-              extraction.
-              <br />
-              <span className="text-slate-700">Source direct.</span>
+              <span className="text-slate-700">Go Factory Direct.</span>
             </h1>
 
             {/* Subtext */}
