@@ -535,46 +535,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
-                      Weight {unitSystem === "imperial" ? "(lb)" : "(kg)"}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={unitSystem === "imperial" ? "1.2" : "0.5"}
-                      value={form.weight}
-                      onChange={(e) => setForm((prev) => ({ ...prev, weight: e.target.value }))}
-                      className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
-                      Dimensions {unitSystem === "imperial" ? "(in)" : "(cm)"}
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        placeholder="L"
-                        value={form.length}
-                        onChange={(e) => setForm((prev) => ({ ...prev, length: e.target.value }))}
-                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                      />
-                      <input
-                        type="text"
-                        placeholder="W"
-                        value={form.width}
-                        onChange={(e) => setForm((prev) => ({ ...prev, width: e.target.value }))}
-                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                      />
-                      <input
-                        type="text"
-                        placeholder="H"
-                        value={form.height}
-                        onChange={(e) => setForm((prev) => ({ ...prev, height: e.target.value }))}
-                        className="w-full h-10 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                      />
-                    </div>
+                  {/* Weight and Dimensions fields removed. Gemini will infer all data from the product photo. */}
+                  <div className="text-xs text-slate-500 py-2">
+                    <strong>Note:</strong> Gemini will infer all product data (weight, dimensions, price, etc.) from the uploaded photo. No manual entry required.
                   </div>
                 </div>
               </details>
