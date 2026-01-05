@@ -470,9 +470,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-6 sm:gap-8 lg:grid-cols-[2fr_1fr] lg:gap-12">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
         {/* Left: Photo Upload */}
-        <div>
+        <div className="max-w-full">
           {loading ? (
             <LoadingState 
               progress={loadingProgress}
@@ -488,8 +488,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           )}
         </div>
 
-        {/* Right: Settings */}
-        <div className="space-y-4 sm:space-y-6">
+        {/* Right: Settings - Sticky Sidebar */}
+        <div className="lg:sticky lg:top-24 lg:self-start space-y-4 sm:space-y-6">
           {apiError && (
             <div className="p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-sm text-red-700">
               {apiError}
@@ -531,15 +531,15 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
               {/* Target Sell Price */}
               <div>
-                <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price ($)</label>
+                <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-slate-400">$</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-slate-600">$</span>
                   <input
                     type="text"
                     placeholder="9.99"
                     value={form.shelfPrice}
                     onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
-                    className="w-full h-11 sm:h-12 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm pl-8 pr-4 text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
+                    className="w-full h-12 rounded-xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm pl-8 pr-4 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:border-slate-600 focus:ring-2 focus:ring-slate-200 focus:outline-none transition-all"
                   />
                 </div>
                 <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin.</p>
@@ -617,10 +617,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   onClick={handleSubmit}
                   disabled={loading || !hasValidInput}
                   className={cn(
-                    "w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-semibold transition-all shadow-lg touch-manipulation",
+                    "w-full h-12 rounded-xl text-base font-semibold transition-all shadow-lg touch-manipulation",
                     !hasValidInput
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
-                      : "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-xl active:scale-[0.98]"
+                      : "bg-gradient-to-r from-slate-700 to-slate-900 text-white hover:from-slate-800 hover:to-slate-950 hover:shadow-xl active:scale-[0.98]"
                   )}
                 >
                   {loading ? "Calculating..." : "Calculate Landed Cost"}

@@ -209,7 +209,8 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     cameraInputRef: React.RefObject<HTMLInputElement | null>,
     slotRef?: React.RefObject<HTMLDivElement | null>,
     isRequired = false,
-    tooltipText?: string
+    tooltipText?: string,
+    isCompact = false
   ) => {
     const slot = slots[slotType];
     const hasImage = !!slot.file;
@@ -218,32 +219,47 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
     const hasAnyError = validationError || submissionError;
 
     return (
-      <div ref={slotRef} className="flex flex-col h-full">
-        {/* Header */}
-        <div className="mb-4 sm:mb-5">
-          <div className="flex items-center gap-2.5 mb-3">
-            <h4 className="text-base sm:text-lg font-bold text-slate-900">{label}</h4>
-            {isRequired && (
-              <span className="rounded-full bg-rose-50 border border-rose-200/60 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                Required
-              </span>
+      <div ref={slotRef} className={cn("flex flex-col", isCompact ? "h-full" : "")}>
+        {/* Header - Only show if not compact */}
+        {!isCompact && (
+          <div className={cn("mb-4", isCompact ? "mb-2" : "sm:mb-5")}>
+            <div className="flex items-center gap-2.5 mb-3">
+              <h4 className={cn("font-bold text-slate-900", isCompact ? "text-sm" : "text-base sm:text-lg")}>{label}</h4>
+              {isRequired && (
+                <span className="rounded-full bg-rose-50 border border-rose-200/60 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                  Required
+                </span>
+              )}
+              {!isRequired && (
+                <span className="rounded-full bg-slate-100/80 border border-slate-200/60 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                  Optional
+                </span>
+              )}
+            </div>
+            {helperText && !isCompact && (
+              <p className={cn("text-slate-600 leading-relaxed", isCompact ? "text-xs" : "text-sm sm:text-base")}>{helperText}</p>
             )}
-            {!isRequired && (
-              <span className="rounded-full bg-slate-100/80 border border-slate-200/60 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                Optional
-              </span>
+            {tooltipText && !isCompact && (
+              <p className="mt-2 text-xs text-slate-500 leading-relaxed">{tooltipText}</p>
             )}
           </div>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed">{helperText}</p>
-          {tooltipText && (
-            <p className="mt-2 text-xs text-slate-500 leading-relaxed">{tooltipText}</p>
-          )}
-        </div>
+        )}
+        
+        {/* Compact header for compact mode */}
+        {isCompact && label && (
+          <div className="mb-2">
+            <h4 className="text-sm font-semibold text-slate-900">{label}</h4>
+            {isRequired && (
+              <span className="inline-block mt-1 w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+            )}
+          </div>
+        )}
 
         {/* Upload Area */}
         <div
           className={cn(
-            "relative rounded-2xl border transition-all overflow-hidden group flex-1 flex items-center justify-center",
+            "relative rounded-2xl border transition-all overflow-hidden group flex items-center justify-center",
+            isCompact ? "flex-1" : "flex-1",
             hasImage
               ? "border-emerald-200/80 bg-gradient-to-br from-emerald-50/50 to-white shadow-lg shadow-emerald-100/30"
               : hasAnyError
@@ -255,15 +271,15 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
           onPaste={(e) => handlePaste(slotType, e)}
         >
           {hasImage && slot.preview ? (
-            <div className="relative w-full h-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-slate-50 to-white">
-              <img src={slot.preview} alt={label} className="h-full w-full object-contain p-6" />
+            <div className={cn("relative w-full h-full bg-gradient-to-br from-slate-50 to-white", isCompact ? "min-h-[160px]" : "min-h-[280px] sm:min-h-[320px]")}>
+              <img src={slot.preview} alt={label} className={cn("h-full w-full object-contain", isCompact ? "p-4" : "p-6")} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute right-4 top-4 flex gap-2">
+              <div className={cn("absolute flex gap-2", isCompact ? "right-2 top-2" : "right-4 top-4")}>
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
                   disabled={disabled}
-                  className="rounded-lg bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50"
+                  className={cn("rounded-lg bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg font-semibold text-slate-700 hover:bg-white hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50", isCompact ? "px-2 py-1 text-xs" : "px-3.5 py-2 text-xs")}
                 >
                   Replace
                 </button>
@@ -271,44 +287,64 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                   type="button"
                   onClick={() => handleFileRemove(slotType)}
                   disabled={disabled}
-                  className="rounded-lg bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg p-2 text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all disabled:opacity-50"
+                  className={cn("rounded-lg bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all disabled:opacity-50", isCompact ? "p-1.5" : "p-2")}
                 >
-                  <X className="h-4 w-4" />
+                  <X className={cn(isCompact ? "h-3 w-3" : "h-4 w-4")} />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="w-full h-full min-h-[280px] sm:min-h-[320px] flex flex-col items-center justify-center gap-4 sm:gap-5 p-6 sm:p-8">
+            <div className={cn(
+              "w-full h-full flex flex-col items-center justify-center gap-4 p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all",
+              isCompact ? "min-h-[160px] border-slate-200 hover:border-slate-300 hover:bg-slate-50/50" : "min-h-[280px] sm:min-h-[320px] border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+            )}
+            onClick={() => galleryInputRef.current?.click()}
+            >
               {/* Icon */}
               <div className="relative">
                 <div className="absolute inset-0 bg-slate-100 rounded-2xl blur-xl opacity-50" />
-                <div className="relative rounded-2xl bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 p-4 sm:p-5 shadow-sm">
-                  <ImageIcon className="h-7 w-7 sm:h-9 sm:w-9 text-slate-400" />
+                <div className={cn("relative rounded-2xl bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 shadow-sm", isCompact ? "p-3" : "p-4 sm:p-5")}>
+                  <ImageIcon className={cn("text-slate-400", isCompact ? "h-6 w-6" : "h-7 w-7 sm:h-9 sm:w-9")} />
                 </div>
               </div>
               
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-                <button
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  disabled={disabled}
-                  className="flex-1 rounded-lg bg-white border border-slate-200/80 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all disabled:opacity-50 touch-manipulation"
-                >
-                  Choose photos
-                </button>
-                <button
-                  type="button"
-                  onClick={() => cameraInputRef.current?.click()}
-                  disabled={disabled}
-                  className="flex-1 rounded-lg bg-slate-900 text-white px-4 py-3 text-sm font-semibold hover:bg-slate-800 hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 touch-manipulation"
-                >
-                  Take photo
-                </button>
-              </div>
+              {/* Buttons - Only show for main upload */}
+              {!isCompact && (
+                <>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        galleryInputRef.current?.click();
+                      }}
+                      disabled={disabled}
+                      className="flex-1 rounded-lg bg-white border border-slate-200/80 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all disabled:opacity-50 touch-manipulation"
+                    >
+                      Choose photos
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cameraInputRef.current?.click();
+                      }}
+                      disabled={disabled}
+                      className="flex-1 rounded-lg bg-slate-900 text-white px-4 py-3 text-sm font-semibold hover:bg-slate-800 hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 touch-manipulation sm:hidden"
+                    >
+                      Take photo
+                    </button>
+                  </div>
+                  
+                  {/* Helper text */}
+                  <p className="text-xs text-slate-500 font-medium">Or drop, paste files here</p>
+                </>
+              )}
               
-              {/* Helper text */}
-              <p className="text-xs text-slate-500 font-medium">Or drop, paste files here</p>
+              {/* Compact mode text */}
+              {isCompact && (
+                <p className="text-xs text-slate-500 text-center px-4">Click or drop to upload</p>
+              )}
             </div>
           )}
           {/* Gallery input (multiple selection, no capture) */}
@@ -360,19 +396,28 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
   };
 
   return (
-    <div className="space-y-8 sm:space-y-10">
-      {/* Section Header */}
-      <div>
-        <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">Product photos</h3>
-        <p className="text-base sm:text-lg text-slate-600 leading-relaxed">Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy.</p>
-        <p className="mt-2 text-sm text-slate-500">3 minutes. Assumptions are always labeled.</p>
+    <div className="space-y-6">
+      {/* Main Upload - Large */}
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Product photo</h3>
+          <p className="text-xs text-slate-500">Required • Clear front photo of the product</p>
+        </div>
+        {/* Main upload card - full width, large */}
+        <div className="max-w-2xl">
+          {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true, "", false)}
+        </div>
       </div>
-      
-      {/* Upload Grid */}
-      <div className="grid gap-6 sm:gap-8 sm:grid-cols-3">
-        {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true)}
-        {renderSlot("barcode", "Barcode photo (optional)", "UPC or EAN close-up. Avoid glare. Fill the frame.", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
-        {renderSlot("label", "Label photo (optional)", "Back label with net weight, materials, warnings, and origin if shown.", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "Barcode/Label highly recommended for accuracy, but not required.")}
+
+      {/* Optional Uploads - Compact */}
+      <div className="space-y-4 pt-6 border-t border-slate-200">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-slate-600">Optional (recommended for accuracy)</span>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
+          {renderSlot("barcode", "Barcode", "UPC or EAN close-up", barcodeGalleryInputRef, barcodeCameraInputRef, barcodeSlotRef, false, "", true)}
+          {renderSlot("label", "Label", "Back label with details", labelGalleryInputRef, labelCameraInputRef, labelSlotRef, false, "", true)}
+        </div>
       </div>
 
       {/* Optional Section */}
