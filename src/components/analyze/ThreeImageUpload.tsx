@@ -226,7 +226,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
             <div className="flex items-center gap-2.5 mb-3">
               <h4 className={cn("font-bold text-slate-900", isCompact ? "text-sm" : "text-base sm:text-lg")}>{label}</h4>
               {isRequired && (
-                <span className="rounded-full bg-rose-50 border border-rose-200/60 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                <span className="rounded-full bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-xs font-semibold text-emerald-700">
                   Required
                 </span>
               )}
@@ -250,7 +250,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
           <div className="mb-2">
             <h4 className="text-sm font-semibold text-slate-900">{label}</h4>
             {isRequired && (
-              <span className="inline-block mt-1 w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              <span className="inline-block mt-1 w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             )}
           </div>
         )}
@@ -263,7 +263,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
             hasImage
               ? "border-emerald-200/80 bg-gradient-to-br from-emerald-50/50 to-white shadow-lg shadow-emerald-100/30"
               : hasAnyError
-              ? "border-red-200/80 bg-gradient-to-br from-red-50/50 to-white shadow-lg shadow-red-100/30"
+              ? "border-emerald-200/80 bg-gradient-to-br from-emerald-50/50 to-white shadow-lg shadow-emerald-100/30"
               : "border-slate-200/80 bg-white shadow-sm hover:border-slate-300/80 hover:shadow-lg hover:shadow-slate-200/50 cursor-pointer transition-shadow"
           )}
           onDrop={(e) => handleDrop(slotType, e)}
@@ -287,7 +287,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                   type="button"
                   onClick={() => handleFileRemove(slotType)}
                   disabled={disabled}
-                  className={cn("rounded-lg bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all disabled:opacity-50", isCompact ? "p-1.5" : "p-2")}
+                  className={cn("rounded-lg bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg text-slate-500 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 transition-all disabled:opacity-50", isCompact ? "p-1.5" : "p-2")}
                 >
                   <X className={cn(isCompact ? "h-3 w-3" : "h-4 w-4")} />
                 </button>
@@ -386,7 +386,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
         {/* Error Messages */}
         {(validationError || submissionError) && (
           <div className="mt-3 sm:mt-4 p-3.5 rounded-xl bg-gradient-to-br from-rose-50/90 to-white border border-rose-200/60 shadow-sm">
-            <p className="text-xs sm:text-sm text-rose-700 font-semibold leading-relaxed">
+            <p className="text-xs sm:text-sm text-emerald-700 font-semibold leading-relaxed">
               {validationError || submissionError}
             </p>
           </div>
@@ -449,7 +449,7 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
                 handleFileRemove("extra2");
               }}
               disabled={disabled}
-              className="text-sm text-slate-500 hover:text-rose-600 font-semibold transition-colors disabled:opacity-50"
+              className="text-sm text-slate-500 hover:text-emerald-600 font-semibold transition-colors disabled:opacity-50"
             >
               Remove extra photos
             </button>
