@@ -85,79 +85,77 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   // Removed unit conversion and toggle logic
 
-  const handleSubmit = async () => {
-    if (loading) return; // Already submitting, ignore duplicate clicks
-    
-    // Check authentication for public mode - redirect to login if not authenticated
-    if (mode === "public") {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.info("Please sign in to run analysis");
-        router.push(`/signin?next=${encodeURIComponent("/analyze")}`);
-        return;
-      }
-    }
-    
-    setSubmitted(true);
-    setValidationErrors({});
-    setApiError(null);
-
-    // Validate only product photo is required
-    const errors: { product?: string; barcode?: string; label?: string } = {};
-    if (!files.product) errors.product = "Product photo is required";
-    // barcode and label are optional
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      uploadRef.current?.scrollToFirstMissing();
-      return;
-    }
-
-    const parsed = analyzeSchema.safeParse({
-      destination: form.destination || "US",
-      shippingMode: form.shippingMode || "air",
-      linkUrl: form.linkUrl.trim() || undefined,
-      front: files.product,
-      barcode: files.barcode || undefined,
-      label: files.label || undefined,
-    });
-
-    if (!parsed.success) {
-      return;
-    }
-
-    // Public mode: authentication is already checked above, continue to API call
-
-    // App mode: run analysis via API
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("image", parsed.data.front as File);
-      if (parsed.data.barcode) formData.append("barcode", parsed.data.barcode as File);
-      if (parsed.data.label) formData.append("label", parsed.data.label as File);
-      if (files.extra1) formData.append("extra1", files.extra1);
-      if (files.extra2) formData.append("extra2", files.extra2);
-      if (parsed.data.destination) formData.append("destination", parsed.data.destination);
-      if (parsed.data.shippingMode) formData.append("shippingMode", parsed.data.shippingMode);
-      if (parsed.data.linkUrl) formData.append("linkUrl", parsed.data.linkUrl);
-      if (form.shelfPrice) formData.append("shelfPrice", form.shelfPrice);
-
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      // Handle reused report (idempotency)
-      if (response.ok && data?.ok && data?.reused) {
-        const existingReportId = String(data.reportId || '').trim();
-        console.log(`[AnalyzeForm] Server returned existing report: ${existingReportId}, status: ${data.status}`);
-        
-        if (!existingReportId || existingReportId === 'null' || existingReportId === 'undefined') {
-          console.error("[AnalyzeForm] Invalid existing reportId:", data.reportId);
+        let pollStart = Date.now();
+        const pollInterval = setInterval(async () => {
+          try {
+            const verifyUrl = `/api/reports/${encodeURIComponent(reportIdStr)}`;
+            const verifyRes = await fetch(verifyUrl, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
+            });
+            if (verifyRes.ok) {
+              const verifyData = await verifyRes.json();
+              if (verifyData?.ok && verifyData?.report) {
+                const report = verifyData.report;
+                const status = report.status || report.data?.status;
+                // Update progress based on status
+                if (status === "processing" || status === "queued") {
+                  // Estimate progress: start at 10%, slowly increase
+                  const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
+                  const estimatedTotal = 180000; // 3 minutes
+                  const progress = Math.min(90, 10 + (elapsed / estimatedTotal) * 80);
+                  setLoadingProgress(progress);
+                  // Update step based on elapsed time
+                  if (elapsed < 30000) {
+                    setLoadingStep("Initializing analysis...");
+                  } else if (elapsed < 90000) {
+                    setLoadingStep("Searching supplier database...");
+                  } else if (elapsed < 150000) {
+                    setLoadingStep("Calculating costs and margins...");
+                  } else {
+                    setLoadingStep("Finalizing report...");
+                  }
+                } else if (status === "completed") {
+                  // Report is complete
+                  clearInterval(pollInterval);
+                  setLoadingProgress(100);
+                  setLoadingStep("Analysis complete!");
+                  // Get current user id for ownership check
+                  const supabase = createClient();
+                  const { data: { user: currentUser } } = await supabase.auth.getUser();
+                  // Check ownership if report has a user_id
+                  if (report.user_id && currentUser) {
+                    if (report.user_id !== currentUser.id) {
+                      console.error("[AnalyzeForm] Ownership mismatch:", {
+                        reportUserId: report.user_id,
+                        currentUserId: currentUser.id,
+                      });
+                      toast.error("This report belongs to another account. Please try again.");
+                      setLoading(false);
+                      return;
+                    }
+                  }
+                  // Small delay to show completion
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  console.log("[AnalyzeForm] ✓ Report completed, redirecting to:", `/reports/${reportIdStr}/v2`);
+                  toast.success("Analysis completed");
+                  router.push(`/reports/${reportIdStr}/v2`);
+                  return;
+                }
+              }
+            }
+          } catch (pollError) {
+            console.warn("[AnalyzeForm] Polling error:", pollError);
+            // Continue polling on error
+          }
+          // Timeout after 2 minutes
+          if (Date.now() - pollStart > 120000) {
+            clearInterval(pollInterval);
+            toast.error("Analysis is taking longer than expected. Please try again or check your reports.");
+            setLoading(false);
+          }
+        }, 2000); // Poll every 2 seconds
           toast.error("Existing report ID is invalid. Starting new analysis...");
           setLoading(false);
           return;
