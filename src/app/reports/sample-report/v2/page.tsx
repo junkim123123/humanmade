@@ -33,6 +33,7 @@ export default function Page() {
     ...sampleReportData,
     pipeline_result: {
       ...sampleReportData.pipeline_result,
+      scenarios: [], // Ensure scenarios is present
       draftInference,
     },
   };
