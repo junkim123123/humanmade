@@ -87,8 +87,8 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                                "linear-gradient(135deg, #a78bfa, #8b5cf6)"
                   }}
                 />
-                {/* Product Visual Area - 더 크게 */}
-                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-white/50 backdrop-blur-sm shadow-sm"
+                {/* Product Visual Area - 비율 1:1로 통일 */}
+                <div className="relative aspect-square rounded-xl overflow-hidden mb-5 bg-white/50 backdrop-blur-sm shadow-sm"
                   style={{ height: '300px' }}>
                   {product.image ? (
                     <img
