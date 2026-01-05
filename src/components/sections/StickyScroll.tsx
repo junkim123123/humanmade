@@ -72,7 +72,7 @@ export default function StickyScroll({ steps, title, subtitle }: StickyScrollPro
               const y = useTransform(stepProgress, [0, 0.5, 1], [20, 0, -20]);
               
               // Check if this step is active (convert to number for useTransform)
-              const isActiveNumber = useTransform(activeStep, (active) => active === index ? 1 : 0);
+              const isActiveNumber = useTransform(activeStep, (active) => Number(active === index));
 
               return (
                 <motion.div
