@@ -23,7 +23,7 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
   };
 
   return (
-    <div className="landing-container">
+    <div className="landing-container bg-gradient-to-b from-blue-50 to-white">
       <div className="py-12 lg:py-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12 items-center">
           {/* Left: Copy */}
