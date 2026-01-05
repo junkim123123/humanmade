@@ -24,6 +24,10 @@ const sampleReportData = {
     _sensitivity: {
       scenarios: [],
     },
+    _actionPlan48h: {
+      today: [],
+      tomorrow: [],
+    },
   },
 };
 
