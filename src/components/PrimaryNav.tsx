@@ -10,6 +10,7 @@ const primaryNavItems = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/analyze", label: "Analyze", icon: Search },
   { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/sample-report", label: "Sample Report", icon: FileText },
   { href: "/projects", label: "Orders", icon: FolderKanban },
 ];
 
