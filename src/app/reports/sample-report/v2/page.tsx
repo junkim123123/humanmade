@@ -7,7 +7,9 @@ const sampleReportData = {
   id: "sample-report",
   productName: "Fruit Gummies Variety Pack (12 count)",
   category: "Confectionery",
-  pipeline_result: {},
+  pipeline_result: {
+    scenarios: [],
+  },
   baseline: {},
   signals: {},
   inputStatus: {
