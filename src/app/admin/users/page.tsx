@@ -3,7 +3,14 @@ import { Card } from '@/components/ui/card'
 import { formatDistance } from 'date-fns'
 import type { Profile } from '@/types/database'
 
-async function getUsers(): Promise<Profile[]> {
+type ProfileWithLastProduct = Profile & {
+  lastReport?: {
+    product_name: string
+    created_at: string
+  }
+}
+
+async function getUsers(): Promise<ProfileWithLastProduct[]> {
   const supabase = getSupabaseAdmin()
   const { data: users } = await supabase
     .from('profiles')
@@ -11,7 +18,36 @@ async function getUsers(): Promise<Profile[]> {
     .order('created_at', { ascending: false })
     .limit(100)
 
-  return (users as Profile[]) || []
+  if (!users || users.length === 0) {
+    return []
+  }
+
+  // Get the latest report for each user
+  const userIds = users.map(u => u.id)
+  const { data: latestReports } = await supabase
+    .from('reports')
+    .select('user_id, product_name, created_at')
+    .in('user_id', userIds)
+    .order('created_at', { ascending: false })
+
+  // Create a map of user_id -> latest report
+  const reportMap = new Map<string, { product_name: string; created_at: string }>()
+  if (latestReports) {
+    for (const report of latestReports) {
+      if (!reportMap.has(report.user_id)) {
+        reportMap.set(report.user_id, {
+          product_name: report.product_name || '—',
+          created_at: report.created_at,
+        })
+      }
+    }
+  }
+
+  // Attach last report to each user
+  return users.map(user => ({
+    ...user,
+    lastReport: reportMap.get(user.id),
+  })) as ProfileWithLastProduct[]
 }
 
 export default async function UsersPage() {
@@ -36,6 +72,9 @@ export default async function UsersPage() {
                   Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Last Analyzed Product
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -51,6 +90,18 @@ export default async function UsersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                     {user.full_name || '—'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-700">
+                    {user.lastReport ? (
+                      <div>
+                        <div className="font-medium text-slate-900">{user.lastReport.product_name}</div>
+                        <div className="text-xs text-slate-500">
+                          {formatDistance(new Date(user.lastReport.created_at), new Date(), { addSuffix: true })}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">No reports yet</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

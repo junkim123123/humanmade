@@ -15,19 +15,58 @@ async function getReports(): Promise<ReportWithProfile[]> {
       profiles!reports_user_id_fkey(email)
     `)
     .order('created_at', { ascending: false })
-    .limit(100)
+    .limit(1000)
 
   return (reports as ReportWithProfile[]) || []
 }
 
+// Deduplicate reports by user email and product name
+function deduplicateReports(reports: ReportWithProfile[]): ReportWithProfile[] {
+  const seen = new Map<string, ReportWithProfile>()
+  
+  for (const report of reports) {
+    const email = (report.profiles as any)?.email || report.user_id || 'unknown'
+    const productName = (report.product_name || '').toLowerCase().trim()
+    const key = `${email}::${productName}`
+    
+    if (!seen.has(key)) {
+      // First occurrence - keep the most recent one
+      seen.set(key, report)
+    } else {
+      // Duplicate found - keep the one with the latest created_at
+      const existing = seen.get(key)!
+      const existingDate = new Date(existing.created_at)
+      const currentDate = new Date(report.created_at)
+      
+      if (currentDate > existingDate) {
+        seen.set(key, report)
+      }
+    }
+  }
+  
+  return Array.from(seen.values())
+}
+
 export default async function ReportsPage() {
-  const reports = await getReports()
+  const allReports = await getReports()
+  const reports = deduplicateReports(allReports)
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
-        <p className="text-slate-600 mt-2">All product analysis reports</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
+            <p className="text-slate-600 mt-2">
+              Product analysis reports (deduplicated by user & product)
+              {allReports.length !== reports.length && (
+                <span className="ml-2 text-xs text-blue-600 font-semibold">
+                  ({allReports.length} total, {reports.length} unique)
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
       </div>
 
       <Card className="overflow-hidden">
