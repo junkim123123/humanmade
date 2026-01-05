@@ -21,6 +21,9 @@ const sampleReportData = {
     _verdict: {
       decision: "GO",
     },
+    _sensitivity: {
+      scenarios: [],
+    },
   },
 };
 
