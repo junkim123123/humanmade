@@ -29,11 +29,11 @@ const sampleProducts: ProductCard[] = [
   },
   {
     id: "2",
-    name: "Survival Dart Game",
+    name: "Demon Slayer Keychain",
     metric: "Data-driven factory matching",
     category: "Toys",
     colorClass: "bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200",
-    image: "/product-photos/$0.5 장난감/mmexport1758762530965.jpg",
+    image: "/product-photos/귀멸의 칼날 키링/mmexport1758763260109.jpg",
     icon: <ToyBrick className="w-16 h-16 text-blue-600" />,
   },
   {

@@ -43,7 +43,12 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">User Intelligence Pool</h1>
+      <h1 className="text-3xl font-bold text-white mb-2">
+  User Intelligence Pool
+</h1>
+<p className="text-slate-400">
+  Monitor user activity and manage reports.
+</p>
       {/* 유저별 폴더 UI 컴포넌트 */}
       <UserFolderList users={users} />
     </div>
