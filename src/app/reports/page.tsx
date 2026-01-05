@@ -297,6 +297,9 @@ export default function ReportsPage() {
                     
                     {/* Gradient Overlay for better text readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-[2]" />
+                  
+                  {/* Shine Effect on Hover */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent z-[4]" />
                   </div>
                   
                   {/* Content */}
@@ -317,11 +320,7 @@ export default function ReportsPage() {
                       <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
                     </Link>
                   </div>
-                  
-                  {/* Shine Effect on Hover */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                </div>
-              </motion.div>
+                </motion.div>
               </FadeUp>
             ))}
           </StaggerContainer>
