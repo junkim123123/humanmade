@@ -83,90 +83,77 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     return !!files.product; // Only product photo is required
   }, [files.product]);
 
-  // Removed unit conversion and toggle logic
+  const handleSubmit = async () => {
+    setSubmitted(true);
+    setApiError(null);
 
-        let pollStart = Date.now();
-        const pollInterval = setInterval(async () => {
-          try {
-            const verifyUrl = `/api/reports/${encodeURIComponent(reportIdStr)}`;
-            const verifyRes = await fetch(verifyUrl, {
-              method: 'GET',
-              headers: { 'Content-Type': 'application/json' },
-              cache: 'no-store',
-            });
-            if (verifyRes.ok) {
-              const verifyData = await verifyRes.json();
-              if (verifyData?.ok && verifyData?.report) {
-                const report = verifyData.report;
-                const status = report.status || report.data?.status;
-                // Update progress based on status
-                if (status === "processing" || status === "queued") {
-                  // Estimate progress: start at 10%, slowly increase
-                  const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
-                  const estimatedTotal = 180000; // 3 minutes
-                  const progress = Math.min(90, 10 + (elapsed / estimatedTotal) * 80);
-                  setLoadingProgress(progress);
-                  // Update step based on elapsed time
-                  if (elapsed < 30000) {
-                    setLoadingStep("Initializing analysis...");
-                  } else if (elapsed < 90000) {
-                    setLoadingStep("Searching supplier database...");
-                  } else if (elapsed < 150000) {
-                    setLoadingStep("Calculating costs and margins...");
-                  } else {
-                    setLoadingStep("Finalizing report...");
-                  }
-                } else if (status === "completed") {
-                  // Report is complete
-                  clearInterval(pollInterval);
-                  setLoadingProgress(100);
-                  setLoadingStep("Analysis complete!");
-                  // Get current user id for ownership check
-                  const supabase = createClient();
-                  const { data: { user: currentUser } } = await supabase.auth.getUser();
-                  // Check ownership if report has a user_id
-                  if (report.user_id && currentUser) {
-                    if (report.user_id !== currentUser.id) {
-                      console.error("[AnalyzeForm] Ownership mismatch:", {
-                        reportUserId: report.user_id,
-                        currentUserId: currentUser.id,
-                      });
-                      toast.error("This report belongs to another account. Please try again.");
-                      setLoading(false);
-                      return;
-                    }
-                  }
-                  // Small delay to show completion
-                  await new Promise(resolve => setTimeout(resolve, 500));
-                  console.log("[AnalyzeForm] ✓ Report completed, redirecting to:", `/reports/${reportIdStr}/v2`);
-                  toast.success("Analysis completed");
-                  router.push(`/reports/${reportIdStr}/v2`);
-                  return;
-                }
-              }
-            }
-          } catch (pollError) {
-            console.warn("[AnalyzeForm] Polling error:", pollError);
-            // Continue polling on error
-          }
-          // Timeout after 2 minutes
-          if (Date.now() - pollStart > 120000) {
-            clearInterval(pollInterval);
-            toast.error("Analysis is taking longer than expected. Please try again or check your reports.");
-            setLoading(false);
-          }
-        }, 2000); // Poll every 2 seconds
-          toast.error("Existing report ID is invalid. Starting new analysis...");
-          setLoading(false);
-          // Do not continue further after error
-        }
+    // Basic client-side validation
+    const newErrors: typeof validationErrors = {};
+    if (!files.product) {
+      newErrors.product = "Product photo is required.";
+    }
+    setValidationErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please provide a product photo.");
+      return;
+    }
+
+    setLoading(true);
+    setLoadingProgress(0);
+    setLoadingStep("Preparing analysis...");
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (mode === "public" && !user) {
+      // Save to localStorage and redirect to login
+      try {
+        const draft = { ...form };
+        window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        toast.info("Please sign in to continue.");
+        router.push("/login?redirect=/app/analyze");
+      } catch (e) {
+        console.error("Failed to save draft", e);
+        toast.error("Could not save your draft. Please try again.");
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (mode === "app" && !user) {
+      toast.error("Authentication required. Please sign in.");
+      router.push("/login?redirect=/app/analyze");
+      setLoading(false);
+      return;
+    }
+
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+    if (files.product) formData.append("product", files.product);
+    if (files.barcode) formData.append("barcode", files.barcode);
+    if (files.label) formData.append("label", files.label);
+    if (files.extra1) formData.append("extra1", files.extra1);
+    if (files.extra2) formData.append("extra2", files.extra2);
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data?.existingReportId) {
+        const existingReportId = String(data.existingReportId).trim();
         
         // Verify existing report exists and user owns it before redirecting
         try {
           console.log("[AnalyzeForm] Verifying existing report ownership before redirect...");
           
           // Get current user id
-          const supabase = createClient();
           const { data: { user: currentUser } } = await supabase.auth.getUser();
           
           // Verify report exists and check ownership
@@ -200,29 +187,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   router.push(`/reports/${existingReportId}/v2`);
                 }
                 }
-              }
-              
-              console.log("[AnalyzeForm] Existing report verified and ownership confirmed, redirecting...");
-              if (data.status === "processing" || data.status === "queued") {
-                toast.info(data.message || "Analysis already in progress. Redirecting...");
-              } else if (data.status === "completed") {
-                toast.info("Analysis already completed. Redirecting to existing report.");
-              }
-              router.push(`/reports/${existingReportId}/v2`);
-              // Do not continue further after redirect
-            } else if (verifyData?.ok === false) {
-              // Explicit error from API
-              if (verifyData.errorCode === "FORBIDDEN" || verifyData.errorCode === "AUTH_REQUIRED") {
-                console.error("[AnalyzeForm] Access forbidden to existing report:", verifyData.errorCode);
-                toast.error("Cannot access this report. Starting fresh analysis...");
+              } else {
+                // If verification failed, the report might not exist - start new analysis
+                console.error("[AnalyzeForm] Existing report verification failed, starting new analysis:", { reportId: existingReportId, status: verifyRes.status });
+                toast.error("Existing report not found. Please try again.");
                 setLoading(false);
-                // Do not continue further after error
               }
             }
-          }
-          
-          // If verification failed, the report might not exist - start new analysis
-          console.error("[AnalyzeForm] Existing report verification failed, starting new analysis:", { reportId: existingReportId, status: verifyRes.status }); toast.error("Existing report not found. Please try again."); setLoading(false);
         } catch (verifyError) {
           console.error("[AnalyzeForm] Error verifying existing report:", verifyError);
           toast.error("Error verifying report. Please try again.");
