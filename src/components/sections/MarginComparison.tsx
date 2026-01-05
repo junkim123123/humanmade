@@ -298,7 +298,7 @@ export default function MarginComparison() {
           </div>
           
           {/* Social Proof Section */}
-          <SocialProof />
+          {/* <SocialProof /> */}
         </div>
       </FadeUp>
     </section>
@@ -354,21 +354,47 @@ function SocialProof() {
       transition={{ duration: 0.6, delay: 0.3 }}
       className="mt-12 pt-12 border-t border-slate-200"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-3">
-          Trusted by SMB Sellers, Backed by Global Standards
-        </h2>
-        <p className="text-base text-slate-500 mb-6">
-          Access the same factory networks supplying vendors for:
-        </p>
-        <div className="flex justify-center items-center gap-12 my-8">
-          <img src="/logos/costco.svg" alt="Costco" className="h-8 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
-          <img src="/logos/7-eleven.svg" alt="7-Eleven" className="h-8 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
-          <img src="/logos/don-quijote.svg" alt="Don Quijote" className="h-8 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
+      <div className="flex flex-col items-center justify-center space-y-8 py-12">
+        {/* Header Section */}
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+            Trusted by SMB Sellers, Backed by Global Standards
+          </h2>
+          <p className="text-slate-500 text-lg">
+            Access the same factory networks supplying vendors for:
+          </p>
         </div>
-        <p className="text-sm font-medium text-slate-600">
-          Real results from our St. Louis & Toronto community:
-        </p>
+
+        {/* Authority Logo Bar */}
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-500 ease-in-out">
+          {/* Costco Logo */}
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/5/59/Costco_Wholesale_logo_2010-10-26.svg" 
+            alt="Costco Wholesale" 
+            className="h-8 md:h-10 w-auto object-contain"
+          />
+          
+          {/* 7-Eleven Logo */}
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/4/40/7-eleven_logo.svg" 
+            alt="7-Eleven" 
+            className="h-8 md:h-10 w-auto object-contain"
+          />
+
+          {/* Don Quijote Logo (Japanese Retail Giant) */}
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Don_Quijote_Logo.svg" 
+            alt="Don Quijote" 
+            className="h-8 md:h-10 w-auto object-contain"
+          />
+        </div>
+
+        {/* Bridge Text */}
+        <div className="w-full max-w-2xl border-t border-slate-200 pt-8 mt-4">
+          <p className="text-center text-slate-600 font-medium">
+            Real results from our St. Louis & Toronto community:
+          </p>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

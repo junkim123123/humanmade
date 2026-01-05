@@ -26,10 +26,10 @@ const stats = [
 // Case study data matching Swell premium style
 const caseStudies = [
   {
-    id: "p-1",
+    id: "sample-report/v2",
     category: "Confectionery",
-    productName: "Fruit Lover Marshmallow",
-    benefit: "Estimated $0.42 saved per unit",
+    productName: "Fruit Gummies Variety Pack (12 count)",
+    benefit: "Proof found 6 signals",
     gradientFrom: "from-rose-100/50",
     gradientTo: "to-pink-100/30",
     borderColor: "border-rose-200/60",
@@ -341,6 +341,54 @@ export default function ReportsPage() {
             ))}
           </StaggerContainer>
         </div>
+      </section>
+      
+      {/* Trust Section */}
+      <section className="relative py-16">
+        <FadeUp>
+          <div className="flex flex-col items-center justify-center space-y-8 py-12">
+            {/* Header Section */}
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+                Trusted by SMB Sellers, Backed by Global Standards
+              </h2>
+              <p className="text-slate-500 text-lg">
+                Access the same factory networks supplying vendors for:
+              </p>
+            </div>
+
+            {/* Authority Logo Bar */}
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-500 ease-in-out">
+              {/* Costco Logo */}
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/5/59/Costco_Wholesale_logo_2010-10-26.svg" 
+                alt="Costco Wholesale" 
+                className="h-8 md:h-10 w-auto object-contain"
+              />
+              
+              {/* 7-Eleven Logo */}
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/4/40/7-eleven_logo.svg" 
+                alt="7-Eleven" 
+                className="h-8 md:h-10 w-auto object-contain"
+              />
+
+              {/* Don Quijote Logo (Japanese Retail Giant) */}
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Don_Quijote_Logo.svg" 
+                alt="Don Quijote" 
+                className="h-8 md:h-10 w-auto object-contain"
+              />
+            </div>
+
+            {/* Bridge Text */}
+            <div className="w-full max-w-2xl border-t border-slate-200 pt-8 mt-4">
+              <p className="text-center text-slate-600 font-medium">
+                Real results from our St. Louis & Toronto community:
+              </p>
+            </div>
+          </div>
+        </FadeUp>
       </section>
       
       {/* CTA Section - Swell Style */}

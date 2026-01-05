@@ -23,7 +23,7 @@ const sampleProducts: ProductCard[] = [
     name: "Fruit Lover Marshmallow",
     metric: "Optimized sourcing via network intelligence",
     category: "Confectionery",
-    colorClass: "bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200",
+    colorClass: "bg-gradient-to-br from-rose-100 to-teal-100 border-rose-200",
     image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
     icon: <Candy className="w-16 h-16 text-rose-500" />,
   },
@@ -32,7 +32,7 @@ const sampleProducts: ProductCard[] = [
     name: "Demon Slayer Keychain",
     metric: "Data-driven factory matching",
     category: "Toys",
-    colorClass: "bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200",
+    colorClass: "bg-gradient-to-br from-sky-100 to-indigo-100 border-sky-200",
     image: "/product-photos/귀멸의 칼날 키링/mmexport1758763260109.jpg",
     icon: <ToyBrick className="w-16 h-16 text-blue-600" />,
   },
@@ -41,7 +41,7 @@ const sampleProducts: ProductCard[] = [
     name: "3D Jelly Snacks",
     metric: "Network-optimized quotes delivered",
     category: "Snacks",
-    colorClass: "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200",
+    colorClass: "bg-gradient-to-br from-amber-100 to-violet-100 border-amber-200",
     image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
     icon: <Cookie className="w-16 h-16 text-purple-600" />,
   },
@@ -72,7 +72,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
           {products.map((product, index) => (
             <FadeUp key={product.id} delay={index * 0.1}>
               <motion.div
-                className={`group relative rounded-2xl border-2 overflow-hidden p-6 h-[484px] ${
+                className={`group relative rounded-2xl border-2 overflow-hidden p-6 h-full ${
                   product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                 }`}
                 whileHover={{ scale: 1.03, y: -4 }}
