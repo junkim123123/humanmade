@@ -7,6 +7,22 @@ import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+// Stats data for hero section
+const stats = [
+  {
+    value: "95%+",
+    label: "Accuracy",
+  },
+  {
+    value: "$3-5",
+    label: "Per-unit savings",
+  },
+  {
+    value: "7%",
+    label: "Service fee",
+  },
+];
+
 // Case study data matching Swell premium style
 const caseStudies = [
   {
