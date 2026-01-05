@@ -152,10 +152,10 @@ export default function MarginComparison() {
   ];
 
   const nexSupplyItems: CostItem[] = [
-    { label: "Factory FOB", amount: "$1.24", proofStatus: "verified" as const },
-    { label: "Freight & duty", amount: "$0.86", proofStatus: "verified" as const },
-    { label: "NexSupply fee (7%)", amount: "$0.09", proofStatus: "verified" as const },
-    { label: "Total cost", amount: "$2.19", type: "total", proofStatus: "verified" as const },
+    { label: "Factory FOB", amount: "$1.14", proofStatus: "verified" as const },
+    { label: "Freight & duty", amount: "$0.81", proofStatus: "verified" as const },
+    { label: "NexSupply fee (7%)", amount: "$0.08", proofStatus: "verified" as const },
+    { label: "Total cost", amount: "$2.03", type: "total", proofStatus: "verified" as const },
   ];
 
   const diyPainPoints = [
@@ -204,7 +204,7 @@ export default function MarginComparison() {
                 <ComparisonColumn
                   title="NexSupply"
                   label="Full-Service"
-                  totalCost="$2.19"
+                  totalCost="$2.03"
                   items={nexSupplyItems}
                   isHighlight={true}
                   advantages={nexSupplyAdvantages}

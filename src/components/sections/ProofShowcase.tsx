@@ -72,7 +72,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
           {products.map((product, index) => (
             <FadeUp key={product.id} delay={index * 0.1}>
               <motion.div
-                className={`group relative rounded-2xl border-2 overflow-hidden p-6 h-[440px] ${
+                className={`group relative rounded-2xl border-2 overflow-hidden p-6 h-[484px] ${
                   product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                 }`}
                 whileHover={{ scale: 1.03, y: -4 }}
