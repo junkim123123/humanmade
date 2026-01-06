@@ -45,6 +45,8 @@ function LogoImg({
   )
 }
 
+
+
 export default function TrustedByBar() {
   const items: Item[] = [
     {

@@ -64,7 +64,7 @@ export default function ActionPlan48hCard({ actionPlan }: ActionPlan48hCardProps
         {/* Blueprint Sample Preview */}
         <div className="pt-6 border-t border-slate-100">
           <Link 
-            href="/sample-report"
+            href="/#pricing"
             className="group/blueprint block"
           >
             <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-br from-purple-50/50 to-blue-50/30 border border-purple-200/60 hover:border-purple-300 transition-colors">
@@ -85,13 +85,10 @@ export default function ActionPlan48hCard({ actionPlan }: ActionPlan48hCardProps
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <FileText className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
-                  <span className="text-[12px] font-semibold text-purple-900">Sample Blueprint Report</span>
+                  <span className="text-[12px] font-semibold text-purple-900">Optimize Sourcing & Unlock Network</span>
                 </div>
-                <p className="text-[11px] text-slate-600 leading-relaxed group-hover/blueprint:text-slate-700 transition-colors">
-                  See what you'll receive after verification: 3 optimized factory quotes, HS Code analysis, compliance checklist, and logistics plan.
-                </p>
                 <span className="inline-block mt-1.5 text-[10px] font-medium text-purple-700 group-hover/blueprint:text-purple-800 transition-colors">
-                  View sample →
+                  Upgrade now →
                 </span>
               </div>
             </div>

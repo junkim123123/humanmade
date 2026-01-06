@@ -152,9 +152,7 @@ export function Hero3D() {
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl md:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-            AI-powered sourcing intelligence for B2B importers.
-            <br />
-            Get verified factory quotes, landed cost analysis, and risk assessment in minutes.
+            Let's find your factory.
           </p>
 
           {/* CTA Buttons */}

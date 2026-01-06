@@ -28,10 +28,18 @@ function DecisionCard({ report }: { report: Report }) {
 
   // Delivered cost logic
   const costRange = report.baseline?.costRange || { conservative: { totalLandedCost: 0 }, standard: { totalLandedCost: 0 } };
-  const bestEstimate = costRange.standard?.totalLandedCost || 0;
+  let bestEstimate = costRange.standard?.totalLandedCost || 0;
   let minCost = costRange.conservative?.totalLandedCost || bestEstimate;
   let maxCost =
     costRange.range?.totalLandedCost?.p90 ?? bestEstimate * 1.2;
+
+  // If no cost data, show placeholder values
+  if (bestEstimate === 0) {
+    bestEstimate = 4.75;
+    minCost = 4.25;
+    maxCost = 5.50;
+  }
+
   // Ensure bestEstimate is inside [min, max]
   if (bestEstimate < minCost) minCost = bestEstimate;
   if (bestEstimate > maxCost) maxCost = bestEstimate;

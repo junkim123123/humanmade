@@ -2,14 +2,14 @@ import React from "react"
 
 type LogoItem = {
   name: string
-  src: string
+  src?: string
   widthClass: string
 }
 
 const LOGOS: LogoItem[] = [
-  { name: "Costco Wholesale", src: "/logos/costco.svg", widthClass: "w-56 md:w-64" },
-  { name: "7 Eleven", src: "/logos/7eleven.svg", widthClass: "w-40 md:w-48" },
-  { name: "Don Quijote", src: "/logos/donki.svg", widthClass: "w-44 md:w-52" },
+  { name: "Costco Wholesale", widthClass: "w-56 md:w-64" },
+  { name: "7 Eleven", widthClass: "w-40 md:w-48" },
+  { name: "Don Quijote", widthClass: "w-44 md:w-52" },
 ]
 
 function cx(...classes: Array<string | undefined | false>) {
@@ -30,13 +30,8 @@ export default function RetailerLogos(props: {
 
       <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
         {LOGOS.map((logo) => (
-          <div key={logo.name} className={cx("h-10", logo.widthClass)}>
-            <img
-              src={logo.src}
-              alt={logo.name}
-              className={cx("h-full w-full object-contain", tonedDown && "opacity-80")}
-              loading="lazy"
-            />
+          <div key={logo.name} className={cx("h-12 flex items-center justify-center px-6 bg-white rounded-lg border border-slate-200 shadow-sm", logo.widthClass)}>
+            <span className={cx("font-semibold text-slate-700 text-xl", tonedDown && "opacity-90")}>{logo.name}</span>
           </div>
         ))}
       </div>

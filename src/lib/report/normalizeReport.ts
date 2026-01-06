@@ -318,7 +318,7 @@ export function getSupplierMatches(report: any): NormalizedSupplierMatch[] {
   }
 
   // Priority 3: Fallback to legacy fields
-  const legacyMatches = report.supplierMatches || report.supplier_matches;
+  const legacyMatches = report.supplierMatches || report.supplier_matches || report.pipeline_result?.supplier_matches;
   if (Array.isArray(legacyMatches) && legacyMatches.length > 0) {
     return legacyMatches.map((match: any, index: number) => normalizeMatch(match, index));
   }
@@ -337,7 +337,7 @@ function normalizeMatch(match: any, index: number): NormalizedSupplierMatch {
   
   // Extract supplierName with safe fallbacks
   // prefer match.supplier_name, else match.supplierName, else match.supplier?.name, else "Unknown supplier"
-  const supplierName = match.supplier_name || match.supplierName || match.supplier?.name || match.companyName || "Unknown supplier";
+  const supplierName = match.supplier_name || match.supplierName || match.supplier?.name || match.companyName || match.name || "Unknown supplier";
   
   // Extract supplierId with safe fallbacks
   // prefer match.supplier_id, else match.supplierId, else match.id

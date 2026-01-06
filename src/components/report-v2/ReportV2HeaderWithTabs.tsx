@@ -117,7 +117,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
   return (
     <>
-      <div ref={headerRef} className="bg-white/95 backdrop-blur-sm border-b border-slate-200/80 sticky top-0 z-40 shadow-sm">
+      <div ref={headerRef} className="bg-white/95 backdrop-blur-sm border-b border-slate-200/80 top-0 z-40 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Row 1: Back link */}
           <div className="py-3">

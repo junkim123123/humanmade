@@ -126,7 +126,7 @@ export default function Hero() {
           <div className="flex flex-col gap-6 sm:gap-8 lg:gap-12 w-full lg:w-1/2">
             {/* Eyebrow */}
             <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
-              Sourcing Intelligence OS
+              Your AI Sourcing Team
             </p>
 
             {/* Headline - Premium sizing - Updated to concise messaging */}
