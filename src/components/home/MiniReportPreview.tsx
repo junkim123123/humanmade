@@ -214,11 +214,10 @@ export function MiniReportPreview({ mode = "sample", compact = false, variant = 
           {!isLoading && !compact && !isHero && (
             <div className="mt-3">
               <Button
-                asChild
-                className="h-10 w-full bg-electric-blue-600 hover:bg-electric-blue-700 text-white text-sm"
-                onClick={(e) => e.stopPropagation()}
+                className="h-10 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold shadow-lg"
+                onClick={onStartVerification}
               >
-                <Link href="#verify">Start verification, $45 credited on order</Link>
+                Optimize Sourcing & Unlock Network
               </Button>
             </div>
           )}

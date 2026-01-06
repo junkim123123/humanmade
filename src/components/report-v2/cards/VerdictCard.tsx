@@ -75,7 +75,13 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
           <div className="flex-1 bg-slate-100 rounded-full h-2">
             <div
               className={`h-2 rounded-full transition-all ${
-                confidence >= 70 ? "bg-emerald-500" : confidence >= 40 ? "bg-amber-500" : "bg-red-500"
+                (decision === "GO" && confidence >= 80)
+                  ? "bg-emerald-500"
+                  : confidence >= 70
+                  ? "bg-emerald-500"
+                  : confidence >= 40
+                  ? "bg-amber-500"
+                  : "bg-red-500"
               }`}
               style={{ width: `${confidence}%` }}
             />
