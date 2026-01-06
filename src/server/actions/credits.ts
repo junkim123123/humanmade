@@ -64,11 +64,14 @@ export async function adminGrantCredits(
   description?: string
 ): Promise<{ success: boolean; newBalance?: number; error?: string }> {
   const supabase = await createClient();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase.rpc('grant_credits', {
+  const { data, error } = await supabase.rpc('add_user_credits', {
     p_user_id: userId,
     p_amount: amount,
-    p_description: description
+    p_type: 'admin_grant',
+    p_description: description,
+    p_created_by: currentUser?.id
   });
 
   if (error) {

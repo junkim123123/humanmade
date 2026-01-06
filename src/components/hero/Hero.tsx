@@ -130,30 +130,31 @@ export default function Hero() {
             </p>
 
             {/* Headline - Premium sizing - Updated to concise messaging */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-slate-900 leading-[1.05] drop-shadow-sm">
               Triple Your Margin.
               <br />
-              <span className="text-slate-700">Go Factory Direct.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900">Go Factory Direct.</span>
             </h1>
 
             {/* Subtext */}
-            <p className="text-lg sm:text-xl text-slate-500 leading-relaxed max-w-xl">
+            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-xl font-medium">
               Use our free AI sourcing calculator to verify your real landed cost and secure 3x higher margins. We only make money when your goods arrive at the warehouse.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col items-start gap-3">
+            <div className="flex flex-col items-start gap-4">
               <Link
                 href="/analyze"
-                className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-base hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-100"
+                className="inline-flex items-center justify-center h-14 px-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0"
               >
                 Calculate My Savings (Free)
               </Link>
               <Link
                 href="/reports/sample-report/v2"
-                className="inline-flex items-center text-slate-600 font-medium text-sm hover:text-slate-900 transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-slate-500"
+                className="inline-flex items-center text-slate-500 font-medium text-sm hover:text-blue-600 transition-colors group"
               >
-                View Sample AI Report
+                <span className="border-b border-transparent group-hover:border-blue-600 transition-all">View Sample AI Report</span>
+                <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </Link>
             </div>
 

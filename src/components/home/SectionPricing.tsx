@@ -95,22 +95,25 @@ function PricingCard({ plan }: { plan: PlanData }) {
   return (
     <SlideCard
       className={cx(
-        "h-full flex flex-col transition-all",
+        "h-full flex flex-col transition-all duration-300",
         plan.recommended
-          ? "border-slate-300 ring-4 ring-slate-100 bg-slate-50/50"
-          : "border-slate-200"
+          ? "border-blue-200 ring-4 ring-blue-50 bg-white shadow-xl shadow-blue-500/10 scale-[1.02] z-10"
+          : "border-slate-200 hover:border-slate-300 hover:shadow-lg hover:-translate-y-1"
       )}
     >
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 space-y-5">
         {/* Header with label and recommended badge */}
         <div className="flex items-start justify-between gap-3">
-          <div className="text-xs font-semibold tracking-wide text-slate-500">
+          <div className={cx(
+            "text-xs font-bold tracking-wider uppercase",
+            plan.recommended ? "text-blue-600" : "text-slate-500"
+          )}>
             {plan.label}
           </div>
           {plan.recommended ? (
             <Badge
               variant="outline"
-              className="h-4 px-1.5 text-[10px] bg-slate-50 text-slate-600 border-slate-200"
+              className="h-5 px-2 text-[10px] bg-blue-50 text-blue-700 border-blue-200 font-semibold"
             >
               Recommended
             </Badge>
@@ -118,47 +121,55 @@ function PricingCard({ plan }: { plan: PlanData }) {
         </div>
 
         {/* Title */}
-        <div className="text-base font-semibold text-slate-900">
+        <div className="text-lg font-bold text-slate-900">
           {plan.title}
         </div>
 
         {/* Best for */}
-        <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">
+        <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wide bg-slate-50 inline-block px-2 py-1 rounded-md">
           Best for: {plan.bestFor}
         </div>
 
         {/* Price */}
-        <div>
-          <div className="text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
+        <div className="py-2">
+          <div className={cx(
+            "text-4xl font-bold tracking-tight tabular-nums",
+            plan.recommended ? "text-slate-900" : "text-slate-700"
+          )}>
             {plan.priceMain}
           </div>
           {plan.priceSub ? (
-            <div className="mt-1 text-xs text-slate-600 tabular-nums">
+            <div className="mt-1.5 text-xs text-slate-500 font-medium tabular-nums">
               {plan.priceSub}
             </div>
           ) : null}
           {plan.label === "VERIFICATION" && (
-            <div className="mt-1 text-xs font-medium text-slate-700">
+            <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
               Credited on your order
             </div>
           )}
         </div>
 
         {/* Description */}
-        <p className="text-sm leading-snug text-slate-600 line-clamp-2">
+        <p className="text-sm leading-relaxed text-slate-600">
           {plan.description}
         </p>
 
         {/* Bullets - limit to 3 */}
         {plan.bullets.length > 0 ? (
-          <div className="space-y-1.5">
+          <div className="space-y-3 pt-2">
             {plan.bullets.slice(0, 3).map((bullet, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 text-sm text-slate-600"
+                className="flex items-start gap-3 text-sm text-slate-600"
               >
-                <CheckIcon />
-                <span className="leading-4">{bullet}</span>
+                <div className={cx(
+                  "mt-0.5 shrink-0",
+                  plan.recommended ? "text-blue-500" : "text-slate-400"
+                )}>
+                  <CheckIcon />
+                </div>
+                <span className="leading-5">{bullet}</span>
               </div>
             ))}
           </div>
@@ -166,14 +177,16 @@ function PricingCard({ plan }: { plan: PlanData }) {
       </div>
 
       {/* CTA Button - aligned at bottom */}
-      <div className="pt-4 mt-auto border-t border-slate-100">
-        <Link href={plan.ctaLink}>
+      <div className="pt-6 mt-auto border-t border-slate-100">
+        <Link href={plan.ctaLink} className="block">
           <Button
-            size="md"
+            size="lg"
             variant={plan.recommended ? "default" : "outline"}
             className={cx(
-              "w-full",
-              plan.recommended && "font-semibold"
+              "w-full h-12 text-base shadow-sm transition-all active:scale-[0.98]",
+              plan.recommended 
+                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 font-bold" 
+                : "hover:bg-slate-50 font-semibold text-slate-700"
             )}
           >
             {plan.ctaText}
