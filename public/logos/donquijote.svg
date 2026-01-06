@@ -1,0 +1,15 @@
+<svg viewBox="0 0 360 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Don Quijote">
+  <rect x="6" y="16" width="348" height="68" rx="18" fill="#F3F4F6" stroke="#E5E7EB"/>
+  <text
+    x="180" y="50"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    font-size="40"
+    font-weight="800"
+    letter-spacing="-0.4"
+    fill="#111827"
+  >
+    Don Quijote
+  </text>
+</svg>
