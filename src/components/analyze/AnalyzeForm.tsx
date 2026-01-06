@@ -215,7 +215,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         }
       }
 
-      if (!response.ok || !data?.ok) {
+      const isSuccessful = data?.ok || data?.savedReport || data?.reportId;
+
+      if (!response.ok || !isSuccessful) {
         const errorMessage = data?.error || data?.message || data?.details || `Analysis failed (${response.status})`;
         const fullError = {
           status: response.status,
