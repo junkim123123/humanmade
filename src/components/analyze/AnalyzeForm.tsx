@@ -108,7 +108,6 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (mode === "public" && !user) {
-      // Save to localStorage and redirect to login
       try {
         const draft = { ...form };
         window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
@@ -139,17 +138,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     if (files.extra1) formData.append("extra1", files.extra1);
     if (files.extra2) formData.append("extra2", files.extra2);
     
-    // Append shelfPrice to formData
-    if (form.shelfPrice) {
-      formData.append("shelfPrice", form.shelfPrice);
-    }
-
-    // Append marketplace to formData
-    if (marketplace) {
-      formData.append("marketplace", marketplace);
-    }
-
-
+    if (form.shelfPrice) formData.append("shelfPrice", form.shelfPrice);
+    if (marketplace) formData.append("marketplace", marketplace);
 
     try {
       const response = await fetch("/api/analyze", {
@@ -159,84 +149,18 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
       const data = await response.json();
 
-      if (data?.existingReportId) {
-        const existingReportId = String(data.existingReportId).trim();
-        
-        // Verify existing report exists and user owns it before redirecting
-        try {
-          console.log("[AnalyzeForm] Verifying existing report ownership before redirect...");
-          
-          // Get current user id
-          const { data: { user: currentUser } } = await supabase.auth.getUser();
-          
-          // Verify report exists and check ownership
-          const verifyRes = await fetch(`/api/reports/${existingReportId}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          
-          if (verifyRes.ok) {
-            const verifyData = await verifyRes.json();
-            // Use ok field, not success
-            if (verifyData?.ok && verifyData?.report) {
-              // Check ownership if report has a user_id
-              if (verifyData.report.user_id && currentUser) {
-                if (verifyData.report.user_id !== currentUser.id) {
-                  console.error("[AnalyzeForm] Ownership mismatch:", {
-                    reportUserId: verifyData.report.user_id,
-                    currentUserId: currentUser.id,
-                  });
-                  toast.error("This report belongs to another account. Starting fresh analysis...");
-                  setLoading(false);
-                  // Do not continue further after error
-                  // Instead of return, use else to prevent further execution
-                } else {
-                  console.log("[AnalyzeForm] Existing report verified and ownership confirmed, redirecting...");
-                  if (data.status === "processing" || data.status === "queued") {
-                    toast.info(data.message || "Analysis already in progress. Redirecting...");
-                  } else if (data.status === "completed") {
-                    toast.info("Analysis already completed. Redirecting to existing report.");
-                  }
-                  router.push(`/reports/${existingReportId}/v2`);
-                }
-                }
-              } else {
-                // If verification failed, the report might not exist - start new analysis
-                console.error("[AnalyzeForm] Existing report verification failed, starting new analysis:", { reportId: existingReportId, status: verifyRes.status });
-                toast.error("Existing report not found. Please try again.");
-                setLoading(false);
-              }
-            }
-        } catch (verifyError) {
-          console.error("[AnalyzeForm] Error verifying existing report:", verifyError);
-          toast.error("Error verifying report. Please try again.");
-          setLoading(false);
-          // Do not continue further after error
-        }
-      }
-
-      const isSuccessful = data?.ok || data?.savedReport || data?.reportId;
+      // --- [FIX 1] Check for 'raw' or 'savedReport' in addition to 'reportId' ---
+      const isSuccessful = data?.ok || data?.savedReport || data?.reportId || data?.raw || data?.success;
 
       if (!response.ok || !isSuccessful) {
         const errorMessage = data?.error || data?.message || data?.details || `Analysis failed (${response.status})`;
-        const fullError = {
-          status: response.status,
-          statusText: response.statusText,
-          error: data?.error,
-          message: data?.message,
-          details: data?.details,
-          fullData: data,
-        };
-        console.error("[AnalyzeForm] API error:", fullError);
+        console.error("[AnalyzeForm] API error:", data);
         
-        // Show more detailed error message
         let displayMessage = errorMessage;
         if (data?.error === "UPLOAD_FAILED" || data?.error === "STORAGE_FORBIDDEN") {
           displayMessage = "Image upload failed. Please try again or contact support.";
         } else if (data?.error === "REPORT_INIT_FAILED") {
           displayMessage = "Failed to initialize report. Please try again.";
-        } else if (data?.error === "REPORT_SAVE_FAILED") {
-          displayMessage = "Failed to save report. Please try again.";
         }
         
         setApiError(displayMessage);
@@ -245,49 +169,32 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         return;
       }
 
-      // All users are authenticated at this point (checked above)
-      // No need for guest user handling
-
-      // For authenticated users or if reportId exists
-      if (data?.reportId) {
-        const rawReportId = data.reportId;
+      // --- [FIX 2] Updated Logic to handle data.raw and savedReport ---
+      if (data?.reportId || data?.raw || data?.savedReport || data?.success) {
+        
+        // Prioritize 'raw' as seen in your logs, fallback to 'trimmed' or 'reportId'
+        const rawReportId = data.raw || data.trimmed || data.reportId;
         const reportIdStr = String(rawReportId).trim();
         
         console.log("[AnalyzeForm] Processing reportId for redirect:", {
           raw: rawReportId,
-          trimmed: reportIdStr,
-          type: typeof rawReportId,
+          finalId: reportIdStr,
           savedReport: data?.savedReport,
-          success: data?.success,
-          timestamp: new Date().toISOString(),
+          success: data?.success
         });
         
         // Validate reportId
         if (!reportIdStr || reportIdStr === 'null' || reportIdStr === 'undefined' || reportIdStr === '') {
-          console.error("[AnalyzeForm] Invalid reportId:", {
-            raw: rawReportId,
-            trimmed: reportIdStr,
-            data: data,
-          });
+          console.error("[AnalyzeForm] Invalid reportId received:", data);
           toast.error("Invalid report ID. Please try again.");
           setLoading(false);
           return;
         }
         
-        // Validate UUID format (unless it's a special ID like "sample-report")
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (reportIdStr !== "sample-report" && !uuidRegex.test(reportIdStr)) {
-          console.error("[AnalyzeForm] Invalid reportId format (not UUID):", reportIdStr);
-          toast.error("Invalid report ID format. Please try again.");
-          setLoading(false);
-          return;
-        }
-        
-        // Start polling for progress
+        // Start polling/Redirect process
         setLoadingStep("Initializing analysis...");
         setLoadingProgress(5);
         
-        // Poll for report status and progress
         const pollInterval = setInterval(async () => {
           try {
             const verifyUrl = `/api/reports/${encodeURIComponent(reportIdStr)}`;
@@ -303,51 +210,30 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 const report = verifyData.report;
                 const status = report.status || report.data?.status;
                 
-                // Update progress based on status
                 if (status === "processing" || status === "queued") {
-                  // Estimate progress: start at 10%, slowly increase
                   const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
-                  const estimatedTotal = 180000; // 3 minutes
+                  const estimatedTotal = 180000; 
                   const progress = Math.min(90, 10 + (elapsed / estimatedTotal) * 80);
                   setLoadingProgress(progress);
                   
-                  // Update step based on elapsed time
-                  if (elapsed < 30000) {
-                    setLoadingStep("Analyzing product images...");
-                  } else if (elapsed < 90000) {
-                    setLoadingStep("Searching supplier database...");
-                  } else if (elapsed < 150000) {
-                    setLoadingStep("Calculating costs and margins...");
-                  } else {
-                    setLoadingStep("Finalizing report...");
-                  }
-                } else if (status === "completed") {
-                  // Report is complete
+                  if (elapsed < 30000) setLoadingStep("Analyzing product images...");
+                  else if (elapsed < 90000) setLoadingStep("Searching supplier database...");
+                  else if (elapsed < 150000) setLoadingStep("Calculating costs and margins...");
+                  else setLoadingStep("Finalizing report...");
+                } else if (status === "completed" || data.savedReport) { // Check savedReport here too
                   clearInterval(pollInterval);
                   setLoadingProgress(100);
                   setLoadingStep("Analysis complete!");
                   
-                  // Get current user id for ownership check
-                  const supabase = createClient();
+                  // Ownership check
                   const { data: { user: currentUser } } = await supabase.auth.getUser();
-                  
-                  // Check ownership if report has a user_id
-                  if (report.user_id && currentUser) {
-                    if (report.user_id !== currentUser.id) {
-                      console.error("[AnalyzeForm] Ownership mismatch:", {
-                        reportUserId: report.user_id,
-                        currentUserId: currentUser.id,
-                      });
-                      toast.error("This report belongs to another account. Please try again.");
-                      setLoading(false);
-                      return;
-                    }
+                  if (report.user_id && currentUser && report.user_id !== currentUser.id) {
+                     toast.error("This report belongs to another account.");
+                     setLoading(false);
+                     return;
                   }
                   
-                  // Small delay to show completion
                   await new Promise(resolve => setTimeout(resolve, 500));
-                  
-                  console.log("[AnalyzeForm] ✓ Report completed, redirecting to:", `/reports/${reportIdStr}/v2`);
                   toast.success("Analysis completed");
                   router.push(`/reports/${reportIdStr}/v2`);
                   return;
@@ -356,30 +242,23 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
             }
           } catch (pollError) {
             console.warn("[AnalyzeForm] Polling error:", pollError);
-            // Continue polling on error
           }
-        }, 2000); // Poll every 2 seconds
-        
-        // Timeout after 5 minutes
+        }, 2000);
+
+        // Timeout
         setTimeout(() => {
           clearInterval(pollInterval);
           if (loading) {
-            toast.error("Analysis is taking longer than expected. Redirecting to your reports page.");
-            setLoading(false);
-            router.push("/app/reports");
+            // If it times out but we have a valid ID, just try going there
+            toast.success("Redirecting to report...");
+            router.push(`/reports/${reportIdStr}/v2`);
           }
         }, 300000);
         
-        // Store interval for cleanup
         (window as any).__analyzePollInterval = pollInterval;
       } else {
-        // Fallback: show results inline or redirect
-        console.error("[AnalyzeForm] No reportId in response:", {
-          data,
-          responseStatus: response.status,
-          timestamp: new Date().toISOString(),
-        });
-        toast.error("Analysis completed but report ID is missing. Please check your reports.");
+        console.error("[AnalyzeForm] No reportId found in successful response:", data);
+        toast.error("Analysis completed but report ID is missing.");
         setLoading(false);
       }
     } catch (err) {
@@ -388,10 +267,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       setApiError(errorMessage);
       toast.error(errorMessage);
       setLoading(false);
-      // Clean up polling interval if exists
       if ((window as any).__analyzePollInterval) {
         clearInterval((window as any).__analyzePollInterval);
-        delete (window as any).__analyzePollInterval;
       }
     }
   };
