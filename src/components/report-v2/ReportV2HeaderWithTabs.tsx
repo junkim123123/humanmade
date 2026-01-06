@@ -133,12 +133,12 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           {/* Row 2: Product Info */}
           <div className="pb-4">
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
                 {report.productName}
               </h1>
               {/* V2 Badge - visible marker to confirm correct renderer (dev only) */}
               {process.env.NODE_ENV !== "production" && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
                   Report V2
                   {report.schemaVersion && (
                     <span className="ml-1 text-blue-600">v{report.schemaVersion}</span>
@@ -146,11 +146,11 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
                 </span>
               )}
             </div>
-            <div className="mt-2 flex items-center gap-3">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] font-medium ${evidenceBadge.color}`}>
+            <div className="mt-2 flex items-center gap-2 sm:gap-3">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] sm:text-[12px] font-medium ${evidenceBadge.color}`}>
                 {evidenceBadge.label}
               </span>
-              <span className="text-[13px] text-slate-500">
+              <span className="hidden sm:inline text-[11px] md:text-[13px] text-slate-500">
                 Draft buy plan — we&apos;ll lock numbers after verification.
               </span>
             </div>
@@ -160,9 +160,19 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
       {/* Sticky Bottom CTA */}
       <div className="sticky bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 backdrop-blur-md shadow-lg">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-2">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="order-2 sm:order-1 flex-grow">
+              <div className="px-4 py-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60 max-w-full sm:max-w-md">
+                <p className="text-[11px] sm:text-[12px] font-semibold text-blue-900 mb-0.5 sm:mb-1">
+                  High-Impact Optimization
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-blue-800 leading-relaxed">
+                  Leverage NexSupply's internal network data to find factories with 15-20% higher margins than public data matches.
+                </p>
+              </div>
+            </div>
+            <div className="order-1 sm:order-2">
               <button
                 onClick={handleRequestVerification}
                 disabled={isRequesting}
@@ -170,14 +180,6 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
               >
                 {isRequesting ? "Starting..." : "Optimize Sourcing & Unlock Network"}
               </button>
-              <div className="px-4 py-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60 max-w-2xl">
-                <p className="text-[12px] font-semibold text-blue-900 mb-1">
-                  High-Impact Optimization
-                </p>
-                <p className="text-[11px] text-blue-800 leading-relaxed">
-                  Leverage NexSupply's internal network data to find factories with 15-20% higher margins than public data matches.
-                </p>
-              </div>
             </div>
           </div>
         </div>

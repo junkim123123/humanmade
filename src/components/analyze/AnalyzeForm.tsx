@@ -297,8 +297,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[65fr_35fr]">
-        {/* Left: Main Workflow Area (65%) */}
+      <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[1fr_auto]">
+        {/* Main Workflow Area */}
         <div className="space-y-6">
           {loading ? (
             <LoadingState 
@@ -315,7 +315,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           )}
           
           {/* Smart Input Group - Marketplace Context */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-slate-900 mb-3">Marketplace Context</h3>
               <div className="flex flex-wrap gap-2">
@@ -325,7 +325,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                     type="button"
                     onClick={() => setMarketplace(channel)}
                     className={cn(
-                      "px-4 py-2 rounded-lg border text-sm font-medium transition-colors",
+                      "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors",
                       marketplace === channel
                         ? "bg-blue-500 border-blue-500 text-white"
                         : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
@@ -341,13 +341,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
             <div>
               <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-700">$</span>
+                <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-base sm:text-lg font-bold text-slate-700">$</span>
                 <input
                   type="text"
                   placeholder="9.99"
                   value={form.shelfPrice}
                   onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
-                  className="w-full h-14 rounded-xl border-2 border-slate-200 bg-white pl-8 pr-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                  className="w-full h-12 sm:h-14 rounded-xl border-2 border-slate-200 bg-white pl-7 sm:pl-8 pr-4 text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                 />
               </div>
               <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin</p>
@@ -355,28 +355,28 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           </div>
         </div>
 
-        {/* Right: Live Margin Calculator Sidebar (35%) - Sticky */}
-        <div className="lg:sticky lg:top-6 lg:self-start mt-8 lg:mt-0">
+        {/* Live Margin Calculator Sidebar */}
+        <div className="lg:sticky lg:top-6 lg:self-start mt-4 sm:mt-8 lg:mt-0">
           {apiError && (
-            <div className="p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-sm text-red-700">
+            <div className="p-3 sm:p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-xs sm:text-sm text-red-700 mb-4">
               {apiError}
             </div>
           )}
           {restoredDraft && (
-            <div className="p-4 rounded-xl border border-amber-200/60 bg-amber-50/80 backdrop-blur-sm text-sm text-amber-700">
+            <div className="p-3 sm:p-4 rounded-xl border border-amber-200/60 bg-amber-50/80 backdrop-blur-sm text-xs sm:text-sm text-amber-700 mb-4">
               Draft restored. Re-attach your photos and submit.
             </div>
           )}
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
             {/* Live Calculator Header */}
-            <div className="p-5 border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white">
+            <div className="p-4 sm:p-5 border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white">
               <h3 className="text-base font-semibold text-slate-900 mb-1">Live Margin Calculator</h3>
               <p className="text-xs text-slate-500">Updates as you fill in details</p>
             </div>
 
             {/* Form */}
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               {/* Destination - Compact */}
               <div className="pb-4 border-b border-slate-100">
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">Destination</div>
@@ -427,13 +427,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
               </details>
 
               {/* Submit - Full Width CTA */}
-              <div className="pt-4 border-t border-slate-200 -mx-5 -mb-5 px-5 pb-5 bg-slate-50/50">
+              <div className="pt-4 border-t border-slate-200 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 pb-4 sm:pb-5 bg-slate-50/50">
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={loading || !hasValidInput}
                   className={cn(
-                    "w-full h-14 rounded-xl text-base font-semibold transition-all shadow-lg touch-manipulation",
+                    "w-full h-12 sm:h-14 rounded-xl text-base font-semibold transition-all shadow-lg touch-manipulation",
                     !hasValidInput
                       ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
                       : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-xl active:scale-[0.98]"

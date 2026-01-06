@@ -348,7 +348,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             verdictText={reportAny._verdictText}
             nudge={reportAny._nudge}
           />
-          <ActionPlan48hCard actionPlan={decisionSummary._actionPlan48h} />
+          <ActionPlan48hCard report={report} actionPlan={decisionSummary._actionPlan48h} />
           {(() => {
             // Only render SensitivityCard if there are computable scenarios
             const computableScenarios = decisionSummary._sensitivity.scenarios.filter((s: any) => {
