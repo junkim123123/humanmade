@@ -28,7 +28,6 @@ export default function BillingPage() {
   // --- [FIX] Refactor data loading into a single function ---
   const loadData = async () => {
     try {
-      setLoading(true);
       const [creditsRes, txRes] = await Promise.all([
         fetchMyCredits(),
         fetchMyCreditTransactions()

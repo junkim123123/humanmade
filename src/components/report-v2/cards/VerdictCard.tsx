@@ -21,7 +21,9 @@ interface VerdictCardProps {
 
 export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCardProps) {
   const { decision, reasons, confidence } = verdict;
-  const displayConfidence = Math.min(confidence, 1);
+  
+  // --- [FIX] Cap confidence at 90% if decision is not GO ---
+  const displayConfidence = decision === "GO" ? Math.min(confidence, 1) : Math.min(confidence, 0.9);
   
   // Use template text if available, otherwise use reasons
   const displayText = verdictText || reasons.join(" ");
