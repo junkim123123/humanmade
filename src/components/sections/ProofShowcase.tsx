@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowRight, Candy, ToyBrick, Cookie } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
+import { BrandTrustedByRow } from "@/components/sections/BrandTrustedByRow";
 
 interface ProductCard {
   id: string;
@@ -55,6 +56,8 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Brand Logos Row */}
+        <BrandTrustedByRow />
         {/* Header */}
         <FadeUp>
           <div className="text-center mb-16 lg:mb-20">
