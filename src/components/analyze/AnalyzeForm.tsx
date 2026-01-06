@@ -362,8 +362,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         setTimeout(() => {
           clearInterval(pollInterval);
           if (loading) {
-            toast.error("Analysis is taking longer than expected. Please check your reports.");
+            toast.error("Analysis is taking longer than expected. Redirecting to your reports page.");
             setLoading(false);
+            router.push("/app/reports");
           }
         }, 300000);
         

@@ -72,15 +72,46 @@ export function LoadingState({ progress, currentStep, estimatedTimeRemaining }: 
 
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 min-h-[500px]">
-      {/* Spinner */}
-      <div className="relative mb-8">
+      {/* Spinner & Magic Effect */}
+      <div className="relative mb-8 w-24 h-24">
+        {/* Outer circle */}
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="relative"
+          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0"
         >
-          <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-slate-900" />
+          <div className="w-full h-full rounded-full border-4 border-slate-200/50 border-t-slate-900" />
         </motion.div>
+        {/* Inner circle */}
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 p-4"
+        >
+          <div className="w-full h-full rounded-full border-2 border-blue-200/50 border-t-blue-500" />
+        </motion.div>
+        
+        {/* Magic sparkles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ 
+              scale: [0, 1, 0], 
+              opacity: [0, 1, 0],
+              x: `${Math.cos((i / 6) * 2 * Math.PI) * 48}px`,
+              y: `${Math.sin((i / 6) * 2 * Math.PI) * 48}px`,
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: i * 0.2,
+              ease: "easeInOut",
+            }}
+            className="absolute top-1/2 left-1/2 w-2 h-2 bg-blue-400 rounded-full"
+            style={{ originX: '0px', originY: '0px' }}
+          />
+        ))}
       </div>
 
       {/* Progress Bar */}
@@ -118,14 +149,16 @@ export function LoadingState({ progress, currentStep, estimatedTimeRemaining }: 
 
       {/* Default message if no step provided */}
       {!currentStep && (
-        <div className="text-center mb-4">
-          <p className="text-sm font-medium text-slate-900">
-            Analyzing your product
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-4"
+        >
+          <h3 className="text-lg font-semibold text-slate-900">Let the magic happen</h3>
+          <p className="text-sm text-slate-500 mt-1">
+            Gemini is analyzing your product...
           </p>
-          <p className="text-xs text-slate-500 mt-1">
-            This usually takes 2-3 minutes
-          </p>
-        </div>
+        </motion.div>
       )}
 
       {/* Elapsed Time */}
