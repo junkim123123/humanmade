@@ -193,8 +193,19 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         
         // Start polling/Redirect process
         setLoadingStep("Initializing analysis...");
-        setLoadingProgress(5);
         
+        // --- [FIX] Smoothly animate to 5% to show immediate progress ---
+        const progressInterval = setInterval(() => {
+          setLoadingProgress((prev) => {
+            if (prev === undefined) return 1;
+            if (prev >= 5) {
+              clearInterval(progressInterval);
+              return 5;
+            }
+            return prev + 1;
+          });
+        }, 80);
+
         const pollInterval = setInterval(async () => {
           try {
             const verifyUrl = `/api/reports/${encodeURIComponent(reportIdStr)}`;
@@ -212,13 +223,14 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 
                 if (status === "processing" || status === "queued") {
                   const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
-                  const estimatedTotal = 180000; 
+                  // --- [FIX] Adjusted total time to 2 minutes ---
+                  const estimatedTotal = 120000; 
                   const progress = Math.min(90, 10 + (elapsed / estimatedTotal) * 80);
                   setLoadingProgress(progress);
                   
                   if (elapsed < 30000) setLoadingStep("Analyzing product images...");
-                  else if (elapsed < 90000) setLoadingStep("Searching supplier database...");
-                  else if (elapsed < 150000) setLoadingStep("Calculating costs and margins...");
+                  else if (elapsed < 60000) setLoadingStep("Searching supplier database...");
+                  else if (elapsed < 100000) setLoadingStep("Calculating costs and margins...");
                   else setLoadingStep("Finalizing report...");
                 } else if (status === "completed" || data.savedReport) { // Check savedReport here too
                   clearInterval(pollInterval);

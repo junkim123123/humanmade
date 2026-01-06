@@ -21,6 +21,7 @@ interface VerdictCardProps {
 
 export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCardProps) {
   const { decision, reasons, confidence } = verdict;
+  const displayConfidence = Math.min(confidence, 1);
   
   // Use template text if available, otherwise use reasons
   const displayText = verdictText || reasons.join(" ");
@@ -81,10 +82,10 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
                   ? "bg-amber-500"
                   : "bg-red-500"
               }`}
-              style={{ width: `${confidence * 100}%` }}
+              style={{ width: `${displayConfidence * 100}%` }}
             />
           </div>
-          <span className="text-[12px] text-slate-600 font-medium">{confidence * 100}% confidence</span>
+          <span className="text-[12px] text-slate-600 font-medium">{(displayConfidence * 100).toFixed(0)}% confidence</span>
         </div>
       </div>
       

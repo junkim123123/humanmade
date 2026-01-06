@@ -158,11 +158,12 @@ export function LoadingState({ progress, currentStep, estimatedTimeRemaining }: 
           <p className="text-sm text-slate-500 mt-1">
             Gemini is analyzing your product...
           </p>
-          <p className="text-xs text-slate-400 mt-2">
-            This usually takes about 2 minutes.
-          </p>
         </motion.div>
       )}
+
+      <p className="text-xs text-slate-500 -mt-2 mb-4">
+        This usually takes around 2 minutes.
+      </p>
 
       {/* Elapsed Time */}
       <div className="text-xs text-slate-400 mt-4">
