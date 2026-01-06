@@ -1,5 +1,3 @@
-<svg viewBox="0 0 260 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="10" width="80" height="80" rx="16" fill="#bbb"/>
-  <text x="40" y="70" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="64" font-weight="bold" fill="#fff">7</text>
-  <text x="110" y="70" font-family="Arial Black, Arial, sans-serif" font-size="48" font-weight="bold" fill="#222">Eleven</text>
+<svg viewBox="0 0 600 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <text x="50%" y="70" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="56" font-weight="bold" fill="#222">7-Eleven</text>
 </svg>

@@ -16,15 +16,22 @@ import { LocalBadge } from "@/components/ui/LocalBadge"
 
 function FinalCta() {
   return (
-    <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 py-16 sm:py-20 lg:py-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 sm:p-12 lg:p-16 shadow-2xl relative overflow-hidden border-2 border-white/10">
-          {/* Decorative background elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl"></div>
-          
+    <section className="relative py-16 sm:py-20 lg:py-24 overflow-hidden">
+      {/* Layered animated gradient background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 opacity-90"></div>
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40"></div>
+        {/* Animated shimmer overlay */}
+        <div className="absolute inset-0 pointer-events-none animate-[shimmer_6s_linear_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-60" style={{backgroundSize:'200% 100%'}}></div>
+        {/* Decorative blurred blobs */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl"></div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="rounded-2xl bg-gradient-to-br from-slate-900/95 to-slate-800/90 p-8 sm:p-12 lg:p-16 shadow-2xl border-2 border-white/10 relative overflow-hidden">
           <div className="relative z-10 text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-lg">
               Ready to out-source your competition?
             </h2>
             <p className="text-lg sm:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
@@ -50,6 +57,13 @@ function FinalCta() {
           </div>
         </div>
       </div>
+      {/* Keyframes for shimmer animation */}
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+      `}</style>
     </section>
   )
 }
