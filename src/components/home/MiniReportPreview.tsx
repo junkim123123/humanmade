@@ -12,6 +12,7 @@ interface MiniReportPreviewProps {
   mode?: MiniReportPreviewMode;
   compact?: boolean;
   variant?: "default" | "hero";
+  onStartVerification?: () => void;
   data?: {
     productName?: string;
     category?: string;
@@ -44,7 +45,13 @@ const MOCK_DATA = {
   costStack: { fob: 0.75, freight: 1.2, duty: 0.19, fees: 0.08 },
 };
 
-export function MiniReportPreview({ mode = "sample", compact = false, variant = "default", data }: MiniReportPreviewProps) {
+export function MiniReportPreview({
+  mode = "sample",
+  compact = false,
+  variant = "default",
+  onStartVerification = () => {},
+  data,
+}: MiniReportPreviewProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [activeTab, setActiveTab] = useState<"summary" | "cost" | "suppliers">("summary");
 
