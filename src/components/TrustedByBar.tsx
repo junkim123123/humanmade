@@ -53,52 +53,11 @@ export default function TrustedByBar() {
     },
     {
       key: "7eleven",
-      node: (
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              background: "#E5E7EB",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 800,
-              fontSize: 22,
-              color: "#6B7280",
-              flex: "0 0 auto",
-            }}
-          >
-            7
-          </div>
-          <div style={{ fontSize: 32, fontWeight: 800, color: "#3F3F46", lineHeight: 1 }}>
-            Eleven
-          </div>
-        </div>
-      ),
+      node: <LogoImg src="/logos/7-eleven.svg" alt="7 Eleven" height={30} maxWidth={340} />,
     },
     {
       key: "donki",
-      node: (
-        <div
-          style={{
-            height: 44,
-            padding: "0 18px",
-            borderRadius: 16,
-            background: "#E5E7EB",
-            display: "inline-flex",
-            alignItems: "center",
-            fontSize: 30,
-            fontWeight: 800,
-            color: "#3F3F46",
-            lineHeight: 1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Don Quijote
-        </div>
-      ),
+      node: <LogoImg src="/logos/don-quijote.svg" alt="Don Quijote" height={30} maxWidth={340} />,
     },
   ]
 
