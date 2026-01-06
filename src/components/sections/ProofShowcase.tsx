@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowRight, Candy, ToyBrick, Cookie } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
-import { TrustBar } from "@/components/marketing/TrustBar";
+import RetailerLogos from "@/components/marketing/RetailerLogos";
 
 interface ProductCard {
   id: string;
@@ -56,12 +56,8 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
   return (
       <section className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-24 lg:py-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Logo Row (replaces TrustBar) */}
-        <div className="flex flex-wrap justify-center items-center gap-6 mb-8">
-          <img src="/logos/costco.svg" alt="Costco Wholesale" className="h-8 w-auto opacity-80" style={{maxWidth: 120}} />
-          <img src="/logos/7eleven.svg" alt="7 Eleven" className="h-8 w-auto opacity-80" style={{maxWidth: 120}} />
-          <img src="/logos/donki.svg" alt="Don Quijote" className="h-8 w-auto opacity-80" style={{maxWidth: 120}} />
-        </div>
+        {/* Retailer Logos Row */}
+        <RetailerLogos className="mb-10" />
         {/* Header */}
         <FadeUp>
             <div className="text-center mb-16 lg:mb-20">
