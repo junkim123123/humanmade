@@ -55,6 +55,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     label?: string;
   }>({});
   const [apiError, setApiError] = useState<string | null>(null);
+  const [marketplace, setMarketplace] = useState<string>("Amazon FBA");
 
   // Hydrate from localStorage draft (used when public -> login -> app)
   useEffect(() => {
@@ -137,6 +138,16 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     if (files.label) formData.append("label", files.label);
     if (files.extra1) formData.append("extra1", files.extra1);
     if (files.extra2) formData.append("extra2", files.extra2);
+    
+    // Append shelfPrice to formData
+    if (form.shelfPrice) {
+      formData.append("shelfPrice", form.shelfPrice);
+    }
+
+    // Append marketplace to formData
+    if (marketplace) {
+      formData.append("marketplace", marketplace);
+    }
 
 
 
@@ -420,7 +431,13 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   <button
                     key={channel}
                     type="button"
-                    className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                    onClick={() => setMarketplace(channel)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg border text-sm font-medium transition-colors",
+                      marketplace === channel
+                        ? "bg-blue-500 border-blue-500 text-white"
+                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                    )}
                   >
                     {channel}
                   </button>
