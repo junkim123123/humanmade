@@ -75,13 +75,13 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
           {products.map((product, index) => (
             <FadeUp key={product.id} delay={index * 0.1}>
               <motion.div
-                className={`group relative rounded-2xl border border-slate-200 shadow-md overflow-hidden p-4 sm:p-6 h-full ${
+                className={`group relative rounded-xl border-2 border-slate-200 bg-white/90 shadow-lg overflow-hidden p-5 sm:p-7 h-full transition-all hover:shadow-2xl ${
                   product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                 }`}
                 style={{ minHeight: '500px' }} // 더 시원하게
                 whileHover={{ scale: 1.04, y: -6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      className={`group relative rounded-xl border-2 border-slate-200 bg-white/90 shadow-lg overflow-hidden p-5 sm:p-7 h-full transition-all hover:shadow-2xl ${
+              >
                 {/* Blurred Circle Gradient Background */}
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 blur-3xl pointer-events-none"
                   style={{
