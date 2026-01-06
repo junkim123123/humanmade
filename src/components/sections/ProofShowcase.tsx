@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowRight, Candy, ToyBrick, Cookie } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
-import { BrandTrustedByRow } from "@/components/sections/BrandTrustedByRow";
+import { TrustBar } from "@/components/marketing/TrustBar";
 
 interface ProductCard {
   id: string;
@@ -56,11 +56,11 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Brand Logos Row */}
-        <BrandTrustedByRow />
+        {/* Trust Bar (replaces logo row) */}
+        <TrustBar />
         {/* Header */}
         <FadeUp>
-          <div className="text-center mb-16 lg:mb-20">
+          <section className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-24 lg:py-32">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6">
               Products we've sourced
             </h2>
@@ -81,7 +81,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                 style={{ minHeight: '500px' }} // 더 시원하게
                 whileHover={{ scale: 1.04, y: -6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
+                      className={`group relative rounded-xl border-2 border-slate-200 bg-white/90 shadow-lg overflow-hidden p-5 sm:p-7 h-full transition-all hover:shadow-2xl ${
                 {/* Blurred Circle Gradient Background */}
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 blur-3xl pointer-events-none"
                   style={{
