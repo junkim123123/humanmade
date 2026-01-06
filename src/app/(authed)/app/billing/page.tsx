@@ -25,25 +25,28 @@ export default function BillingPage() {
   // Convert credits to dollar amount
   const balanceInDollars = balance * CREDIT_VALUE;
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [creditsRes, txRes] = await Promise.all([
-          fetchMyCredits(),
-          fetchMyCreditTransactions()
-        ]);
-        if (creditsRes.success) {
-          setBalance(creditsRes.balance || 0);
-        }
-        if (txRes.success) {
-          setTransactions(txRes.transactions || []);
-        }
-      } catch (err) {
-        console.error("Failed to load billing data", err);
-      } finally {
-        setLoading(false);
+  // --- [FIX] Refactor data loading into a single function ---
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [creditsRes, txRes] = await Promise.all([
+        fetchMyCredits(),
+        fetchMyCreditTransactions()
+      ]);
+      if (creditsRes.success) {
+        setBalance(creditsRes.balance || 0);
       }
+      if (txRes.success) {
+        setTransactions(txRes.transactions || []);
+      }
+    } catch (err) {
+      console.error("Failed to load billing data", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     void loadData();
   }, []);
 
@@ -66,7 +69,8 @@ export default function BillingPage() {
     setCodeMessage(null);
 
     try {
-      const response = await fetch("/api/credits/redeem-code", {
+      // --- [FIX] Add cache-busting parameter ---
+      const response = await fetch(`/api/credits/redeem-code?_=${new Date().getTime()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: codeInput.trim() }),
@@ -77,17 +81,8 @@ export default function BillingPage() {
       if (data.success) {
         setCodeMessage({ type: "success", text: data.message });
         setCodeInput("");
-        // Reload credits and transactions
-        const [creditsRes, txRes] = await Promise.all([
-          fetchMyCredits(),
-          fetchMyCreditTransactions()
-        ]);
-        if (creditsRes.success) {
-          setBalance(creditsRes.balance || 0);
-        }
-        if (txRes.success) {
-          setTransactions(txRes.transactions || []);
-        }
+        // --- [FIX] Reload data after successful redemption ---
+        await loadData();
       } else {
         setCodeMessage({ type: "error", text: data.error || "Failed to redeem code" });
       }

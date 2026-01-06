@@ -104,6 +104,25 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     setLoadingProgress(0);
     setLoadingStep("Preparing analysis...");
 
+    // Start a fake progress interval to provide immediate feedback
+    const fakeProgressInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev === undefined) return 0;
+        // Slowly increment to a small percentage and then hold
+        if (prev < 15) {
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 200);
+
+    const cleanup = (clearProgress = true) => {
+      clearInterval(fakeProgressInterval);
+      if (clearProgress) {
+        setLoading(false);
+      }
+    };
+
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -116,7 +135,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       } catch (e) {
         console.error("Failed to save draft", e);
         toast.error("Could not save your draft. Please try again.");
-        setLoading(false);
+        cleanup();
       }
       return;
     }
@@ -124,7 +143,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     if (mode === "app" && !user) {
       toast.error("Authentication required. Please sign in.");
       router.push("/login?redirect=/app/analyze");
-      setLoading(false);
+      cleanup();
       return;
     }
 
@@ -148,8 +167,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       });
 
       const data = await response.json();
+      
+      // Stop the fake progress once we have a response
+      cleanup(false);
 
-      // --- [FIX 1] Check for 'raw' or 'savedReport' in addition to 'reportId' ---
       const isSuccessful = data?.ok || data?.savedReport || data?.reportId || data?.raw || data?.success;
 
       if (!response.ok || !isSuccessful) {
@@ -169,10 +190,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         return;
       }
 
-      // --- [FIX 2] Updated Logic to handle data.raw and savedReport ---
       if (data?.reportId || data?.raw || data?.savedReport || data?.success) {
         
-        // Prioritize 'raw' as seen in your logs, fallback to 'trimmed' or 'reportId'
         const rawReportId = data.raw || data.trimmed || data.reportId;
         const reportIdStr = String(rawReportId).trim();
         
@@ -183,7 +202,6 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           success: data?.success
         });
         
-        // Validate reportId
         if (!reportIdStr || reportIdStr === 'null' || reportIdStr === 'undefined' || reportIdStr === '') {
           console.error("[AnalyzeForm] Invalid reportId received:", data);
           toast.error("Invalid report ID. Please try again.");
@@ -191,20 +209,8 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           return;
         }
         
-        // Start polling/Redirect process
         setLoadingStep("Initializing analysis...");
-        
-        // --- [FIX] Smoothly animate to 5% to show immediate progress ---
-        const progressInterval = setInterval(() => {
-          setLoadingProgress((prev) => {
-            if (prev === undefined) return 1;
-            if (prev >= 5) {
-              clearInterval(progressInterval);
-              return 5;
-            }
-            return prev + 1;
-          });
-        }, 80);
+        setLoadingProgress(15); // Start real progress from where the fake one left off
 
         const pollInterval = setInterval(async () => {
           try {
@@ -223,21 +229,19 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 
                 if (status === "processing" || status === "queued") {
                   const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
-                  // --- [FIX] Adjusted total time to 2 minutes ---
                   const estimatedTotal = 120000; 
-                  const progress = Math.min(90, 10 + (elapsed / estimatedTotal) * 80);
+                  const progress = Math.min(90, 15 + (elapsed / estimatedTotal) * 75);
                   setLoadingProgress(progress);
                   
                   if (elapsed < 30000) setLoadingStep("Analyzing product images...");
                   else if (elapsed < 60000) setLoadingStep("Searching supplier database...");
                   else if (elapsed < 100000) setLoadingStep("Calculating costs and margins...");
                   else setLoadingStep("Finalizing report...");
-                } else if (status === "completed" || data.savedReport) { // Check savedReport here too
+                } else if (status === "completed" || data.savedReport) {
                   clearInterval(pollInterval);
                   setLoadingProgress(100);
                   setLoadingStep("Analysis complete!");
                   
-                  // Ownership check
                   const { data: { user: currentUser } } = await supabase.auth.getUser();
                   if (report.user_id && currentUser && report.user_id !== currentUser.id) {
                      toast.error("This report belongs to another account.");
@@ -257,11 +261,9 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
           }
         }, 2000);
 
-        // Timeout
         setTimeout(() => {
           clearInterval(pollInterval);
           if (loading) {
-            // If it times out but we have a valid ID, just try going there
             toast.success("Redirecting to report...");
             router.push(`/reports/${reportIdStr}/v2`);
           }
@@ -274,11 +276,11 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         setLoading(false);
       }
     } catch (err) {
+      cleanup();
       const errorMessage = err instanceof Error ? err.message : "Failed to process analysis";
       console.error("[AnalyzeForm] Unexpected error:", err);
       setApiError(errorMessage);
       toast.error(errorMessage);
-      setLoading(false);
       if ((window as any).__analyzePollInterval) {
         clearInterval((window as any).__analyzePollInterval);
       }
