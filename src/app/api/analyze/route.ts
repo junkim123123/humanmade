@@ -583,7 +583,7 @@ export async function POST(request: Request) {
     // Heavy analysis (supplier matching, HS inference) runs in background job
     // Skip for guest users (they get full results immediately)
     // ============================================================================
-    if (process.env.ANALYZE_FAST_MODE === "true" && finalReportId && user) {
+    if (true && finalReportId && user) {
       try {
         const requestId = crypto.randomUUID();
         console.log(`[Analyze API] FAST_MODE enabled, using 2-phase response (requestId: ${requestId})`);
