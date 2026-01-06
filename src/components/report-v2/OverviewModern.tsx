@@ -200,7 +200,7 @@ function DecisionCard({ report }: { report: Report }) {
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-xs text-slate-500">Profit per unit:</span>
                     <motion.span 
-                      className={`text-lg font-bold ${profitPerUnit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                      className={`text-lg font-bold ${profitPerUnit >= 0 ? 'text-emerald-600' : 'text-emerald-500'}`}
                       key={`profit-${profitPerUnit?.toFixed(2)}`}
                       initial={{ scale: 1.1, opacity: 0.8 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -212,7 +212,7 @@ function DecisionCard({ report }: { report: Report }) {
                   <div className="flex items-baseline justify-between gap-2 pt-1.5 border-t border-slate-100">
                     <span className="text-xs text-slate-500">Margin %:</span>
                     <motion.span 
-                      className={`text-xl font-bold ${marginPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                      className={`text-xl font-bold ${marginPercent >= 0 ? 'text-emerald-600' : 'text-emerald-500'}`}
                       key={`margin-${marginPercent?.toFixed(1)}`}
                       initial={{ scale: 1.1, opacity: 0.8 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -228,7 +228,7 @@ function DecisionCard({ report }: { report: Report }) {
                   <div className="mt-3 pt-2 border-t border-slate-100">
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <motion.div
-                        className={`h-full ${marginPercent >= 0 ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
+                        className={`h-full ${marginPercent >= 0 ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-emerald-200 to-emerald-400'}`}
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(Math.abs(marginPercent), 100)}%` }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
