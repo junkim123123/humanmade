@@ -54,20 +54,20 @@ interface ProofShowcaseProps {
 
 export default function ProofShowcase({ products = sampleProducts }: ProofShowcaseProps) {
   return (
-    <section>
+      <section className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-24 lg:py-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Trust Bar (replaces logo row) */}
         <TrustBar />
         {/* Header */}
         <FadeUp>
-          <section className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-24 lg:py-32">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6">
-              Products we've sourced
-            </h2>
-            <p className="text-xl text-slate-500 max-w-2xl mx-auto">
-              Real products, verified factories, and measurable cost savings.
-            </p>
-          </div>
+            <div className="text-center mb-16 lg:mb-20">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6">
+                Products we've sourced
+              </h2>
+              <p className="text-xl text-slate-500 max-w-2xl mx-auto">
+                Real products, verified factories, and measurable cost savings.
+              </p>
+            </div>
         </FadeUp>
 
         {/* Product Cards Grid */}
