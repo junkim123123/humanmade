@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80">
-	<rect x="0" y="0" width="320" height="80" rx="24" fill="#FFE34D"/>
-	<text x="160" y="56" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="48" font-weight="bold" fill="#005BAC">Don Quijote</text>
+	<rect x="0" y="0" width="320" height="80" rx="24" fill="#ddd"/>
+	<text x="160" y="56" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="48" font-weight="bold" fill="#222">Don Quijote</text>
 </svg>
