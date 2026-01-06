@@ -123,7 +123,7 @@ export function DetectionSummary({
               <Tag className="w-3.5 h-3.5 text-slate-400" />
               <div className="text-xs font-medium text-slate-500">Category</div>
             </div>
-            <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-sm font-medium text-slate-700">
+            <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-sm font-medium text-slate-700 max-w-[180px] truncate" title={category}>
               {category}
             </span>
           </div>
@@ -136,11 +136,12 @@ export function DetectionSummary({
               <Hash className="w-3.5 h-3.5 text-slate-400" />
               <div className="text-xs font-medium text-slate-500">HS code candidates</div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 max-h-[48px] overflow-hidden">
               {hsCodeCandidates.slice(0, 3).map((code, index) => (
                 <code
                   key={index}
-                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono border border-blue-200"
+                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono border border-blue-200 max-w-[90px] truncate"
+                  title={code}
                 >
                   {code}
                 </code>

@@ -63,7 +63,7 @@ export function IntelligenceCard({ analysis: analysisInput }: IntelligenceCardPr
             <Tag className="w-4 h-4 text-slate-400" />
             <span className="text-sm font-medium text-slate-600">Category</span>
           </div>
-          <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-sm font-medium text-slate-700">
+          <span className="inline-block px-3 py-1 bg-slate-100 rounded-full text-sm font-medium text-slate-700 max-w-[180px] truncate" title={analysis.category}>
             {analysis.category}
           </span>
         </div>
@@ -75,11 +75,12 @@ export function IntelligenceCard({ analysis: analysisInput }: IntelligenceCardPr
               <Tag className="w-4 h-4 text-slate-400" />
               <span className="text-sm font-medium text-slate-600">Keywords</span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 max-h-[48px] overflow-hidden">
               {analysis.keywords.slice(0, 8).map((keyword: any, index: number) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-electric-blue-50 text-electric-blue-700 rounded-lg text-xs font-medium"
+                  className="px-2 py-1 bg-electric-blue-50 text-electric-blue-700 rounded-lg text-xs font-medium max-w-[90px] truncate"
+                  title={keyword}
                 >
                   {keyword}
                 </span>

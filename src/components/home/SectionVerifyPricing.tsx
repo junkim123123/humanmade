@@ -26,15 +26,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
           {/* Single Unified Pricing Card */}
           <div className="max-w-4xl mx-auto">
             <div className="relative rounded-2xl border-2 border-blue-200 bg-white shadow-2xl overflow-hidden">
-              {/* Free Credit Badge */}
-              <div className="absolute top-6 right-6 z-10">
-                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase tracking-wide shadow-lg">
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  FREE Monthly Credit
-                </div>
-              </div>
+              {/* Free Credit Badge removed for mobile view */}
 
               <div className="p-8 sm:p-10 lg:p-12">
                 {/* Pricing Header */}

@@ -42,10 +42,10 @@ function getVerdict(
     if (margin < 0) {
       return { verdict: "no-go", label: "No go", icon: <XCircle className="w-5 h-5" />, color: "text-red-600" };
     }
-    if (margin >= 30 && isHighEvidence && !hasKeyMissingInputs) {
+    if (margin >= 15 && isHighEvidence && !hasKeyMissingInputs) {
       return { verdict: "go", label: "Go", icon: <CheckCircle2 className="w-5 h-5" />, color: "text-green-600" };
     }
-    if (margin >= 15) {
+    if (margin >= 5) {
       return { verdict: "caution", label: "Verify before ordering", icon: <AlertCircle className="w-5 h-5" />, color: "text-yellow-600" };
     }
     return { verdict: "no-go", label: "No go", icon: <XCircle className="w-5 h-5" />, color: "text-red-600" };
