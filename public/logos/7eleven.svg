@@ -1,7 +1,5 @@
-<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g>
-    <rect width="32" height="32" rx="6" fill="#009540"/>
-    <text x="10" y="24" font-family="Arial Black, Arial, sans-serif" font-size="20" fill="#fff">7</text>
-    <text x="40" y="24" font-family="Arial Black, Arial, sans-serif" font-size="20" fill="#231F20">Eleven</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80">
+  <rect x="0" y="0" width="80" height="80" rx="16" fill="#009540"/>
+  <text x="40" y="60" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="64" font-weight="bold" fill="#fff">7</text>
+  <text x="100" y="60" font-family="Arial Black, Arial, sans-serif" font-size="48" font-weight="bold" fill="#231F20">Eleven</text>
 </svg>
