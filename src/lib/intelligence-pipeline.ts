@@ -459,6 +459,9 @@ async function analyzeProductImage(
     *   'logisticsType': 'bulky' (for furniture/mattresses/large items), 'fragile' (for plates/glass/lighting), or 'standard' (for jelly/clothing/general merchandise).
     *   'materialPremium': 'economy', 'standard', or 'premium' (based on visual quality and material type).
 3.  Clearly specify the main category, such as 'Food', 'Furniture', 'Lighting', 'Tableware', 'Electronics', 'Apparel', etc.
+4.  Estimate logistics dimensions:
+    *   'estimatedUnitCBM': Estimate the unit volume in cubic meters (e.g., 0.001 for a small box, 0.5 for a chair).
+    *   'unitWeightKg': Estimate the unit weight in kilograms.
 
 Return only valid JSON in the following format:
 {
@@ -479,6 +482,8 @@ Return only valid JSON in the following format:
     "logisticsType": "bulky | fragile | standard",
     "materialPremium": "economy | standard | premium"
   },
+  "estimatedUnitCBM": 0.01,
+  "unitWeightKg": 0.5,
   "keywords": ["keyword1", "keyword2", "keyword3"]
 }
 
@@ -539,6 +544,8 @@ Be specific and accurate. If HS Code is not clearly identifiable, set it to null
       attributes: analysis.attributes || {},
       keywords: analysis.keywords || [],
       confidence: 0.9, // Gemini 1.5 Flash typically has high confidence
+      estimatedUnitCBM: (analysis as any).estimatedUnitCBM,
+      unitWeightKg: (analysis as any).unitWeightKg,
     };
 
     // Normalize immediately after creation to ensure all array fields are safe
@@ -2545,6 +2552,25 @@ async function findSupplierMatches(
       evidenceSnippet: match.evidence?.evidenceSnippet || null,
       lastSeenDays: match.evidence?.lastSeenDays || null,
     });
+
+    // Apply recency and volume boosts (Data-Driven Sorting)
+    let finalRerankScore = score;
+    const recordCount = match.evidence?.recordCount || 0;
+    const lastSeenDays = match.evidence?.lastSeenDays;
+
+    // Boost for high volume (established supplier)
+    if (recordCount > 50) finalRerankScore += 10;
+    else if (recordCount > 10) finalRerankScore += 5;
+
+    // Boost for recency (active supplier)
+    if (lastSeenDays !== null && lastSeenDays !== undefined) {
+      if (lastSeenDays < 90) finalRerankScore += 10; // Very recent
+      else if (lastSeenDays < 180) finalRerankScore += 5; // Recent
+      else if (lastSeenDays > 730) finalRerankScore -= 10; // Old (>2 years)
+    }
+
+    // Cap score at 100
+    finalRerankScore = Math.min(100, finalRerankScore);
     
     // Resolve category profile for category_family
     const categoryProfile = resolveCategoryProfile(analysis.category || "unknown");
@@ -2576,7 +2602,7 @@ async function findSupplierMatches(
     
     return {
       ...match,
-      rerankScore: score, // Store reranked score separately
+      rerankScore: finalRerankScore, // Store reranked score separately
       // Keep original matchScore for reference
       // Store flags for debugging (not exposed to UI)
       _rerankFlags: flags,
@@ -3639,13 +3665,9 @@ IMPORTANT:
       return { min: baseMin, max: baseMax, method: "category_default" as const };
     })();
 
-    // Apply random fluctuation to Target Cost to ensure uniqueness (simulate real-time market flux)
-    // +/- 5% random variation
-    const randomFlux = 0.95 + Math.random() * 0.1;
-    if (categoryDefaultRange.min > 0) {
-      categoryDefaultRange.min *= randomFlux;
-      categoryDefaultRange.max *= randomFlux;
-    }
+    // REMOVED: Random fluctuation (randomFlux)
+    // We now use pure data-driven confidence intervals.
+    // If no data is available, we use wide category defaults without randomization.
 
     let finalRangeSource: MarketEstimate["source"] = rangeSource;
     let finalRangeMethod: MarketEstimate["rangeMethod"] | undefined = fobRangeFromData?.method;
@@ -3694,7 +3716,7 @@ IMPORTANT:
         typical: 60,
       },
       primaryProductionCountries: estimateRaw.primaryProductionCountries || [],
-      riskChecklist: estimateRaw.riskChecklist || [],
+      riskChecklist: estimateRaw.riskChecklist || getCategoryRiskChecklist(analysis.category), // Use category-specific fallback
       notes: estimateRaw.notes || "",
       source: finalRangeSource,
       rangeMethod: finalRangeMethod,
@@ -3831,7 +3853,8 @@ function calculateLandedCost(
   quantity: number,
   dutyRate: number,
   shippingCost: number,
-  fee: number
+  fee: number,
+  estimatedUnitCBM?: number // Optional CBM estimate from analysis
 ): LandedCost {
   console.log(
     `[Pipeline Step 3] Calculating landed cost for supplier: ${match.supplierName}`
@@ -3840,7 +3863,23 @@ function calculateLandedCost(
   const baseUnitPrice = match.unitPrice;
   const dutyAmount = baseUnitPrice * dutyRate;
   const shippingPerUnit = (() => {
-    // Advanced logistics calculation based on category type
+    // Advanced logistics calculation based on CBM (if available) or category type
+    
+    // 1. If CBM is available, use it for precise calculation
+    // Assume standard container shipping rates (approx $50/CBM LCL or $30/CBM FCL)
+    // This is a simplified model: Base Rate + Handling
+    if (estimatedUnitCBM && estimatedUnitCBM > 0) {
+      const cbmRate = 150; // $150 per CBM (conservative LCL rate including port fees)
+      const cbmCost = estimatedUnitCBM * cbmRate;
+      
+      // If the user provided a total shipping cost, we blend it
+      // If shippingCost is provided (e.g. $1000 for 500 units = $2/unit)
+      // We take the MAX of the CBM-based cost and the user-provided cost to be safe
+      const userPerUnit = shippingCost / quantity;
+      return Math.max(cbmCost, userPerUnit);
+    }
+
+    // 2. Fallback to category-based logic if no CBM
     const logisticsType = match.evidence?.productTypes?.some(t => 
       t.toLowerCase().includes('furniture') || t.toLowerCase().includes('sofa') || t.toLowerCase().includes('chair')
     ) ? 'bulky' : 
@@ -3877,7 +3916,7 @@ function calculateLandedCost(
     shippingCost: shippingPerUnit,
     fee: feePerUnit,
     totalLandedCost,
-    formula: `Unit * (1+Duty) + Shipping (${logisticsType}) + Fee = ${baseUnitPrice.toFixed(2)} * (1+${dutyRate}) + ${shippingPerUnit.toFixed(2)} + ${feePerUnit.toFixed(2)} = ${totalLandedCost.toFixed(2)}`,
+    formula: `Unit * (1+Duty) + Shipping + Fee = ${baseUnitPrice.toFixed(2)} * (1+${dutyRate}) + ${shippingPerUnit.toFixed(2)} + ${feePerUnit.toFixed(2)} = ${totalLandedCost.toFixed(2)}`,
     breakdown: {
       baseUnitPrice,
       dutyAmount,
@@ -3885,6 +3924,84 @@ function calculateLandedCost(
       feePerUnit,
     },
   };
+}
+
+// ============================================================================
+// Step 5: Category-Specific Logic (Risk & Duty)
+// ============================================================================
+
+/**
+ * Get category-specific risk checklist
+ */
+function getCategoryRiskChecklist(category: string): string[] {
+  const cat = category.toLowerCase();
+  
+  if (cat.includes("food") || cat.includes("candy") || cat.includes("snack")) {
+    return [
+      "FDA Registration Required (Food Facility)",
+      "Prior Notice filing for every shipment",
+      "Ingredient label compliance (FDA regulations)",
+      "Allergen declaration requirements",
+      "Shelf life and expiration date verification"
+    ];
+  }
+  
+  if (cat.includes("furniture") || cat.includes("sofa") || cat.includes("chair")) {
+    return [
+      "TB117-2013 Flammability compliance (California)",
+      "Lacey Act declaration (if wood components used)",
+      "Formaldehyde emission standards (TSCA Title VI)",
+      "Packaging drop test (ISTA 3A recommended for e-commerce)",
+      "Anti-dumping duty checks (especially from China)"
+    ];
+  }
+  
+  if (cat.includes("lighting") || cat.includes("lamp") || cat.includes("led")) {
+    return [
+      "UL/ETL Certification (Safety)",
+      "FCC Part 15 compliance (Radio frequency interference)",
+      "Energy Guide label (if applicable)",
+      "Lead content limits (California Prop 65)",
+      "Voltage compatibility (110V-120V for US)"
+    ];
+  }
+  
+  if (cat.includes("toy") || cat.includes("game") || cat.includes("kid")) {
+    return [
+      "CPC (Children's Product Certificate) required",
+      "ASTM F963 safety standard compliance",
+      "Lead and Phthalate testing (CPSC)",
+      "Small parts warning label (choking hazard)",
+      "Tracking label requirements (batch/date)"
+    ];
+  }
+
+  // Default General Merchandise
+  return [
+    "Customs value declaration accuracy",
+    "Country of Origin marking",
+    "Intellectual Property check (Trademarks/Patents)",
+    "Packaging compliance (recycling symbols)",
+    "California Prop 65 warning (if chemicals present)"
+  ];
+}
+
+/**
+ * Get category-specific estimated duty rate (if user input is 0/default)
+ */
+function getCategoryDutyEstimate(category: string): number {
+  const cat = category.toLowerCase();
+  
+  // Note: These are rough estimates for US imports (MFN rates)
+  // Actual rates vary by HS code and origin (Section 301 tariffs not included here to stay conservative)
+  
+  if (cat.includes("food")) return 0.05; // ~5%
+  if (cat.includes("furniture")) return 0.0; // Many furniture items are duty free (excluding 301)
+  if (cat.includes("lighting")) return 0.039; // ~3.9%
+  if (cat.includes("toy")) return 0.0; // Toys are generally duty free
+  if (cat.includes("textile") || cat.includes("apparel")) return 0.15; // ~15% (high duty)
+  
+  return 0.05; // Default 5%
 }
 
 // ============================================================================
@@ -4199,7 +4316,8 @@ export async function runIntelligencePipeline(
         params.quantity,
         params.dutyRate,
         params.shippingCost,
-        params.fee
+        params.fee,
+        normalizedAnalysis.estimatedUnitCBM // Pass estimated CBM
       ),
     }));
 
