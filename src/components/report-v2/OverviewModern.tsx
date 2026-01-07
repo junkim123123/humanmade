@@ -19,6 +19,7 @@ import ExtractionSummary from "./ExtractionSummary";
 import VerdictCard from "./cards/VerdictCard";
 import ActionPlan48hCard from "./cards/ActionPlan48hCard";
 import SensitivityCard from "./cards/SensitivityCard";
+import ConfidenceBuilder from "./cards/ConfidenceBuilder";
 import OriginSimulator from "./cards/OriginSimulator";
 
 // --- New DecisionCard for top of report ---
@@ -124,22 +125,21 @@ function DecisionCard({ report }: { report: Report }) {
               <span className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
                 ${bestEstimate.toFixed(2)}
               </span>
-              <span className="text-sm text-slate-500">per unit</span>
+              <span className="text-sm text-slate-500">Optimized cost per unit</span>
             </div>
             <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
               <p className="text-[13px] font-semibold text-amber-800 mb-1">
-                Uncertainty Range: ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
+                Conservative Estimate: ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
               </p>
               <p className="text-[12px] text-amber-700">
-                Only verification can lock the exact price. Range reflects missing data assumptions.
+                Based on current data. Verification will lock in the final price.
               </p>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>
-            {safeStrength.charAt(0).toUpperCase() + safeStrength.slice(1)} evidence
-            {safeStrength !== "high" && " — upgrade"}
+            {safeStrength === 'low' ? "Verification Required" : "Verification in Progress"}
           </span>
           <span className="text-[13px] text-slate-600">{evidenceSummary}</span>
         </div>
@@ -457,9 +457,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
       </>
 
       {/* Assumptions */}
-      <AssumptionsCard 
-        report={report}
-      />
+      <ConfidenceBuilder report={report} onUpgrade={() => setShowVerificationModal(true)} />
 
       {/* Label Confirmation Modal */}
       {showLabelConfirmation && (
