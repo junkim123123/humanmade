@@ -38,6 +38,59 @@ export function normalizeReport(report: any): any {
     };
   }
 
+  // Extract data from nested structures if needed
+  // Some reports store data in a `data` field (JSONB column)
+  const dataField = normalized.data;
+  if (dataField && typeof dataField === "object" && !Array.isArray(dataField)) {
+    // Merge data field into normalized report (data field takes precedence for nested values)
+    // But preserve top-level fields that might be more up-to-date
+    if (dataField.baseline && !normalized.baseline) {
+      normalized.baseline = dataField.baseline;
+    }
+    if (dataField.pipeline_result && !normalized.pipeline_result) {
+      normalized.pipeline_result = dataField.pipeline_result;
+    }
+    if (dataField.productName && !normalized.productName) {
+      normalized.productName = dataField.productName;
+    }
+    if (dataField.category && !normalized.category) {
+      normalized.category = dataField.category;
+    }
+    // Merge other fields from data if they don't exist at top level
+    Object.keys(dataField).forEach((key) => {
+      if (!(key in normalized) || normalized[key] === null || normalized[key] === undefined) {
+        normalized[key] = dataField[key];
+      }
+    });
+  }
+
+  // Extract baseline from various possible locations
+  if (!normalized.baseline || Object.keys(normalized.baseline).length === 0) {
+    // Try to find baseline in other locations
+    const possibleBaseline = 
+      normalized.baseline ||
+      (dataField?.baseline) ||
+      (normalized.pipeline_result?.baseline) ||
+      {};
+    
+    if (possibleBaseline && typeof possibleBaseline === "object" && Object.keys(possibleBaseline).length > 0) {
+      normalized.baseline = possibleBaseline;
+    }
+  }
+
+  // Extract pipeline_result from various possible locations
+  if (!normalized.pipeline_result || Object.keys(normalized.pipeline_result).length === 0) {
+    // Try to find pipeline_result in other locations
+    const possiblePipelineResult = 
+      normalized.pipeline_result ||
+      (dataField?.pipeline_result) ||
+      {};
+    
+    if (possiblePipelineResult && typeof possiblePipelineResult === "object" && Object.keys(possiblePipelineResult).length > 0) {
+      normalized.pipeline_result = possiblePipelineResult;
+    }
+  }
+
   // Ensure pipeline_result and scenarios exist
   if (!normalized.pipeline_result) {
     normalized.pipeline_result = {};
@@ -66,27 +119,53 @@ export function normalizeReport(report: any): any {
     normalized.id = normalized.reportId;
   }
 
-  // Ensure baseline and costRange exist
-  if (!normalized.baseline) {
+  // Ensure baseline and costRange exist - extract from actual data structure
+  if (!normalized.baseline || typeof normalized.baseline !== "object") {
     normalized.baseline = {};
   }
-  if (!normalized.baseline.costRange) {
-    normalized.baseline.costRange = {
-      standard: { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 },
-      conservative: { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 },
+
+  // Try to extract costRange from various possible structures
+  let costRange = normalized.baseline.costRange;
+  if (!costRange) {
+    // Check if costRange exists in a different format
+    if (normalized.baseline.standard || normalized.baseline.conservative) {
+      // costRange might be at baseline level directly
+      costRange = {
+        standard: normalized.baseline.standard || {},
+        conservative: normalized.baseline.conservative || {},
+      };
+    } else if (normalized.pipeline_result?.baseline?.costRange) {
+      // costRange might be in pipeline_result
+      costRange = normalized.pipeline_result.baseline.costRange;
+    } else if (dataField?.baseline?.costRange) {
+      // costRange might be in data field
+      costRange = dataField.baseline.costRange;
+    }
+  }
+
+  // If still no costRange, create default structure
+  if (!costRange || typeof costRange !== "object") {
+    costRange = {
+      standard: {},
+      conservative: {},
     };
   }
+
   // Ensure standard and conservative objects exist within costRange
-  if (!normalized.baseline.costRange.standard) {
-    normalized.baseline.costRange.standard = { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 };
+  if (!costRange.standard || typeof costRange.standard !== "object") {
+    costRange.standard = {};
   }
-  if (!normalized.baseline.costRange.conservative) {
-    normalized.baseline.costRange.conservative = { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 };
+  if (!costRange.conservative || typeof costRange.conservative !== "object") {
+    costRange.conservative = {};
   }
+
   // Ensure all required properties exist in standard and conservative
   const defaultCostFields = { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 };
-  normalized.baseline.costRange.standard = { ...defaultCostFields, ...normalized.baseline.costRange.standard };
-  normalized.baseline.costRange.conservative = { ...defaultCostFields, ...normalized.baseline.costRange.conservative };
+  costRange.standard = { ...defaultCostFields, ...costRange.standard };
+  costRange.conservative = { ...defaultCostFields, ...costRange.conservative };
+
+  // Set the normalized costRange back to baseline
+  normalized.baseline.costRange = costRange;
 
   // Normalize HS code fields from various sources
   // Check pipeline_result, baseline, signals, and marketEstimate
@@ -362,7 +441,7 @@ export function getSupplierMatches(report: any): NormalizedSupplierMatch[] {
           });
           return null;
         }
-      }).filter((match): match is NormalizedSupplierMatch => match !== null);
+      }).filter((match: NormalizedSupplierMatch | null): match is NormalizedSupplierMatch => match !== null);
     }
 
     // Priority 2: Combine _recommendedMatches and _candidateMatches
@@ -381,7 +460,7 @@ export function getSupplierMatches(report: any): NormalizedSupplierMatch[] {
           });
           return null;
         }
-      }).filter((match): match is NormalizedSupplierMatch => match !== null);
+      }).filter((match: NormalizedSupplierMatch | null): match is NormalizedSupplierMatch => match !== null);
     }
 
     // Priority 3: Fallback to legacy fields
@@ -397,7 +476,7 @@ export function getSupplierMatches(report: any): NormalizedSupplierMatch[] {
           });
           return null;
         }
-      }).filter((match): match is NormalizedSupplierMatch => match !== null);
+      }).filter((match: NormalizedSupplierMatch | null): match is NormalizedSupplierMatch => match !== null);
     }
 
     // No matches found
