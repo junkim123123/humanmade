@@ -241,7 +241,62 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 const report = verifyData.report;
                 const status = report.status || report.data?.status;
                 
-                if (status === "processing" || status === "queued") {
+                // Check if report is completed (multiple status formats supported)
+                const isCompleted = status === "completed" || 
+                                  status === "COMPLETED" || 
+                                  report.status === "completed" ||
+                                  report.status === "COMPLETED" ||
+                                  (report.data && report.data.status === "completed");
+                
+                if (isCompleted) {
+                  clearInterval(pollInterval);
+                  
+                  console.log("[AnalyzeForm] Report completed, redirecting...", {
+                    reportId: reportIdStr,
+                    status: status,
+                    reportStatus: report.status,
+                    dataStatus: report.data?.status
+                  });
+                  
+                  // 완료 시에도 부드럽게 100%까지 올라가도록 처리
+                  setLoadingStep("Finalizing report...");
+                  
+                  // 현재 진행률에서 100%까지 천천히 올라가도록 (약 1.5초에 걸쳐)
+                  const startProgress = Math.max(85, Math.min(99, loadingProgress || 85));
+                  let smoothProgress = startProgress;
+                  
+                  const smoothInterval = setInterval(() => {
+                    smoothProgress = Math.min(100, smoothProgress + 1.2); // 1.2%씩 증가
+                    setLoadingProgress(smoothProgress);
+                    
+                    if (smoothProgress >= 100) {
+                      clearInterval(smoothInterval);
+                      setLoadingStep("Analysis complete!");
+                      
+                      // 완료 후 약간의 딜레이를 두고 리다이렉트
+                      setTimeout(async () => {
+                        try {
+                          const { data: { user: currentUser } } = await supabase.auth.getUser();
+                          if (report.user_id && currentUser && report.user_id !== currentUser.id) {
+                             toast.error("This report belongs to another account.");
+                             setLoading(false);
+                             return;
+                          }
+                          
+                          toast.success("Analysis completed");
+                          console.log("[AnalyzeForm] Redirecting to:", `/reports/${reportIdStr}/v2`);
+                          router.push(`/reports/${reportIdStr}/v2`);
+                        } catch (redirectError) {
+                          console.error("[AnalyzeForm] Redirect error:", redirectError);
+                          toast.error("Failed to redirect. Please navigate manually.");
+                          setLoading(false);
+                        }
+                      }, 500);
+                    }
+                  }, 60); // 60ms마다 1.2%씩 증가 (약 1.5초에 100% 도달)
+                  
+                  return;
+                } else if (status === "processing" || status === "queued" || status === "PROCESSING" || status === "QUEUED") {
                   // 클라이언트 시간 기준으로 경과 시간 계산 (서버 시간 차이 보정)
                   const clientElapsed = Date.now() - pollingStartTime;
                   const estimatedTotal = 120000; // 2분 = 120초 = 120,000ms
@@ -270,40 +325,14 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   else if (clientElapsed < 100000) setLoadingStep("Computing landed costs...");
                   else if (clientElapsed < 110000) setLoadingStep("Generating market insights...");
                   else setLoadingStep("Finalizing report...");
-                } else if (status === "completed" || data.savedReport) {
-                  clearInterval(pollInterval);
-                  
-                  // 완료 시에도 부드럽게 100%까지 올라가도록 처리
-                  setLoadingStep("Finalizing report...");
-                  
-                  // 현재 진행률에서 100%까지 천천히 올라가도록 (약 2초에 걸쳐)
-                  const startProgress = Math.max(85, Math.min(99, loadingProgress || 85));
-                  let smoothProgress = startProgress;
-                  
-                  const smoothInterval = setInterval(() => {
-                    smoothProgress = Math.min(100, smoothProgress + 1.2); // 1.2%씩 증가
-                    setLoadingProgress(smoothProgress);
-                    
-                    if (smoothProgress >= 100) {
-                      clearInterval(smoothInterval);
-                      setLoadingStep("Analysis complete!");
-                      
-                      // 완료 후 약간의 딜레이를 두고 리다이렉트
-                      setTimeout(async () => {
-                        const { data: { user: currentUser } } = await supabase.auth.getUser();
-                        if (report.user_id && currentUser && report.user_id !== currentUser.id) {
-                           toast.error("This report belongs to another account.");
-                           setLoading(false);
-                           return;
-                        }
-                        
-                        toast.success("Analysis completed");
-                        router.push(`/reports/${reportIdStr}/v2`);
-                      }, 500);
-                    }
-                  }, 60); // 60ms마다 1.2%씩 증가 (약 1.5초에 100% 도달)
-                  
-                  return;
+                } else {
+                  // Unknown status - log for debugging
+                  console.warn("[AnalyzeForm] Unknown report status:", {
+                    status,
+                    reportStatus: report.status,
+                    dataStatus: report.data?.status,
+                    reportId: reportIdStr
+                  });
                 }
               }
             }
