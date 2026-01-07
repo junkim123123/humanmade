@@ -1486,12 +1486,37 @@ export async function POST(request: Request) {
       })),
     };
 
+    // DB 저장 전 confidence 값 정제 (DB 제약 조건 준수)
+    const sanitizeConfidence = (conf: any): "low" | "medium" | "high" => {
+      if (typeof conf === "string") {
+        const lower = conf.toLowerCase();
+        if (lower === "low" || lower === "medium" || lower === "high") {
+          return lower as "low" | "medium" | "high";
+        }
+      }
+      // 숫자 값이 들어온 경우 변환 (0-1 범위 또는 0-100 범위)
+      if (typeof conf === "number") {
+        let normalized = conf;
+        // 1보다 크면 0-100 범위로 가정하고 0-1로 변환
+        if (normalized > 1) {
+          normalized = normalized / 100;
+        }
+        // 0-1 범위로 클램핑
+        normalized = Math.min(Math.max(normalized, 0), 1);
+        return normalized >= 0.8 ? "high" : normalized >= 0.6 ? "medium" : "low";
+      }
+      // 기본값
+      return "medium";
+    };
+    
+    const sanitizedConfidence = sanitizeConfidence(report.confidence);
+
     const { data: updateData, error: updateError } = await admin
       .from("reports")
       .update({
         product_name: report.productName,
         category: report.category,
-        confidence: report.confidence,
+        confidence: sanitizedConfidence,
         signals: report.signals,
         baseline: report.baseline,
         data: {

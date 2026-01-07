@@ -229,8 +229,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 
                 if (status === "processing" || status === "queued") {
                   const elapsed = Date.now() - (report.created_at ? new Date(report.created_at).getTime() : Date.now());
-                  const estimatedTotal = 120000; 
-                  const progress = Math.min(90, 15 + (elapsed / estimatedTotal) * 75);
+                  const estimatedTotal = 120000; // 2분 = 120초 = 120,000ms
+                  // 15%에서 시작해서 2분 동안 85%까지 올라가도록 계산 (완료 시 100%까지 부드럽게)
+                  // 15% + (elapsed / 120000) * 70 = 15%에서 85%까지
+                  const progress = Math.min(85, 15 + (elapsed / estimatedTotal) * 70);
                   setLoadingProgress(progress);
                   
                   if (elapsed < 30000) setLoadingStep("Analyzing product images...");
@@ -239,19 +241,37 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   else setLoadingStep("Finalizing report...");
                 } else if (status === "completed" || data.savedReport) {
                   clearInterval(pollInterval);
-                  setLoadingProgress(100);
-                  setLoadingStep("Analysis complete!");
                   
-                  const { data: { user: currentUser } } = await supabase.auth.getUser();
-                  if (report.user_id && currentUser && report.user_id !== currentUser.id) {
-                     toast.error("This report belongs to another account.");
-                     setLoading(false);
-                     return;
-                  }
+                  // 완료 시에도 부드럽게 100%까지 올라가도록 처리
+                  setLoadingStep("Finalizing report...");
                   
-                  await new Promise(resolve => setTimeout(resolve, 500));
-                  toast.success("Analysis completed");
-                  router.push(`/reports/${reportIdStr}/v2`);
+                  // 현재 진행률에서 100%까지 천천히 올라가도록 (약 2초에 걸쳐)
+                  const startProgress = Math.max(85, Math.min(99, loadingProgress || 85));
+                  let smoothProgress = startProgress;
+                  
+                  const smoothInterval = setInterval(() => {
+                    smoothProgress = Math.min(100, smoothProgress + 1.2); // 1.2%씩 증가
+                    setLoadingProgress(smoothProgress);
+                    
+                    if (smoothProgress >= 100) {
+                      clearInterval(smoothInterval);
+                      setLoadingStep("Analysis complete!");
+                      
+                      // 완료 후 약간의 딜레이를 두고 리다이렉트
+                      setTimeout(async () => {
+                        const { data: { user: currentUser } } = await supabase.auth.getUser();
+                        if (report.user_id && currentUser && report.user_id !== currentUser.id) {
+                           toast.error("This report belongs to another account.");
+                           setLoading(false);
+                           return;
+                        }
+                        
+                        toast.success("Analysis completed");
+                        router.push(`/reports/${reportIdStr}/v2`);
+                      }, 500);
+                    }
+                  }, 60); // 60ms마다 1.2%씩 증가 (약 1.5초에 100% 도달)
+                  
                   return;
                 }
               }

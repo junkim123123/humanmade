@@ -14,14 +14,15 @@ export function LoadingState({ progress, currentStep, estimatedTimeRemaining }: 
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  // Animate progress smoothly
+  // Animate progress smoothly - 더 천천히 올라가도록 개선
   useEffect(() => {
     if (progress !== undefined) {
       const target = Math.min(100, Math.max(0, progress));
       const diff = target - animatedProgress;
       if (Math.abs(diff) > 0.5) {
-        const duration = 300;
-        const steps = 20;
+        // 진행률이 클수록 더 천천히 올라가도록 (2분 동안 부드럽게)
+        const duration = Math.max(500, Math.min(2000, Math.abs(diff) * 20)); // 최소 500ms, 최대 2000ms
+        const steps = 30; // 더 많은 단계로 부드럽게
         const increment = diff / steps;
         let current = animatedProgress;
         const interval = setInterval(() => {
