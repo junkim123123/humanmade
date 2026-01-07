@@ -69,7 +69,7 @@ export default function ReportV2Renderer({ report }: ReportV2RendererProps) {
     <>
       <V2RendererBadge />
       <div
-        className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50"
+        className="min-h-screen bg-white pb-24"
         style={{ ["--report-header-h" as any]: `${headerHeight}px` }}
       >
         <ReportV2HeaderWithTabs
@@ -78,7 +78,7 @@ export default function ReportV2Renderer({ report }: ReportV2RendererProps) {
           onHeightChange={setHeaderHeight}
         />
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
           <OverviewModern report={report} />
         </div>
       </div>

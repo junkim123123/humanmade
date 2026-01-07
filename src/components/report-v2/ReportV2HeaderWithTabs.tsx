@@ -118,70 +118,50 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
   return (
     <>
-      <div ref={headerRef} className="bg-white/95 backdrop-blur-sm border-b border-slate-200/80 top-0 z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={headerRef} className="bg-white border-b border-slate-200/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Row 1: Back link */}
-          <div className="py-3">
+          <div className="pt-6 pb-4">
             <Link
               href="/app/reports"
-              className="inline-flex items-center gap-1 text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors font-medium"
             >
               <ChevronLeft className="w-4 h-4" />
-              Reports
+              Back to Reports
             </Link>
           </div>
 
-          {/* Row 2: Product Info */}
-          <div className="pb-4">
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
-                {extractProductName(report.productName || (report as any).product_name)}
-              </h1>
-              {/* V2 Badge - visible marker to confirm correct renderer (dev only) */}
-              {process.env.NODE_ENV !== "production" && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                  Report V2
-                  {report.schemaVersion && (
-                    <span className="ml-1 text-blue-600">v{report.schemaVersion}</span>
-                  )}
-                </span>
-              )}
-            </div>
-            <div className="mt-2 flex items-center gap-2 sm:gap-3">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] sm:text-[12px] font-medium ${evidenceBadge.color}`}>
-                {evidenceBadge.label}
-              </span>
-              <span className="hidden sm:inline text-[11px] md:text-[13px] text-slate-500">
-                Draft buy plan — we&apos;ll lock numbers after verification.
-              </span>
-            </div>
+          {/* Row 2: Product Info - Clean and Spacious */}
+          <div className="pb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 leading-tight">
+              {extractProductName(report.productName || (report as any).product_name)}
+            </h1>
+            <p className="text-base text-slate-600 max-w-2xl">
+              Initial cost analysis complete. Review the estimate below and optimize with our verified network.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Sticky Bottom CTA */}
-      <div className="sticky bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 backdrop-blur-md shadow-lg">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="order-2 sm:order-1 flex-grow">
-              <div className="px-4 py-2.5 rounded-lg bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-200/60 max-w-full sm:max-w-md">
-                <p className="text-[11px] sm:text-[12px] font-semibold text-blue-900 mb-0.5 sm:mb-1">
-                  High-Impact Optimization
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-blue-800 leading-relaxed">
-                  Leverage NexSupply's internal network data to find factories with 15-20% higher margins than public data matches.
-                </p>
-              </div>
+      {/* Sticky Bottom CTA - Simplified and Cleaner */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white shadow-2xl">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-slate-900 mb-1">
+                Ready to optimize your sourcing?
+              </p>
+              <p className="text-sm text-slate-600">
+                Access verified factories with 15-20% better margins
+              </p>
             </div>
-            <div className="order-1 sm:order-2">
-              <button
-                onClick={handleRequestVerification}
-                disabled={isRequesting}
-                className="inline-flex items-center justify-center h-11 px-6 text-[14px] font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-60 shrink-0 w-full sm:w-auto"
-              >
-                {isRequesting ? "Starting..." : "Optimize Sourcing & Unlock Network"}
-              </button>
-            </div>
+            <button
+              onClick={handleRequestVerification}
+              disabled={isRequesting}
+              className="inline-flex items-center justify-center h-12 px-8 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {isRequesting ? "Starting..." : "Unlock Network ($49)"}
+            </button>
           </div>
         </div>
       </div>

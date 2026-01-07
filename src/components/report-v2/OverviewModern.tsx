@@ -117,138 +117,108 @@ function DecisionCard({ report }: { report: Report }) {
   if (inputStatus.boxSizeDefaultUsed) missingInputs.push("Box size default used");
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="px-6 py-5 border-b border-slate-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="text-[16px] font-semibold text-slate-900 mb-1">Decision</h3>
-          <p className="text-[12px] text-slate-500 mb-2">Initial Intelligence Draft. Our Research Engine will now apply proprietary data design to find the absolute floor price among verified partners.</p>
-          <div className="flex flex-col gap-2 mb-1">
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
-                ${bestEstimate.toFixed(2)}
-              </span>
-              <span className="text-sm text-slate-500">Optimized cost per unit</span>
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      {/* Hero Section - Big, Bold, Clean */}
+      <div className="px-8 py-10 bg-gradient-to-br from-slate-50 to-white">
+        <div className="max-w-3xl">
+          <div className="flex items-center gap-3 mb-6">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>
+              {safeStrength === 'low' ? "Preliminary" : safeStrength === 'medium' ? "Trade-Backed" : "Verified"}
+            </span>
+          </div>
+          
+          <div className="space-y-6">
+            {/* Main Price */}
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-3">Estimated Landed Cost</p>
+              <div className="flex items-baseline gap-4">
+                <span className="text-5xl sm:text-6xl font-bold text-slate-900 tracking-tight">
+                  ${bestEstimate.toFixed(2)}
+                </span>
+                <span className="text-lg text-slate-500">per unit</span>
+              </div>
             </div>
-            <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-              <p className="text-[13px] font-semibold text-amber-800 mb-1">
-                Conservative Estimate: ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
-              </p>
-              <p className="text-[12px] text-amber-700">
-                Based on current data. Verification will lock in the final price.
+
+            {/* Range Info */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50/60 border border-amber-200/60">
+              <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm text-amber-900">
+                Range: ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {missingInputs.some(input => input === "Origin missing") && (
+        <div className="px-8 py-5 bg-amber-50/40 border-t border-amber-100">
+          <div className="flex items-start gap-3">
+            <svg className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-900 mb-1">Origin Confirmation Needed</p>
+              <p className="text-sm text-amber-800 leading-relaxed">
+                Verification will confirm country of origin for accurate duty calculation
               </p>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>
-            {safeStrength === 'low' ? "Verification Required" : "Verification in Progress"}
-          </span>
-          <span className="text-[13px] text-slate-600">{evidenceSummary}</span>
-        </div>
-      </div>
-      {missingInputs.length > 0 && (
-        <div className="px-6 py-3">
-          {missingInputs.slice(0, 3).map((chip, i) => (
-            chip === "Origin missing" ? (
-              <div key={i} className="p-3 rounded-lg bg-amber-50 border-2 border-amber-300 mb-2 animate-subtle-pulse">
-                <div className="flex items-start gap-2">
-                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <div className="flex-1">
-                    <p className="text-[13px] font-semibold text-amber-900 mb-1">Critical: Origin missing</p>
-                    <p className="text-[12px] text-amber-800">Professional verification required to confirm country of origin for accurate duty calculation and compliance.</p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <span 
-                key={i} 
-                className="inline-block text-xs px-2 py-0.5 rounded-full border bg-slate-100 text-slate-500 border-slate-200 mr-2 mb-2"
-              >
-                {chip}
-              </span>
-            )
-          ))}
-        </div>
       )}
-      {/* Shelf Price Input & Margin Calculator */}
-      <div className="px-6 py-4 border-t border-slate-100 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-          <div className="flex-1">
-            <label htmlFor="shelf-price-input" className="block text-xs font-semibold text-slate-700 mb-2">
-              Shelf Price
+      {/* Shelf Price Input & Margin Calculator - Redesigned */}
+      <div className="px-8 py-8 border-t border-slate-200">
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="shelf-price-input" className="block text-sm font-semibold text-slate-900 mb-3">
+              Your Retail Price
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-lg">$</span>
               <input
                 id="shelf-price-input"
                 type="text"
                 inputMode="decimal"
-                placeholder={existingShelfPrice ? existingShelfPrice.toFixed(2) : "e.g. 14.99"}
+                placeholder="14.99"
                 value={shelfPriceInput !== "" ? shelfPriceInput : (targetSellPrice ? targetSellPrice.toFixed(2) : "")}
                 onChange={handleShelfPriceChange}
                 onBlur={handleShelfPriceBlur}
                 onKeyDown={handleShelfPriceKeyDown}
-                className="w-full pl-7 pr-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all bg-white"
+                className="w-full h-14 pl-10 pr-4 border-2 border-slate-300 rounded-xl text-lg font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all bg-white"
               />
             </div>
-            <p className="text-xs text-slate-500 mt-1.5">Enter your retail price to see calculated margin</p>
           </div>
 
-          {/* Margin Display - Real-time animated */}
+          {/* Margin Display */}
           {previewPrice && profitPerUnit !== null && marginPercent !== null && (
-            <div className="flex-shrink-0 sm:w-48">
-              <motion.div 
-                className="bg-white rounded-lg border-2 border-emerald-200 p-4 shadow-sm"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2 }}
-              >
-                <p className="text-xs font-semibold text-slate-600 mb-2">Expected Margin</p>
-                <div className="space-y-1.5">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-xs text-slate-500">Profit per unit:</span>
-                    <motion.span 
-                      className={`text-lg font-bold ${profitPerUnit >= 0 ? 'text-emerald-600' : 'text-emerald-500'}`}
-                      key={`profit-${profitPerUnit?.toFixed(2)}`}
-                      initial={{ scale: 1.1, opacity: 0.8 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    >
-                      {profitPerUnit >= 0 ? '+' : ''}${profitPerUnit.toFixed(2)}
-                    </motion.span>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-2 pt-1.5 border-t border-slate-100">
-                    <span className="text-xs text-slate-500">Margin %:</span>
-                    <motion.span 
-                      className={`text-xl font-bold ${marginPercent >= 0 ? 'text-emerald-600' : 'text-emerald-500'}`}
-                      key={`margin-${marginPercent?.toFixed(1)}`}
-                      initial={{ scale: 1.1, opacity: 0.8 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    >
-                      {marginPercent >= 0 ? '+' : ''}{marginPercent.toFixed(1)}%
-                    </motion.span>
-                  </div>
+            <motion.div 
+              className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border-2 border-emerald-200"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className="text-sm font-semibold text-emerald-900 mb-4">Your Profit</p>
+              <div className="space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm text-emerald-700">Per unit:</span>
+                  <motion.span 
+                    className="text-2xl font-bold text-emerald-600"
+                    key={`profit-${profitPerUnit?.toFixed(2)}`}
+                  >
+                    ${profitPerUnit.toFixed(2)}
+                  </motion.span>
                 </div>
-                
-                {/* Visual Margin Bar */}
-                {marginPercent !== null && (
-                  <div className="mt-3 pt-2 border-t border-slate-100">
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <motion.div
-                        className={`h-full ${marginPercent >= 0 ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-emerald-200 to-emerald-400'}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(Math.abs(marginPercent), 100)}%` }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-1 text-center">Margin visualization</p>
-                  </div>
-                )}
-              </motion.div>
-            </div>
+                <div className="flex items-baseline justify-between pt-3 border-t-2 border-emerald-200">
+                  <span className="text-sm text-emerald-700">Margin:</span>
+                  <motion.span 
+                    className="text-3xl font-bold text-emerald-600"
+                    key={`margin-${marginPercent?.toFixed(1)}`}
+                  >
+                    {marginPercent.toFixed(0)}%
+                  </motion.span>
+                </div>
+              </div>
+            </motion.div>
           )}
         </div>
       </div>
