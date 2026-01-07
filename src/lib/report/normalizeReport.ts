@@ -3,6 +3,8 @@
  * Ensures UI always has a consistent supplier candidates array
  */
 
+import { extractProductName } from "./extractProductName";
+
 /**
  * Normalize a report object to ensure consistent structure
  * Applies supplier match normalization and ensures required fields exist
@@ -30,11 +32,12 @@ export function normalizeReport(report: any): any {
   }
 
   // Ensure productName exists (handle both camelCase and snake_case)
-  if (!normalized.productName && normalized.product_name) {
-    normalized.productName = normalized.product_name;
-  }
-  if (!normalized.product_name && normalized.productName) {
-    normalized.product_name = normalized.productName;
+  // Extract readable name from JSON format if needed
+  const rawProductName = normalized.productName || normalized.product_name;
+  if (rawProductName) {
+    const extractedName = extractProductName(rawProductName);
+    normalized.productName = extractedName;
+    normalized.product_name = extractedName;
   }
 
   // Ensure id exists

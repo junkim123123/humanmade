@@ -7,6 +7,7 @@ import type { Report } from "@/lib/report/types";
 import { ChevronLeft } from "lucide-react";
 import { VerificationConfirmModal } from "@/components/verification/VerificationConfirmModal";
 import { getSupplierMatches } from "@/lib/report/normalizeReport";
+import { extractProductName } from "@/lib/report/extractProductName";
 
 interface ReportV2HeaderWithTabsProps {
   report: Report & {
@@ -134,7 +135,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           <div className="pb-4">
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
-                {report.productName}
+                {extractProductName(report.productName || report.product_name)}
               </h1>
               {/* V2 Badge - visible marker to confirm correct renderer (dev only) */}
               {process.env.NODE_ENV !== "production" && (
