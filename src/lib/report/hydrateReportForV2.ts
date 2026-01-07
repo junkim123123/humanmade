@@ -38,9 +38,33 @@ export async function hydrateReportForV2(
       return { ok: false, errorCode: "NOT_FOUND" };
     }
 
-  const reportAny = reportData as any;
+    const reportAny = reportData as any;
 
-  // Enforce access control
+    // Ensure report data structure exists
+    if (!reportAny) {
+      console.error("[HydrateReport] Report data is null or undefined:", reportId);
+      return { ok: false, errorCode: "NOT_FOUND" };
+    }
+
+    // Ensure baseline exists (may be empty object initially)
+    if (!reportAny.baseline || typeof reportAny.baseline !== "object") {
+      console.warn("[HydrateReport] Baseline missing or invalid, initializing:", reportId);
+      reportAny.baseline = reportAny.baseline || {};
+    }
+
+    // Ensure pipeline_result exists
+    if (!reportAny.pipeline_result || typeof reportAny.pipeline_result !== "object") {
+      console.warn("[HydrateReport] pipeline_result missing or invalid, initializing:", reportId);
+      reportAny.pipeline_result = reportAny.pipeline_result || { scenarios: [] };
+    }
+
+    // Ensure data field exists
+    if (!reportAny.data || typeof reportAny.data !== "object") {
+      console.warn("[HydrateReport] data field missing or invalid, initializing:", reportId);
+      reportAny.data = reportAny.data || {};
+    }
+
+    // Enforce access control
   // If report.user_id is null, allow anyone
   // If report.user_id exists, require viewerUserId and must match
   if (reportAny.user_id !== null && reportAny.user_id !== undefined) {

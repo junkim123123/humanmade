@@ -11,11 +11,32 @@ import { extractProductName } from "./extractProductName";
  */
 export function normalizeReport(report: any): any {
   if (!report) {
-    return report;
+    // Return minimal valid report structure
+    return {
+      baseline: { costRange: { standard: {}, conservative: {} } },
+      pipeline_result: { scenarios: [] },
+      _supplierMatches: [],
+      _recommendedMatches: [],
+      _candidateMatches: [],
+      _hsCandidates: [],
+    };
   }
 
   // Create a normalized copy
   const normalized = { ...report };
+  
+  // Ensure report is an object
+  if (typeof normalized !== "object" || Array.isArray(normalized)) {
+    console.error("[normalizeReport] Invalid report type:", typeof normalized);
+    return {
+      baseline: { costRange: { standard: {}, conservative: {} } },
+      pipeline_result: { scenarios: [] },
+      _supplierMatches: [],
+      _recommendedMatches: [],
+      _candidateMatches: [],
+      _hsCandidates: [],
+    };
+  }
 
   // Ensure pipeline_result and scenarios exist
   if (!normalized.pipeline_result) {
