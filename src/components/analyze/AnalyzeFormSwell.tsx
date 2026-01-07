@@ -15,7 +15,7 @@ const DRAFT_KEY = "analyzeDraft";
 
 const defaultValues = {
   destination: "US",
-  shippingMode: "air",
+  shippingMode: "sea",
   linkUrl: "",
 };
 

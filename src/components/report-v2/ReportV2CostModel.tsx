@@ -40,7 +40,7 @@ export default function ReportV2CostModel({ report }: ReportV2CostModelProps) {
   
   const [showRefineControls, setShowRefineControls] = useState(false);
   const [shippingMode, setShippingMode] = useState<"air" | "ocean">(
-    inferredInputs.shippingMode?.value || "ocean"
+    inferredInputs.shippingMode?.value || "ocean" // "ocean" = "sea" (same meaning)
   );
   const [unitWeight, setUnitWeight] = useState<string>("");
   const [cartonPack, setCartonPack] = useState<string>("");

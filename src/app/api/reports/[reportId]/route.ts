@@ -1323,6 +1323,9 @@ export async function GET(
 
   return NextResponse.json({
     ok: true,
-    report: reportWithDecision,
+    report: {
+      ...reportWithDecision,
+      status: data.status, // Include status for polling
+    },
   });
 }

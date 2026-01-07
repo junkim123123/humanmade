@@ -38,7 +38,7 @@ const PIPELINE_VERSION = process.env.PIPELINE_VERSION || "v1";
  * - extra1: File (optional)
  * - extra2: File (optional)
  * - destination: string (optional, default: \"US\")
- * - shippingMode: string (optional, default: \"air\")
+ * - shippingMode: string (optional, default: \"sea\")
  * - shelfPrice: string (optional)
  * - weight: string (optional, in kg)
  * - length: string (optional, in cm)
@@ -157,7 +157,17 @@ export async function POST(request: Request) {
 
     // Generate input key for deduplication
     const destination = formData.get("destination")?.toString() ?? null;
-    const shippingMode = formData.get("shippingMode")?.toString() ?? null;
+    let shippingMode = formData.get("shippingMode")?.toString() ?? null;
+    
+    // Normalize "sea" to "ocean" (same meaning, different terminology)
+    if (shippingMode === "sea") {
+      shippingMode = "ocean";
+    }
+    
+    // Default to "ocean" (sea) if not specified
+    if (!shippingMode) {
+      shippingMode = "ocean";
+    }
     
     // If rerun is requested, append a nonce to make the key unique
     let inputKey: string;

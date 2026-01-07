@@ -14,7 +14,7 @@ const DRAFT_KEY = "analyzeDraft";
 
 const defaultValues = {
   destination: "US",
-  shippingMode: "air",
+  shippingMode: "sea",
   linkUrl: "",
 };
 
@@ -242,11 +242,15 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                 const status = report.status || report.data?.status;
                 
                 // Check if report is completed (multiple status formats supported)
+                // Also treat undefined/null status as completed if report exists with data
+                // (pipeline must complete before report data is saved)
+                const hasReportData = report.productName || report.baseline || report.id;
                 const isCompleted = status === "completed" || 
                                   status === "COMPLETED" || 
                                   report.status === "completed" ||
                                   report.status === "COMPLETED" ||
-                                  (report.data && report.data.status === "completed");
+                                  (report.data && report.data.status === "completed") ||
+                                  (status === undefined && hasReportData);
                 
                 if (isCompleted) {
                   clearInterval(pollInterval);
@@ -325,6 +329,21 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   else if (clientElapsed < 100000) setLoadingStep("Computing landed costs...");
                   else if (clientElapsed < 110000) setLoadingStep("Generating market insights...");
                   else setLoadingStep("Finalizing report...");
+                } else if (status === "failed" || status === "FAILED" || status === "error" || status === "ERROR") {
+                  // Report failed - stop polling and show error
+                  clearInterval(pollInterval);
+                  console.error("[AnalyzeForm] Report failed:", { status, reportId: reportIdStr });
+                  toast.error("Analysis failed. Please try again.");
+                  setLoading(false);
+                  return;
+                } else if (status === undefined || status === null) {
+                  // Status undefined but report exists - might still be initializing
+                  // Continue polling but log for debugging
+                  console.log("[AnalyzeForm] Report status undefined, continuing to poll:", {
+                    reportId: reportIdStr,
+                    hasProductName: !!report.productName,
+                    hasBaseline: !!report.baseline
+                  });
                 } else {
                   // Unknown status - log for debugging
                   console.warn("[AnalyzeForm] Unknown report status:", {
@@ -497,7 +516,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                       className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
                     >
                       <option value="air">Air</option>
-                      <option value="ocean">Ocean</option>
+                      <option value="sea">Sea</option>
                     </select>
                   </div>
 

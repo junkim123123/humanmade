@@ -25,12 +25,16 @@ export async function POST(
       );
     }
 
-    const { unitWeight, unitsPerCase, countryOfOrigin, shippingMode } = body;
+    const { unitWeight, unitsPerCase, countryOfOrigin, shippingMode: rawShippingMode } = body;
+    
+    // Normalize "sea" to "ocean" (same meaning)
+    const shippingMode = rawShippingMode === "sea" ? "ocean" : (rawShippingMode || "ocean");
+    
     const unitWeightKg = unitWeight / 1000;
 
     // Recalculate shipping cost based on weight and mode
     const shippingPerUnitAir = 30 * unitWeightKg; // $30 per kg for air
-    const shippingPerUnitOcean = 5 * unitWeightKg; // $5 per kg for ocean
+    const shippingPerUnitOcean = 5 * unitWeightKg; // $5 per kg for ocean (sea)
     const shippingPerUnit = shippingMode === "air" ? shippingPerUnitAir : shippingPerUnitOcean;
 
     const oldCost = reportData.baseline.costRange.standard.totalLandedCost;
