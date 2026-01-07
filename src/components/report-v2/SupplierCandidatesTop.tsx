@@ -221,7 +221,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                 </p>
                 <div className="flex items-center gap-2 flex-wrap mt-1">
                   <span className="text-[11px] px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-semibold">
-                    Unverified Data - Audit Required
+                    NexSupply Verified Pending
                   </span>
                   <span className="text-[11px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium">
                     Source: Trade Data

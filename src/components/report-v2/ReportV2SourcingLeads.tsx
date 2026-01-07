@@ -43,7 +43,7 @@ function EvidenceBadge({ strength }: { strength: string | null | undefined }) {
   const config = {
     strong: { label: "Strong evidence", color: "bg-green-100 text-green-800" },
     medium: { label: "Keyword signal", color: "bg-yellow-100 text-yellow-800" },
-    weak: { label: "Unverified", color: "bg-slate-100 text-slate-800" },
+    weak: { label: "NexSupply Verified Pending", color: "bg-slate-100 text-slate-800" },
   };
   
   const match = config[strength as keyof typeof config] || config.weak;
@@ -272,7 +272,7 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
           {filteredUnverifiedLeads.length > 0 && (
             <div>
               <div className="mb-3">
-                <h3 className="text-sm font-semibold text-slate-900 mb-1">Unverified</h3>
+                <h3 className="text-sm font-semibold text-slate-900 mb-1">NexSupply Verified Pending</h3>
                 <p className="text-xs text-slate-600">
                   Potential matches based on category and keywords. Click company name to search.
                 </p>

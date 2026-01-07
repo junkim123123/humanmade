@@ -82,7 +82,7 @@ export default function ReportV2CostModel({ report }: ReportV2CostModelProps) {
               <tr>
                 <td className="py-2 px-3 text-slate-900 flex items-center gap-2">
                   Factory unit price estimate
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">Draft</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">Initial Intelligence Draft</span>
                 </td>
                 <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard.unitPrice || 0).toFixed(2)}</td>
                 <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative.unitPrice || 0).toFixed(2)}</td>

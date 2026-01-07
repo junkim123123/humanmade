@@ -21,6 +21,7 @@ import ActionPlan48hCard from "./cards/ActionPlan48hCard";
 import SensitivityCard from "./cards/SensitivityCard";
 import ConfidenceBuilder from "./cards/ConfidenceBuilder";
 import OriginSimulator from "./cards/OriginSimulator";
+import ProfitConversionCard from "./cards/ProfitConversionCard";
 
 // --- New DecisionCard for top of report ---
 function DecisionCard({ report }: { report: Report }) {
@@ -455,6 +456,12 @@ export default function OverviewModern({ report }: OverviewModernProps) {
           }
         })()}
       </>
+
+      {/* Profit Conversion Card */}
+      <ProfitConversionCard 
+        report={report} 
+        onUnlock={() => setShowVerificationModal(true)} 
+      />
 
       {/* Assumptions */}
       <ConfidenceBuilder report={report} onUpgrade={() => setShowVerificationModal(true)} />

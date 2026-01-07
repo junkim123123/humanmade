@@ -76,11 +76,20 @@ export default function DecisionCard({ report, onShowMissing }: DecisionCardProp
               key={i}
               className="text-xs px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full border border-amber-200 flex items-center gap-1"
             >
-              <span className="font-medium">Draft:</span>
+              <span className="font-medium">Initial Intelligence Draft:</span>
               <span>{missing.label}</span>
             </div>
           ))}
         </div>
+      )}
+
+      {missingInputsCount > 0 && (
+        <button
+          onClick={() => {}} // Placeholder for unlock action
+          className="w-full mb-3 px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm font-medium hover:bg-amber-200 transition-colors border border-amber-200"
+        >
+          Unlock proprietary data to see exact numbers
+        </button>
       )}
 
       <button

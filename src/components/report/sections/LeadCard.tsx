@@ -305,9 +305,9 @@ export function LeadCard({
                     case "medium":
                       return "Some evidence";
                     case "weak":
-                      return "Low evidence";
+                      return "Analyzing Industry Benchmarks";
                     default:
-                      return "Low evidence";
+                      return "Analyzing Industry Benchmarks";
                   }
                 };
                 return (

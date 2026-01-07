@@ -119,6 +119,12 @@ export interface ImageAnalysisResult {
     batteryType?: string; // For electronics
     certifications?: string[];
   } | null;
+  extendedKeywordSet?: {
+    processBased?: string[];
+    categoryBased?: string[];
+    supplyChainBased?: string[];
+    hsCodeExpansion?: string[];
+  };
 }
 
 export type SupplierType = "factory" | "trading" | "logistics" | "unknown";
@@ -201,7 +207,7 @@ export interface MarketEstimate {
   // Legacy alias used by UI components (kept for backward compatibility)
   evidenceSource?: "internal_records" | "llm_baseline";
   similarRecordsCount?: number; // Number of similar records found in DB or supplier prices
-  confidenceTier?: "low" | "medium" | "high"; // Based on data availability
+  confidenceTier?: "high_potential" | "medium" | "high"; // Based on data availability
   rangeMethod?: "p20p80" | "p25p75" | "minMaxClamp" | "medianPlusMinus" | "p35p65" | "p40p60" | "category_default";
   // Observed suppliers when evidenceSource is internal_records
   observedSuppliers?: Array<{
@@ -236,6 +242,20 @@ export interface MarketEstimate {
   recentImportersTotalShipments?: number; // Total matched shipments in the window
   // Backward compatibility for older payloads (deprecated)
   fobPriceRange?: MarketEstimate["fobUnitPriceRange"];
+  // New fields for scenario analysis
+  scenarioAnalysis?: {
+    originCountries?: Array<{
+      country: string;
+      tariffRange: {
+        bestCase: number;
+        worstCase: number;
+      };
+    }>;
+  };
+  volumeBasedPricing?: Array<{
+    quantity: number;
+    perUnit: number;
+  }>;
 }
 
 export interface IntelligencePipelineResult {
@@ -461,6 +481,11 @@ async function analyzeProductImage(
     *   'estimatedUnitCBM': Estimate the Cubic Meters (CBM) per unit based on visual dimensions. IMPORTANT for bulky items.
     *   'unitWeightKg': Estimate the weight in KG per unit.
 3.  Clearly specify the main category, such as 'Food', 'Furniture', 'Lighting', 'Tableware', 'Electronics', 'Apparel', etc.
+4.  Generate an 'extendedKeywordSet' for sourcing. This should include:
+    *   'processBased': Keywords related to manufacturing techniques (e.g., "Puffed candy extrusion", "Gelatin-based confectionery").
+    *   'categoryBased': Broader category terms (e.g., "Camping snacks", "S'mores ingredients").
+    *   'supplyChainBased': Keywords about competitor supply chains or OEM regions.
+    *   'hsCodeExpansion': Related HS codes beyond the primary one (e.g., "1806" for chocolate-containing sweets if primary is "1704.90").
 
 Return only valid JSON in the following format:
 {
@@ -483,7 +508,13 @@ Return only valid JSON in the following format:
     "estimatedUnitCBM": 0.5,
     "unitWeightKg": 10.5
   },
-  "keywords": ["keyword1", "keyword2", "keyword3"]
+  "keywords": ["keyword1", "keyword2", "keyword3"],
+  "extendedKeywordSet": {
+    "processBased": ["Puffed candy extrusion", "Gelatin-based confectionery"],
+    "categoryBased": ["Camping snacks", "S'mores ingredients"],
+    "supplyChainBased": ["Major US marshmallow brand OEM regions"],
+    "hsCodeExpansion": ["1806", "1704.90"]
+  }
 }
 
 Be specific and accurate. If HS Code is not clearly identifiable, set it to null.`;
@@ -1445,6 +1476,37 @@ function scoreCandidate(base: number, name: string): number {
   return base + factoryLikeBoost(name) - logisticsPenalty(name);
 }
 
+async function generateManufacturingKeywords(
+  productName: string,
+  keyAdjectives: string[]
+): Promise<string[]> {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const prompt = `Based on the product name "${productName}" and key adjectives "${keyAdjectives.join(
+      ", "
+    )}", generate a list of manufacturing-focused keywords optimized for global sourcing. For example, if the input is 'Barbecue Marshmallow', the output should be a JSON array like: ["Marshmallow wholesale", "Confectionery extrusion factory", "Camping food OEM", "High-temp stable sweets"]. Return only the JSON array of strings.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.warn("[AI Keywords] Failed to parse Gemini response as JSON array");
+      return [];
+    }
+
+    const keywords = JSON.parse(jsonMatch[0]) as string[];
+    console.log(
+      `[AI Keywords] Generated ${keywords.length} manufacturing keywords for "${productName}"`
+    );
+    return keywords;
+  } catch (error) {
+    console.error("[AI Keywords] Error generating manufacturing keywords:", error);
+    return [];
+  }
+}
+
 /**
  * Find supplier matches from Supabase cache
  * Searches by HS Code (priority), product name, category, and keywords
@@ -1540,6 +1602,11 @@ async function findSupplierMatches(
     });
   }
 
+  const manufacturingKeywords = await generateManufacturingKeywords(
+    analysis.productName,
+    (analysis.attributes?.keyAdjectives as string[]) || []
+  );
+
   // Priority 2: Optimized single-query search
   // Build search terms from product name, keywords, category, and material
   // Wrapped in try-catch for error resilience
@@ -1553,6 +1620,7 @@ async function findSupplierMatches(
       ...(asArrayString(analysis.keywords)),
       analysis.category,
       analysis.attributes?.material,
+      ...manufacturingKeywords,
     ]
       .filter(Boolean)
       .join(" ");
@@ -3499,9 +3567,9 @@ async function inferMarketEstimateWithGemini(
   const priceSignalCount = internalPriceSamples.length > 0
     ? internalPriceSamples.length
     : supplierPriceSamples.length;
-  const confidenceTier: "low" | "medium" | "high" = 
+  const confidenceTier: "high_potential" | "medium" | "high" = 
     priceSignalCount >= 50 ? "high" :
-    priceSignalCount >= 10 ? "medium" : "low";
+    priceSignalCount >= 10 ? "medium" : "high_potential";
 
   // Build RAG context
   const { buildRAGContext } = await import("@/lib/server/rag-context-builder");
@@ -3515,6 +3583,7 @@ async function inferMarketEstimateWithGemini(
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `You are a sourcing intelligence expert. Analyze this product and provide a comprehensive market estimate using the provided context.
+If data is insufficient for a definitive answer, use scenario-based analysis to provide actionable intelligence.
 
 PRODUCT INFORMATION:
 - Product: ${analysis.productName}
@@ -3526,7 +3595,10 @@ PRODUCT INFORMATION:
 RAG CONTEXT:
 ${JSON.stringify(ragContext, null, 2)}
 
-Provide a comprehensive market estimate in this exact JSON format (Pass B: Decision Synthesis):
+Provide a comprehensive market estimate in this exact JSON format. Apply the following logic for data gaps:
+1.  **Origin Scenarios**: If origin is uncertain, provide a 'scenarioAnalysis' object. For the top 3 potential origin countries (e.g., China, Vietnam, Mexico), show 'Best/Worst' tariff scenarios based on typical duty rates.
+2.  **Volume Pricing**: If a fixed factory-gate price is unavailable, create a 'volumeBasedPricing' table. Show how the per-unit price decreases with larger order quantities (e.g., 500, 5000 units).
+
 {
   "hs_code_ranking": [
     {
@@ -3572,7 +3644,17 @@ Provide a comprehensive market estimate in this exact JSON format (Pass B: Decis
     "Customs compliance",
     "Shipping logistics"
   ],
-  "notes": "Additional sourcing considerations"
+  "notes": "Additional sourcing considerations",
+  "scenarioAnalysis": {
+    "originCountries": [
+      { "country": "China", "tariffRange": { "bestCase": 0.05, "worstCase": 0.25 } },
+      { "country": "Vietnam", "tariffRange": { "bestCase": 0.03, "worstCase": 0.15 } }
+    ]
+  },
+  "volumeBasedPricing": [
+    { "quantity": 500, "perUnit": 0.55 },
+    { "quantity": 5000, "perUnit": 0.45 }
+  ]
 }
 
 IMPORTANT:
@@ -3699,6 +3781,9 @@ IMPORTANT:
       _evidenceLadderLevel: estimateRaw.price_range?.evidence_ladder_level || (similarImports.length > 0 ? "similar_import" : "category_prior"),
       _complianceChecklist: estimateRaw.compliance_checklist,
       _tightenInputs: estimateRaw.tighten_inputs,
+      // New scenario fields
+      scenarioAnalysis: estimateRaw.scenarioAnalysis,
+      volumeBasedPricing: estimateRaw.volumeBasedPricing,
     } as any;
 
     // Collect recent importers with fallback windows (90 → 180 → 365 days)
@@ -3808,8 +3893,10 @@ IMPORTANT:
       source: "llm_baseline",
       evidenceSource: "llm_baseline",
       similarRecordsCount: 0,
-      confidenceTier: "low",
+      confidenceTier: "high_potential",
       rangeMethod: "category_default",
+      scenarioAnalysis: undefined,
+      volumeBasedPricing: undefined,
     };
   }
 }
@@ -3827,29 +3914,38 @@ function calculateLandedCost(
   dutyRate: number,
   shippingCost: number,
   fee: number,
-  estimatedUnitCBM?: number // Optional CBM estimate from analysis
+  analysis: ImageAnalysisResult
 ): LandedCost {
   console.log(
     `[Pipeline Step 3] Calculating landed cost for supplier: ${match.supplierName}`
   );
 
+  // Apply benchmark enrichment if data is missing
+  const benchmarks = enrichWithBenchmarks(analysis, dutyRate, shippingCost, quantity);
+  
+  // Use benchmark values if original values were missing/zero
+  const effectiveDutyRate = benchmarks.dutyRate;
+  const effectiveShippingCost = benchmarks.shippingCost;
+
   const baseUnitPrice = match.unitPrice;
-  const dutyAmount = baseUnitPrice * dutyRate;
+  const dutyAmount = baseUnitPrice * effectiveDutyRate;
+  
   const shippingPerUnit = (() => {
+    // If we have a valid total shipping cost (user provided or benchmark), use it
+    if (effectiveShippingCost > 0) {
+      return effectiveShippingCost / quantity;
+    }
+
+    // Fallback to previous logic if somehow still 0 (should be covered by benchmarks)
     // Advanced logistics calculation based on CBM (if available) or category type
     
     // 1. If CBM is available, use it for precise calculation
     // Assume standard container shipping rates (approx $50/CBM LCL or $30/CBM FCL)
     // This is a simplified model: Base Rate + Handling
-    if (estimatedUnitCBM && estimatedUnitCBM > 0) {
+    if (analysis.estimatedUnitCBM && analysis.estimatedUnitCBM > 0) {
       const cbmRate = 150; // $150 per CBM (conservative LCL rate including port fees)
-      const cbmCost = estimatedUnitCBM * cbmRate;
-      
-      // If the user provided a total shipping cost, we blend it
-      // If shippingCost is provided (e.g. $1000 for 500 units = $2/unit)
-      // We take the MAX of the CBM-based cost and the user-provided cost to be safe
-      const userPerUnit = shippingCost / quantity;
-      return Math.max(cbmCost, userPerUnit);
+      const cbmCost = analysis.estimatedUnitCBM * cbmRate;
+      return cbmCost;
     }
 
     // 2. Fallback to category-based logic if no CBM
@@ -3860,42 +3956,120 @@ function calculateLandedCost(
       t.toLowerCase().includes('glass') || t.toLowerCase().includes('ceramic') || t.toLowerCase().includes('light')
     ) ? 'fragile' : 'standard';
 
-    let baseShipping = shippingCost / quantity;
+    // Default fallback if no shipping cost provided at all
+    let baseShipping = 0.5; // Default $0.50 per unit
 
     if (logisticsType === 'bulky') {
-      // CBM based calculation for furniture (approximate)
-      // Assuming 1 container fits fewer items, so per-unit cost is higher
       return baseShipping * 3.5; 
     } else if (logisticsType === 'fragile') {
-      // Fragile items need special packaging/handling + breakage insurance
-      // Add fixed cost for crating/packaging + 20% premium
-      const specialPackaging = 150 / quantity; // $150 fixed fee spread over quantity
+      const specialPackaging = 150 / quantity; 
       return (baseShipping * 1.2) + specialPackaging;
     }
     
-    // Food/Standard - weight based (already approximated by standard shippingCost input)
     return baseShipping;
   })();
 
   const feePerUnit = fee / quantity;
 
   // Formula: Unit * (1+Duty) + Shipping + Fee
-  const unitWithDuty = baseUnitPrice * (1 + dutyRate);
+  const unitWithDuty = baseUnitPrice * (1 + effectiveDutyRate);
   const totalLandedCost = unitWithDuty + shippingPerUnit + feePerUnit;
 
   return {
     unitPrice: baseUnitPrice,
-    dutyRate,
+    dutyRate: effectiveDutyRate,
     shippingCost: shippingPerUnit,
     fee: feePerUnit,
     totalLandedCost,
-    formula: `Unit * (1+Duty) + Shipping + Fee = ${baseUnitPrice.toFixed(2)} * (1+${dutyRate}) + ${shippingPerUnit.toFixed(2)} + ${feePerUnit.toFixed(2)} = ${totalLandedCost.toFixed(2)}`,
+    formula: `Unit * (1+Duty) + Shipping + Fee = ${baseUnitPrice.toFixed(2)} * (1+${effectiveDutyRate}) + ${shippingPerUnit.toFixed(2)} + ${feePerUnit.toFixed(2)} = ${totalLandedCost.toFixed(2)}${benchmarks.isBenchmark ? ' (Estimated)' : ''}`,
     breakdown: {
       baseUnitPrice,
       dutyAmount,
       shippingPerUnit,
       feePerUnit,
     },
+  };
+}
+
+// ============================================================================
+// Step 4: Benchmark Enrichment (Data Filling)
+// ============================================================================
+
+export interface BenchmarkData {
+  origin: string;
+  dutyRate: number;
+  shippingCost: number;
+  isBenchmark: boolean;
+  source: string;
+}
+
+/**
+ * Enrich missing data with category-based benchmarks
+ * Used when Origin, Duty, or Shipping are missing/null
+ */
+function enrichWithBenchmarks(
+  analysis: ImageAnalysisResult,
+  currentDuty: number,
+  currentShipping: number,
+  quantity: number
+): BenchmarkData {
+  const category = (analysis.category || "").toLowerCase();
+  
+  // 1. Origin & Duty Benchmarks
+  // Default to China if unknown, as it's the primary sourcing hub
+  let origin = "China";
+  let dutyRate = currentDuty;
+  
+  if (!dutyRate || dutyRate === 0) {
+    if (category.includes("textile") || category.includes("apparel")) {
+      dutyRate = 0.15; // ~15% for textiles
+      origin = "Vietnam"; // Alternative hub for textiles
+    } else if (category.includes("furniture")) {
+      dutyRate = 0.0; // Often duty free
+      origin = "Vietnam"; // Major furniture hub
+    } else if (category.includes("food")) {
+      dutyRate = 0.05; // ~5%
+    } else if (category.includes("electronics")) {
+      dutyRate = 0.0; // Information Technology Agreement (often 0%)
+    } else {
+      dutyRate = 0.05; // General merchandise default
+    }
+  }
+
+  // 2. Shipping Benchmarks
+  // Estimate based on product type if user input (currentShipping) is 0 or missing
+  let shippingCost = currentShipping;
+  
+  if (!shippingCost || shippingCost === 0) {
+    // Estimate per-unit shipping based on likely dimensions/weight
+    let perUnitShipping = 0.35; // Default small item
+    
+    if (analysis.estimatedUnitCBM) {
+      // If we have CBM, use it: $150/CBM (LCL rate)
+      perUnitShipping = analysis.estimatedUnitCBM * 150;
+    } else {
+      // Heuristic based on category
+      if (category.includes("furniture") || category.includes("sofa")) {
+        perUnitShipping = 45.0; // Bulky
+      } else if (category.includes("apparel") || category.includes("clothing")) {
+        perUnitShipping = 0.50; // Light but volume
+      } else if (category.includes("electronics")) {
+        perUnitShipping = 0.25; // Small, dense
+      } else if (category.includes("food") || category.includes("candy")) {
+        perUnitShipping = 0.15; // Small, heavy/dense
+      }
+    }
+    
+    // Convert per-unit to total shipping cost for the batch
+    shippingCost = perUnitShipping * quantity;
+  }
+
+  return {
+    origin,
+    dutyRate,
+    shippingCost,
+    isBenchmark: (!currentDuty || currentDuty === 0) || (!currentShipping || currentShipping === 0),
+    source: "NexSupply Benchmark"
   };
 }
 
@@ -4295,7 +4469,7 @@ export async function runIntelligencePipeline(
         params.dutyRate,
         params.shippingCost,
         params.fee,
-        normalizedAnalysis.estimatedUnitCBM // Pass estimated CBM
+        normalizedAnalysis // Pass full analysis for benchmark enrichment
       ),
     }));
 

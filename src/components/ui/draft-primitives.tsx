@@ -9,7 +9,7 @@ import { useState } from "react";
 export function DraftChip({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 ${className}`}>
-      Draft
+      Initial Intelligence Draft
     </span>
   );
 }
