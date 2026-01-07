@@ -1683,7 +1683,8 @@ async function findSupplierMatches(
   productId?: string,
   analysisId?: string,
   runtimeAllowHs2?: string[],
-  warnOnce?: (message: string) => void
+  warnOnce?: (message: string) => void,
+  reportId?: string // EMERGENCY FIX: Add reportId parameter
 ): Promise<{ matches: SupplierMatch[]; cached: boolean }> {
   console.log("[Pipeline Step 2] Starting supplier matching...");
   const supabase = await createClient();
@@ -3375,12 +3376,14 @@ async function findSupplierMatches(
       conflictColumns = "analysis_id,supplier_id";
     }
     
+    // EMERGENCY FIX: Store report_id if available (passed as parameter)
     const { error: cacheError } = await supabaseAdmin
       .from("product_supplier_matches")
       .upsert(
         finalMatches.map((match) => ({
           product_id: productId || null,
           analysis_id: analysisId || null,
+          report_id: reportId || null, // EMERGENCY FIX: Also store report_id for hydration
           supplier_id: match.supplierId,
           supplier_name: match.supplierName,
           product_name: match.productName,
@@ -4987,7 +4990,7 @@ export async function runIntelligencePipeline(
         analysisId, 
         runtimeAllowHs2, 
         warnOnce,
-        productSignals
+        (params as any).reportId // EMERGENCY FIX: Pass reportId if available
       );
       supplierMatches = matchResult.matches;
       matchesCached = matchResult.cached;

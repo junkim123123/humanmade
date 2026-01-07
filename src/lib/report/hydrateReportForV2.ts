@@ -84,12 +84,65 @@ export async function hydrateReportForV2(
   }
 
   // Fetch supplier matches from product_supplier_matches table
-  const { data: supplierMatchesData, error: matchesError } = await admin
+  // Try multiple ID fields: report_id, product_id, analysis_id
+  // (supplier matches may be stored with different ID types)
+  let supplierMatchesData: any[] | null = null;
+  let matchesError: any = null;
+  
+  // First try report_id (if matches are stored with report_id)
+  let query = admin
     .from("product_supplier_matches")
     .select("*")
-    .eq("report_id", reportId)
+    .eq("report_id", reportId);
+  
+  const { data: reportIdMatches, error: reportIdError } = await query
     .order("rerank_score", { ascending: false, nullsFirst: false })
     .order("match_score", { ascending: false, nullsFirst: false });
+  
+  if (reportIdMatches && reportIdMatches.length > 0) {
+    supplierMatchesData = reportIdMatches;
+    console.log(`[HydrateReport] Found ${supplierMatchesData.length} matches by report_id`);
+  } else {
+    // Try product_id or analysis_id from report data
+    const productId = reportAny.product_id;
+    const analysisId = reportAny.analysis_id;
+    
+    if (productId) {
+      const { data: productIdMatches, error: productIdError } = await admin
+        .from("product_supplier_matches")
+        .select("*")
+        .eq("product_id", productId)
+        .order("rerank_score", { ascending: false, nullsFirst: false })
+        .order("match_score", { ascending: false, nullsFirst: false });
+      
+      if (productIdMatches && productIdMatches.length > 0) {
+        supplierMatchesData = productIdMatches;
+        console.log(`[HydrateReport] Found ${supplierMatchesData.length} matches by product_id: ${productId}`);
+      } else if (productIdError) {
+        matchesError = productIdError;
+      }
+    }
+    
+    if (!supplierMatchesData && analysisId) {
+      const { data: analysisIdMatches, error: analysisIdError } = await admin
+        .from("product_supplier_matches")
+        .select("*")
+        .eq("analysis_id", analysisId)
+        .order("rerank_score", { ascending: false, nullsFirst: false })
+        .order("match_score", { ascending: false, nullsFirst: false });
+      
+      if (analysisIdMatches && analysisIdMatches.length > 0) {
+        supplierMatchesData = analysisIdMatches;
+        console.log(`[HydrateReport] Found ${supplierMatchesData.length} matches by analysis_id: ${analysisId}`);
+      } else if (analysisIdError && !matchesError) {
+        matchesError = analysisIdError;
+      }
+    }
+    
+    if (!supplierMatchesData && reportIdError) {
+      matchesError = reportIdError;
+    }
+  }
 
   // If match table read fails, try to use snapshot from data._v2Snapshot
   let normalizedMatches: NormalizedSupplierMatch[] = [];

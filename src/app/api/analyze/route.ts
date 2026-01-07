@@ -666,7 +666,8 @@ export async function POST(request: Request) {
         dutyRate: parsedDutyRate,
         shippingCost: parsedShippingCost,
         fee: parsedFee,
-      }, warnOnce);
+        reportId: finalReportId, // EMERGENCY FIX: Pass reportId so supplier matches can be stored with it
+      } as any, warnOnce); // Type assertion needed since reportId is not in interface yet
       console.log("[Analyze API] Pipeline completed successfully");
     } catch (pipelineError: any) {
       console.error("[Analyze API] Pipeline execution error:", {
