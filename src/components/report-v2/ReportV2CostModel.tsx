@@ -28,12 +28,15 @@ function getSourceBadge(source?: InferenceSource) {
 }
 
 export default function ReportV2CostModel({ report }: ReportV2CostModelProps) {
-  const costRange = report.baseline.costRange;
+  const costRange = report.baseline?.costRange || {
+    standard: { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0 },
+    conservative: { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0 }
+  };
   const reportAny = report as any;
   const priceUnit = reportAny._priceUnit || "per unit";
   
   // Get inferred inputs from baseline evidence
-  const inferredInputs = report.baseline.evidence.inferredInputs || {};
+  const inferredInputs = report.baseline?.evidence?.inferredInputs || {};
   
   const [showRefineControls, setShowRefineControls] = useState(false);
   const [shippingMode, setShippingMode] = useState<"air" | "ocean">(
@@ -46,21 +49,21 @@ export default function ReportV2CostModel({ report }: ReportV2CostModelProps) {
   const v2Data = reportAny.v2;
   
   const standardTotal = v2Data?.costModel?.standard?.totalLandedCost ?? 
-    (costRange.standard.unitPrice || 0) +
-    (costRange.standard.shippingPerUnit || 0) +
-    (costRange.standard.dutyPerUnit || 0) +
-    (costRange.standard.feePerUnit || 0);
+    (costRange.standard?.unitPrice || 0) +
+    (costRange.standard?.shippingPerUnit || 0) +
+    (costRange.standard?.dutyPerUnit || 0) +
+    (costRange.standard?.feePerUnit || 0);
   
   const conservativeTotal = v2Data?.costModel?.conservative?.totalLandedCost ??
-    (costRange.conservative.unitPrice || 0) +
-    (costRange.conservative.shippingPerUnit || 0) +
-    (costRange.conservative.dutyPerUnit || 0) +
-    (costRange.conservative.feePerUnit || 0);
+    (costRange.conservative?.unitPrice || 0) +
+    (costRange.conservative?.shippingPerUnit || 0) +
+    (costRange.conservative?.dutyPerUnit || 0) +
+    (costRange.conservative?.feePerUnit || 0);
 
   // Check which components have inferred values
-  const hasInferredFreight = (costRange.standard.shippingPerUnit || 0) > 0;
-  const hasInferredDuty = (costRange.standard.dutyPerUnit || 0) > 0;
-  const hasInferredFees = (costRange.standard.feePerUnit || 0) > 0;
+  const hasInferredFreight = (costRange.standard?.shippingPerUnit || 0) > 0;
+  const hasInferredDuty = (costRange.standard?.dutyPerUnit || 0) > 0;
+  const hasInferredFees = (costRange.standard?.feePerUnit || 0) > 0;
   const hasAnyInferred = hasInferredFreight || hasInferredDuty || hasInferredFees;
 
   return (
@@ -84,32 +87,32 @@ export default function ReportV2CostModel({ report }: ReportV2CostModelProps) {
                   Factory unit price estimate
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">Initial Intelligence Draft</span>
                 </td>
-                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard.unitPrice || 0).toFixed(2)}</td>
-                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative.unitPrice || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard?.unitPrice || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative?.unitPrice || 0).toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 text-slate-900">
                   Freight
                   {hasInferredFreight && getSourceBadge(inferredInputs.shippingPerUnit?.source)}
                 </td>
-                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard.shippingPerUnit || 0).toFixed(2)}</td>
-                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative.shippingPerUnit || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard?.shippingPerUnit || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative?.shippingPerUnit || 0).toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 text-slate-900">
                   Duty
                   {hasInferredDuty && getSourceBadge(inferredInputs.dutyRate?.source)}
                 </td>
-                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard.dutyPerUnit || 0).toFixed(2)}</td>
-                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative.dutyPerUnit || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard?.dutyPerUnit || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative?.dutyPerUnit || 0).toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 text-slate-900">
                   Fees
                   {hasInferredFees && getSourceBadge(inferredInputs.feesPerUnit?.source)}
                 </td>
-                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard.feePerUnit || 0).toFixed(2)}</td>
-                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative.feePerUnit || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-900">${(costRange.standard?.feePerUnit || 0).toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-slate-600">${(costRange.conservative?.feePerUnit || 0).toFixed(2)}</td>
               </tr>
               <tr className="border-t-2 border-slate-300 font-semibold">
                 <td className="py-2 px-3 text-slate-900">Total</td>

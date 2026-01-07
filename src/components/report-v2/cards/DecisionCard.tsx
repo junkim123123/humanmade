@@ -10,12 +10,12 @@ interface DecisionCardProps {
 }
 
 export default function DecisionCard({ report, onShowMissing }: DecisionCardProps) {
-  const costRange = report.baseline.costRange;
+  const costRange = report.baseline?.costRange;
   const maxCost = 
-    (costRange.standard.unitPrice || 0) +
-    (costRange.standard.shippingPerUnit || 0) +
-    (costRange.standard.dutyPerUnit || 0) +
-    (costRange.standard.feePerUnit || 0);
+    (costRange?.standard?.unitPrice || 0) +
+    (costRange?.standard?.shippingPerUnit || 0) +
+    (costRange?.standard?.dutyPerUnit || 0) +
+    (costRange?.standard?.feePerUnit || 0);
 
   const quality = computeReportQuality(report);
   const missingInputsCount = countMissingCriticalInputs(report);

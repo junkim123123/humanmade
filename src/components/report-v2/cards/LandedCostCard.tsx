@@ -8,8 +8,8 @@ interface LandedCostCardProps {
 }
 
 export default function LandedCostCard({ costRange }: LandedCostCardProps) {
-  const conservative = costRange.conservative.totalLandedCost;
-  const standard = costRange.standard.totalLandedCost;
+  const conservative = costRange?.conservative?.totalLandedCost || 0;
+  const standard = costRange?.standard?.totalLandedCost || 0;
   const min = Math.min(conservative, standard);
   const max = Math.max(conservative, standard);
   const mid = (min + max) / 2;
@@ -57,24 +57,24 @@ export default function LandedCostCard({ costRange }: LandedCostCardProps) {
       <div className="space-y-2 pt-4 border-t border-slate-100">
         <CostDriver 
           label="Factory unit price estimate" 
-          value={costRange.standard.unitPrice} 
-          percent={standard > 0 ? (costRange.standard.unitPrice / standard * 100) : 0}
+          value={costRange?.standard?.unitPrice || 0} 
+          percent={standard > 0 ? ((costRange?.standard?.unitPrice || 0) / standard * 100) : 0}
           draft={unitPriceDraft}
         />
         <CostDriver 
           label="Shipping" 
-          value={costRange.standard.shippingPerUnit} 
-          percent={standard > 0 ? (costRange.standard.shippingPerUnit / standard * 100) : 0}
+          value={costRange?.standard?.shippingPerUnit || 0} 
+          percent={standard > 0 ? ((costRange?.standard?.shippingPerUnit || 0) / standard * 100) : 0}
         />
         <CostDriver 
           label="Duty" 
-          value={costRange.standard.dutyPerUnit} 
-          percent={standard > 0 ? (costRange.standard.dutyPerUnit / standard * 100) : 0}
+          value={costRange?.standard?.dutyPerUnit || 0} 
+          percent={standard > 0 ? ((costRange?.standard?.dutyPerUnit || 0) / standard * 100) : 0}
         />
         <CostDriver 
           label="Fees" 
-          value={costRange.standard.feePerUnit} 
-          percent={standard > 0 ? (costRange.standard.feePerUnit / standard * 100) : 0}
+          value={costRange?.standard?.feePerUnit || 0} 
+          percent={standard > 0 ? ((costRange?.standard?.feePerUnit || 0) / standard * 100) : 0}
         />
       </div>
     </div>

@@ -18,17 +18,17 @@ function getVerdict(
   missingInputs: string[],
   targetSellPrice?: number
 ): {
-  verdict: "go" | "caution" | "no-go";
+  verdict: "go" | "caution" | "no-go" | "volume-sensitive" | "requires-verification";
   label: string;
   icon: React.ReactNode;
   color: string;
 } {
   // Calculate total manually (same as Cost Model)
   const maxCost = 
-    (costRange.standard.unitPrice || 0) +
-    (costRange.standard.shippingPerUnit || 0) +
-    (costRange.standard.dutyPerUnit || 0) +
-    (costRange.standard.feePerUnit || 0);
+    (costRange?.standard?.unitPrice || 0) +
+    (costRange?.standard?.shippingPerUnit || 0) +
+    (costRange?.standard?.dutyPerUnit || 0) +
+    (costRange?.standard?.feePerUnit || 0);
   
   // Rule set: Verdict based on evidenceLevel and missing inputs
   // Go only when evidenceLevel is verified_quote or exact_import and totals are fully computed
@@ -39,21 +39,27 @@ function getVerdict(
   // Check for negative margin when target price is provided
   if (targetSellPrice) {
     const margin = ((targetSellPrice - maxCost) / targetSellPrice) * 100;
-    if (margin < 0) {
-      return { verdict: "no-go", label: "No go", icon: <XCircle className="w-5 h-5" />, color: "text-emerald-500" };
+    // Only show "No Go" for illegal items (hasComplianceRedFlags)
+    if (margin < 0 && hasComplianceRedFlags) {
+      return { verdict: "no-go", label: "No go", icon: <XCircle className="w-5 h-5" />, color: "text-red-600" };
     }
-    if (margin >= 15 && isHighEvidence && !hasKeyMissingInputs) {
+    // For tight margins, show "Volume Sensitive" instead of "No Go"
+    if (margin < 0) {
+      return { verdict: "volume-sensitive", label: "Volume Sensitive", icon: <AlertCircle className="w-5 h-5" />, color: "text-yellow-600" };
+    }
+    if (margin >= 30 && isHighEvidence && !hasKeyMissingInputs) {
       return { verdict: "go", label: "Go", icon: <CheckCircle2 className="w-5 h-5" />, color: "text-green-600" };
     }
-    if (margin >= 5) {
+    if (margin >= 15) {
       return { verdict: "caution", label: "Verify before ordering", icon: <AlertCircle className="w-5 h-5" />, color: "text-yellow-600" };
     }
-    return { verdict: "no-go", label: "No go", icon: <XCircle className="w-5 h-5" />, color: "text-emerald-500" };
+    // Tight margin but not negative - show "Volume Sensitive"
+    return { verdict: "volume-sensitive", label: "Volume Sensitive", icon: <AlertCircle className="w-5 h-5" />, color: "text-yellow-600" };
   }
   
-  // Without target price: Caution when evidenceLevel is similar_import or category_prior, or when key inputs are missing
+  // Without target price: Show "Requires Verification" when evidence is low or inputs are missing
   if (hasKeyMissingInputs || evidenceLevel === "similar_import" || evidenceLevel === "category_prior") {
-    return { verdict: "caution", label: "Verify before ordering", icon: <AlertCircle className="w-5 h-5" />, color: "text-yellow-600" };
+    return { verdict: "requires-verification", label: "Requires Verification", icon: <AlertCircle className="w-5 h-5" />, color: "text-blue-600" };
   }
   
   // Only Go when we have high evidence and no missing inputs
@@ -61,16 +67,16 @@ function getVerdict(
     return { verdict: "go", label: "Go", icon: <CheckCircle2 className="w-5 h-5" />, color: "text-green-600" };
   }
   
-  // Default to caution
-  return { verdict: "caution", label: "Verify before ordering", icon: <AlertCircle className="w-5 h-5" />, color: "text-yellow-600" };
+  // Default to "Requires Verification"
+  return { verdict: "requires-verification", label: "Requires Verification", icon: <AlertCircle className="w-5 h-5" />, color: "text-blue-600" };
 }
 
 function getBiggestDrivers(costRange: Report["baseline"]["costRange"]): string[] {
   const drivers: Array<{ name: string; value: number }> = [
-    { name: "Factory unit price estimate", value: costRange.standard.unitPrice },
-    { name: "Shipping", value: costRange.standard.shippingPerUnit },
-    { name: "Duty", value: costRange.standard.dutyPerUnit },
-    { name: "Fees", value: costRange.standard.feePerUnit },
+    { name: "Factory unit price estimate", value: costRange?.standard?.unitPrice || 0 },
+    { name: "Shipping", value: costRange?.standard?.shippingPerUnit || 0 },
+    { name: "Duty", value: costRange?.standard?.dutyPerUnit || 0 },
+    { name: "Fees", value: costRange?.standard?.feePerUnit || 0 },
   ];
   
   drivers.sort((a, b) => b.value - a.value);
@@ -99,7 +105,7 @@ function getBiggestUnknowns(report: Report): string[] {
 
 function getWhySummary(report: Report, evidenceLevel: string | undefined, missingInputs: string[]): string[] {
   const summary: string[] = [];
-  const costRange = report.baseline.costRange;
+  const costRange = report.baseline?.costRange;
   const reportAny = report as any;
   const v2Data = reportAny.v2;
   const priceUnit = reportAny._priceUnit || "per unit";
@@ -114,24 +120,24 @@ function getWhySummary(report: Report, evidenceLevel: string | undefined, missin
     maxCost = normalized.max;
   } else {
     const standardTotal =
-      (costRange.standard.unitPrice || 0) +
-      (costRange.standard.shippingPerUnit || 0) +
-      (costRange.standard.dutyPerUnit || 0) +
-      (costRange.standard.feePerUnit || 0);
+      (costRange?.standard?.unitPrice || 0) +
+      (costRange?.standard?.shippingPerUnit || 0) +
+      (costRange?.standard?.dutyPerUnit || 0) +
+      (costRange?.standard?.feePerUnit || 0);
     const conservativeTotal =
-      (costRange.conservative.unitPrice || 0) +
-      (costRange.conservative.shippingPerUnit || 0) +
-      (costRange.conservative.dutyPerUnit || 0) +
-      (costRange.conservative.feePerUnit || 0);
+      (costRange?.conservative?.unitPrice || 0) +
+      (costRange?.conservative?.shippingPerUnit || 0) +
+      (costRange?.conservative?.dutyPerUnit || 0) +
+      (costRange?.conservative?.feePerUnit || 0);
 
     minCost = Math.min(standardTotal, conservativeTotal);
     maxCost = Math.max(standardTotal, conservativeTotal);
   }
 
-  const hasUnitPrice = (costRange.standard.unitPrice || 0) > 0;
-  const hasShipping = (costRange.standard.shippingPerUnit || 0) > 0;
-  const hasDuty = (costRange.standard.dutyPerUnit || 0) > 0;
-  const hasFees = (costRange.standard.feePerUnit || 0) > 0;
+  const hasUnitPrice = (costRange?.standard?.unitPrice || 0) > 0;
+  const hasShipping = (costRange?.standard?.shippingPerUnit || 0) > 0;
+  const hasDuty = (costRange?.standard?.dutyPerUnit || 0) > 0;
+  const hasFees = (costRange?.standard?.feePerUnit || 0) > 0;
   isFOBOnly = hasUnitPrice && !hasShipping && !hasDuty && !hasFees;
 
   if (hasUnitPrice) {
@@ -161,7 +167,7 @@ function getWhySummary(report: Report, evidenceLevel: string | undefined, missin
 }
 
 export default function ReportV2Decision({ report }: ReportV2DecisionProps) {
-  const costRange = report.baseline.costRange;
+  const costRange = report.baseline?.costRange;
   const reportAny = report as any;
   const targetSellPrice = reportAny.targetSellPrice;
   const evidenceLevel = report.evidenceLevel;
@@ -200,15 +206,15 @@ export default function ReportV2Decision({ report }: ReportV2DecisionProps) {
   } else {
     // Fallback: calculate and ensure correct ordering
     const standardTotal = 
-      (costRange.standard.unitPrice || 0) +
-      (costRange.standard.shippingPerUnit || 0) +
-      (costRange.standard.dutyPerUnit || 0) +
-      (costRange.standard.feePerUnit || 0);
+      (costRange?.standard?.unitPrice || 0) +
+      (costRange?.standard?.shippingPerUnit || 0) +
+      (costRange?.standard?.dutyPerUnit || 0) +
+      (costRange?.standard?.feePerUnit || 0);
     const conservativeTotal = 
-      (costRange.conservative.unitPrice || 0) +
-      (costRange.conservative.shippingPerUnit || 0) +
-      (costRange.conservative.dutyPerUnit || 0) +
-      (costRange.conservative.feePerUnit || 0);
+      (costRange?.conservative?.unitPrice || 0) +
+      (costRange?.conservative?.shippingPerUnit || 0) +
+      (costRange?.conservative?.dutyPerUnit || 0) +
+      (costRange?.conservative?.feePerUnit || 0);
     
     // Fix: Always ensure min < max (not assume conservative is min)
     minCost = Math.min(standardTotal, conservativeTotal);
@@ -218,10 +224,10 @@ export default function ReportV2Decision({ report }: ReportV2DecisionProps) {
   const priceUnit = reportAny._priceUnit || "per unit";
   
   // Check if only unit price exists (shipping, duty, fees all zero)
-  const hasUnitPrice = (costRange.standard.unitPrice || 0) > 0;
-  const hasShipping = (costRange.standard.shippingPerUnit || 0) > 0;
-  const hasDuty = (costRange.standard.dutyPerUnit || 0) > 0;
-  const hasFees = (costRange.standard.feePerUnit || 0) > 0;
+  const hasUnitPrice = (costRange?.standard?.unitPrice || 0) > 0;
+  const hasShipping = (costRange?.standard?.shippingPerUnit || 0) > 0;
+  const hasDuty = (costRange?.standard?.dutyPerUnit || 0) > 0;
+  const hasFees = (costRange?.standard?.feePerUnit || 0) > 0;
   const isFOBOnly = hasUnitPrice && !hasShipping && !hasDuty && !hasFees;
   
   let marginRange: string | null = null;
@@ -274,6 +280,13 @@ export default function ReportV2Decision({ report }: ReportV2DecisionProps) {
             {verdict.icon}
             <span className="font-semibold">{verdict.label}</span>
           </div>
+          {(verdict.verdict === "volume-sensitive" || verdict.verdict === "requires-verification") && (
+            <p className="text-xs text-slate-500 mt-2">
+              {verdict.verdict === "volume-sensitive" 
+                ? "Profitability depends on MOQ. Verify to confirm bulk pricing."
+                : "Profitability depends on MOQ. Verify to confirm bulk pricing."}
+            </p>
+          )}
         </div>
 
         {/* What drives this */}

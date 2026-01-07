@@ -9,14 +9,15 @@ interface ProfitConversionCardProps {
 }
 
 export default function ProfitConversionCard({ report, onUnlock }: ProfitConversionCardProps) {
-  const costRange = report.baseline.costRange;
+  const costRange = report.baseline?.costRange;
   
   // 1. Get Baseline Cost (Public Data)
-  const currentUnitCost = 
-    (costRange.standard.unitPrice || 0) +
-    (costRange.standard.shippingPerUnit || 0) +
-    (costRange.standard.dutyPerUnit || 0) +
-    (costRange.standard.feePerUnit || 0);
+  const currentUnitCost = costRange ? (
+    (costRange.standard?.unitPrice || 0) +
+    (costRange.standard?.shippingPerUnit || 0) +
+    (costRange.standard?.dutyPerUnit || 0) +
+    (costRange.standard?.feePerUnit || 0)
+  ) : 0;
 
   // 2. Calculate NexSupply Potential (Optimized)
   // Logic: If factory price exists, assume we can negotiate better or find better shipping (-15% total)

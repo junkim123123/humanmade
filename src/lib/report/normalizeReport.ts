@@ -42,6 +42,28 @@ export function normalizeReport(report: any): any {
     normalized.id = normalized.reportId;
   }
 
+  // Ensure baseline and costRange exist
+  if (!normalized.baseline) {
+    normalized.baseline = {};
+  }
+  if (!normalized.baseline.costRange) {
+    normalized.baseline.costRange = {
+      standard: { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 },
+      conservative: { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 },
+    };
+  }
+  // Ensure standard and conservative objects exist within costRange
+  if (!normalized.baseline.costRange.standard) {
+    normalized.baseline.costRange.standard = { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 };
+  }
+  if (!normalized.baseline.costRange.conservative) {
+    normalized.baseline.costRange.conservative = { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 };
+  }
+  // Ensure all required properties exist in standard and conservative
+  const defaultCostFields = { unitPrice: 0, shippingPerUnit: 0, dutyPerUnit: 0, feePerUnit: 0, totalLandedCost: 0 };
+  normalized.baseline.costRange.standard = { ...defaultCostFields, ...normalized.baseline.costRange.standard };
+  normalized.baseline.costRange.conservative = { ...defaultCostFields, ...normalized.baseline.costRange.conservative };
+
   // Normalize HS code fields from various sources
   // Check pipeline_result, baseline, signals, and marketEstimate
   const pipelineResult = normalized.pipeline_result || {};

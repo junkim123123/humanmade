@@ -4008,12 +4008,12 @@ export interface BenchmarkData {
  * Used when Origin, Duty, or Shipping are missing/null
  */
 function enrichWithBenchmarks(
-  analysis: ImageAnalysisResult,
+  analysis: ImageAnalysisResult | undefined,
   currentDuty: number,
   currentShipping: number,
   quantity: number
 ): BenchmarkData {
-  const category = (analysis.category || "").toLowerCase();
+  const category = (analysis?.category || "").toLowerCase();
   
   // 1. Origin & Duty Benchmarks
   // Default to China if unknown, as it's the primary sourcing hub
@@ -4044,7 +4044,7 @@ function enrichWithBenchmarks(
     // Estimate per-unit shipping based on likely dimensions/weight
     let perUnitShipping = 0.35; // Default small item
     
-    if (analysis.estimatedUnitCBM) {
+    if (analysis?.estimatedUnitCBM) {
       // If we have CBM, use it: $150/CBM (LCL rate)
       perUnitShipping = analysis.estimatedUnitCBM * 150;
     } else {

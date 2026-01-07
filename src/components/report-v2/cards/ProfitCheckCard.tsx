@@ -23,8 +23,8 @@ export default function ProfitCheckCard({ report }: ProfitCheckCardProps) {
   const inputStatus = reportAny.inputStatus || {};
   const existingPrice = inputStatus.shelfPrice || reportAny.targetSellPrice;
 
-  const costRange = report.baseline.costRange;
-  const standardCost = costRange.standard.totalLandedCost;
+  const costRange = report.baseline?.costRange;
+  const standardCost = costRange?.standard?.totalLandedCost || 0;
 
   // Use committed value if set, otherwise use existing price from report
   const targetSellPrice = shelfPriceCommitted || existingPrice;
