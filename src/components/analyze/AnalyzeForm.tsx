@@ -258,9 +258,17 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                   setLoadingProgress(progress);
                   lastProgressUpdate = progress;
                   
-                  if (elapsed < 30000) setLoadingStep("Analyzing product images...");
-                  else if (elapsed < 60000) setLoadingStep("Searching supplier database...");
-                  else if (elapsed < 100000) setLoadingStep("Calculating costs and margins...");
+                  // Update step based on elapsed time with more granular messages
+                  if (clientElapsed < 10000) setLoadingStep("Analyzing product images...");
+                  else if (clientElapsed < 20000) setLoadingStep("Extracting product details...");
+                  else if (clientElapsed < 30000) setLoadingStep("Identifying category and materials...");
+                  else if (clientElapsed < 40000) setLoadingStep("Scanning trade data...");
+                  else if (clientElapsed < 50000) setLoadingStep("Matching suppliers...");
+                  else if (clientElapsed < 60000) setLoadingStep("Analyzing HS codes...");
+                  else if (clientElapsed < 70000) setLoadingStep("Calculating duty rates...");
+                  else if (clientElapsed < 80000) setLoadingStep("Estimating shipping costs...");
+                  else if (clientElapsed < 100000) setLoadingStep("Computing landed costs...");
+                  else if (clientElapsed < 110000) setLoadingStep("Generating market insights...");
                   else setLoadingStep("Finalizing report...");
                 } else if (status === "completed" || data.savedReport) {
                   clearInterval(pollInterval);

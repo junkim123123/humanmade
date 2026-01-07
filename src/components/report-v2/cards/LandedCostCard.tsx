@@ -1,6 +1,7 @@
 "use client";
 
-import { BarChart3 } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, Info, X } from "lucide-react";
 import type { Report } from "@/lib/report/types";
 
 interface LandedCostCardProps {
@@ -8,6 +9,7 @@ interface LandedCostCardProps {
 }
 
 export default function LandedCostCard({ costRange }: LandedCostCardProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
   const conservative = costRange?.conservative?.totalLandedCost || 0;
   const standard = costRange?.standard?.totalLandedCost || 0;
   const min = Math.min(conservative, standard);
@@ -18,11 +20,25 @@ export default function LandedCostCard({ costRange }: LandedCostCardProps) {
   // Range visualization
   const rangePercent = max > 0 ? ((mid - min) / (max - min)) * 100 : 50;
 
+  // Extract cost breakdown
+  const fobPrice = costRange?.standard?.unitPrice || 0;
+  const shipping = costRange?.standard?.shippingPerUnit || 0;
+  const duty = costRange?.standard?.dutyPerUnit || 0;
+  const fees = costRange?.standard?.feePerUnit || 0;
+  const total = standard;
+
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+    <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow relative">
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 className="w-5 h-5 text-blue-600" />
         <h3 className="font-semibold text-slate-900">Landed cost</h3>
+        <button
+          onClick={() => setShowTooltip(!showTooltip)}
+          className="ml-auto p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+          aria-label="Show cost breakdown"
+        >
+          <Info className="w-4 h-4 text-slate-500" />
+        </button>
       </div>
 
       {/* Range Visualization */}
@@ -77,6 +93,44 @@ export default function LandedCostCard({ costRange }: LandedCostCardProps) {
           percent={standard > 0 ? ((costRange?.standard?.feePerUnit || 0) / standard * 100) : 0}
         />
       </div>
+
+      {/* Cost Breakdown Tooltip */}
+      {showTooltip && (
+        <div className="absolute top-16 right-4 z-50 w-80 bg-white border border-slate-300 rounded-lg shadow-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-slate-900 text-sm">Cost Breakdown</h4>
+            <button
+              onClick={() => setShowTooltip(false)}
+              className="p-1 rounded hover:bg-slate-100 transition-colors"
+              aria-label="Close breakdown"
+            >
+              <X className="w-4 h-4 text-slate-500" />
+            </button>
+          </div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <span className="text-sm text-slate-600">FOB Price (Factory)</span>
+              <span className="font-semibold text-slate-900">${fobPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <span className="text-sm text-slate-600">Shipping</span>
+              <span className="font-semibold text-slate-900">${shipping.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <span className="text-sm text-slate-600">Duty</span>
+              <span className="font-semibold text-slate-900">${duty.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <span className="text-sm text-slate-600">Import Fees</span>
+              <span className="font-semibold text-slate-900">${fees.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t-2 border-slate-300">
+              <span className="text-sm font-semibold text-slate-900">Total Landed Cost</span>
+              <span className="text-lg font-bold text-blue-600">${total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

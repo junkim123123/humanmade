@@ -358,8 +358,18 @@ function normalizeMatch(match: any, index: number): NormalizedSupplierMatch {
   const id = match.id || match.supplier_id || match.supplierId || `sample-${index}`;
   
   // Extract supplierName with safe fallbacks
-  // prefer match.supplier_name, else match.supplierName, else match.supplier?.name, else "Unknown supplier"
-  const supplierName = match.supplier_name || match.supplierName || match.supplier?.name || match.companyName || match.name || "Unknown supplier";
+  // Priority: Real trade data names (shipper_name, company_name) > supplier_name > supplierName > others
+  // Remove synthetic_ prefix if present, but preserve actual company names from ImportKey trade data
+  let supplierName = match.shipper_name || match.company_name || match.supplier_name || match.supplierName || match.supplier?.name || match.companyName || match.name || "Unknown supplier";
+  
+  // Remove synthetic_ prefix only if it's actually a synthetic ID (not a real company name)
+  if (supplierName && !supplierName.startsWith("synthetic_") && match.supplier_id?.startsWith("synthetic_")) {
+    // Keep the name as-is if it's a real company name (even if supplier_id is synthetic)
+    // This preserves actual ImportKey trade data company names
+  } else if (supplierName.startsWith("synthetic_")) {
+    // Only remove prefix if the name itself starts with synthetic_
+    supplierName = supplierName.replace(/^synthetic_/i, "").trim() || supplierName;
+  }
   
   // Extract supplierId with safe fallbacks
   // prefer match.supplier_id, else match.supplierId, else match.id

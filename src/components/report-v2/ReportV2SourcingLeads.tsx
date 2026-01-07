@@ -55,6 +55,38 @@ function EvidenceBadge({ strength }: { strength: string | null | undefined }) {
   );
 }
 
+function MatchConfidenceBadge({ matchScore, rerankScore }: { matchScore?: number | null; rerankScore?: number | null }) {
+  // Use rerankScore if available, otherwise fall back to matchScore
+  const score = rerankScore ?? matchScore ?? 0;
+  
+  if (score === 0) return null;
+  
+  // Determine confidence tier based on score (0-100)
+  let tier: "high" | "medium" | "low";
+  let color: string;
+  let label: string;
+  
+  if (score >= 70) {
+    tier = "high";
+    color = "bg-green-100 text-green-800 border-green-200";
+    label = `High Match (${Math.round(score)})`;
+  } else if (score >= 40) {
+    tier = "medium";
+    color = "bg-yellow-100 text-yellow-800 border-yellow-200";
+    label = `Medium Match (${Math.round(score)})`;
+  } else {
+    tier = "low";
+    color = "bg-orange-100 text-orange-800 border-orange-200";
+    label = `Low Match (${Math.round(score)})`;
+  }
+  
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${color}`} title={`Match confidence: ${Math.round(score)}/100`}>
+      {label}
+    </span>
+  );
+}
+
 // Helper function to clean supplier name (remove synthetic_ prefix, show actual name from trade data)
 function cleanSupplierName(supplier: any): string {
   const rawName = supplier.supplier_name || supplier.supplierName || "Unknown Supplier";
@@ -123,6 +155,7 @@ function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; rep
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <MatchConfidenceBadge matchScore={supplier.matchScore} rerankScore={supplier.rerankScore} />
             <SupplierTypeBadge type={supplierType} />
             <EvidenceBadge strength={evidenceStrength} />
           </div>
