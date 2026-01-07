@@ -110,11 +110,10 @@ export default async function AppReportsPage() {
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl py-10">
           <div className="text-center">
             <h1 className="text-[32px] sm:text-[40px] font-bold text-white leading-tight mb-3">
-              Sourcing, verification, logistics —<br />
-              <span className="text-slate-300">all in one place.</span>
+              Sourcing, verification, logistics—all in one.
             </h1>
             <p className="text-[15px] text-slate-400 max-w-md mx-auto mb-6">
-              From factory floor to your door. We run the chaos so you can keep selling.
+              From factory to your door. We run the chaos so you can sell.
             </p>
             <Link
               href="/app/analyze"

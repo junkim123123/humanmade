@@ -103,6 +103,8 @@ export interface ImageAnalysisResult {
   attributes: Record<string, string>;
   keywords: string[];
   confidence: number; // 0-1
+  estimatedUnitCBM?: number; // Cubic meters per unit
+  unitWeightKg?: number; // Kilograms per unit
   // Evidence level for credibility
   evidenceLevel?: "image_only" | "image_and_label" | "image_and_label_and_barcode";
   // Optional: Extracted from barcode or label
@@ -269,6 +271,22 @@ export interface IntelligencePipelineResult {
   productSignalEvidence?: ProductSignalEvidence;
   supplierEmptyReason?: "no_signals" | "no_matches" | "pipeline_error";
   supplierMatchMode?: "normal" | "fallback";
+  // Comparison data for UI (DIY vs NexSupply)
+  comparison?: {
+    diyEstimate: number;
+    nexSupplyEstimate: number;
+    potentialSavings: number;
+    diyBreakdown: {
+      productCost: number;
+      shipping: number;
+      hiddenCosts: number; // Unexpected fees, bad quality buffer, time cost
+    };
+    nexSupplyBreakdown: {
+      productCost: number;
+      shipping: number; // Optimized
+      serviceFee: number; // 7%
+    };
+  };
 }
 
 export interface CachedAnalysis {
@@ -434,22 +452,37 @@ async function analyzeProductImage(
     // Use gemini-2.5-flash for latest image analysis capabilities
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `Analyze this product image and extract structured information in JSON format:
+    const prompt = `Analyze this product image and extract structured information in JSON format.
+1.  Extract the brand name and key adjectives (e.g., flavor, material, design features) from the product name.
+2.  Add the following attributes to the 'attributes' object:
+    *   'complexityScore': A score from 1 to 10 (1-3 for simple processing like raw materials/simple assembly, 7-10 for complex processes/certifications/electronics).
+    *   'logisticsType': 'bulky' (for furniture/mattresses/large items), 'fragile' (for plates/glass/lighting), or 'standard' (for jelly/clothing/general merchandise).
+    *   'materialPremium': 'economy', 'standard', or 'premium' (based on visual quality and material type).
+3.  Clearly specify the main category, such as 'Food', 'Furniture', 'Lighting', 'Tableware', 'Electronics', 'Apparel', etc.
+
+Return only valid JSON in the following format:
 {
-  "productName": "specific and descriptive product name",
+  "productName": {
+    "brand": "brand name or null",
+    "fullName": "full product name",
+    "keyAdjectives": ["adj1", "adj2"]
+  },
   "description": "detailed product description",
-  "category": "product category",
+  "category": "Food | Furniture | Lighting | Tableware | Electronics | Apparel | Other",
   "hsCode": "HS Code if identifiable (format: XXXX.XX.XX)",
   "attributes": {
     "material": "material type",
     "color": "color",
     "size": "size/dimensions",
-    "weight": "weight if applicable"
+    "weight": "weight if applicable",
+    "complexityScore": "1-10",
+    "logisticsType": "bulky | fragile | standard",
+    "materialPremium": "economy | standard | premium"
   },
   "keywords": ["keyword1", "keyword2", "keyword3"]
 }
 
-Be specific and accurate. If HS Code is not clearly identifiable, set it to null. Return only valid JSON.`;
+Be specific and accurate. If HS Code is not clearly identifiable, set it to null.`;
 
     // Convert ArrayBuffer to base64 or extract from data URL
     let imageBase64: string;
@@ -1508,8 +1541,10 @@ async function findSupplierMatches(
   function buildSearchTerms(analysis: ImageAnalysisResult): string[] {
     try {
     const raw = [
+      // Prioritize unique keywords from product name (first 2 words)
+      ...(analysis.productName ? analysis.productName.split(' ').slice(0, 2) : []),
       analysis.productName,
-        ...(asArrayString(analysis.keywords)),
+      ...(asArrayString(analysis.keywords)),
       analysis.category,
       analysis.attributes?.material,
     ]
@@ -2854,14 +2889,32 @@ function calculateMatchScore(
 
   if (analysisHs6 && itemHs6) {
     if (analysisHs6 === itemHs6) {
-      score += 40;
+      score += 50; // Increased from 40 to 50 for exact match
       reasons.push("HS6 match");
     } else if (
       analysisHs6.startsWith(itemHs6.substring(0, 4)) ||
       itemHs6.startsWith(analysisHs6.substring(0, 4))
     ) {
-      score += 25;
+      score += 30; // Increased from 25 to 30
       reasons.push("Partial HS Code match");
+    }
+  }
+
+  // Material match bonus (0-20 points)
+  if (analysis.attributes?.material && itemProductName) {
+    const material = analysis.attributes.material.toLowerCase();
+    if (itemProductName.toLowerCase().includes(material)) {
+      score += 20;
+      reasons.push(`Material match (${material})`);
+    }
+  }
+
+  // Furniture manufacturer bonus
+  if (analysis.category?.toLowerCase().includes('furniture')) {
+    const supplierName = (item.supplier_name as string || "").toLowerCase();
+    if (supplierName.includes('furniture') || supplierName.includes('mfg')) {
+      score += 15;
+      reasons.push("Furniture Specialist");
     }
   }
 
@@ -3540,17 +3593,59 @@ IMPORTANT:
     
     const categoryDefaultRange = (() => {
       const cat = (analysis.category || "").toLowerCase();
-      if (cat.includes("novelty") || cat.includes("candy") || cat.includes("confection")) {
-        return { min: 0.18, max: 0.32, method: "category_default" as const };
+      const complexity = Number(analysis.attributes?.complexityScore) || 5;
+      const isPremium = analysis.attributes?.materialPremium === 'premium';
+      const isEconomy = analysis.attributes?.materialPremium === 'economy';
+      
+      // Base multipliers based on complexity and quality
+      let baseMin = 0.55;
+      let baseMax = 0.90;
+      
+      // Adjust base range by complexity (1-10)
+      // Higher complexity = higher base cost
+      const complexityFactor = 1 + ((complexity - 5) * 0.1); // 0.6x to 1.5x
+      baseMin *= complexityFactor;
+      baseMax *= complexityFactor;
+      
+      // Adjust by premium status
+      if (isPremium) {
+        baseMin *= 1.4;
+        baseMax *= 1.5;
+      } else if (isEconomy) {
+        baseMin *= 0.7;
+        baseMax *= 0.8;
+      }
+
+      // Category specific overrides
+      if (cat.includes("food") || cat.includes("candy") || cat.includes("confection") || cat.includes("jelly")) {
+        // Food is volume based, typically lower unit cost but higher volume
+        return { min: 0.15 * complexityFactor, max: 0.35 * complexityFactor, method: "category_default" as const };
+      }
+      if (cat.includes("furniture") || cat.includes("sofa") || cat.includes("chair")) {
+        // Furniture is much higher value
+        return { min: 45.0 * complexityFactor, max: 120.0 * complexityFactor, method: "category_default" as const };
+      }
+      if (cat.includes("lighting") || cat.includes("lamp")) {
+        // Lighting varies wildly, but generally mid-range
+        return { min: 5.0 * complexityFactor, max: 15.0 * complexityFactor, method: "category_default" as const };
       }
       if (cat.includes("electronics") || cat.includes("accessor")) {
-        return { min: 1.2, max: 2.0, method: "category_default" as const };
+        return { min: 1.2 * complexityFactor, max: 3.5 * complexityFactor, method: "category_default" as const };
       }
-      if (cat.includes("fan")) {
-        return { min: 2.0, max: 3.2, method: "category_default" as const };
+      if (cat.includes("tableware") || cat.includes("plate") || cat.includes("ceramic")) {
+        return { min: 0.8 * complexityFactor, max: 2.5 * complexityFactor, method: "category_default" as const };
       }
-      return { min: 0.55, max: 0.9, method: "category_default" as const };
+      
+      return { min: baseMin, max: baseMax, method: "category_default" as const };
     })();
+
+    // Apply random fluctuation to Target Cost to ensure uniqueness (simulate real-time market flux)
+    // +/- 5% random variation
+    const randomFlux = 0.95 + Math.random() * 0.1;
+    if (categoryDefaultRange.min > 0) {
+      categoryDefaultRange.min *= randomFlux;
+      categoryDefaultRange.max *= randomFlux;
+    }
 
     let finalRangeSource: MarketEstimate["source"] = rangeSource;
     let finalRangeMethod: MarketEstimate["rangeMethod"] | undefined = fobRangeFromData?.method;
@@ -3744,7 +3839,32 @@ function calculateLandedCost(
 
   const baseUnitPrice = match.unitPrice;
   const dutyAmount = baseUnitPrice * dutyRate;
-  const shippingPerUnit = shippingCost / quantity;
+  const shippingPerUnit = (() => {
+    // Advanced logistics calculation based on category type
+    const logisticsType = match.evidence?.productTypes?.some(t => 
+      t.toLowerCase().includes('furniture') || t.toLowerCase().includes('sofa') || t.toLowerCase().includes('chair')
+    ) ? 'bulky' : 
+    match.evidence?.productTypes?.some(t => 
+      t.toLowerCase().includes('glass') || t.toLowerCase().includes('ceramic') || t.toLowerCase().includes('light')
+    ) ? 'fragile' : 'standard';
+
+    let baseShipping = shippingCost / quantity;
+
+    if (logisticsType === 'bulky') {
+      // CBM based calculation for furniture (approximate)
+      // Assuming 1 container fits fewer items, so per-unit cost is higher
+      return baseShipping * 3.5; 
+    } else if (logisticsType === 'fragile') {
+      // Fragile items need special packaging/handling + breakage insurance
+      // Add fixed cost for crating/packaging + 20% premium
+      const specialPackaging = 150 / quantity; // $150 fixed fee spread over quantity
+      return (baseShipping * 1.2) + specialPackaging;
+    }
+    
+    // Food/Standard - weight based (already approximated by standard shippingCost input)
+    return baseShipping;
+  })();
+
   const feePerUnit = fee / quantity;
 
   // Formula: Unit * (1+Duty) + Shipping + Fee
@@ -3757,7 +3877,7 @@ function calculateLandedCost(
     shippingCost: shippingPerUnit,
     fee: feePerUnit,
     totalLandedCost,
-    formula: `Unit * (1+Duty) + Shipping + Fee = ${baseUnitPrice.toFixed(2)} * (1+${dutyRate}) + ${shippingPerUnit.toFixed(2)} + ${feePerUnit.toFixed(2)} = ${totalLandedCost.toFixed(2)}`,
+    formula: `Unit * (1+Duty) + Shipping (${logisticsType}) + Fee = ${baseUnitPrice.toFixed(2)} * (1+${dutyRate}) + ${shippingPerUnit.toFixed(2)} + ${feePerUnit.toFixed(2)} = ${totalLandedCost.toFixed(2)}`,
     breakdown: {
       baseUnitPrice,
       dutyAmount,
@@ -4109,6 +4229,42 @@ export async function runIntelligencePipeline(
     });
     const profile = getCategoryProfile(categoryKey);
 
+    // Step 4: Generate Comparison Data (DIY vs NexSupply)
+    // Calculate best landed cost from matches (or estimate if no matches)
+    const bestMatchCost = landedCosts.length > 0 
+      ? Math.min(...landedCosts.map(lc => lc.landedCost.totalLandedCost))
+      : (marketEstimate?.fobUnitPriceRange.min || 0) * (1 + params.dutyRate) + (params.shippingCost / params.quantity);
+
+    const targetUnitCost = bestMatchCost > 0 ? bestMatchCost : 10; // Fallback to $10 if calculation fails
+
+    // DIY Scenario: Higher product cost (inefficient sourcing), standard shipping, hidden costs
+    const diyProductCost = targetUnitCost * 1.25; // 25% markup for inefficient sourcing
+    const diyShipping = params.shippingCost / params.quantity;
+    const diyHiddenCosts = targetUnitCost * 0.35; // 35% hidden costs (quality issues, time, unexpected fees)
+    const diyEstimate = diyProductCost + diyShipping + diyHiddenCosts;
+
+    // NexSupply Scenario: Optimized product cost, optimized shipping, transparent fee
+    const nexProductCost = targetUnitCost; // Access to factory direct pricing
+    const nexShipping = (params.shippingCost / params.quantity) * 0.85; // 15% shipping optimization
+    const nexServiceFee = nexProductCost * 0.07; // 7% NexSupply fee
+    const nexSupplyEstimate = nexProductCost + nexShipping + nexServiceFee;
+
+    const comparison = {
+      diyEstimate,
+      nexSupplyEstimate,
+      potentialSavings: Math.max(0, diyEstimate - nexSupplyEstimate),
+      diyBreakdown: {
+        productCost: diyProductCost,
+        shipping: diyShipping,
+        hiddenCosts: diyHiddenCosts
+      },
+      nexSupplyBreakdown: {
+        productCost: nexProductCost,
+        shipping: nexShipping,
+        serviceFee: nexServiceFee
+      }
+    };
+
     const duration = Date.now() - startTime;
     console.log(`[Pipeline] Completed in ${duration}ms. Cached: analysis=${analysisCached}, matches=${matchesCached}, marketEstimate=${!!marketEstimate}`);
 
@@ -4120,6 +4276,7 @@ export async function runIntelligencePipeline(
       candidateSuppliers,
       landedCosts,
       marketEstimate,
+      comparison, // Add comparison data
       cached: {
         analysis: analysisCached,
         matches: matchesCached,
