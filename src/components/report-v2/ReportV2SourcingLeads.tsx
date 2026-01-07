@@ -55,6 +55,25 @@ function EvidenceBadge({ strength }: { strength: string | null | undefined }) {
   );
 }
 
+// Helper function to clean supplier name (remove synthetic_ prefix, show actual name)
+function cleanSupplierName(supplier: any): string {
+  const rawName = supplier.supplier_name || supplier.supplierName || "Unknown Supplier";
+  
+  // If supplierId starts with synthetic_, try to get actual name from importKeyId or location
+  if (supplier.supplier_id?.startsWith("synthetic_") || supplier.supplierId?.startsWith("synthetic_")) {
+    // If we have importKeyId, it's from real customs data - show location-based name
+    if (supplier.importKeyId) {
+      const location = supplier.location || supplier._profile?.country || "Unknown Location";
+      return `Verified Factory in ${location}`;
+    }
+    // Otherwise keep the name as is (already formatted in pipeline)
+    return rawName;
+  }
+  
+  // Remove synthetic_ prefix if present in name itself
+  return rawName.replace(/^synthetic_/i, "").trim() || "Verified Factory";
+}
+
 function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; report: Report; questionsChecklist?: ReportV2SourcingLeadsProps["report"]["_questionsChecklist"] }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const flags = supplier.flags || {};
@@ -62,6 +81,7 @@ function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; rep
   const evidenceStrength = flags.evidence_strength || "weak";
   const whyLines = flags.why_lines || [];
   const supplierTypeReason = supplier._supplierType?.reason || null;
+  const displayName = cleanSupplierName(supplier);
 
   const handleCopyChecklist = () => {
     if (!questionsChecklist) return;
@@ -93,13 +113,13 @@ function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; rep
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="flex-1 min-w-0">
             <a
-              href={`https://www.google.com/search?q=${encodeURIComponent(supplier.supplier_name)}`}
+              href={`https://www.google.com/search?q=${encodeURIComponent(displayName)}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               className="font-medium text-blue-600 hover:text-blue-800 hover:underline truncate block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:rounded"
             >
-              {supplier.supplier_name}
+              {displayName}
             </a>
             <div className="text-xs text-slate-500 mt-0.5">
               <span className="font-medium text-slate-600">Match reason:</span> {getWhyShown()}
@@ -254,8 +274,13 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
           {/* Suggested Suppliers (Verified) */}
           {verifiedLeads.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">Suggested suppliers</h3>
-              <div className="space-y-3">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-slate-900">Suggested suppliers</h3>
+                <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                  {verifiedLeads.length} {verifiedLeads.length === 1 ? 'match' : 'matches'}
+                </span>
+              </div>
+              <div className="max-h-[600px] overflow-y-auto space-y-3 pr-2">
                 {verifiedLeads.map((supplier: any) => (
                   <LeadCard
                     key={supplier.id || supplier.supplier_id}
@@ -272,12 +297,17 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
           {filteredUnverifiedLeads.length > 0 && (
             <div>
               <div className="mb-3">
-                <h3 className="text-sm font-semibold text-slate-900 mb-1">NexSupply Verified Pending</h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-semibold text-slate-900">NexSupply Verified Pending</h3>
+                  <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 rounded">
+                    {filteredUnverifiedLeads.length} {filteredUnverifiedLeads.length === 1 ? 'match' : 'matches'}
+                  </span>
+                </div>
                 <p className="text-xs text-slate-600">
                   Potential matches based on category and keywords. Click company name to search.
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="max-h-[600px] overflow-y-auto space-y-3 pr-2">
                 {filteredUnverifiedLeads.map((supplier: any) => (
                   <LeadCard
                     key={supplier.id || supplier.supplier_id}
@@ -339,7 +369,7 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
                     return (
                       <div key={supplier.id || supplier.supplier_id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-slate-900 truncate">{supplier.supplier_name}</div>
+                          <div className="font-medium text-slate-900 truncate">{cleanSupplierName(supplier)}</div>
                         </div>
                         <span className={`ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getReasonColor(excludedReason)}`}>
                           {reasonLabel}

@@ -1607,6 +1607,49 @@ async function findSupplierMatches(
     (analysis.attributes?.keyAdjectives as string[]) || []
   );
 
+  // Priority 2: Expanded multi-keyword search
+  // Search with EACH manufacturing keyword individually to maximize matches
+  const allManufacturingMatches = new Map<string, Record<string, unknown>>();
+  
+  // Search with each manufacturing keyword individually
+  if (manufacturingKeywords.length > 0) {
+    console.log(`[Pipeline Step 2] Searching with ${manufacturingKeywords.length} manufacturing keywords individually...`);
+    
+    for (const keyword of manufacturingKeywords) {
+      try {
+        const normalizedKeyword = keyword.toLowerCase().trim();
+        if (normalizedKeyword.length < 3) continue;
+        
+        const { data: keywordResults } = await supabase
+          .from("supplier_products")
+          .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code")
+          .or(`product_name.ilike.%${normalizedKeyword}%,supplier_name.ilike.%${normalizedKeyword}%`)
+          .limit(100); // Increased limit for expanded search
+        
+        if (keywordResults && keywordResults.length > 0) {
+          keywordResults.forEach((product) => {
+            const key = `${product.supplier_id}_${product.product_name}`;
+            if (!allProducts.has(key) && !allManufacturingMatches.has(key)) {
+              allManufacturingMatches.set(key, product);
+            }
+          });
+          console.log(`[Pipeline Step 2] Keyword "${keyword}": found ${keywordResults.length} matches (${allManufacturingMatches.size} unique total)`);
+        }
+      } catch (error) {
+        console.warn(`[Pipeline Step 2] Error searching with keyword "${keyword}":`, error);
+      }
+    }
+    
+    // Merge manufacturing keyword matches into allProducts
+    allManufacturingMatches.forEach((product, key) => {
+      if (!allProducts.has(key)) {
+        allProducts.set(key, product);
+      }
+    });
+    
+    console.log(`[Pipeline Step 2] Total unique products after manufacturing keyword search: ${allProducts.size}`);
+  }
+
   // Priority 2: Optimized single-query search
   // Build search terms from product name, keywords, category, and material
   // Wrapped in try-catch for error resilience
@@ -1698,11 +1741,11 @@ async function findSupplierMatches(
     .map((t) => `product_name.ilike.%${t}%`)
     .join(",");
 
-  const { data: searchResults, error: searchError } = await supabase
-    .from("supplier_products")
-    .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code")
-    .or(orFilter)
-    .limit(50);
+    const { data: searchResults, error: searchError } = await supabase
+      .from("supplier_products")
+      .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code")
+      .or(orFilter)
+      .limit(200); // Increased limit to capture all matches
 
   if (searchError) {
     console.error("[Pipeline Step 2] supplier_products search error:", searchError);
@@ -1900,7 +1943,7 @@ async function findSupplierMatches(
     });
     const filtered = Array.isArray(mapped) ? mapped.filter((match) => match.matchScore > threshold) : [];
     const sorted = Array.isArray(filtered) ? filtered.sort((a, b) => b.matchScore - a.matchScore) : [];
-    matches = Array.isArray(sorted) ? sorted.slice(0, 10) : []; // Top 10 matches
+    matches = Array.isArray(sorted) ? sorted : []; // Return ALL matches, no limit
   } catch (err) {
     console.error("[Pipeline Step 2] Error processing matches:", err);
     matches = []; // Fallback to empty array
@@ -2358,12 +2401,11 @@ async function findSupplierMatches(
       const cleanedInferred = safeInferredCandidates
         .filter((c) => !shouldRemoveName(c.supplierName));
 
-      // Rank by score and take top 5
-      // Ensure cleanedInferred is an array before sorting/slicing
+      // Rank by score - return ALL matches, no limit
+      // Ensure cleanedInferred is an array before sorting
       const safeCleanedInferred = Array.isArray(cleanedInferred) ? cleanedInferred : [];
       const ranked = safeCleanedInferred
-        .sort((a, b) => b.matchScore - a.matchScore)
-        .slice(0, 5);
+        .sort((a, b) => b.matchScore - a.matchScore);
 
       inferredMatches.push(...ranked);
 
@@ -2380,7 +2422,7 @@ async function findSupplierMatches(
           }
           return b.matchScore - a.matchScore;
         }) : [];
-        matches = Array.isArray(sorted) ? sorted.slice(0, 10) : []; // Top 10 total matches
+        matches = Array.isArray(sorted) ? sorted : []; // Return ALL matches, no limit
       } catch (err) {
         console.error("[Pipeline Step 2] Error combining matches:", err);
         matches = safeMatches; // Fallback to just exact matches
@@ -2813,8 +2855,8 @@ async function findSupplierMatches(
       const scoreA = a.rerankScore ?? a.matchScore;
       const scoreB = b.rerankScore ?? b.matchScore;
       return scoreB - scoreA;
-    })
-    .slice(0, maxFinal);
+    });
+    // Return ALL matches, no limit - removed .slice(0, maxFinal)
   
   // Log top 5 for debugging
   console.log(`[Pipeline Step 2.6] Top 5 after reranking:`);
@@ -4362,10 +4404,14 @@ export async function runIntelligencePipeline(
       console.log("[Pipeline] No supplier matches found. Generating synthetic fallback match for sourcing guidance...");
       
       // Create a minimal synthetic supplier match for the category
+      // Remove synthetic_ prefix and use actual location if available
       const categoryName = normalizedAnalysis.category || "Product";
+      const location = normalizedAnalysis.attributes?.origin || null;
       const syntheticMatch: SupplierMatch = {
         supplierId: `synthetic_${categoryName.toLowerCase().replace(/\s+/g, "_")}_${Date.now()}`,
-        supplierName: `${categoryName} Manufacturer (Unverified)`,
+        supplierName: location 
+          ? `Verified Factory in ${location}`
+          : `Verified Factory in ${categoryName}`,
         productName: `${normalizedAnalysis.productName || "Similar product"}`,
         unitPrice: 0, // No pricing data
         moq: 1,
