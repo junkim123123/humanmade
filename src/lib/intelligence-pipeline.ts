@@ -1476,15 +1476,37 @@ function scoreCandidate(base: number, name: string): number {
   return base + factoryLikeBoost(name) - logisticsPenalty(name);
 }
 
+/**
+ * Generate universal manufacturing keywords based on product materials and usage
+ * Works across all categories: Food, Furniture, Apparel, Electronics, etc.
+ * Analyzes materials, manufacturing processes, and use cases to create sourcing keywords
+ */
 async function generateManufacturingKeywords(
   productName: string,
-  keyAdjectives: string[]
+  keyAdjectives: string[],
+  material?: string,
+  category?: string
 ): Promise<string[]> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const prompt = `Based on the product name "${productName}" and key adjectives "${keyAdjectives.join(
-      ", "
-    )}", generate a list of manufacturing-focused keywords optimized for global sourcing. For example, if the input is 'Barbecue Marshmallow', the output should be a JSON array like: ["Marshmallow wholesale", "Confectionery extrusion factory", "Camping food OEM", "High-temp stable sweets"]. Return only the JSON array of strings.`;
+    
+    // Build comprehensive prompt that analyzes materials and usage across all categories
+    const prompt = `Analyze the product "${productName}" with attributes: ${keyAdjectives.join(", ")}${material ? `, Material: ${material}` : ""}${category ? `, Category: ${category}` : ""}.
+
+Generate a comprehensive list of manufacturing-focused keywords for global sourcing. Consider:
+1. **Materials**: What materials are used? (e.g., plastic, wood, fabric, metal, food ingredients)
+2. **Manufacturing Processes**: What processes create this? (e.g., injection molding, extrusion, sewing, assembly, cooking)
+3. **Use Cases**: What is it used for? (e.g., furniture, clothing, electronics, food, toys)
+4. **Industry Terms**: What are the industry-specific sourcing terms? (e.g., OEM, wholesale, factory, manufacturer)
+
+Return a JSON array of 8-12 keywords that would help find suppliers across different categories.
+Examples across categories:
+- Food: ["Confectionery factory", "Food processing plant", "Beverage manufacturer"]
+- Furniture: ["Furniture manufacturer", "Woodworking factory", "Upholstery supplier"]
+- Apparel: ["Garment factory", "Textile manufacturer", "Clothing OEM"]
+- Electronics: ["Electronics assembly", "PCB manufacturer", "Consumer electronics factory"]
+
+Return only the JSON array of strings, no other text.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -1498,7 +1520,7 @@ async function generateManufacturingKeywords(
 
     const keywords = JSON.parse(jsonMatch[0]) as string[];
     console.log(
-      `[AI Keywords] Generated ${keywords.length} manufacturing keywords for "${productName}"`
+      `[AI Keywords] Generated ${keywords.length} universal manufacturing keywords for "${productName}" (Category: ${category || "any"}, Material: ${material || "unknown"})`
     );
     return keywords;
   } catch (error) {
@@ -1602,9 +1624,12 @@ async function findSupplierMatches(
     });
   }
 
+  // Generate universal manufacturing keywords based on materials and usage (works for all categories)
   const manufacturingKeywords = await generateManufacturingKeywords(
     analysis.productName,
-    (analysis.attributes?.keyAdjectives as string[]) || []
+    (analysis.attributes?.keyAdjectives as string[]) || [],
+    analysis.attributes?.material,
+    analysis.category
   );
 
   // Priority 2: Expanded multi-keyword search
@@ -1718,22 +1743,18 @@ async function findSupplierMatches(
   // Ensure searchTerms is an array before processing
   const safeSearchTerms = Array.isArray(searchTerms) ? searchTerms : [];
   
-  // Keyword Expansion for food categories
-  const foodKeywords = ["pudding", "jelly", "candy", "confectionery"];
+  // Universal keyword expansion - no category-specific limitations
+  // The manufacturing keywords from AI already cover all categories (food, furniture, apparel, electronics, etc.)
+  // Additional expansion is handled by the AI-generated keywords, not hardcoded category lists
   let expandedTerms = [...safeSearchTerms];
-  const lowerCaseTerms = safeSearchTerms.join(" ").toLowerCase();
-
-  if (foodKeywords.some(keyword => lowerCaseTerms.includes(keyword))) {
-    const expansionSet = new Set(expandedTerms);
-    foodKeywords.forEach(keyword => expansionSet.add(keyword));
-    expandedTerms = Array.from(expansionSet);
-    console.log("[Pipeline Step 2] Expanded search with food keywords:", expandedTerms);
-  }
+  
+  // Remove category-specific hardcoded keywords - rely on AI-generated universal keywords instead
+  // This ensures the pipeline works for all categories: Food, Furniture, Apparel, Electronics, Toys, etc.
 
   const limitedTerms = (expandedTerms
     .map(normalizeTerm)
     .filter((t) => t && t.length >= 2) || []) // Minimum 2 chars
-    .slice(0, 10); // Increased limit for expanded search
+    .slice(0, 15); // Increased limit to capture more universal matches
 
   console.log("[Pipeline Step 2] Searching by terms (limited to 6):", limitedTerms);
 
@@ -2184,108 +2205,96 @@ async function findSupplierMatches(
       }
     }
 
-    // Step 4: Search by material (last resort, with special rules for food)
+    // Step 4: Universal material search (works for all categories: food, furniture, apparel, electronics, etc.)
     if (inferredProducts.size < 5) {
       const material = analysis.attributes?.material;
       if (material) {
-        // For food category, use tighter 2-token fallback
-        if (isFoodCategory(analysis.category)) {
-          const foodSearchTerms = buildFoodMaterialSearchTerms(material, analysis.category);
-          
-          if (foodSearchTerms.length > 0) {
-            console.log(
-              `[Pipeline Step 2 Fallback] Food category detected. Using tight 2-token material search: ${foodSearchTerms.join(", ")}`
-            );
+        // Universal material search - no category-specific limitations
+        // Works for all categories by analyzing material composition and manufacturing processes
+        console.log(
+          `[Pipeline Step 2 Fallback] Universal material search (last resort): "${material}"`
+        );
 
-            for (const searchTerm of foodSearchTerms) {
-              const { data: materialMatches, error: materialError } = await supabase
-                .from("supplier_products")
-                .select("*")
-                .or(
-                  `product_name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`
-                )
-                .limit(20); // Reduced from 30 for tighter results
-
-              if (materialError) {
-                console.error(`[Pipeline Step 2 Fallback] Material search error for "${searchTerm}":`, materialError);
-              } else {
-                materialMatches?.forEach((product) => {
-                  addInferredProduct(product, "materialRound");
-                });
-              }
-            }
-            console.log(
-              `[Pipeline Step 2 Fallback] Food material search completed, ${inferredProducts.size} total candidates`
-            );
-          } else {
-            console.log(
-              `[Pipeline Step 2 Fallback] Food category: material "${material}" could not form 2-token search`
-            );
-          }
-        } else {
-          // Non-food: use standard material search
+        const materialTokens = extractMaterialTokens(material);
+        
+        // Also generate manufacturing keywords from material for better cross-category matching
+        const materialKeywords = await generateManufacturingKeywords(
+          material,
+          [],
+          material,
+          analysis.category
+        );
+        
+        // Combine material tokens with AI-generated material keywords
+        const allMaterialTerms = [...materialTokens, ...materialKeywords.map(k => k.toLowerCase())];
+        const uniqueMaterialTerms = Array.from(new Set(allMaterialTerms));
+        
+        if (uniqueMaterialTerms.length > 0) {
           console.log(
-            `[Pipeline Step 2 Fallback] Searching by material (last resort): "${material}"`
+            `[Pipeline Step 2 Fallback] Material search terms (universal): ${uniqueMaterialTerms.join(", ")}`
           );
 
-          const materialTokens = extractMaterialTokens(material);
-          
-          if (materialTokens.length > 0) {
-            console.log(
-              `[Pipeline Step 2 Fallback] Material tokens (after stopwords filter): ${materialTokens.join(", ")}`
-            );
+          for (const keyword of uniqueMaterialTerms) {
+            const { data: materialMatches, error: materialError } = await supabase
+              .from("supplier_products")
+              .select("*")
+              .or(
+                `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%,supplier_name.ilike.%${keyword}%`
+              )
+              .limit(30); // Universal limit for all categories
 
-            for (const keyword of materialTokens) {
-              const { data: materialMatches, error: materialError } = await supabase
+            if (materialError) {
+              console.error(`[Pipeline Step 2 Fallback] Material search error for "${keyword}":`, materialError);
+            } else {
+              materialMatches?.forEach((product) => {
+                addInferredProduct(product, "materialRound");
+              });
+            }
+          }
+          console.log(
+            `[Pipeline Step 2 Fallback] Material search completed, ${inferredProducts.size} total candidates`
+          );
+        } else {
+          console.log(
+            `[Pipeline Step 2 Fallback] Material "${material}" filtered out all tokens (stopwords only)`
+          );
+          
+          // Universal fallback: Generate manufacturing keywords from material for all categories
+          // No category-specific limitations - works for food, furniture, apparel, electronics, toys, etc.
+          if (inferredProducts.size < 5) {
+            console.log("[Pipeline Step 2 Fallback] Attempting universal material keyword fallback...");
+            
+            // Generate universal manufacturing keywords from material
+            const materialFallbackKeywords = await generateManufacturingKeywords(
+              material,
+              [],
+              material,
+              analysis.category
+            );
+            
+            // Use first 5 keywords as fallback search terms
+            const fallbackTerms = materialFallbackKeywords.slice(0, 5);
+            
+            for (const keyword of fallbackTerms) {
+              const { data: fallbackMatches, error: fallbackError } = await supabase
                 .from("supplier_products")
                 .select("*")
                 .or(
-                  `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%`
+                  `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%,supplier_name.ilike.%${keyword}%`
                 )
-                .limit(30);
+                .limit(20);
 
-              if (materialError) {
-                console.error(`[Pipeline Step 2 Fallback] Material search error for "${keyword}":`, materialError);
+              if (fallbackError) {
+                console.error(`[Pipeline Step 2 Fallback] Universal keyword search error for "${keyword}":`, fallbackError);
               } else {
-                materialMatches?.forEach((product) => {
+                fallbackMatches?.forEach((product) => {
                   addInferredProduct(product, "materialRound");
                 });
               }
             }
             console.log(
-              `[Pipeline Step 2 Fallback] Material search completed, ${inferredProducts.size} total candidates`
+              `[Pipeline Step 2 Fallback] Universal material keyword fallback completed, ${inferredProducts.size} total candidates`
             );
-          } else {
-            console.log(
-              `[Pipeline Step 2 Fallback] Material "${material}" filtered out all tokens (stopwords only)`
-            );
-            
-            // Toy keyword fallback: if material search is empty and category is toy, try toy-specific terms
-            if (isToyCategory(analysis.category) && inferredProducts.size < 5) {
-              console.log("[Pipeline Step 2 Fallback] Attempting toy keyword fallback...");
-              const toyKeywords = ["insect figure", "animal figure", "beetle toy", "stag beetle", "rhinoceros beetle", "toy insect", "figure toy"];
-              
-              for (const keyword of toyKeywords) {
-                const { data: toyMatches, error: toyError } = await supabase
-                  .from("supplier_products")
-                  .select("*")
-                  .or(
-                    `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%`
-                  )
-                  .limit(20);
-
-                if (toyError) {
-                  console.error(`[Pipeline Step 2 Fallback] Toy keyword search error for "${keyword}":`, toyError);
-                } else {
-                  toyMatches?.forEach((product) => {
-                    addInferredProduct(product, "materialRound");
-                  });
-                }
-              }
-              console.log(
-                `[Pipeline Step 2 Fallback] Toy keyword fallback completed, ${inferredProducts.size} total candidates`
-              );
-            }
           }
         }
       }
