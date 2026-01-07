@@ -55,23 +55,20 @@ function EvidenceBadge({ strength }: { strength: string | null | undefined }) {
   );
 }
 
-// Helper function to clean supplier name (remove synthetic_ prefix, show actual name)
+// Helper function to clean supplier name (remove synthetic_ prefix, show actual name from trade data)
 function cleanSupplierName(supplier: any): string {
   const rawName = supplier.supplier_name || supplier.supplierName || "Unknown Supplier";
   
-  // If supplierId starts with synthetic_, try to get actual name from importKeyId or location
+  // If supplierId starts with synthetic_, it's a fallback candidate - show as Candidate
   if (supplier.supplier_id?.startsWith("synthetic_") || supplier.supplierId?.startsWith("synthetic_")) {
-    // If we have importKeyId, it's from real customs data - show location-based name
-    if (supplier.importKeyId) {
-      const location = supplier.location || supplier._profile?.country || "Unknown Location";
-      return `Verified Factory in ${location}`;
-    }
-    // Otherwise keep the name as is (already formatted in pipeline)
+    // Keep the name as formatted in pipeline (already includes "Candidate Factory in...")
     return rawName;
   }
   
-  // Remove synthetic_ prefix if present in name itself
-  return rawName.replace(/^synthetic_/i, "").trim() || "Verified Factory";
+  // For real trade data: remove synthetic_ prefix if present, but show actual company name
+  // Do NOT mask real company names - show them as-is from ImportKey trade data
+  const cleaned = rawName.replace(/^synthetic_/i, "").trim();
+  return cleaned || rawName; // Return original if cleaning results in empty string
 }
 
 function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; report: Report; questionsChecklist?: ReportV2SourcingLeadsProps["report"]["_questionsChecklist"] }) {

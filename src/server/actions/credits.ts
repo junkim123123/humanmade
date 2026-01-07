@@ -66,20 +66,80 @@ export async function adminGrantCredits(
   const supabase = await createClient();
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase.rpc('add_user_credits', {
-    p_user_id: userId,
-    p_amount: amount,
-    p_type: 'admin_grant',
-    p_description: description,
-    p_created_by: currentUser?.id
-  });
+  try {
+    // 1. Get current balance or create credits record if it doesn't exist
+    const { data: existingCredits, error: fetchError } = await supabase
+      .from("credits")
+      .select("balance")
+      .eq("user_id", userId)
+      .single();
 
-  if (error) {
-    console.error("[adminGrantCredits] RPC Error:", error);
-    return { success: false, error: error.message };
+    let currentBalance = 0;
+    
+    if (fetchError && fetchError.code === 'PGRST116') {
+      // Credits record doesn't exist, create it
+      const { error: insertError } = await supabase
+        .from("credits")
+        .insert({
+          user_id: userId,
+          balance: 0,
+          updated_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error("[adminGrantCredits] Error creating credits record:", insertError);
+        return { success: false, error: insertError.message };
+      }
+      currentBalance = 0;
+    } else if (fetchError) {
+      console.error("[adminGrantCredits] Error fetching credits:", fetchError);
+      return { success: false, error: fetchError.message };
+    } else {
+      currentBalance = existingCredits?.balance || 0;
+    }
+
+    // 2. Calculate new balance
+    const newBalance = currentBalance + amount;
+
+    // 3. Insert transaction record
+    const { error: transactionError } = await supabase
+      .from("credit_transactions")
+      .insert({
+        user_id: userId,
+        amount: amount,
+        balance_after: newBalance,
+        type: 'admin_grant',
+        description: description || null,
+        created_at: new Date().toISOString()
+      });
+
+    if (transactionError) {
+      console.error("[adminGrantCredits] Error inserting transaction:", transactionError);
+      return { success: false, error: transactionError.message };
+    }
+
+    // 4. Update credits balance
+    const { error: updateError } = await supabase
+      .from("credits")
+      .update({
+        balance: newBalance,
+        updated_at: new Date().toISOString()
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.error("[adminGrantCredits] Error updating credits:", updateError);
+      return { success: false, error: updateError.message };
+    }
+
+    return { success: true, newBalance };
+  } catch (error) {
+    console.error("[adminGrantCredits] Unexpected error:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
   }
-
-  return { success: true, newBalance: data };
 }
 
 export async function adminGetAllUserCredits(): Promise<{ success: boolean; users?: any[]; error?: string }> {

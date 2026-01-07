@@ -1645,11 +1645,49 @@ async function findSupplierMatches(
         const normalizedKeyword = keyword.toLowerCase().trim();
         if (normalizedKeyword.length < 3) continue;
         
+        // Search in supplier_products table (primary source)
         const { data: keywordResults } = await supabase
           .from("supplier_products")
-          .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code")
+          .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,import_key_id")
           .or(`product_name.ilike.%${normalizedKeyword}%,supplier_name.ilike.%${normalizedKeyword}%`)
-          .limit(100); // Increased limit for expanded search
+          .limit(20); // Limit to 20 matches per keyword
+        
+        // Also search in report_importkey_companies for real trade data company names
+        // This expands search to actual shipper/exporter names from ImportKey customs data
+        try {
+          const { data: importKeyCompanies } = await supabase
+            .from("report_importkey_companies")
+            .select("company_name,role,origin_country")
+            .ilike("company_name", `%${normalizedKeyword}%`)
+            .limit(10); // Limit to 10 additional matches from ImportKey data
+          
+          // Convert ImportKey companies to supplier_products-like format for merging
+          if (importKeyCompanies && importKeyCompanies.length > 0) {
+            importKeyCompanies.forEach((company) => {
+              // Only use Shipper/Exporter roles (actual suppliers, not importers)
+              if (company.role === "Shipper" || company.role === "Exporter") {
+                const syntheticKey = `importkey_${company.company_name}_${Date.now()}`;
+                // Add to allManufacturingMatches if not already present
+                if (!allManufacturingMatches.has(syntheticKey)) {
+                  allManufacturingMatches.set(syntheticKey, {
+                    supplier_id: syntheticKey,
+                    supplier_name: company.company_name, // Real trade data name - no masking
+                    product_name: `${normalizedKeyword} products`, // Placeholder product name
+                    unit_price: 0, // No pricing data from ImportKey companies table
+                    moq: 1,
+                    lead_time: 0,
+                    category: null,
+                    hs_code: null,
+                    import_key_id: null,
+                  });
+                }
+              }
+            });
+          }
+        } catch (importKeyError) {
+          // Silently fail if report_importkey_companies table doesn't exist or query fails
+          console.warn(`[Pipeline Step 2] Could not search report_importkey_companies:`, importKeyError);
+        }
         
         if (keywordResults && keywordResults.length > 0) {
           keywordResults.forEach((product) => {
@@ -1764,9 +1802,9 @@ async function findSupplierMatches(
 
     const { data: searchResults, error: searchError } = await supabase
       .from("supplier_products")
-      .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code")
+      .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,import_key_id")
       .or(orFilter)
-      .limit(200); // Increased limit to capture all matches
+      .limit(20); // Limit to 20 matches for better performance
 
   if (searchError) {
     console.error("[Pipeline Step 2] supplier_products search error:", searchError);
@@ -2136,11 +2174,11 @@ async function findSupplierMatches(
         .map((t: string) => `product_name.ilike.%${t}%`)
         .join(",");
 
-      const { data: anchorMatches, error: anchorError } = await supabase
+        const { data: anchorMatches, error: anchorError } = await supabase
         .from("supplier_products")
-        .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code")
+        .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,import_key_id")
         .or(orFilter)
-        .limit(50);
+        .limit(20);
 
       if (anchorError) {
         console.error(`[Pipeline Step 2 Fallback] Anchor keywords search error:`, anchorError);
@@ -2166,7 +2204,7 @@ async function findSupplierMatches(
           .from("supplier_products")
           .select("*")
           .ilike("hs_code", `${hs6}%`)
-          .limit(50);
+          .limit(20);
 
         if (hs6Error) {
           console.error(`[Pipeline Step 2 Fallback] HS6 search error:`, hs6Error);
@@ -2191,7 +2229,7 @@ async function findSupplierMatches(
         .from("supplier_products")
         .select("*")
         .ilike("category", `%${analysis.category}%`)
-        .limit(30);
+        .limit(20);
 
       if (categoryError) {
         console.error(`[Pipeline Step 2 Fallback] Category search error:`, categoryError);
@@ -2241,7 +2279,7 @@ async function findSupplierMatches(
               .or(
                 `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%,supplier_name.ilike.%${keyword}%`
               )
-              .limit(30); // Universal limit for all categories
+              .limit(20); // Limit to 20 matches per keyword
 
             if (materialError) {
               console.error(`[Pipeline Step 2 Fallback] Material search error for "${keyword}":`, materialError);
@@ -2282,7 +2320,7 @@ async function findSupplierMatches(
                 .or(
                   `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%,supplier_name.ilike.%${keyword}%`
                 )
-                .limit(20);
+                .limit(20); // Limit to 20 matches per keyword
 
               if (fallbackError) {
                 console.error(`[Pipeline Step 2 Fallback] Universal keyword search error for "${keyword}":`, fallbackError);
@@ -4410,23 +4448,23 @@ export async function runIntelligencePipeline(
     let allMatches = [...recommendedSuppliers, ...candidateSuppliers];
     
     if (allMatches.length === 0) {
-      console.log("[Pipeline] No supplier matches found. Generating synthetic fallback match for sourcing guidance...");
+      console.log("[Pipeline] No supplier matches found. Generating minimal synthetic fallback match (only when zero results)...");
       
-      // Create a minimal synthetic supplier match for the category
-      // Remove synthetic_ prefix and use actual location if available
+      // Create a minimal synthetic supplier match ONLY when zero results
+      // Mark clearly as Candidate for transparency
       const categoryName = normalizedAnalysis.category || "Product";
       const location = normalizedAnalysis.attributes?.origin || null;
       const syntheticMatch: SupplierMatch = {
         supplierId: `synthetic_${categoryName.toLowerCase().replace(/\s+/g, "_")}_${Date.now()}`,
         supplierName: location 
-          ? `Verified Factory in ${location}`
-          : `Verified Factory in ${categoryName}`,
+          ? `Candidate Factory in ${location}`
+          : `Candidate Factory in ${categoryName}`,
         productName: `${normalizedAnalysis.productName || "Similar product"}`,
         unitPrice: 0, // No pricing data
         moq: 1,
         leadTime: 0,
         matchScore: 0, // No real match score
-        matchReason: "Category-based match suggestion only. Manual sourcing required.",
+        matchReason: "Candidate match - No real trade data found. Manual sourcing required.",
         importKeyId: null,
         currency: "USD",
         isInferred: true,
