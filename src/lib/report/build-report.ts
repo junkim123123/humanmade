@@ -250,7 +250,23 @@ export function buildReportFromPipeline(input: {
           shippingPerUnit: inferredInputs.shippingPerUnit,
           unitsPerCase,
         },
-        items: [], // TODO: Populate from marketEstimate observedSuppliers
+        items: market?.observedSuppliers?.map((supplier, index) => ({
+          id: `supplier-${index}-${supplier.exporterName}`,
+          source: "internal_db" as const,
+          title: supplier.exporterName,
+          summary: supplier.evidenceSnippet || `${supplier.exporterName} found in ${supplier.recordCount} similar import record${supplier.recordCount > 1 ? 's' : ''}`,
+          strength: (supplier.recordCount >= 10 ? "high" : supplier.recordCount >= 5 ? "medium" : "low") as "low" | "medium" | "high",
+          observed: {
+            lastSeenDate: supplier.lastSeenDays !== null ? new Date(Date.now() - supplier.lastSeenDays * 24 * 60 * 60 * 1000).toISOString() : null,
+            likelyOrigins: [], // Not available from supplier_products
+            typicalLotRange: {
+              min: null,
+              max: null,
+              unit: "units" as const,
+            },
+            matchedBy: ["category"] as ("hs" | "keywords" | "category")[],
+          },
+        })) || [],
         lastAttemptAt: null,
         lastSuccessAt: null,
         lastResult: null,

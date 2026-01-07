@@ -4203,17 +4203,77 @@ async function inferMarketEstimateWithGemini(
     .filter((v) => Number.isFinite(v) && v > 0);
 
   // Try to find similar records by category with full data
+  let observedSuppliers: Array<{
+    exporterName: string;
+    recordCount: number;
+    lastSeenDays: number | null;
+    evidenceSnippet?: string | null;
+  }> = [];
+  
+  // Helper function to build observedSuppliers from records
+  const buildObservedSuppliers = (records: any[]) => {
+    if (!records || records.length === 0) return [];
+    
+    const supplierMap = new Map<string, {
+      count: number;
+      lastUpdated: Date | null;
+      sampleProduct: string | null;
+    }>();
+    
+    for (const record of records) {
+      const supplierName = record.supplier_name || "Unknown";
+      const existing = supplierMap.get(supplierName) || {
+        count: 0,
+        lastUpdated: null,
+        sampleProduct: null,
+      };
+      
+      existing.count += 1;
+      if (record.updated_at) {
+        const updatedAt = new Date(record.updated_at);
+        if (!existing.lastUpdated || updatedAt > existing.lastUpdated) {
+          existing.lastUpdated = updatedAt;
+        }
+      }
+      if (!existing.sampleProduct && record.product_name) {
+        existing.sampleProduct = record.product_name;
+      }
+      
+      supplierMap.set(supplierName, existing);
+    }
+    
+    // Convert map to array and calculate lastSeenDays
+    const now = new Date();
+    return Array.from(supplierMap.entries())
+      .map(([exporterName, data]) => {
+        const lastSeenDays = data.lastUpdated
+          ? Math.floor((now.getTime() - data.lastUpdated.getTime()) / (1000 * 60 * 60 * 24))
+          : null;
+        
+        return {
+          exporterName,
+          recordCount: data.count,
+          lastSeenDays,
+          evidenceSnippet: data.sampleProduct ? `${data.sampleProduct} (${data.count} record${data.count > 1 ? 's' : ''})` : null,
+        };
+      })
+      .sort((a, b) => b.recordCount - a.recordCount) // Sort by record count descending
+      .slice(0, 20); // Limit to top 20 suppliers
+  };
+  
+  let allCategoryRecords: any[] = [];
+  
   if (analysis.category) {
     const { data: categoryRecords } = await supabase
       .from("supplier_products")
-      .select("hs_code, product_name, product_description, unit_price, currency, category")
+      .select("hs_code, product_name, product_description, unit_price, currency, category, supplier_name, updated_at")
       .eq("category", analysis.category)
-      .limit(100);
+      .limit(200); // Increased limit to get more data
     
-    similarRecordsCount = categoryRecords?.length ?? 0;
-    
-    // Get top 5 similar imports for RAG context
     if (categoryRecords && categoryRecords.length > 0) {
+      allCategoryRecords = categoryRecords;
+      similarRecordsCount = categoryRecords.length;
+      
       internalPriceSamples.push(
         ...categoryRecords
           .map((r: any) => Number(r.unit_price))
@@ -4221,8 +4281,8 @@ async function inferMarketEstimateWithGemini(
       );
 
       similarImports = categoryRecords
-        .filter((r: any) => r.unit_price && r.unit_price > 0)
-        .sort((a: any, b: any) => (b.unit_price || 0) - (a.unit_price || 0))
+        .filter((r: any) => r.unit_price && Number(r.unit_price) > 0)
+        .sort((a: any, b: any) => (Number(b.unit_price) || 0) - (Number(a.unit_price) || 0))
         .slice(0, 5)
         .map((r: any) => ({
           hs_code: r.hs_code,
@@ -4230,22 +4290,55 @@ async function inferMarketEstimateWithGemini(
           product_description: r.product_description,
           unit_price: r.unit_price,
           currency: r.currency || "USD",
-          origin_country: null, // Not available in supplier_products
+          origin_country: null,
           weight: null,
           invoice_snippet: null,
         }));
+      
+      observedSuppliers = buildObservedSuppliers(categoryRecords);
     }
     
-    // Also check by keywords
+    // Also check by keywords as fallback
     if (analysis.keywords.length > 0) {
       const keyword = analysis.keywords[0];
       const { data: keywordRecords } = await supabase
         .from("supplier_products")
-        .select("id")
+        .select("hs_code, product_name, product_description, unit_price, currency, category, supplier_name, updated_at")
         .ilike("product_name", `%${keyword}%`)
-        .limit(50);
+        .limit(100);
       
-      similarRecordsCount = Math.max(similarRecordsCount, keywordRecords?.length ?? 0);
+      if (keywordRecords && keywordRecords.length > 0) {
+        similarRecordsCount = Math.max(similarRecordsCount, keywordRecords.length);
+        
+        // Merge keyword records if we don't have enough category records
+        if (allCategoryRecords.length < 50) {
+          allCategoryRecords = [...allCategoryRecords, ...keywordRecords];
+          // Rebuild observedSuppliers with merged data
+          observedSuppliers = buildObservedSuppliers(allCategoryRecords);
+        }
+      }
+    }
+  }
+  
+  // Fallback: If no category match or insufficient data, get any recent records
+  if (observedSuppliers.length === 0 || similarRecordsCount < 5) {
+    const { data: fallbackRecords } = await supabase
+      .from("supplier_products")
+      .select("hs_code, product_name, product_description, unit_price, currency, category, supplier_name, updated_at")
+      .order("updated_at", { ascending: false })
+      .limit(100);
+    
+    if (fallbackRecords && fallbackRecords.length > 0) {
+      similarRecordsCount = Math.max(similarRecordsCount, fallbackRecords.length);
+      
+      // Merge with existing records
+      const mergedRecords = [...allCategoryRecords, ...fallbackRecords];
+      // Remove duplicates by id
+      const uniqueRecords = Array.from(
+        new Map(mergedRecords.map((r: any) => [r.id || `${r.supplier_name}-${r.product_name}`, r])).values()
+      );
+      
+      observedSuppliers = buildObservedSuppliers(uniqueRecords);
     }
   }
   // Build FOB range from available numeric signals (internal records first, then supplier prices)
@@ -4552,6 +4645,8 @@ IMPORTANT:
       source: estimate.source || rangeSource,
       similarRecordsCount: fobResult.similarRecordsCount,
       confidenceTier: fobResult.confidenceTier,
+      // Include observedSuppliers if available
+      observedSuppliers: observedSuppliers.length > 0 ? observedSuppliers : undefined,
       // Always include recentImporters (even if empty) so UI can show "No data" message
       recentImporters: recentImportersResult.importers.length > 0 ? recentImportersResult.importers : [],
       // Store metadata for UI display
