@@ -19,22 +19,24 @@ export async function hydrateReportForV2(
   reportId: string,
   viewerUserId: string | null
 ): Promise<HydrateResult> {
-  const admin = getSupabaseAdmin();
+  try {
+    const admin = getSupabaseAdmin();
 
-  // Fetch report row
-  const { data: reportData, error: readError } = await admin
-    .from("reports")
-    .select("*")
-    .eq("id", reportId)
-    .single();
+    // Fetch report row
+    const { data: reportData, error: readError } = await admin
+      .from("reports")
+      .select("*")
+      .eq("id", reportId)
+      .single();
 
-  if (readError || !reportData) {
-    console.error("[HydrateReport] Report not found:", {
-      reportId,
-      error: readError?.message,
-    });
-    return { ok: false, errorCode: "NOT_FOUND" };
-  }
+    if (readError || !reportData) {
+      console.error("[HydrateReport] Report not found:", {
+        reportId,
+        error: readError?.message,
+        code: readError?.code,
+      });
+      return { ok: false, errorCode: "NOT_FOUND" };
+    }
 
   const reportAny = reportData as any;
 
@@ -135,23 +137,52 @@ export async function hydrateReportForV2(
   }
 
   // Normalize the report (this will also normalize supplier matches and HS fields)
-  const normalized = normalizeReport(reportAny);
+  let normalized;
+  try {
+    normalized = normalizeReport(reportAny);
+  } catch (normalizeError) {
+    console.error("[HydrateReport] Error in normalizeReport:", {
+      reportId,
+      error: normalizeError instanceof Error ? normalizeError.message : String(normalizeError),
+      stack: normalizeError instanceof Error ? normalizeError.stack : undefined,
+    });
+    // Return a minimal normalized report to prevent complete failure
+    normalized = {
+      ...reportAny,
+      _supplierMatches: [],
+      _recommendedMatches: [],
+      _candidateMatches: [],
+      _hsCandidates: [],
+      baseline: reportAny.baseline || {},
+      pipeline_result: reportAny.pipeline_result || { scenarios: [] },
+    };
+  }
 
-  // Ensure arrays are always present (even if empty)
-  if (!Array.isArray(normalized._supplierMatches)) {
-    normalized._supplierMatches = [];
-  }
-  if (!Array.isArray(normalized._recommendedMatches)) {
-    normalized._recommendedMatches = [];
-  }
-  if (!Array.isArray(normalized._candidateMatches)) {
-    normalized._candidateMatches = [];
-  }
-  if (!Array.isArray(normalized._hsCandidates)) {
-    normalized._hsCandidates = [];
-  }
+    // Ensure arrays are always present (even if empty)
+    if (!Array.isArray(normalized._supplierMatches)) {
+      normalized._supplierMatches = [];
+    }
+    if (!Array.isArray(normalized._recommendedMatches)) {
+      normalized._recommendedMatches = [];
+    }
+    if (!Array.isArray(normalized._candidateMatches)) {
+      normalized._candidateMatches = [];
+    }
+    if (!Array.isArray(normalized._hsCandidates)) {
+      normalized._hsCandidates = [];
+    }
 
-  return { ok: true, report: normalized };
+    return { ok: true, report: normalized };
+  } catch (error) {
+    // Catch any unexpected errors during hydration
+    console.error("[HydrateReport] Unexpected error:", {
+      reportId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    // Return NOT_FOUND to trigger 404 instead of 500
+    return { ok: false, errorCode: "NOT_FOUND" };
+  }
 }
 
 /**

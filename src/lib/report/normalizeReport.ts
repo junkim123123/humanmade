@@ -328,109 +328,198 @@ export interface NormalizedSupplierMatch {
  * 3. report.supplierMatches or report.supplier_matches (legacy)
  */
 export function getSupplierMatches(report: any): NormalizedSupplierMatch[] {
-  // Priority 1: Use _supplierMatches if it's a non-empty array
-  if (Array.isArray(report._supplierMatches) && report._supplierMatches.length > 0) {
-    return report._supplierMatches.map((match: any, index: number) => normalizeMatch(match, index));
-  }
+  try {
+    // Priority 1: Use _supplierMatches if it's a non-empty array
+    if (Array.isArray(report._supplierMatches) && report._supplierMatches.length > 0) {
+      return report._supplierMatches.map((match: any, index: number) => {
+        try {
+          return normalizeMatch(match, index);
+        } catch (matchError) {
+          console.warn("[getSupplierMatches] Error normalizing match, skipping:", {
+            index,
+            error: matchError instanceof Error ? matchError.message : String(matchError),
+          });
+          return null;
+        }
+      }).filter((match): match is NormalizedSupplierMatch => match !== null);
+    }
 
-  // Priority 2: Combine _recommendedMatches and _candidateMatches
-  const recommended = Array.isArray(report._recommendedMatches) ? report._recommendedMatches : [];
-  const candidates = Array.isArray(report._candidateMatches) ? report._candidateMatches : [];
-  
-  if (recommended.length > 0 || candidates.length > 0) {
-    const combined = [...recommended, ...candidates];
-    return combined.map((match: any, index: number) => normalizeMatch(match, index));
-  }
+    // Priority 2: Combine _recommendedMatches and _candidateMatches
+    const recommended = Array.isArray(report._recommendedMatches) ? report._recommendedMatches : [];
+    const candidates = Array.isArray(report._candidateMatches) ? report._candidateMatches : [];
+    
+    if (recommended.length > 0 || candidates.length > 0) {
+      const combined = [...recommended, ...candidates];
+      return combined.map((match: any, index: number) => {
+        try {
+          return normalizeMatch(match, index);
+        } catch (matchError) {
+          console.warn("[getSupplierMatches] Error normalizing match, skipping:", {
+            index,
+            error: matchError instanceof Error ? matchError.message : String(matchError),
+          });
+          return null;
+        }
+      }).filter((match): match is NormalizedSupplierMatch => match !== null);
+    }
 
-  // Priority 3: Fallback to legacy fields
-  const legacyMatches = report.supplierMatches || report.supplier_matches || report.pipeline_result?.supplier_matches;
-  if (Array.isArray(legacyMatches) && legacyMatches.length > 0) {
-    return legacyMatches.map((match: any, index: number) => normalizeMatch(match, index));
-  }
+    // Priority 3: Fallback to legacy fields
+    const legacyMatches = report.supplierMatches || report.supplier_matches || report.pipeline_result?.supplier_matches;
+    if (Array.isArray(legacyMatches) && legacyMatches.length > 0) {
+      return legacyMatches.map((match: any, index: number) => {
+        try {
+          return normalizeMatch(match, index);
+        } catch (matchError) {
+          console.warn("[getSupplierMatches] Error normalizing match, skipping:", {
+            index,
+            error: matchError instanceof Error ? matchError.message : String(matchError),
+          });
+          return null;
+        }
+      }).filter((match): match is NormalizedSupplierMatch => match !== null);
+    }
 
-  // No matches found
-  return [];
+    // No matches found
+    return [];
+  } catch (error) {
+    console.error("[getSupplierMatches] Unexpected error:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
 }
 
 /**
  * Normalize a single supplier match to guarantee required keys exist
  */
 function normalizeMatch(match: any, index: number): NormalizedSupplierMatch {
-  // Extract id with safe fallbacks
-  // prefer match.id, else match.supplier_id, else match.supplierId, else build `sample-${index}`
-  const id = match.id || match.supplier_id || match.supplierId || `sample-${index}`;
-  
-  // Extract supplierName with safe fallbacks
-  // Priority: Real trade data names (shipper_name, company_name) > supplier_name > supplierName > others
-  // Remove synthetic_ prefix if present, but preserve actual company names from ImportKey trade data
-  let supplierName = match.shipper_name || match.company_name || match.supplier_name || match.supplierName || match.supplier?.name || match.companyName || match.name || "Unknown supplier";
-  
-  // Remove synthetic_ prefix only if it's actually a synthetic ID (not a real company name)
-  if (supplierName && !supplierName.startsWith("synthetic_") && match.supplier_id?.startsWith("synthetic_")) {
-    // Keep the name as-is if it's a real company name (even if supplier_id is synthetic)
-    // This preserves actual ImportKey trade data company names
-  } else if (supplierName.startsWith("synthetic_")) {
-    // Only remove prefix if the name itself starts with synthetic_
-    supplierName = supplierName.replace(/^synthetic_/i, "").trim() || supplierName;
+  try {
+    // Ensure match is an object
+    if (!match || typeof match !== "object") {
+      throw new Error(`Invalid match object at index ${index}`);
+    }
+
+    // Extract id with safe fallbacks
+    // prefer match.id, else match.supplier_id, else match.supplierId, else build `sample-${index}`
+    const id = match.id || match.supplier_id || match.supplierId || `sample-${index}`;
+    
+    // Extract supplierName with safe fallbacks
+    // Priority: Real trade data names (shipper_name, company_name) > supplier_name > supplierName > others
+    // Remove synthetic_ prefix if present, but preserve actual company names from ImportKey trade data
+    let supplierName = match.shipper_name || match.company_name || match.supplier_name || match.supplierName || match.supplier?.name || match.companyName || match.name || "Unknown supplier";
+    
+    // Ensure supplierName is a string
+    if (typeof supplierName !== "string") {
+      supplierName = String(supplierName || "Unknown supplier");
+    }
+    
+    // Remove synthetic_ prefix only if it's actually a synthetic ID (not a real company name)
+    if (supplierName && !supplierName.startsWith("synthetic_") && match.supplier_id?.startsWith("synthetic_")) {
+      // Keep the name as-is if it's a real company name (even if supplier_id is synthetic)
+      // This preserves actual ImportKey trade data company names
+    } else if (supplierName.startsWith("synthetic_")) {
+      // Only remove prefix if the name itself starts with synthetic_
+      supplierName = supplierName.replace(/^synthetic_/i, "").trim() || supplierName;
+    }
+    
+    // Extract supplierId with safe fallbacks
+    // prefer match.supplier_id, else match.supplierId, else match.id
+    const supplierId = match.supplier_id || match.supplierId || match.id || id;
+    
+    // Also set normalized snake_case versions for consistency
+    const supplier_id = supplierId;
+    const supplier_name = supplierName;
+
+    // Extract match counts with safe fallbacks
+    const exact_match_count = typeof match.exact_match_count === "number" ? match.exact_match_count : 
+                              typeof match.exactMatchCount === "number" ? match.exactMatchCount : 0;
+    const inferred_match_count = typeof match.inferred_match_count === "number" ? match.inferred_match_count : 
+                                typeof match.inferredMatchCount === "number" ? match.inferredMatchCount : 0;
+
+    // Normalize _intel with safe fallbacks
+    const _intel = {
+      product_count: typeof match._intel?.product_count === "number" ? match._intel.product_count :
+                     typeof match._intel?.productCount === "number" ? match._intel.productCount : 0,
+      price_coverage_pct: typeof match._intel?.price_coverage_pct === "number" ? match._intel.price_coverage_pct :
+                          typeof match._intel?.priceCoveragePct === "number" ? match._intel.priceCoveragePct : 0,
+      last_seen_days: typeof match._intel?.last_seen_days === "number" ? match._intel.last_seen_days :
+                      typeof match._intel?.lastSeenDays === "number" ? match._intel.lastSeenDays : null,
+    };
+
+    // Normalize _profile with safe fallbacks
+    const _profile = {
+      country: typeof match._profile?.country === "string" ? match._profile.country :
+                 typeof match.country === "string" ? match.country : null,
+      last_seen_date: typeof match._profile?.last_seen_date === "string" ? match._profile.last_seen_date :
+                      typeof match._profile?.lastSeenDate === "string" ? match._profile.lastSeenDate :
+                      typeof match.last_seen_date === "string" ? match.last_seen_date : null,
+      shipment_count_12m: typeof match._profile?.shipment_count_12m === "number" ? match._profile.shipment_count_12m :
+                         typeof match._profile?.shipmentCount12m === "number" ? match._profile.shipmentCount12m :
+                         typeof match.shipment_count_12m === "number" ? match.shipment_count_12m : null,
+      role: typeof match._profile?.role === "string" ? match._profile.role :
+            typeof match.role === "string" ? match.role :
+            typeof match.supplierRole === "string" ? match.supplierRole : null,
+      role_reason: typeof match._profile?.role_reason === "string" ? match._profile.role_reason :
+                   typeof match._profile?.roleReason === "string" ? match._profile.roleReason :
+                   typeof match.role_reason === "string" ? match.role_reason : null,
+    };
+
+    // Normalize supplier/company types
+    const _supplierType = typeof match._supplierType === "string" ? match._supplierType :
+                          typeof match.supplierType === "string" ? match.supplierType :
+                          typeof match.supplierRole === "string" ? match.supplierRole : null;
+    const _companyType = typeof match._companyType === "string" ? match._companyType :
+                         typeof match.companyType === "string" ? match.companyType : null;
+
+    // Normalize example products (max 2)
+    let _exampleProducts: Array<{ product_name: string; category?: string; unit_price?: number }> = [];
+    if (Array.isArray(match._exampleProducts)) {
+      _exampleProducts = match._exampleProducts.slice(0, 2).map((p: any) => ({
+        product_name: typeof p.product_name === "string" ? p.product_name :
+                      typeof p.productName === "string" ? p.productName : "",
+        category: typeof p.category === "string" ? p.category : undefined,
+        unit_price: typeof p.unit_price === "number" ? p.unit_price :
+                    typeof p.unitPrice === "number" ? p.unitPrice : undefined,
+      }));
+    }
+
+    // Return normalized match with all original fields preserved
+    return {
+      ...match,
+      id,
+      supplierName,
+      supplierId,
+      supplier_id,
+      supplier_name,
+      exact_match_count,
+      inferred_match_count,
+      _intel,
+      _profile,
+      _supplierType,
+      _companyType,
+      _exampleProducts,
+    };
+  } catch (error) {
+    console.error("[normalizeMatch] Error normalizing match:", {
+      index,
+      error: error instanceof Error ? error.message : String(error),
+      match: match ? JSON.stringify(match).substring(0, 200) : "null",
+    });
+    // Return a minimal valid match to prevent complete failure
+    return {
+      id: `error-${index}`,
+      supplierName: "Unknown supplier",
+      supplierId: `error-${index}`,
+      supplier_id: `error-${index}`,
+      supplier_name: "Unknown supplier",
+      exact_match_count: 0,
+      inferred_match_count: 0,
+      _intel: { product_count: 0, price_coverage_pct: 0, last_seen_days: null },
+      _profile: { country: null, last_seen_date: null, shipment_count_12m: null, role: null, role_reason: null },
+      _supplierType: null,
+      _companyType: null,
+      _exampleProducts: [],
+    };
   }
-  
-  // Extract supplierId with safe fallbacks
-  // prefer match.supplier_id, else match.supplierId, else match.id
-  const supplierId = match.supplier_id || match.supplierId || match.id || id;
-  
-  // Also set normalized snake_case versions for consistency
-  const supplier_id = supplierId;
-  const supplier_name = supplierName;
-
-  // Extract match counts
-  const exact_match_count = match.exact_match_count || match.exactMatchCount || 0;
-  const inferred_match_count = match.inferred_match_count || match.inferredMatchCount || 0;
-
-  // Normalize _intel
-  const _intel = {
-    product_count: match._intel?.product_count || match._intel?.productCount || 0,
-    price_coverage_pct: match._intel?.price_coverage_pct || match._intel?.priceCoveragePct || 0,
-    last_seen_days: match._intel?.last_seen_days ?? match._intel?.lastSeenDays ?? null,
-  };
-
-  // Normalize _profile
-  const _profile = {
-    country: match._profile?.country || match.country || null,
-    last_seen_date: match._profile?.last_seen_date || match._profile?.lastSeenDate || match.last_seen_date || null,
-    shipment_count_12m: match._profile?.shipment_count_12m || match._profile?.shipmentCount12m || match.shipment_count_12m || null,
-    role: match._profile?.role || match.role || match.supplierRole || null,
-    role_reason: match._profile?.role_reason || match._profile?.roleReason || match.role_reason || null,
-  };
-
-  // Normalize supplier/company types
-  const _supplierType = match._supplierType || match.supplierType || match.supplierRole || null;
-  const _companyType = match._companyType || match.companyType || null;
-
-  // Normalize example products (max 2)
-  let _exampleProducts: Array<{ product_name: string; category?: string; unit_price?: number }> = [];
-  if (Array.isArray(match._exampleProducts)) {
-    _exampleProducts = match._exampleProducts.slice(0, 2).map((p: any) => ({
-      product_name: p.product_name || p.productName || "",
-      category: p.category,
-      unit_price: p.unit_price || p.unitPrice,
-    }));
-  }
-
-  // Return normalized match with all original fields preserved
-  return {
-    ...match,
-    id,
-    supplierName,
-    supplierId,
-    supplier_id,
-    supplier_name,
-    exact_match_count,
-    inferred_match_count,
-    _intel,
-    _profile,
-    _supplierType,
-    _companyType,
-    _exampleProducts,
-  };
 }
 
