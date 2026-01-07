@@ -1756,7 +1756,10 @@ async function findSupplierMatches(
   
   // Search with each manufacturing keyword individually
   if (manufacturingKeywords.length > 0) {
-    console.log(`[Pipeline Step 2] Searching with ${manufacturingKeywords.length} manufacturing keywords individually...`);
+    console.log(`[Pipeline Step 2] ========================================`);
+    console.log(`[Pipeline Step 2] SEARCH KEYWORDS (Manufacturing): ${JSON.stringify(manufacturingKeywords)}`);
+    console.log(`[Pipeline Step 2] Searching ${manufacturingKeywords.length} keywords in supplier_products (300K+ records)...`);
+    console.log(`[Pipeline Step 2] ========================================`);
     
     for (const keyword of manufacturingKeywords) {
       try {
@@ -1820,7 +1823,9 @@ async function findSupplierMatches(
               allManufacturingMatches.set(key, product);
             }
           });
-          console.log(`[Pipeline Step 2] Keyword "${keyword}": found ${keywordResults.length} matches (${allManufacturingMatches.size} unique total)`);
+          console.log(`[Pipeline Step 2] ✓ Keyword "${keyword}": FOUND ${keywordResults.length} raw matches → ${allManufacturingMatches.size} unique total`);
+        } else {
+          console.log(`[Pipeline Step 2] ✗ Keyword "${keyword}": 0 matches in DB`);
         }
       } catch (error) {
         console.warn(`[Pipeline Step 2] Error searching with keyword "${keyword}":`, error);
@@ -1834,7 +1839,9 @@ async function findSupplierMatches(
       }
     });
     
-    console.log(`[Pipeline Step 2] Total unique products after manufacturing keyword search: ${allProducts.size}`);
+    console.log(`[Pipeline Step 2] ========================================`);
+    console.log(`[Pipeline Step 2] TOTAL FOUND: ${allProducts.size} unique products from manufacturing keywords`);
+    console.log(`[Pipeline Step 2] ========================================`);
   }
 
   // Priority 2: Optimized single-query search
@@ -4706,9 +4713,17 @@ export async function runIntelligencePipeline(
     let allMatches = [...recommendedSuppliers, ...candidateSuppliers];
     
     if (allMatches.length === 0) {
-      console.log("[Pipeline] No supplier matches found in public trade data.");
-      console.log("[Pipeline] Searched keywords:", limitedTerms);
-      console.log("[Pipeline] Consider upgrading to premium verification for comprehensive supplier search.");
+      console.log("[Pipeline] ========================================");
+      console.log("[Pipeline] ⚠️  ZERO SUPPLIER MATCHES FOUND");
+      console.log("[Pipeline] ========================================");
+      console.log("[Pipeline] Searched with keywords:", JSON.stringify(limitedTerms));
+      console.log("[Pipeline] Database searched: supplier_products (300K+ records)");
+      console.log("[Pipeline] Filters applied: logistics companies removed, invalid names removed");
+      console.log("[Pipeline] Result: No real factories found in public trade data");
+      console.log("[Pipeline] ========================================");
+      console.log("[Pipeline] Action: UI will show 'No public records found' + Premium verification CTA ($49)");
+      console.log("[Pipeline] NO SYNTHETIC DATA GENERATED - Maintaining trust & transparency");
+      console.log("[Pipeline] ========================================");
       
       // DO NOT create synthetic matches - this damages trust
       // Instead, the UI will detect zero matches and show:

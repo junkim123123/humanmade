@@ -290,12 +290,38 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
       <h2 className="text-lg font-semibold text-slate-900 mb-6">Sourcing leads</h2>
       
       {!hasAnySuppliers ? (
-        /* Empty State */
-        <div className="border border-slate-200 rounded-lg p-8 bg-slate-50 text-center">
-          <div className="max-w-md mx-auto">
-            <h3 className="text-base font-semibold text-slate-900 mb-2">No supplier matches found yet</h3>
-            <p className="text-sm text-slate-600">
-              We did not find matches in recent customs data for this product yet. We'll keep scanning category suppliers and related records.
+        /* Empty State - No Public Export Records */
+        <div className="border border-amber-200 rounded-lg p-8 bg-gradient-to-br from-amber-50 to-white text-center">
+          <div className="max-w-xl mx-auto">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mb-4">
+              <HelpCircle className="w-6 h-6 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No public export records found</h3>
+            <p className="text-sm text-slate-600 mb-6">
+              We searched 300,000+ public trade records but couldn't find exact matches for this specific product. 
+              This doesn't mean suppliers don't exist—they may not appear in public customs data or may use different product descriptions.
+            </p>
+            
+            {/* Premium Verification CTA */}
+            <div className="bg-white rounded-lg border-2 border-blue-500 p-6 mb-4">
+              <h4 className="text-base font-semibold text-slate-900 mb-2">
+                🔓 Unlock Private Network Factories
+              </h4>
+              <p className="text-sm text-slate-600 mb-4">
+                Get access to 4+ verified factories from our private network, plus manual sourcing by our experts.
+              </p>
+              <button className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]">
+                Unlock Premium Verification - $49
+              </button>
+              <p className="text-xs text-slate-500 mt-3">
+                ✓ Manual factory sourcing by experts<br />
+                ✓ 4+ pre-vetted supplier contacts<br />
+                ✓ Direct manufacturer quotes
+              </p>
+            </div>
+            
+            <p className="text-xs text-slate-500">
+              Or contact us at <a href="mailto:support@nexsupply.com" className="text-blue-600 hover:underline">support@nexsupply.com</a> for custom sourcing assistance.
             </p>
           </div>
         </div>
