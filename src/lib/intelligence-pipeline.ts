@@ -458,10 +458,9 @@ async function analyzeProductImage(
     *   'complexityScore': A score from 1 to 10 (1-3 for simple processing like raw materials/simple assembly, 7-10 for complex processes/certifications/electronics).
     *   'logisticsType': 'bulky' (for furniture/mattresses/large items), 'fragile' (for plates/glass/lighting), or 'standard' (for jelly/clothing/general merchandise).
     *   'materialPremium': 'economy', 'standard', or 'premium' (based on visual quality and material type).
+    *   'estimatedUnitCBM': Estimate the Cubic Meters (CBM) per unit based on visual dimensions. IMPORTANT for bulky items.
+    *   'unitWeightKg': Estimate the weight in KG per unit.
 3.  Clearly specify the main category, such as 'Food', 'Furniture', 'Lighting', 'Tableware', 'Electronics', 'Apparel', etc.
-4.  Estimate logistics dimensions:
-    *   'estimatedUnitCBM': Estimate the unit volume in cubic meters (e.g., 0.001 for a small box, 0.5 for a chair).
-    *   'unitWeightKg': Estimate the unit weight in kilograms.
 
 Return only valid JSON in the following format:
 {
@@ -480,10 +479,10 @@ Return only valid JSON in the following format:
     "weight": "weight if applicable",
     "complexityScore": "1-10",
     "logisticsType": "bulky | fragile | standard",
-    "materialPremium": "economy | standard | premium"
+    "materialPremium": "economy | standard | premium",
+    "estimatedUnitCBM": 0.5,
+    "unitWeightKg": 10.5
   },
-  "estimatedUnitCBM": 0.01,
-  "unitWeightKg": 0.5,
   "keywords": ["keyword1", "keyword2", "keyword3"]
 }
 
@@ -2536,23 +2535,6 @@ async function findSupplierMatches(
       }
     }
     
-    const { score, flags } = rerankWithProfile({
-      baseScore: match.matchScore,
-      supplierName: match.supplierName.toLowerCase(),
-      productText, // Already lowercase
-      supplierHs: effectiveSupplierHs,
-      analysisHs: analysis.hsCode,
-      isLogistics: match.supplierType === "logistics",
-      isGenericManifest: isGenericManifestText(match.productName),
-      anchorHits,
-      brandPhraseHits,
-      profile,
-      runtimeAllowHs2: effectiveRuntimeAllowHs2,
-      supplierType: match.supplierType,
-      evidenceSnippet: match.evidence?.evidenceSnippet || null,
-      lastSeenDays: match.evidence?.lastSeenDays || null,
-    });
-
     // Apply recency and volume boosts (Data-Driven Sorting)
     let finalRerankScore = score;
     const recordCount = match.evidence?.recordCount || 0;
@@ -3668,28 +3650,6 @@ IMPORTANT:
     // REMOVED: Random fluctuation (randomFlux)
     // We now use pure data-driven confidence intervals.
     // If no data is available, we use wide category defaults without randomization.
-
-    let finalRangeSource: MarketEstimate["source"] = rangeSource;
-    let finalRangeMethod: MarketEstimate["rangeMethod"] | undefined = fobRangeFromData?.method;
-
-    const llmRange = estimateRaw.price_range?.min !== undefined
-      ? clampByRatio(estimateRaw.price_range.min, estimateRaw.price_range.max, 3)
-      : undefined;
-
-    const resolvedRange = fobRangeFromData
-      ? fobRangeFromData
-      : llmRange
-        ? { min: llmRange.min, max: llmRange.max, method: finalRangeMethod || "p25p75" }
-        : categoryDefaultRange;
-
-    if (!fobRangeFromData && llmRange) {
-      finalRangeSource = "llm_baseline";
-      finalRangeMethod = finalRangeMethod || "p25p75";
-    }
-    if (!fobRangeFromData && !llmRange) {
-      finalRangeSource = "category_default";
-      finalRangeMethod = categoryDefaultRange.method;
-    }
 
     const estimate: Omit<MarketEstimate, "similarRecordsCount" | "confidenceTier"> = {
       hsCodeCandidates,
