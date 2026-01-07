@@ -1642,10 +1642,9 @@ async function findSupplierMatches(
         }
         return false;
       }
-      if (isLikelyLogistics(supplierName)) {
-        removalReasons.logistics++;
-        return false;
-      }
+      // Logistics companies are now demoted to candidate later, not removed here
+      // But if we have too many results, we might want to prioritize non-logistics
+      // For now, let them through so they can be classified properly
       
       // Toy category mismatch filter (industrial equipment, not toys)
       if (isToyCategory(analysis.category)) {

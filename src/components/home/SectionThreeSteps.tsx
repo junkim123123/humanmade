@@ -48,7 +48,7 @@ const STEP_DATA: Record<StepKey, StepData> = {
     detail: {
       provide: "A product photo or product link",
       get: "Product name, category classification, and key specifications extracted from the image",
-      reliable: "Powered by Gemini 1.5 Flash AI for accurate product recognition and classification",
+      reliable: "Powered by our AI for accurate product recognition and classification",
       preview: (
         <div className="space-y-2 text-sm">
           <div className="flex items-center justify-between">

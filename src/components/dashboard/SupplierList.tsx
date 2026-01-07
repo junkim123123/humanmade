@@ -735,8 +735,10 @@ export function SupplierList({
     if (name === "Unknown Supplier") return false;
     
     const n = name.toLowerCase();
-    const banned = ["cargo", "logistics", "shipping", "freight", "forward", "expeditors", "transport", "broker", "lines", "oocl", "maersk", "cosco", "cma", "dhl", "fedex", "ups"];
-    if (banned.some((w) => n.includes(w))) return false;
+    // Banned keywords check removed - logic moved to backend pipeline
+    // We trust the pipeline's classification and filtering
+    // Logistics companies are now allowed but classified as 'logistics' type
+    
     if (n.includes("phone") || n.includes("email")) return false;
     
     return true;

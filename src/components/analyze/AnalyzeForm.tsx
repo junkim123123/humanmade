@@ -423,7 +423,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
                   {/* Weight and Dimensions fields removed. Gemini will infer all data from the product photo. */}
                   <div className="text-xs text-slate-500 py-2">
-                    <strong>Note:</strong> Gemini will infer all product data (weight, dimensions, price, etc.) from the uploaded photo. No manual entry required.
+                    <strong>Note:</strong> our ai will infer all product data (weight, dimensions, price, etc.) from the uploaded photo. No manual entry required.
                   </div>
                 </div>
               </details>

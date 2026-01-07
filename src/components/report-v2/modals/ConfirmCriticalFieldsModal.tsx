@@ -90,7 +90,7 @@ export default function ConfirmCriticalFieldsModal({ report, onClose, onSuccess 
               <p className="text-sm text-blue-900 font-medium mb-1">Why these 3 fields?</p>
               <p className="text-sm text-blue-700">
                 Country of origin, net weight, and allergens are critical for FDA compliance, customs clearance, and safety regulations. 
-                Gemini extracted draft values; your verification is optional and compliance remains draft.
+                Our AI extracted draft values; your verification is optional and compliance remains draft.
               </p>
             </div>
           </div>

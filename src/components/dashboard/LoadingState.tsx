@@ -156,7 +156,7 @@ export function LoadingState({ progress, currentStep, estimatedTimeRemaining }: 
         >
           <h3 className="text-lg font-semibold text-slate-900">Let the magic happen</h3>
           <p className="text-sm text-slate-500 mt-1">
-            Gemini is analyzing your product...
+            Our AI is analyzing your product...
           </p>
         </motion.div>
       )}
