@@ -1060,11 +1060,30 @@ const FORWARDER_KEYWORDS = [
 /**
  * Check if supplier name indicates logistics/forwarder (not a factory)
  * Enhanced with comprehensive forwarder blacklist
+ * RELAXED: Only filter if logistics keywords are clearly present (not just CO, LTD)
  */
 function isLikelyLogistics(name: string): boolean {
   if (!name || name.trim().length === 0) return false;
   const n = name.toUpperCase();
-  return FORWARDER_KEYWORDS.some((keyword) => n.includes(keyword.toUpperCase()));
+  
+  // Check for explicit logistics keywords (must be clearly logistics-related)
+  // Don't filter just because of CO, LTD, etc.
+  const explicitLogisticsKeywords = [
+    'logistics', 'freight', 'shipping', 'cargo', 'forward', 'forwarding', 'forwarder',
+    'expeditors', 'transport', 'broker', 'lines', 'intl', 'international freight',
+    'maersk', 'cosco', 'cma', 'dhl', 'fedex', 'ups', 'oocl', 'evergreen', 'yang ming',
+    'damco', 'dsv', 'kuehne', 'panalpina', 'schenker', 'ceva', 'agility', 'geodis',
+    'air sea', 'sea co', 'shipping co', 'freight co', 'logistics co', 'transport co',
+    'translead', 'translead int', 'united logistics', 'connection logistics',
+    'port southeast logistics', 'wider logistics', 'safround logistics',
+    'charter link logistics', 'honour lane shipping', 'maxwide logistics',
+    'shipco transport', 'pt dsv transport', 'beijing century joyo courier',
+    'ningbo translead', 'dsv air sea', 'u s united logistics',
+  ];
+  
+  // Only filter if name contains explicit logistics keywords
+  // CO, LTD alone are not enough - they're common in manufacturing companies too
+  return explicitLogisticsKeywords.some((keyword) => n.includes(keyword.toUpperCase()));
 }
 
 /**
@@ -1160,23 +1179,31 @@ function shouldRemoveName(name: string): boolean {
   // Only symbols (no letters or numbers)
   if (!/[a-zA-Z0-9]/.test(n)) return true;
   
-  // Only placeholder words
+  // RELAXED: If name contains any alphabetic characters, keep it (even if short)
+  // This allows short but valid company names
+  if (/[a-zA-Z]/.test(n)) {
+    // Only remove if it's clearly a placeholder
+    const lower = n.toLowerCase();
+    const placeholderOnly = /^(phone|email|address|contact|tel|fax|zip|postal|code)[\s\-]*$/i.test(n);
+    if (placeholderOnly) return true;
+    
+    // Truly garbage patterns: just punctuation + placeholder
+    // Examples: "phone -", "- company", "--", "."
+    const garbagePattern = /^[\s\-\.]+$|^[\s\-\.]+(phone|email|company)[\s\-\.]*$/i.test(n);
+    if (garbagePattern) return true;
+    
+    // If it has alphabetic characters, keep it (even if short)
+    return false;
+  }
+  
+  // Only placeholder words (no alphabetic characters)
   const lower = n.toLowerCase();
   const placeholderOnly = /^(phone|email|address|contact|tel|fax|zip|postal|code)[\s\-]*$/i.test(n);
   if (placeholderOnly) return true;
   
   // Truly garbage patterns: just punctuation + placeholder
-  // Examples: "phone -", "- company", "--", "."
   const garbagePattern = /^[\s\-\.]+$|^[\s\-\.]+(phone|email|company)[\s\-\.]*$/i.test(n);
   if (garbagePattern) return true;
-  
-  // If it has any company-like structure (LTD, CO, INC, etc.), keep it
-  const hasCompanyStructure = /(ltd|limited|co\.|inc\.|corp|company|enterprise|group|industries)/i.test(n);
-  if (hasCompanyStructure) return false;
-  
-  // If it has at least 2 letters (could be a short but valid name), keep it
-  // This is critical for toy suppliers which may have short names
-  if (/[a-zA-Z].*[a-zA-Z]/.test(n)) return false;
   
   return false;
 }
@@ -1844,6 +1871,65 @@ async function findSupplierMatches(
     console.log(`[Pipeline Step 2] ========================================`);
   }
 
+  // ============================================================================
+  // Data Preprocessing Functions
+  // ============================================================================
+  
+  /**
+   * Remove unnecessary modifiers from product name (with, and, for, etc.)
+   * This helps extract core product terms for better search recall
+   */
+  function preprocessProductName(productName: string): string {
+    if (!productName || typeof productName !== "string") return "";
+    
+    // Remove common modifiers that don't help with supplier matching
+    const modifiers = /\b(with|and|for|from|by|the|a|an|of|in|on|at|to|as)\b/gi;
+    let cleaned = productName.replace(modifiers, " ").replace(/\s+/g, " ").trim();
+    
+    return cleaned;
+  }
+  
+  /**
+   * Extract core nouns (2 most important words) from product name for fallback search
+   * Prioritizes material and category terms
+   */
+  function extractCoreNouns(productName: string, keywords: string[] = [], category?: string, material?: string): string[] {
+    const coreNouns: string[] = [];
+    
+    // Add material if available (high priority)
+    if (material && material.length >= 3) {
+      coreNouns.push(material.toLowerCase());
+    }
+    
+    // Add category if available (high priority)
+    if (category && category.length >= 3) {
+      const categoryWords = category.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+      coreNouns.push(...categoryWords.slice(0, 1)); // Take first meaningful word
+    }
+    
+    // Extract nouns from product name (skip common words)
+    const preprocessed = preprocessProductName(productName);
+    const words = preprocessed.toLowerCase().split(/\s+/).filter(w => {
+      // Skip common words
+      const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'with', 'for', 'from', 'by', 'of', 'in', 'on', 'at', 'to', 'as'];
+      return w.length >= 3 && !commonWords.includes(w);
+    });
+    
+    // Prioritize longer words (likely to be nouns)
+    const sortedWords = words.sort((a, b) => b.length - a.length);
+    coreNouns.push(...sortedWords.slice(0, 2));
+    
+    // Add keywords if not already included
+    keywords.forEach(kw => {
+      if (kw && kw.length >= 3 && !coreNouns.includes(kw.toLowerCase())) {
+        coreNouns.push(kw.toLowerCase());
+      }
+    });
+    
+    // Return top 2 unique nouns
+    return Array.from(new Set(coreNouns)).slice(0, 2);
+  }
+
   // Priority 2: Optimized single-query search
   // Build search terms from product name, keywords, category, and material
   // Wrapped in try-catch for error resilience
@@ -1898,10 +1984,15 @@ async function findSupplierMatches(
 
   // Normalize search terms to prevent SQL injection and ensure clean OR filter
   // Stronger normalization: remove all special chars that could break OR filter
+  // EMERGENCY FIX: Convert to UPPERCASE for ImportKey data compatibility
   const normalizeTerm = (t: string) => {
     if (!t || typeof t !== 'string') return '';
-    return t
-      .toLowerCase()
+    // Remove common stop words (AND, WITH, FOR, etc.)
+    const stopWords = /\b(and|with|for|from|by|the|a|an|of|in|on|at|to|as)\b/gi;
+    let cleaned = t.replace(stopWords, " ").replace(/\s+/g, " ").trim();
+    
+    return cleaned
+      .toUpperCase() // EMERGENCY FIX: Uppercase for ImportKey data
       .replace(/[%_(),.]/g, " ")
       .replace(/\s+/g, " ")
       .trim()
@@ -1953,23 +2044,102 @@ async function findSupplierMatches(
     .slice(0, 15); // Increased limit to capture more universal matches
 
   console.log("[Pipeline Step 2] Searching by terms (limited to 15):", limitedTerms);
+  console.log("[Pipeline Step 2] Actual DB query keywords:", JSON.stringify(limitedTerms));
 
-  // Build OR filter to search BOTH product_name AND product_description
-  // This significantly increases recall for real trade data matches
-  const orFilter = limitedTerms
-    .flatMap((t) => [
-      `product_name.ilike.%${t}%`,
-      `product_description.ilike.%${t}%`
-    ])
-    .join(",");
-
-    const { data: searchResults, error: searchError } = await supabase
-      .from("supplier_products")
-      .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
-      .or(orFilter)
-      .limit(50); // Increased limit to capture more real trade data
+  // ============================================================================
+  // Multi-Stage Search Strategy
+  // ============================================================================
+  
+  // EMERGENCY FIX: Broad Recall Search - Token-based matching
+  // Split product name into tokens and match if at least 2 tokens match
+  const buildTokenBasedSearchQuery = (productName: string, keywords: string[] = [], category?: string, material?: string) => {
+    // Extract all meaningful tokens from product name
+    const preprocessed = preprocessProductName(productName);
+    const tokens = preprocessed
+      .toUpperCase() // Uppercase for ImportKey compatibility
+      .replace(/[^A-Z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length >= 2) // Minimum 2 chars
+      .filter(w => !['AND', 'WITH', 'FOR', 'FROM', 'BY', 'THE', 'A', 'AN', 'OF', 'IN', 'ON', 'AT', 'TO', 'AS'].includes(w));
     
-    console.log(`[Pipeline Step 2] DB search returned ${searchResults?.length || 0} raw results for ${limitedTerms.length} keywords`);
+    // Add keywords, category, material as tokens
+    if (category) {
+      const catTokens = category.toUpperCase().split(/\s+/).filter(w => w.length >= 2);
+      tokens.push(...catTokens);
+    }
+    if (material) {
+      const matTokens = material.toUpperCase().split(/\s+/).filter(w => w.length >= 2);
+      tokens.push(...matTokens);
+    }
+    keywords.forEach(kw => {
+      if (kw && kw.length >= 2) {
+        tokens.push(kw.toUpperCase());
+      }
+    });
+    
+    // Remove duplicates
+    const uniqueTokens = Array.from(new Set(tokens));
+    
+    // Build OR filter for each token
+    // Each token searches in product_name, product_description, and category
+    const tokenFilters = uniqueTokens
+      .flatMap((t) => [
+        `product_name.ilike.%${t}%`,
+        `product_description.ilike.%${t}%`,
+        `category.ilike.%${t}%`
+      ])
+      .join(",");
+    
+    return { tokenFilters, tokens: uniqueTokens };
+  };
+
+  // Stage 1: Primary search with token-based matching (BROAD RECALL)
+  // Build OR filter to search product_name, product_description, AND category
+  // EMERGENCY FIX: Token-based search for maximum recall
+  const buildOrFilter = (terms: string[]) => {
+    return terms
+      .flatMap((t) => [
+        `product_name.ilike.%${t}%`,
+        `product_description.ilike.%${t}%`,
+        `category.ilike.%${t}%` // ADDED: Search category field too
+      ])
+      .join(",");
+  };
+
+  // Also create uppercase versions for ALL CAPS data (ImportKey characteristic)
+  const buildOrFilterWithCaps = (terms: string[]) => {
+    // Terms are already uppercase from normalizeTerm
+    return terms
+      .flatMap((t) => [
+        `product_name.ilike.%${t}%`,
+        `product_description.ilike.%${t}%`,
+        `category.ilike.%${t}%`
+      ])
+      .join(",");
+  };
+
+  // EMERGENCY FIX: Use token-based search for maximum recall
+  const tokenSearch = buildTokenBasedSearchQuery(
+    analysis.productName || "",
+    asArrayString(analysis.keywords),
+    analysis.category,
+    analysis.attributes?.material
+  );
+  
+  console.log(`[Pipeline Step 2] Token-based search with ${tokenSearch.tokens.length} tokens:`, tokenSearch.tokens.slice(0, 10));
+  
+  // Also include traditional keyword search as fallback
+  const orFilter = buildOrFilterWithCaps(limitedTerms);
+  const combinedFilter = `${tokenSearch.tokenFilters},${orFilter}`;
+
+  const { data: searchResults, error: searchError } = await supabase
+    .from("supplier_products")
+    .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
+    .or(combinedFilter)
+    .limit(200); // EMERGENCY FIX: Increased limit for broad recall
+  
+  console.log(`[Pipeline Step 2] Stage 1 (Primary) search returned ${searchResults?.length || 0} raw results for ${limitedTerms.length} keywords`);
+  console.log(`[Pipeline Step 2] Stage 1 query filter (first 200 chars):`, orFilter.substring(0, 200));
     if (searchResults && searchResults.length > 0) {
       console.log(`[Pipeline Step 2] Sample matches:`, searchResults.slice(0, 3).map(r => ({
         supplier: r.supplier_name,
@@ -1983,111 +2153,113 @@ async function findSupplierMatches(
       enrichSupplierNamesFromDescription(searchResults);
     }
 
+  // Stage 2: Fallback search if Stage 1 results < 5
+  let fallbackResults: any[] = [];
+  if (!searchError && (!searchResults || searchResults.length < 5)) {
+    console.log(`[Pipeline Step 2] Stage 1 returned ${searchResults?.length || 0} results (< 5), starting Stage 2 (Fallback) search...`);
+    
+    // Extract core nouns (2 most important words) for fallback search
+    const coreNouns = extractCoreNouns(
+      analysis.productName || "",
+      asArrayString(analysis.keywords),
+      analysis.category,
+      analysis.attributes?.material
+    );
+    
+    console.log(`[Pipeline Step 2] Stage 2 core nouns extracted:`, coreNouns);
+    
+    if (coreNouns.length > 0) {
+      try {
+        const normalizedCoreNouns = coreNouns
+          .map(normalizeTerm)
+          .filter((t) => t && t.length >= 2);
+        
+        if (normalizedCoreNouns.length > 0) {
+          const fallbackOrFilter = buildOrFilterWithCaps(normalizedCoreNouns);
+          
+          console.log(`[Pipeline Step 2] Stage 2 query keywords:`, JSON.stringify(normalizedCoreNouns));
+          console.log(`[Pipeline Step 2] Stage 2 query filter (first 200 chars):`, fallbackOrFilter.substring(0, 200));
+          
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from("supplier_products")
+            .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
+            .or(fallbackOrFilter)
+            .limit(50);
+          
+          if (fallbackError) {
+            console.warn(`[Pipeline Step 2] Stage 2 search error:`, fallbackError);
+          } else {
+            fallbackResults = fallbackData || [];
+            console.log(`[Pipeline Step 2] Stage 2 (Fallback) search returned ${fallbackResults.length} raw results`);
+            
+            // Extract real company names from fallback results
+            if (fallbackResults.length > 0) {
+              enrichSupplierNamesFromDescription(fallbackResults);
+            }
+          }
+        }
+      } catch (fallbackErr) {
+        console.warn(`[Pipeline Step 2] Stage 2 search exception:`, fallbackErr);
+      }
+    }
+  }
+
+  // Combine Stage 1 and Stage 2 results
+  const combinedResults = [
+    ...(searchResults || []),
+    ...fallbackResults.filter(fb => {
+      // Avoid duplicates
+      const key = `${fb.supplier_id}_${fb.product_name}`;
+      return !searchResults?.some(sr => `${sr.supplier_id}_${sr.product_name}` === key);
+    })
+  ];
+
   if (searchError) {
     console.error("[Pipeline Step 2] supplier_products search error:", searchError);
+    // Even if Stage 1 failed, try to use Stage 2 results
+    if (fallbackResults.length > 0) {
+      console.log(`[Pipeline Step 2] Using Stage 2 fallback results (${fallbackResults.length} results) despite Stage 1 error`);
+    }
   } else {
-    // Clean candidates: filter out too generic, invalid, banned, or logistics entries
-    // Track removal reasons for debugging
-    const removalReasons = {
-      tooShort: 0,
-      various: 0,
-      assorted: 0,
-      mixed: 0,
-      random: 0,
-      banned: 0,
-      badName: 0,
-      logistics: 0,
-      toyMismatch: 0,
-      foodMismatch: 0,
-    };
-
-    // Collect badName samples for debugging
-    const badNameSamples: string[] = [];
-
-    const cleaned = (searchResults ?? []).filter((p) => {
+    // EMERGENCY FIX: Don't filter - only remove truly invalid entries (banned products)
+    // All other entries will be scored and sorted, even with penalties
+    const cleaned = (combinedResults ?? []).filter((p) => {
       const productName = ((p.product_name as string) ?? "").toString().toLowerCase();
-      const supplierNameRaw = (p.supplier_name as string) ?? "";
-      const supplierName = normalizeName(supplierNameRaw);
       
-      if (productName.length < 4) {
-        removalReasons.tooShort++;
-        return false;
-      }
-      if (productName.includes("various")) {
-        removalReasons.various++;
-        return false;
-      }
-      if (productName.includes("assorted")) {
-        removalReasons.assorted++;
-        return false;
-      }
-      if (productName.includes("mixed")) {
-        removalReasons.mixed++;
-        return false;
-      }
-      if (productName.includes("random")) {
-        removalReasons.random++;
-        return false;
-      }
+      // Only filter banned products (safety issue)
       if (isBannedCandidate(productName)) {
-        removalReasons.banned++;
         return false;
       }
-      // Use shouldRemoveName (stricter) instead of isBadName
-      // This only removes truly invalid entries, not low-quality ones
-      if (shouldRemoveName(supplierNameRaw)) {
-        removalReasons.badName++;
-        // Collect samples (keep first 10)
-        if (badNameSamples.length < 10) {
-          badNameSamples.push(supplierNameRaw);
-        }
-        return false;
-      }
-      // HARD FILTER: Remove forwarders/logistics companies (not manufacturers)
-      // These should NOT appear in supplier matches as they are not actual factories
-      // RELAXED: Only filter if it's VERY obviously a logistics company
-      if (isLikelyLogistics(supplierName)) {
-        // Log the filtered logistics company for debugging
-        if (removalReasons.logistics < 5) {
-          console.log(`[Pipeline Step 2] Filtered logistics company: "${supplierNameRaw}"`);
-        }
-        removalReasons.logistics++;
-        return false; // Remove forwarders completely
-      }
       
-      // Toy category mismatch filter (industrial equipment, not toys)
-      if (isToyCategory(analysis.category)) {
-        const text = `${productName} ${(p.category as string) || ""} ${(p.product_description as string) || ""}`;
-        if (isMismatchForToyCandidate(text)) {
-          removalReasons.toyMismatch++;
-          return false;
-        }
-        if (isHs2MismatchForToy((p.hs_code as string) || null)) {
-          removalReasons.toyMismatch++;
-          return false;
-        }
-      }
-      
+      // Keep everything else - penalties will be applied in calculateMatchScore
       return true;
     });
 
     console.log(
-      `[Pipeline Step 2] OR query returned: ${searchResults?.length ?? 0} results, cleaned to ${cleaned.length} candidates`
-    );
-    console.log(
-      `[Pipeline Step 2] Removal reasons:`,
-      Object.entries(removalReasons)
-        .filter(([_, count]) => count > 0)
-        .map(([reason, count]) => `${reason}: ${count}`)
-        .join(", ") || "none"
+      `[Pipeline Step 2] Combined search (Stage 1 + Stage 2) returned: ${combinedResults.length} results, after minimal filtering: ${cleaned.length} candidates`
     );
     
-    // Debug: Show badName samples to understand why they're being filtered
-    if (badNameSamples.length > 0) {
-      console.log(
-        `[Pipeline Step 2] badName samples (first ${badNameSamples.length}):`,
-        badNameSamples.map((s, i) => `${i + 1}. "${s}"`).join("\n  ")
-      );
+    // Detailed logging when results are low
+    if (cleaned.length < 5) {
+      console.log(`[Pipeline Step 2] ========================================`);
+      console.log(`[Pipeline Step 2] WARNING: Only ${cleaned.length} supplier matches found`);
+      console.log(`[Pipeline Step 2] Stage 1 keywords used:`, JSON.stringify(limitedTerms));
+      console.log(`[Pipeline Step 2] Stage 1 raw results: ${searchResults?.length || 0}`);
+      if (fallbackResults.length > 0) {
+        console.log(`[Pipeline Step 2] Stage 2 core nouns used:`, JSON.stringify(extractCoreNouns(
+          analysis.productName || "",
+          asArrayString(analysis.keywords),
+          analysis.category,
+          analysis.attributes?.material
+        )));
+        console.log(`[Pipeline Step 2] Stage 2 raw results: ${fallbackResults.length}`);
+      }
+      console.log(`[Pipeline Step 2] Product name: "${analysis.productName}"`);
+      console.log(`[Pipeline Step 2] Category: "${analysis.category}"`);
+      console.log(`[Pipeline Step 2] Material: "${analysis.attributes?.material || 'N/A'}"`);
+      console.log(`[Pipeline Step 2] Keywords:`, JSON.stringify(asArrayString(analysis.keywords)));
+      console.log(`[Pipeline Step 2] Emergency fallback will ensure minimum 5 results`);
+      console.log(`[Pipeline Step 2] ========================================`);
     }
 
     cleaned.forEach((product) => {
@@ -2166,8 +2338,8 @@ async function findSupplierMatches(
   }
 
   // Calculate match scores and transform
-  // Adjust threshold: lower if no HS Code (less accurate matching)
-  const threshold = analysis.hsCode ? 30 : 15;
+  // EMERGENCY FIX: Lower threshold significantly for broad recall
+  const threshold = analysis.hsCode ? 10 : 5; // Much lower threshold
   
   // Ensure allProducts is a valid Map before processing
   const safeAllProducts = allProducts && allProducts instanceof Map ? allProducts : new Map();
@@ -2175,12 +2347,7 @@ async function findSupplierMatches(
   try {
     const allProductsArray = Array.from(safeAllProducts.values()) || [];
     const mapped = allProductsArray.map((item) => {
-      // Filter out forwarders/logistics companies
-      const supplierNameRaw = (item.supplier_name as string) || "";
-      if (isLikelyLogistics(supplierNameRaw)) {
-        return null; // Skip forwarders
-      }
-      
+      // EMERGENCY FIX: Don't filter - let calculateMatchScore apply penalties
       const { score, reason } = calculateMatchScore(item, analysis);
       
       // Normalize product name (convert ALL CAPS to Title Case)
@@ -2201,7 +2368,8 @@ async function findSupplierMatches(
         isInferred: false, // Exact matches are not inferred
       };
     });
-    const filtered = Array.isArray(mapped) ? mapped.filter((match) => match.matchScore > threshold) : [];
+    // EMERGENCY FIX: Filter only banned products, keep all others (even with negative scores)
+    const filtered = Array.isArray(mapped) ? mapped.filter((match) => match && match.matchScore > -100) : [];
     const sorted = Array.isArray(filtered) ? filtered.sort((a, b) => b.matchScore - a.matchScore) : [];
     matches = Array.isArray(sorted) ? sorted : []; // Return ALL matches, no limit
   } catch (err) {
@@ -3302,6 +3470,123 @@ async function findSupplierMatches(
     );
   }
 
+  // EMERGENCY FIX: Guarantee minimum 5 results
+  // If we have fewer than 5 matches, add category-based fallback matches
+  if (finalMatches.length < 5) {
+    console.log(`[Pipeline Step 2] EMERGENCY: Only ${finalMatches.length} matches found. Adding category-based fallback...`);
+    
+    try {
+      // Search for large exporters in the same category
+      const categoryFallbackQuery = supabase
+        .from("supplier_products")
+        .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id,currency")
+        .limit(50);
+      
+      if (analysis.category) {
+        categoryFallbackQuery.ilike("category", `%${analysis.category.toUpperCase()}%`);
+      }
+      
+      const { data: categoryFallback, error: fallbackError } = await categoryFallbackQuery;
+      
+      if (!fallbackError && categoryFallback && categoryFallback.length > 0) {
+        // Extract real company names
+        enrichSupplierNamesFromDescription(categoryFallback);
+        
+        // Convert to matches with lower scores
+        const existingIds = new Set(finalMatches.map(m => m.supplierId));
+        const fallbackMatches = categoryFallback
+          .filter(item => {
+            const supplierNameRaw = (item.supplier_name as string) || "";
+            // Skip if already in results or if truly invalid
+            if (existingIds.has(item.supplier_id as string)) return false;
+            if (isBannedCandidate((item.product_name as string || "").toLowerCase())) return false;
+            return true;
+          })
+          .slice(0, 10 - finalMatches.length) // Fill up to 10 total
+          .map((item) => {
+            const { score } = calculateMatchScore(item, analysis);
+            // Give fallback matches lower but positive scores
+            const fallbackScore = Math.max(5, score - 20);
+            
+            return {
+              supplierId: item.supplier_id as string,
+              supplierName: (item.supplier_name as string) || "Unknown Supplier",
+              productName: normalizeProductName(item.product_name as string),
+              unitPrice: (item.unit_price as number) || 0,
+              moq: (item.moq as number) || 1,
+              leadTime: (item.lead_time as number) || 0,
+              matchScore: fallbackScore,
+              matchReason: "Category fallback match",
+              importKeyId: (item.import_key_id as string) || null,
+              currency: (item.currency as string) || "USD",
+              isInferred: true, // Mark as inferred/fallback
+            };
+          });
+        
+        // Add fallback matches to final results
+        finalMatches.push(...fallbackMatches);
+        finalMatches.sort((a, b) => b.matchScore - a.matchScore);
+        
+        console.log(`[Pipeline Step 2] EMERGENCY: Added ${fallbackMatches.length} category fallback matches. Total: ${finalMatches.length}`);
+      }
+    } catch (emergencyErr) {
+      console.warn(`[Pipeline Step 2] EMERGENCY fallback error:`, emergencyErr);
+    }
+    
+    // If still less than 5, search for any category matches
+    if (finalMatches.length < 5) {
+      console.log(`[Pipeline Step 2] EMERGENCY: Still only ${finalMatches.length} matches. Searching for any category matches...`);
+      try {
+        const emergencyQuery = supabase
+          .from("supplier_products")
+          .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id,currency")
+          .limit(20);
+        
+        if (analysis.category) {
+          emergencyQuery.ilike("category", `%${analysis.category.toUpperCase()}%`);
+        }
+        
+        const { data: emergencyData } = await emergencyQuery;
+        
+        if (emergencyData && emergencyData.length > 0) {
+          enrichSupplierNamesFromDescription(emergencyData);
+          
+          const existingIds = new Set(finalMatches.map(m => m.supplierId));
+          const emergencyMatches = emergencyData
+            .filter(item => {
+              const supplierId = item.supplier_id as string;
+              if (existingIds.has(supplierId)) return false;
+              if (isBannedCandidate((item.product_name as string || "").toLowerCase())) return false;
+              return true;
+            })
+            .slice(0, 5 - finalMatches.length)
+            .map((item) => {
+              const { score } = calculateMatchScore(item, analysis);
+              return {
+                supplierId: item.supplier_id as string,
+                supplierName: (item.supplier_name as string) || "Unknown Supplier",
+                productName: normalizeProductName(item.product_name as string),
+                unitPrice: (item.unit_price as number) || 0,
+                moq: (item.moq as number) || 1,
+                leadTime: (item.lead_time as number) || 0,
+                matchScore: Math.max(1, score), // Minimum score of 1
+                matchReason: "Emergency fallback",
+                importKeyId: (item.import_key_id as string) || null,
+                currency: (item.currency as string) || "USD",
+                isInferred: true,
+              };
+            });
+          
+          finalMatches.push(...emergencyMatches);
+          finalMatches.sort((a, b) => b.matchScore - a.matchScore);
+          console.log(`[Pipeline Step 2] EMERGENCY: Added ${emergencyMatches.length} emergency matches. Total: ${finalMatches.length}`);
+        }
+      } catch (emergencyErr) {
+        console.warn(`[Pipeline Step 2] EMERGENCY fallback error:`, emergencyErr);
+      }
+    }
+  }
+
   return {
     matches: finalMatches,
     cached: false,
@@ -3325,22 +3610,34 @@ function calculateMatchScore(
     return { score: 0, reason: "Missing product name" };
   }
 
-  // HS Code match (highest priority - 0-40 points)
+  // EMERGENCY FIX: HS Code match - Relaxed to include HS4 matches
   // Normalize to 6-digit format for comparison
   const analysisHs6 = normalizeHs6(analysis.hsCode);
   const itemHs6 = normalizeHs6(item.hs_code?.toString());
+  
+  // Also extract HS4 (first 4 digits)
+  const analysisHs4 = analysisHs6 ? analysisHs6.substring(0, 4) : null;
+  const itemHs4 = itemHs6 ? itemHs6.substring(0, 4) : null;
 
   if (analysisHs6 && itemHs6) {
     if (analysisHs6 === itemHs6) {
-      score += 50; // Increased from 40 to 50 for exact match
+      score += 50; // Exact HS6 match
       reasons.push("HS6 match");
+    } else if (analysisHs4 && itemHs4 && analysisHs4 === itemHs4) {
+      // EMERGENCY FIX: HS4 match also gets points (relaxed matching)
+      score += 25; // HS4 match gets significant points
+      reasons.push("HS4 match");
     } else if (
       analysisHs6.startsWith(itemHs6.substring(0, 4)) ||
       itemHs6.startsWith(analysisHs6.substring(0, 4))
     ) {
-      score += 30; // Increased from 25 to 30
+      score += 30; // Partial HS Code match
       reasons.push("Partial HS Code match");
     }
+  } else if (analysisHs4 && itemHs4 && analysisHs4 === itemHs4) {
+    // EMERGENCY FIX: Even if HS6 is missing, HS4 match still counts
+    score += 20;
+    reasons.push("HS4 match (no HS6)");
   }
 
   // Material match bonus (0-20 points)
@@ -3361,7 +3658,40 @@ function calculateMatchScore(
     }
   }
 
-  // Name similarity (0-35 points) - Levenshtein based
+  // EMERGENCY FIX: Token-based matching (at least 2 tokens must match)
+  // Split product name into tokens
+  const analysisTokens = (analysis.productName || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 2)
+    .filter(w => !['AND', 'WITH', 'FOR', 'FROM', 'BY', 'THE', 'A', 'AN', 'OF', 'IN', 'ON', 'AT', 'TO', 'AS'].includes(w));
+  
+  const itemTokens = itemProductName
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 2);
+  
+  // Count matching tokens
+  const matchingTokens = analysisTokens.filter(t => itemTokens.includes(t));
+  const tokenMatchCount = matchingTokens.length;
+  const minTokensForMatch = 2; // EMERGENCY FIX: At least 2 tokens must match
+  
+  // Token overlap score (0-40 points) - Based on token count
+  if (tokenMatchCount >= minTokensForMatch) {
+    // Base score for having minimum tokens
+    score += 20;
+    // Bonus for more matching tokens
+    score += Math.min(20, (tokenMatchCount - minTokensForMatch) * 5);
+    reasons.push(`${tokenMatchCount} token match(es)`);
+  } else if (tokenMatchCount === 1) {
+    // Single token match gets lower score but still included
+    score += 10;
+    reasons.push("1 token match");
+  }
+
+  // Name similarity (0-35 points) - Levenshtein based (fallback)
   const nameSimilarity = calculateStringSimilarity(
     analysis.productName.toLowerCase(),
     itemProductName.toLowerCase()
@@ -3374,8 +3704,7 @@ function calculateMatchScore(
     reasons.push("Moderate name similarity");
   }
 
-  // Token overlap score (0-25 points) - Jaccard based
-  // This helps with long product names where Levenshtein is less effective
+  // Token overlap score (0-25 points) - Jaccard based (additional scoring)
   const combinedAnalysis = `${analysis.productName} ${analysis.category}`;
   const combinedItem = `${itemProductName} ${(item.category as string) || ""}`;
   const overlap = tokenOverlapScore(combinedAnalysis, combinedItem);
@@ -3433,8 +3762,31 @@ function calculateMatchScore(
     reasons.push(`${keywordMatches.length} keyword match(es)`);
   }
 
+  // EMERGENCY FIX: Apply penalties instead of filtering
+  // Check for logistics/forwarder (penalty instead of removal)
+  const supplierNameRaw = (item.supplier_name as string) || "";
+  const supplierName = normalizeName(supplierNameRaw);
+  if (isLikelyLogistics(supplierName)) {
+    score -= 40; // Large penalty but don't remove
+    reasons.push("Logistics penalty");
+  }
+  
+  // Check for bad names (penalty instead of removal)
+  if (shouldRemoveName(supplierNameRaw)) {
+    score -= 30; // Penalty but don't remove
+    reasons.push("Name quality penalty");
+  }
+  
+  // Check for banned products (still filter these - safety issue)
+  const itemProductNameLower = itemProductName.toLowerCase();
+  if (isBannedCandidate(itemProductNameLower)) {
+    // Banned products are still filtered (safety)
+    return { score: 0, reason: "Banned product" };
+  }
+
   // Ensure score is always a valid number (coerce NaN/undefined to 0)
-  let finalScore = Math.min(100, Math.round(score));
+  // EMERGENCY FIX: Allow negative scores (they'll be sorted to bottom)
+  let finalScore = Math.round(score);
   if (isNaN(finalScore) || !isFinite(finalScore)) {
     finalScore = 0;
   }
