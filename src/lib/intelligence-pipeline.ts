@@ -1764,11 +1764,12 @@ async function findSupplierMatches(
         if (normalizedKeyword.length < 3) continue;
         
         // Search in supplier_products table (primary source)
+        // Search across product_name, product_description, AND supplier_name for maximum recall
         const { data: keywordResults } = await supabase
           .from("supplier_products")
           .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
-          .or(`product_name.ilike.%${normalizedKeyword}%,supplier_name.ilike.%${normalizedKeyword}%`)
-          .limit(20); // Limit to 20 matches per keyword
+          .or(`product_name.ilike.%${normalizedKeyword}%,product_description.ilike.%${normalizedKeyword}%,supplier_name.ilike.%${normalizedKeyword}%`)
+          .limit(30); // Increased limit per keyword for better coverage
         
         // Extract real company names from product_description if supplier_name is dummy
         if (keywordResults && keywordResults.length > 0) {
@@ -1909,6 +1910,33 @@ async function findSupplierMatches(
   // Additional expansion is handled by the AI-generated keywords, not hardcoded category lists
   let expandedTerms = [...safeSearchTerms];
   
+  // Add generic high-recall keywords to maximize DB matches
+  // These broad terms help find real trade data even when specific product names don't match
+  const genericKeywords: string[] = [];
+  const categoryLower = (analysis.category || "").toLowerCase();
+  const materialLower = (analysis.attributes?.material || "").toLowerCase();
+  
+  // Material-based keywords
+  if (materialLower.includes("plastic")) genericKeywords.push("plastic", "polymer");
+  if (materialLower.includes("wood")) genericKeywords.push("wood", "wooden");
+  if (materialLower.includes("metal")) genericKeywords.push("metal", "steel", "aluminum");
+  if (materialLower.includes("fabric") || materialLower.includes("textile")) genericKeywords.push("fabric", "textile");
+  if (materialLower.includes("rubber")) genericKeywords.push("rubber");
+  
+  // Category-based keywords
+  if (categoryLower.includes("toy")) genericKeywords.push("toy", "toys");
+  if (categoryLower.includes("food") || categoryLower.includes("confection")) genericKeywords.push("food", "confectionery");
+  if (categoryLower.includes("furniture")) genericKeywords.push("furniture");
+  if (categoryLower.includes("electronic")) genericKeywords.push("electronic", "electronics");
+  if (categoryLower.includes("apparel") || categoryLower.includes("clothing")) genericKeywords.push("apparel", "clothing", "garment");
+  if (categoryLower.includes("home")) genericKeywords.push("home", "household");
+  
+  // Add generic keywords to expanded terms (at the end, so specific terms take priority)
+  if (genericKeywords.length > 0) {
+    console.log(`[Pipeline Step 2] Adding ${genericKeywords.length} generic keywords for broader matching:`, genericKeywords);
+    expandedTerms.push(...genericKeywords);
+  }
+  
   // Remove category-specific hardcoded keywords - rely on AI-generated universal keywords instead
   // This ensures the pipeline works for all categories: Food, Furniture, Apparel, Electronics, Toys, etc.
 
@@ -1917,17 +1945,31 @@ async function findSupplierMatches(
     .filter((t) => t && t.length >= 2) || []) // Minimum 2 chars
     .slice(0, 15); // Increased limit to capture more universal matches
 
-  console.log("[Pipeline Step 2] Searching by terms (limited to 6):", limitedTerms);
+  console.log("[Pipeline Step 2] Searching by terms (limited to 15):", limitedTerms);
 
+  // Build OR filter to search BOTH product_name AND product_description
+  // This significantly increases recall for real trade data matches
   const orFilter = limitedTerms
-    .map((t) => `product_name.ilike.%${t}%`)
+    .flatMap((t) => [
+      `product_name.ilike.%${t}%`,
+      `product_description.ilike.%${t}%`
+    ])
     .join(",");
 
     const { data: searchResults, error: searchError } = await supabase
       .from("supplier_products")
       .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
       .or(orFilter)
-      .limit(20); // Limit to 20 matches for better performance
+      .limit(50); // Increased limit to capture more real trade data
+    
+    console.log(`[Pipeline Step 2] DB search returned ${searchResults?.length || 0} raw results for ${limitedTerms.length} keywords`);
+    if (searchResults && searchResults.length > 0) {
+      console.log(`[Pipeline Step 2] Sample matches:`, searchResults.slice(0, 3).map(r => ({
+        supplier: r.supplier_name,
+        product: r.product_name,
+        description: (r.product_description as string)?.substring(0, 50)
+      })));
+    }
     
     // Extract real company names from product_description if supplier_name is dummy
     if (searchResults && searchResults.length > 0) {
@@ -1996,7 +2038,12 @@ async function findSupplierMatches(
       }
       // HARD FILTER: Remove forwarders/logistics companies (not manufacturers)
       // These should NOT appear in supplier matches as they are not actual factories
+      // RELAXED: Only filter if it's VERY obviously a logistics company
       if (isLikelyLogistics(supplierName)) {
+        // Log the filtered logistics company for debugging
+        if (removalReasons.logistics < 5) {
+          console.log(`[Pipeline Step 2] Filtered logistics company: "${supplierNameRaw}"`);
+        }
         removalReasons.logistics++;
         return false; // Remove forwarders completely
       }
@@ -4654,59 +4701,20 @@ export async function runIntelligencePipeline(
     );
 
     // ============================================================================
-    // Fallback Strategy: If NO suppliers found at all, generate minimum 1 synthetic match
+    // NO Synthetic Fallback - Show Real Status When No Matches Found
     // ============================================================================
     let allMatches = [...recommendedSuppliers, ...candidateSuppliers];
     
     if (allMatches.length === 0) {
-      console.log("[Pipeline] No supplier matches found. Generating minimal synthetic fallback match (only when zero results)...");
+      console.log("[Pipeline] No supplier matches found in public trade data.");
+      console.log("[Pipeline] Searched keywords:", limitedTerms);
+      console.log("[Pipeline] Consider upgrading to premium verification for comprehensive supplier search.");
       
-      // Create a minimal synthetic supplier match ONLY when zero results
-      // Mark clearly as Candidate for transparency
-      const categoryName = normalizedAnalysis.category || "Product";
-      const location = normalizedAnalysis.attributes?.origin || null;
-      const syntheticMatch: SupplierMatch = {
-        supplierId: `synthetic_${categoryName.toLowerCase().replace(/\s+/g, "_")}_${Date.now()}`,
-        supplierName: location 
-          ? `Candidate Factory in ${location}`
-          : `Candidate Factory in ${categoryName}`,
-        productName: `${normalizedAnalysis.productName || "Similar product"}`,
-        unitPrice: 0, // No pricing data
-        moq: 1,
-        leadTime: 0,
-        matchScore: 0, // No real match score
-        matchReason: "Candidate match - No real trade data found. Manual sourcing required.",
-        importKeyId: null,
-        currency: "USD",
-        isInferred: true,
-        // Minimal evidence
-        evidence: {
-          recordCount: 0,
-          lastSeenDays: null,
-          productTypes: [categoryName],
-          anchors: [],
-          whyLines: [
-            `Category: ${categoryName}`,
-            "This is a baseline suggestion. Manual sourcing recommended.",
-          ],
-        },
-        supplierType: "manufacturer",
-        // Flags for UI
-        flags: {
-          why_lines: [
-            `Category: ${categoryName}`,
-            "Baseline suggestion - manual sourcing needed.",
-          ],
-          evidence_strength: "weak",
-          companyType: "Manufacturer",
-        },
-      };
-      
-      // Add synthetic match as a candidate (lowest quality)
-      candidateSuppliers.push(syntheticMatch);
-      allMatches = [syntheticMatch];
-      
-      console.log(`[Pipeline] Added synthetic fallback match: ${syntheticMatch.supplierName}`);
+      // DO NOT create synthetic matches - this damages trust
+      // Instead, the UI will detect zero matches and show:
+      // - "No exact match found in public trade data"
+      // - Upgrade CTA for $49 verification with manual sourcing
+      // - This is more honest than showing fake "Candidate Factory" entries
     }
 
     // Filter out matches with unitPrice = 0 (no pricing data available)
