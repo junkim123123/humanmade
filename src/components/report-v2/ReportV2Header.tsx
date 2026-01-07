@@ -63,7 +63,7 @@ export default function ReportV2Header({ report }: ReportV2HeaderProps) {
           )}
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-semibold text-slate-900 truncate">
-              {extractProductName(report.productName || report.product_name)}
+              {extractProductName(report.productName || (report as any).product_name)}
             </h1>
             <div className="flex items-center gap-3 mt-2">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${confidenceBadge.color}`}>

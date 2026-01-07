@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card'
 import { formatDistance } from 'date-fns'
 import Link from 'next/link'
 import type { Report } from '@/types/database'
+import { extractProductName } from '@/lib/report/extractProductName'
 
 type ReportWithProfile = Report & { profiles?: { email: string } }
 
@@ -95,7 +96,7 @@ export default async function ReportsPage() {
               {reports.map((report) => (
                 <tr key={report.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
-                    {report.product_name}
+                    {extractProductName(report.product_name)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                     {(report.profiles as any)?.email || '—'}

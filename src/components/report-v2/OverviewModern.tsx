@@ -287,7 +287,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   
   // Check for IP/brand keywords in product name
   const ipKeywords = ['pokemon', 'disney', 'marvel', 'star wars', 'nintendo', 'sony', 'warner', 'universal', 'pixar', 'dreamworks', 'hasbro', 'mattel', 'lego'];
-  const displayProductName = extractProductName(report.productName || report.product_name);
+  const displayProductName = extractProductName(report.productName || reportAny.product_name);
   const productNameLower = displayProductName.toLowerCase();
   const hasIPKeyword = ipKeywords.some(keyword => productNameLower.includes(keyword));
   

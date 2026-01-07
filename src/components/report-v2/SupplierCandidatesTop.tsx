@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, MapPin, ChevronDown } from "lucide-react";
+import { Building2, MapPin, ChevronDown, ShieldCheck, Zap } from "lucide-react";
 import { safePercent } from "@/lib/format/percent";
+
+const getMatchConfidenceBadge = (score: number) => {
+  if (score >= 80) return { label: "High Match", color: "bg-emerald-100 text-emerald-700 border-emerald-200" };
+  if (score >= 50) return { label: "Medium Match", color: "bg-blue-100 text-blue-700 border-blue-200" };
+  return { label: "Potential Match", color: "bg-slate-100 text-slate-600 border-slate-200" };
+};
 
 interface SupplierMatch {
   // Normalized fields (guaranteed by normalizeReport)
@@ -275,9 +281,14 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
               <span className="text-[12px] text-slate-600 mt-2 block">Trade data baseline — Let us optimize this for your specific volume and margin targets.</span>
             </div>
             {topMatch.matchScore && (
-              <span className="text-[12px] font-medium px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded">
-                {safePercent(topMatch.matchScore)}%
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${getMatchConfidenceBadge(topMatch.matchScore).color}`}>
+                  {getMatchConfidenceBadge(topMatch.matchScore).label}
+                </span>
+                <span className="text-[13px] font-bold text-slate-900">
+                  {safePercent(topMatch.matchScore)}%
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -348,9 +359,14 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                     <span className="text-[11px] text-slate-600 mt-1 block">Trade data baseline — Let us optimize this for your specific volume and margin targets.</span>
                   </div>
                   {match.matchScore && (
-                    <span className="text-[12px] text-slate-600">
-                      {safePercent(match.matchScore)}%
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getMatchConfidenceBadge(match.matchScore).color}`}>
+                        {getMatchConfidenceBadge(match.matchScore).label}
+                      </span>
+                      <span className="text-[12px] font-semibold text-slate-700">
+                        {safePercent(match.matchScore)}%
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>

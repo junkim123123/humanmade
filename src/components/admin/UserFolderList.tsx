@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { extractProductName } from "@/lib/report/extractProductName";
 import {
   Card,
   CardContent,
@@ -97,7 +98,7 @@ export default function UserFolderList({
                       <FileText className="w-5 h-5 text-slate-500" />
                       <div>
                         <p className="font-semibold text-slate-800">
-                          {report.product_name}
+                          {extractProductName(report.product_name)}
                         </p>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">
                           {report.status}

@@ -135,7 +135,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           <div className="pb-4">
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
-                {extractProductName(report.productName || report.product_name)}
+                {extractProductName(report.productName || (report as any).product_name)}
               </h1>
               {/* V2 Badge - visible marker to confirm correct renderer (dev only) */}
               {process.env.NODE_ENV !== "production" && (

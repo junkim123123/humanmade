@@ -917,6 +917,120 @@ Rules:
 }
 
 /**
+ * Extract company name from product_description (ImportKey trade data)
+ * Prioritizes actual manufacturers over forwarders/logistics companies
+ * Looks for patterns like "FWDR REF:", "CNEE REF:", "ND NOTIFY:", "SHIPPER:", "EXPORTER:"
+ */
+function extractCompanyNameFromDescription(description: string | null | undefined): string | null {
+  if (!description || typeof description !== 'string') return null;
+  
+  const candidates: Array<{ name: string; priority: number; isForwarder: boolean }> = [];
+  
+  // Common patterns in ImportKey product_description
+  const patterns = [
+    // Shipper (actual exporter/manufacturer) - HIGHEST PRIORITY
+    { regex: /SHIPPER[:\s]+([A-Z][A-Z0-9\s&\-.,()]+?)(?:\s+STATES|PO|SC|HS|Origin|TEL|FAX|@|$)/i, priority: 10, isForwarder: false },
+    // Exporter (actual manufacturer)
+    { regex: /EXPORTER[:\s]+([A-Z][A-Z0-9\s&\-.,()]+?)(?:\s+STATES|PO|SC|HS|Origin|TEL|FAX|@|$)/i, priority: 9, isForwarder: false },
+    // Consignee reference (buyer/importer, but sometimes manufacturer name appears)
+    { regex: /CNEE\s+REF[:\s]+([A-Z][A-Z0-9\s&\-.,()]+?)(?:\s+PO|SC|ND|HS|Origin|TEL|FAX|@|$)/i, priority: 5, isForwarder: false },
+    // Notify party (often distributor, but sometimes manufacturer)
+    { regex: /ND\s+NOTIFY[:\s]+([A-Z][A-Z0-9\s&\-.,()]+?)(?:\s+FOR|PO|SC|HS|Origin|TEL|FAX|@|$)/i, priority: 4, isForwarder: false },
+    // Forwarder reference (LOWEST PRIORITY - usually logistics companies)
+    { regex: /FWDR\s+REF[:\s]+([A-Z][A-Z0-9\s&\-.,()]+?)(?:\s+CNEE|$|PO|SC|ND|HS|Origin|TEL|FAX|@)/i, priority: 1, isForwarder: true },
+    // Company name patterns (all caps, followed by common suffixes)
+    { regex: /\b([A-Z][A-Z0-9\s&\-.,()]{10,}(?:CO|LTD|INC|LLC|CORP|LIMITED|GROUP|TRADING|PACKAGING|MANUFACTURING|INDUSTRIAL|TECHNOLOGY|INTERNATIONAL|EXPORT|IMPORT)[\s.,]?)(?:\s+@|TEL|FAX|PHONE|PO|SC|HS|Origin|$)/i, priority: 6, isForwarder: false },
+  ];
+  
+  for (const { regex, priority, isForwarder } of patterns) {
+    const match = description.match(regex);
+    if (match && match[1]) {
+      let companyName = match[1].trim();
+      
+      // Clean up common suffixes and noise
+      companyName = companyName
+        .replace(/\s+(FOR|PO|SC|ND|HS|ORIGIN|TEL|FAX|PHONE|EMAIL|@|STATES|THAT|THIS|CONTAINS|SHIPMENT).*$/i, '')
+        .replace(/\s+-\s*$/, '')
+        .replace(/^[:\s\-]+/, '')
+        .replace(/[:\s\-]+$/, '')
+        .replace(/\s{2,}/g, ' ') // Multiple spaces to single
+        .trim();
+      
+      // Filter out invalid names
+      if (companyName.length < 5) continue;
+      if (companyName.toLowerCase().includes('phone') || 
+          companyName.toLowerCase().includes('email') ||
+          companyName.toLowerCase().includes('contact') ||
+          companyName.toLowerCase().includes('n/a') ||
+          companyName.toLowerCase().includes('unknown')) continue;
+      
+      // Must contain at least one letter
+      if (!/[A-Za-z]/.test(companyName)) continue;
+      
+      // Must not be just numbers or special chars
+      if (/^[0-9\s\-.,()]+$/.test(companyName)) continue;
+      
+      // Check if it's a forwarder (but still add to candidates with lower priority)
+      const isActuallyForwarder = isLikelyLogistics(companyName);
+      
+      candidates.push({
+        name: companyName,
+        priority: isActuallyForwarder ? priority - 5 : priority, // Penalize forwarders
+        isForwarder: isActuallyForwarder || isForwarder,
+      });
+    }
+  }
+  
+  // Sort by priority (highest first), then filter out forwarders if we have non-forwarder options
+  candidates.sort((a, b) => b.priority - a.priority);
+  
+  // Prefer non-forwarder companies
+  const nonForwarder = candidates.find(c => !c.isForwarder);
+  if (nonForwarder) {
+    return nonForwarder.name;
+  }
+  
+  // If all are forwarders, return null (don't show forwarders as manufacturers)
+  return null;
+}
+
+/**
+ * Check if supplier_name is a dummy/placeholder value
+ */
+function isDummySupplierName(supplierName: string): boolean {
+  if (!supplierName || supplierName.trim().length < 3) return true;
+  const lower = supplierName.toLowerCase();
+  return lower.includes('phone') || 
+         lower.includes('email') ||
+         lower.includes('contact') ||
+         lower === '-' ||
+         lower === 'n/a' ||
+         lower === 'unknown' ||
+         lower.startsWith('synthetic_') ||
+         /^[0-9\s\-.,()]+$/.test(supplierName); // Only numbers/special chars
+}
+
+/**
+ * Enrich supplier products with real company names from product_description
+ * Replaces dummy supplier_name with extracted company names
+ */
+function enrichSupplierNamesFromDescription(products: any[]): void {
+  if (!products || !Array.isArray(products)) return;
+  
+  products.forEach((product: any) => {
+    const supplierName = (product.supplier_name as string) || "";
+    
+    if (isDummySupplierName(supplierName) && product.product_description) {
+      const extractedName = extractCompanyNameFromDescription(product.product_description);
+      if (extractedName) {
+        product.supplier_name = extractedName; // Replace dummy name with real name
+        console.log(`[Pipeline Step 2] Extracted company name: "${extractedName}" (was: "${supplierName}")`);
+      }
+    }
+  });
+}
+
+/**
  * Normalize supplier name (trim and clean whitespace)
  */
 function normalizeName(s?: string): string {
@@ -924,29 +1038,33 @@ function normalizeName(s?: string): string {
 }
 
 /**
+ * Forwarder/Logistics company blacklist (comprehensive)
+ * These companies should be filtered out as they are not actual manufacturers
+ */
+const FORWARDER_KEYWORDS = [
+  // Major global forwarders
+  'logistics', 'freight', 'shipping', 'cargo', 'forward', 'forwarding', 'forwarder',
+  'expeditors', 'transport', 'broker', 'lines', 'intl', 'international freight',
+  // Specific company names
+  'maersk', 'cosco', 'cma', 'dhl', 'fedex', 'ups', 'oocl', 'evergreen', 'yang ming',
+  'damco', 'dsv', 'kuehne', 'panalpina', 'schenker', 'ceva', 'agility', 'geodis',
+  // Common patterns
+  'air sea', 'sea co', 'shipping co', 'freight co', 'logistics co', 'transport co',
+  'translead', 'translead int', 'united logistics', 'connection logistics',
+  'port southeast logistics', 'wider logistics', 'safround logistics',
+  'charter link logistics', 'honour lane shipping', 'maxwide logistics',
+  'shipco transport', 'pt dsv transport', 'beijing century joyo courier',
+  'ningbo translead', 'dsv air sea', 'u s united logistics',
+];
+
+/**
  * Check if supplier name indicates logistics/forwarder (not a factory)
+ * Enhanced with comprehensive forwarder blacklist
  */
 function isLikelyLogistics(name: string): boolean {
-  const n = name.toLowerCase();
-  const banned = [
-    "logistics",
-    "shipping",
-    "cargo",
-    "freight",
-    "forward",
-    "expeditors",
-    "transport",
-    "broker",
-    "lines",
-    "oocl",
-    "maersk",
-    "cosco",
-    "cma",
-    "dhl",
-    "fedex",
-    "ups",
-  ];
-  return banned.some((w) => n.includes(w));
+  if (!name || name.trim().length === 0) return false;
+  const n = name.toUpperCase();
+  return FORWARDER_KEYWORDS.some((keyword) => n.includes(keyword.toUpperCase()));
 }
 
 /**
@@ -1648,9 +1766,14 @@ async function findSupplierMatches(
         // Search in supplier_products table (primary source)
         const { data: keywordResults } = await supabase
           .from("supplier_products")
-          .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,import_key_id")
+          .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
           .or(`product_name.ilike.%${normalizedKeyword}%,supplier_name.ilike.%${normalizedKeyword}%`)
           .limit(20); // Limit to 20 matches per keyword
+        
+        // Extract real company names from product_description if supplier_name is dummy
+        if (keywordResults && keywordResults.length > 0) {
+          enrichSupplierNamesFromDescription(keywordResults);
+        }
         
         // Also search in report_importkey_companies for real trade data company names
         // This expands search to actual shipper/exporter names from ImportKey customs data
@@ -1802,9 +1925,14 @@ async function findSupplierMatches(
 
     const { data: searchResults, error: searchError } = await supabase
       .from("supplier_products")
-      .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,import_key_id")
+      .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
       .or(orFilter)
       .limit(20); // Limit to 20 matches for better performance
+    
+    // Extract real company names from product_description if supplier_name is dummy
+    if (searchResults && searchResults.length > 0) {
+      enrichSupplierNamesFromDescription(searchResults);
+    }
 
   if (searchError) {
     console.error("[Pipeline Step 2] supplier_products search error:", searchError);
@@ -1866,9 +1994,12 @@ async function findSupplierMatches(
         }
         return false;
       }
-      // Logistics companies are now demoted to candidate later, not removed here
-      // But if we have too many results, we might want to prioritize non-logistics
-      // For now, let them through so they can be classified properly
+      // HARD FILTER: Remove forwarders/logistics companies (not manufacturers)
+      // These should NOT appear in supplier matches as they are not actual factories
+      if (isLikelyLogistics(supplierName)) {
+        removalReasons.logistics++;
+        return false; // Remove forwarders completely
+      }
       
       // Toy category mismatch filter (industrial equipment, not toys)
       if (isToyCategory(analysis.category)) {
@@ -1940,6 +2071,11 @@ async function findSupplierMatches(
       
       const { data: categoryResults, error: categoryError } = await categoryQuery;
       
+      // Extract real company names from product_description
+      if (categoryResults && categoryResults.length > 0) {
+        enrichSupplierNamesFromDescription(categoryResults);
+      }
+      
       const categorySearchDuration = Date.now() - categorySearchStartTime;
       
       // Hard timeout guard: if search took too long, skip it
@@ -1985,11 +2121,22 @@ async function findSupplierMatches(
   try {
     const allProductsArray = Array.from(safeAllProducts.values()) || [];
     const mapped = allProductsArray.map((item) => {
+      // Filter out forwarders/logistics companies
+      const supplierNameRaw = (item.supplier_name as string) || "";
+      if (isLikelyLogistics(supplierNameRaw)) {
+        return null; // Skip forwarders
+      }
+      
       const { score, reason } = calculateMatchScore(item, analysis);
+      
+      // Normalize product name (convert ALL CAPS to Title Case)
+      const rawProductName = item.product_name as string;
+      const normalizedProductName = normalizeProductName(rawProductName);
+      
       return {
         supplierId: item.supplier_id as string,
-        supplierName: (item.supplier_name as string) || "Unknown Supplier",
-        productName: item.product_name as string,
+        supplierName: supplierNameRaw || "Unknown Supplier",
+        productName: normalizedProductName,
         unitPrice: (item.unit_price as number) || 0,
         moq: (item.moq as number) || 1,
         leadTime: (item.lead_time as number) || 0,
@@ -2052,8 +2199,27 @@ async function findSupplierMatches(
     // Helper function to add product to inferredProducts with filters
     const addInferredProduct = (product: Record<string, unknown>, roundName?: string) => {
       const productName = ((product.product_name as string) ?? "").toLowerCase();
-      const supplierNameRaw = (product.supplier_name as string) ?? "";
+      let supplierNameRaw = (product.supplier_name as string) ?? "";
+      
+      // If supplier_name is dummy, try to extract from product_description
+      if (isDummySupplierName(supplierNameRaw) && product.product_description) {
+        const extractedName = extractCompanyNameFromDescription(product.product_description);
+        if (extractedName) {
+          supplierNameRaw = extractedName; // Use extracted name
+          product.supplier_name = extractedName; // Update the product object too
+        }
+      }
+      
       const supplierName = normalizeName(supplierNameRaw);
+      
+      // HARD FILTER: Remove forwarders/logistics companies (not manufacturers)
+      if (isLikelyLogistics(supplierName)) {
+        fallbackStats.hardRejects.banned++;
+        if (round && round !== "hardRejects" && round !== "softDemotes") {
+          fallbackStats[round].filtered++;
+        }
+        return; // Remove forwarders completely
+      }
       
       // Track round
       const round = roundName as keyof typeof fallbackStats;
@@ -2176,9 +2342,14 @@ async function findSupplierMatches(
 
         const { data: anchorMatches, error: anchorError } = await supabase
         .from("supplier_products")
-        .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,import_key_id")
+        .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
         .or(orFilter)
         .limit(20);
+        
+        // Extract real company names from product_description
+        if (anchorMatches && anchorMatches.length > 0) {
+          enrichSupplierNamesFromDescription(anchorMatches);
+        }
 
       if (anchorError) {
         console.error(`[Pipeline Step 2 Fallback] Anchor keywords search error:`, anchorError);
@@ -2209,6 +2380,10 @@ async function findSupplierMatches(
         if (hs6Error) {
           console.error(`[Pipeline Step 2 Fallback] HS6 search error:`, hs6Error);
         } else {
+          // Extract real company names from product_description
+          if (hs6Matches && hs6Matches.length > 0) {
+            enrichSupplierNamesFromDescription(hs6Matches);
+          }
           hs6Matches?.forEach((product) => {
             addInferredProduct(product, "hs6Round");
           });
@@ -2230,10 +2405,19 @@ async function findSupplierMatches(
         .select("*")
         .ilike("category", `%${analysis.category}%`)
         .limit(20);
+      
+      // Extract real company names from product_description
+      if (categoryMatches && categoryMatches.length > 0) {
+        enrichSupplierNamesFromDescription(categoryMatches);
+      }
 
       if (categoryError) {
         console.error(`[Pipeline Step 2 Fallback] Category search error:`, categoryError);
       } else {
+        // Extract real company names from product_description
+        if (categoryMatches && categoryMatches.length > 0) {
+          enrichSupplierNamesFromDescription(categoryMatches);
+        }
         categoryMatches?.forEach((product) => {
           addInferredProduct(product, "categoryRound");
         });
@@ -2284,6 +2468,10 @@ async function findSupplierMatches(
             if (materialError) {
               console.error(`[Pipeline Step 2 Fallback] Material search error for "${keyword}":`, materialError);
             } else {
+              // Extract real company names from product_description
+              if (materialMatches && materialMatches.length > 0) {
+                enrichSupplierNamesFromDescription(materialMatches);
+              }
               materialMatches?.forEach((product) => {
                 addInferredProduct(product, "materialRound");
               });
@@ -2325,6 +2513,10 @@ async function findSupplierMatches(
               if (fallbackError) {
                 console.error(`[Pipeline Step 2 Fallback] Universal keyword search error for "${keyword}":`, fallbackError);
               } else {
+                // Extract real company names from product_description
+                if (fallbackMatches && fallbackMatches.length > 0) {
+                  enrichSupplierNamesFromDescription(fallbackMatches);
+                }
                 fallbackMatches?.forEach((product) => {
                   addInferredProduct(product, "materialRound");
                 });
@@ -2421,15 +2613,34 @@ async function findSupplierMatches(
           // Base score + calculated score, capped at 70
           const baseInferredScore = Math.min(70, baseScore + score);
           
-          const supplierName = normalizeName((item.supplier_name as string) || "Unknown Supplier");
+          let supplierNameRaw = (item.supplier_name as string) || "Unknown Supplier";
+          
+          // If supplier_name is dummy, try to extract from product_description
+          if (isDummySupplierName(supplierNameRaw) && item.product_description) {
+            const extractedName = extractCompanyNameFromDescription(item.product_description);
+            if (extractedName) {
+              supplierNameRaw = extractedName; // Use extracted name
+            }
+          }
+          
+          const supplierName = normalizeName(supplierNameRaw);
+          
+          // HARD FILTER: Remove forwarders/logistics companies
+          if (isLikelyLogistics(supplierName)) {
+            return null; // Skip forwarders
+          }
           
           // Apply factory boost and logistics penalty
           const finalScore = scoreCandidate(baseInferredScore, supplierName);
+          
+          // Normalize product name (convert ALL CAPS to Title Case)
+          const rawProductName = item.product_name as string;
+          const normalizedProductName = normalizeProductName(rawProductName);
 
           return {
             supplierId: item.supplier_id as string,
             supplierName,
-            productName: item.product_name as string,
+            productName: normalizedProductName,
             unitPrice: (item.unit_price as number) || 0,
             moq: (item.moq as number) || 1,
             leadTime: (item.lead_time as number) || 0,
@@ -2441,10 +2652,10 @@ async function findSupplierMatches(
           };
         });
 
-      // Clean: filter out truly invalid names (low quality names become candidates, not removed)
-      // Logistics companies are handled later (demoted to candidate)
-      // Ensure inferredCandidates is an array before filtering
-      const safeInferredCandidates = Array.isArray(inferredCandidates) ? inferredCandidates : [];
+      // Clean: filter out null entries (forwarders) and ensure array
+      // Logistics companies are now filtered out completely (return null)
+      const safeInferredCandidates = (Array.isArray(inferredCandidates) ? inferredCandidates : [])
+        .filter((m): m is SupplierMatch => m !== null); // Remove null entries (forwarders)
       const cleanedInferred = safeInferredCandidates
         .filter((c) => !shouldRemoveName(c.supplierName));
 
