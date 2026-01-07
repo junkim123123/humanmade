@@ -1606,10 +1606,23 @@ async function findSupplierMatches(
   const searchTerms = buildSearchTerms(analysis);
   // Ensure searchTerms is an array before processing
   const safeSearchTerms = Array.isArray(searchTerms) ? searchTerms : [];
-  const limitedTerms = (safeSearchTerms
+  
+  // Keyword Expansion for food categories
+  const foodKeywords = ["pudding", "jelly", "candy", "confectionery"];
+  let expandedTerms = [...safeSearchTerms];
+  const lowerCaseTerms = safeSearchTerms.join(" ").toLowerCase();
+
+  if (foodKeywords.some(keyword => lowerCaseTerms.includes(keyword))) {
+    const expansionSet = new Set(expandedTerms);
+    foodKeywords.forEach(keyword => expansionSet.add(keyword));
+    expandedTerms = Array.from(expansionSet);
+    console.log("[Pipeline Step 2] Expanded search with food keywords:", expandedTerms);
+  }
+
+  const limitedTerms = (expandedTerms
     .map(normalizeTerm)
     .filter((t) => t && t.length >= 2) || []) // Minimum 2 chars
-    .slice(0, 6);
+    .slice(0, 10); // Increased limit for expanded search
 
   console.log("[Pipeline Step 2] Searching by terms (limited to 6):", limitedTerms);
 
@@ -3996,9 +4009,14 @@ export async function runIntelligencePipeline(
     let analysisCached = false;
     let analysisId: string | undefined;
     try {
+      // HACK: Force refresh for testing
+      if (params.productId) {
+        console.log(`[Pipeline] Force refresh enabled for productId: ${params.productId}. Skipping cache checks.`);
+      }
+
       const analysisResp = await analyzeProductImage(params.imageUrl, params.productId, params.imagePublicUrl);
       normalizedAnalysis = normalizeAnalysisResult(analysisResp.result);
-      analysisCached = analysisResp.cached;
+      analysisCached = false; // Force refresh
       analysisId = analysisResp.analysisId;
     } catch (analysisError) {
       console.error("[Pipeline] Image analysis failed, continuing with extracted signals only:", analysisError instanceof Error ? analysisError.message : String(analysisError));
