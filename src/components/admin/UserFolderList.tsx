@@ -60,10 +60,8 @@ export default function UserFolderList({
               </CardTitle>
               <CardDescription className="text-slate-500 font-medium">{user.email}</CardDescription>
             </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="rounded-full hover:bg-slate-100"
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
               onClick={() =>
                 setOpenUserId(openUserId === user.id ? null : user.id)
               }
@@ -73,7 +71,7 @@ export default function UserFolderList({
                   openUserId === user.id ? "rotate-180" : ""
                 }`}
               />
-            </Button>
+            </button>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4 text-sm text-slate-600">
@@ -115,13 +113,12 @@ export default function UserFolderList({
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold text-xs" asChild>
-                        <Link
-                          href={`/admin/messaging?user=${user.id}&ref=${report.id}`}
-                        >
-                          Nudge
-                        </Link>
-                      </Button>
+                      <Link
+                        href={`/admin/messaging?user=${user.id}&ref=${report.id}`}
+                        className="inline-flex items-center justify-center px-3 py-1 rounded-md text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold text-xs transition-colors"
+                      >
+                        Nudge
+                      </Link>
                     </div>
                   ))
                 ) : (

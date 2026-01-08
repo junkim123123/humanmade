@@ -72,14 +72,12 @@ export function AdminNav({ badgeCounts }: AdminNavProps) {
             })}
           </div>
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 font-semibold"
-              asChild
+            <Link 
+              href="/app"
+              className="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors text-slate-500 hover:text-slate-900 hover:bg-slate-100"
             >
-              <Link href="/app">← Back to App</Link>
-            </Button>
+              ← Back to App
+            </Link>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
