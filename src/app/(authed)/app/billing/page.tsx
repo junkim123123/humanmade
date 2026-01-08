@@ -169,7 +169,7 @@ export default function BillingPage() {
                     handleRedeemCode();
                   }
                 }}
-                placeholder="ENTER CODE (E.G. ATMNX)"
+                placeholder="ENTER CODE"
                 className="flex-1 h-12 px-4 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all uppercase placeholder:text-slate-300"
                 disabled={codeLoading}
               />

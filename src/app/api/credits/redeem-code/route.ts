@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Validate and process code
     const normalizedCode = code.trim().toUpperCase();
     
-    if (normalizedCode === "ATMNX") {
+    if (normalizedCode === "NEXSOURCE") {
       // Grant 1 credit ($45 value)
       const result = await adminGrantCredits(
         user.id,
