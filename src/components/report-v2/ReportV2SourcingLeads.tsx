@@ -43,7 +43,7 @@ function EvidenceBadge({ strength }: { strength: string | null | undefined }) {
   const config = {
     strong: { label: "Strong evidence", color: "bg-green-100 text-green-800" },
     medium: { label: "Keyword signal", color: "bg-yellow-100 text-yellow-800" },
-    weak: { label: "NexSupply Verified Pending", color: "bg-slate-100 text-slate-800" },
+    weak: { label: "NexSupply Verified Pending", color: "bg-slate-100 text-slate-800 animate-pulse" },
   };
   
   const match = config[strength as keyof typeof config] || config.weak;
@@ -284,6 +284,10 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
   };
 
   const hasAnySuppliers = verifiedLeads.length > 0 || filteredUnverifiedLeads.length > 0;
+  const hasTradingLeads = allSupplierMatches.some((s: any) => {
+    const type = s._supplierType?.type || s.flags?.supplierType || s.flags?.type || null;
+    return type === "Trading";
+  });
 
   return (
     <section className="bg-white rounded-lg border border-slate-200 p-6">
@@ -327,6 +331,15 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
         </div>
       ) : (
         <div className="space-y-6">
+          {hasTradingLeads && (
+            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 flex items-start gap-2 mb-2">
+              <HelpCircle className="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-indigo-900 leading-relaxed">
+                <strong>Public data mostly shows trading intermediaries.</strong> Unlock to find direct factories with better MOQ and pricing tiers.
+              </p>
+            </div>
+          )}
+
           {/* Suggested Suppliers (Verified) */}
           {verifiedLeads.length > 0 && (
             <div>
@@ -354,7 +367,7 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
             <div>
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold text-slate-900">NexSupply Verified Pending</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 animate-pulse">NexSupply Verified Pending</h3>
                   <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 rounded">
                     {filteredUnverifiedLeads.length} {filteredUnverifiedLeads.length === 1 ? 'match' : 'matches'}
                   </span>

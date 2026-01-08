@@ -226,7 +226,7 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                   {topMatch.supplierName || topMatch.supplier_name || topMatch.companyName || "Factory Name Unavailable"}
                 </p>
                 <div className="flex items-center gap-2 flex-wrap mt-1">
-                  <span className="text-[11px] px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-semibold">
+                  <span className="text-[11px] px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-semibold animate-pulse">
                     NexSupply Verified Pending
                   </span>
                   <span className="text-[11px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-medium">

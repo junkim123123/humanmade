@@ -30,8 +30,7 @@ export default function ProfitConversionCard({ report, onUnlock }: ProfitConvers
   // Annual Profit Increase Calculation
   // Assume a standard order volume if not present (e.g., 1000 units/month -> 12000 units/year)
   // Or use the report's quantity if available, annualized
-  const quantity = 1000; // Default batch size
-  const annualVolume = quantity * 4; // Assume 4 turns per year
+  const annualVolume = 12000; // Updated: 1000 units/month
   const annualProfitIncrease = savingsPerUnit * annualVolume;
 
   return (

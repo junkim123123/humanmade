@@ -512,6 +512,13 @@ function normalizeMatch(match: any, index: number): NormalizedSupplierMatch {
     if (typeof supplierName !== "string") {
       supplierName = String(supplierName || "Unknown supplier");
     }
+
+    // Format to Title Case if all uppercase
+    if (supplierName === supplierName.toUpperCase() && supplierName !== supplierName.toLowerCase()) {
+      supplierName = supplierName.toLowerCase().split(' ').map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(' ');
+    }
     
     // Remove synthetic_ prefix only if it's actually a synthetic ID (not a real company name)
     if (supplierName && !supplierName.startsWith("synthetic_") && match.supplier_id?.startsWith("synthetic_")) {
