@@ -535,7 +535,7 @@ export async function getOrderDetail(
     let rfq: any = null;
     let assignment: any = null;
     let uploads: any[] = [];
-    try {
+    
     const [msgRes, quoteRes, costRes, rfqRes, assignmentRes, uploadRes, reportRes] = await Promise.all([
       (admin.from('order_messages') as any)
         .select('id, order_id, sender_id, sender_role, sender, body, created_at, visible_to_user')
