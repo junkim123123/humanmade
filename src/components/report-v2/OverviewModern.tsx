@@ -481,7 +481,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
       />
 
       {/* Assumptions */}
-      <ConfidenceBuilder report={report} onUpgrade={isVerified ? undefined : () => setShowVerificationModal(true)} />
+      <ConfidenceBuilder report={report} onUpgrade={isVerified ? () => {} : () => setShowVerificationModal(true)} />
 
       {/* Label Confirmation Modal */}
       {showLabelConfirmation && (
