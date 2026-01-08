@@ -40,10 +40,14 @@ export default async function AdminUsersPage() {
 
   if (error) return <div>데이터 로드 실패: {error.message}</div>;
 
-  // 필드명 변환 (full_name -> name)
-  const users: UserWithReports[] = (profiles || []).map(p => ({
-    ...p,
-    name: p.full_name
+  // 필드명 변환 (full_name -> name) 및 타입 안정성 확보
+  const users: UserWithReports[] = (profiles || []).map((p: any) => ({
+    id: p.id,
+    email: p.email,
+    name: p.full_name || null,
+    role: p.role || 'user',
+    created_at: p.created_at,
+    reports: p.reports || []
   }));
 
   return (
