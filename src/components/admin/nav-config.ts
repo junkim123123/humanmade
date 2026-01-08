@@ -23,10 +23,6 @@ export const adminNavSections: AdminNavSection[] = [
     href: "/admin/queue",
   },
   {
-    label: "Lead Pool (Free)",
-    href: "/admin/leads",
-  },
-  {
     label: "Messaging",
     href: "/admin/inbox",
   },

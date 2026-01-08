@@ -253,6 +253,25 @@ export async function createVerificationRequest(options: {
       console.error('[createVerificationRequest] event insert failed', eventError);
     }
 
+    // --- [nexi Welcome Message] ---
+    const welcomeMessage = `Hi! I'm **nexi**, your dedicated sourcing lead. I've started the deep verification for your **${productName}**.
+
+📍 **What happens over the next 7 days:**
+1. **Direct Outreach:** I will contact the top 3-5 candidates from your report plus our private network.
+2. **Real-time Negotiation:** I'll be verifying their current production capacity and negotiating for your target price.
+3. **The Final Selection:** Note that the best factory might be different from the initial report based on my live consultations.
+
+I'll post daily updates here in the timeline. Any specific quality requirements I should mention?`;
+
+    await (admin.from('order_messages') as any).insert({
+      order_id: order.id,
+      body: welcomeMessage,
+      sender_role: 'admin',
+      sender: 'nexi',
+      visible_to_user: true,
+    });
+    // ------------------------------
+
     // Seed a lead record for the verification request queue
     const leadPayload = {
       order_id: order.id,
@@ -517,45 +536,46 @@ export async function getOrderDetail(
     let assignment: any = null;
     let uploads: any[] = [];
     try {
-      const [msgRes, quoteRes, costRes, rfqRes, assignmentRes, uploadRes] = await Promise.all([
-        (admin.from('order_messages') as any)
-          .select('id, order_id, sender_id, sender_role, sender, body, created_at, visible_to_user')
-          .eq('order_id', orderId)
-          .eq('visible_to_user', true)
-          .order('created_at', { ascending: true }),
-        (admin.from('order_quotes') as any)
-          .select('id, order_id, supplier_name, supplier_country, fob_unit_price, currency, moq, lead_time_days, packaging, notes, evidence_urls, received_at, position, status')
-          .eq('order_id', orderId)
-          .order('position', { ascending: true }),
-        (admin.from('order_cost_models') as any)
-          .select('*')
-          .eq('order_id', orderId)
-          .maybeSingle(),
-        (admin.from('order_rfqs') as any)
-          .select('*')
-          .eq('order_id', orderId)
-          .order('created_at', { ascending: true })
-          .maybeSingle(),
-        (admin.from('order_partner_assignments') as any)
-          .select('*')
-          .eq('order_id', orderId)
-          .order('created_at', { ascending: true })
-          .maybeSingle(),
-        (admin.from('order_uploads') as any)
-          .select('*')
-          .eq('order_id', orderId)
-          .order('created_at', { ascending: false }),
-      ]);
+    const [msgRes, quoteRes, costRes, rfqRes, assignmentRes, uploadRes, reportRes] = await Promise.all([
+      (admin.from('order_messages') as any)
+        .select('id, order_id, sender_id, sender_role, sender, body, created_at, visible_to_user')
+        .eq('order_id', orderId)
+        .eq('visible_to_user', true)
+        .order('created_at', { ascending: true }),
+      (admin.from('order_quotes') as any)
+        .select('id, order_id, supplier_name, supplier_country, fob_unit_price, currency, moq, lead_time_days, packaging, notes, evidence_urls, received_at, position, status')
+        .eq('order_id', orderId)
+        .order('position', { ascending: true }),
+      (admin.from('order_cost_models') as any)
+        .select('*')
+        .eq('order_id', orderId)
+        .maybeSingle(),
+      (admin.from('order_rfqs') as any)
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true })
+        .maybeSingle(),
+      (admin.from('order_partner_assignments') as any)
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true })
+        .maybeSingle(),
+      (admin.from('order_uploads') as any)
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false }),
+      order.report_id 
+        ? (admin.from('reports') as any).select('*').eq('id', order.report_id).single()
+        : Promise.resolve({ data: null })
+    ]);
 
-      messages = msgRes.data || [];
-      quotes = quoteRes.data || [];
-      cost = costRes.data || null;
-      rfq = rfqRes.data || null;
-      assignment = assignmentRes.data || null;
-      uploads = uploadRes.data || [];
-    } catch (msgErr) {
-      console.error('[Orders] Failed to fetch verification artifacts (non-fatal):', msgErr);
-    }
+    messages = msgRes.data || [];
+    quotes = quoteRes.data || [];
+    cost = costRes.data || null;
+    rfq = rfqRes.data || null;
+    assignment = assignmentRes.data || null;
+    uploads = uploadRes.data || [];
+    const reportData = reportRes.data || null;
 
     return {
       success: true,
@@ -570,6 +590,7 @@ export async function getOrderDetail(
         rfq,
         assignment,
         uploads,
+        report: reportData,
       },
       milestones: milestones || [],
       documents: documents || [],
@@ -580,6 +601,7 @@ export async function getOrderDetail(
       rfq,
       assignment,
       uploads,
+      report: reportData,
     };
   } catch (error) {
     console.error('[Orders] Unexpected error:', error);

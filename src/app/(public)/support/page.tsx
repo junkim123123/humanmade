@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { SupportForm } from "@/components/support/SupportForm";
 import { cookies } from "next/headers";
+import { getUserOrders } from "@/server/actions/orders";
+import { Sparkles, MessageCircle, Package, CreditCard, Wrench, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -12,41 +15,82 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const orderId = params?.orderId || null;
   const reportId = params?.reportId || null;
 
+  // Fetch user orders for redirection and dropdown
+  let orders: any[] = [];
+  if (user) {
+    const orderRes = await getUserOrders({ limit: 10 });
+    if (orderRes.success) {
+      orders = orderRes.orders || [];
+    }
+  }
+
+  const activeOrder = orders.find(o => ![ 'closed', 'delivered', 'cancelled' ].includes(o.status));
+
+  const categories = [
+    { id: "sourcing_quotes", title: "Sourcing & Quotes", desc: "Questions about factory details, MOQs, or landing costs.", icon: MessageCircle, color: "text-blue-600", bg: "hover:bg-blue-50/50", border: "hover:border-blue-200" },
+    { id: "order_logistics", title: "Order Status / Logistics", desc: "Track production, QC reports, and freight status.", icon: Package, color: "text-emerald-600", bg: "hover:bg-emerald-50/50", border: "hover:border-emerald-200" },
+    { id: "billing_credits", title: "Billing & Credits", desc: "Invoices, deposit credits, and refunds.", icon: CreditCard, color: "text-amber-600", bg: "hover:bg-amber-50/50", border: "hover:border-amber-200" },
+    { id: "technical_issues", title: "Technical Issues", desc: "Website errors or file upload problems.", icon: Wrench, color: "text-slate-600", bg: "hover:bg-slate-100/50", border: "hover:border-slate-300" }
+  ];
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
-        <header className="space-y-3 text-center">
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Support</p>
-          <h1 className="text-3xl font-bold text-slate-900">Expert Support</h1>
-          <p className="text-slate-600 text-sm">Direct access to your sourcing agents and logistics team.</p>
+    <main className="min-h-screen bg-slate-50 pb-20">
+      <div className="max-w-5xl mx-auto px-4 py-16 space-y-12">
+        
+        {/* nexi Branding Header */}
+        <header className="space-y-4 text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-blue-600 text-white text-2xl font-bold shadow-xl shadow-blue-200 mb-2">
+            n
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center gap-3">
+              <Sparkles className="w-6 h-6 text-blue-500" />
+              nexi is here to help
+            </h1>
+            <p className="text-slate-600 text-lg font-medium">
+              Your dedicated sourcing manager and AI assistant are ready to assist you 24/7.
+            </p>
+          </div>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { id: "sourcing_quotes", title: "Sourcing & Quotes", desc: "Questions about factory details, MOQs, or landing costs." },
-            { id: "order_logistics", title: "Order Status / Logistics", desc: "Track production, QC reports, and freight status." },
-            { id: "billing_credits", title: "Billing & Credits", desc: "Invoices, deposit credits, and refunds." },
-            { id: "technical_issues", title: "Technical Issues", desc: "Website errors or file upload problems." }
-          ].map((card) => {
-            const href = `?category=${card.id}${orderId ? `&orderId=${orderId}` : ""}${reportId ? `&reportId=${reportId}` : ""}#support-form`;
+        {/* Category Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {categories.map((card) => {
+            const isOrderRelated = card.id === "sourcing_quotes" || card.id === "order_logistics";
+            const redirectToOrder = isOrderRelated && activeOrder;
+            
+            const href = redirectToOrder 
+              ? `/app/orders/${activeOrder.id}`
+              : `?category=${card.id}${orderId ? `&orderId=${orderId}` : ""}${reportId ? `&reportId=${reportId}` : ""}#support-form`;
+
             return (
-              <a
+              <Link
                 key={card.id}
                 href={href}
-                className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-blue-400 hover:shadow transition`}
+                className={`group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 ${card.bg} ${card.border} hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50 flex flex-col`}
               >
-                <div className="font-semibold text-slate-900">{card.title}</div>
-                <div className="text-sm text-slate-600 mt-1">{card.desc}</div>
-                <div className="mt-3 inline-flex text-sm font-semibold text-blue-600">Start →</div>
-              </a>
+                <div className={`w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-4 transition-colors group-hover:bg-transparent ${card.color}`}>
+                  <card.icon className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{card.title}</h3>
+                <p className="text-slate-500 text-sm mt-2 leading-relaxed flex-1">{card.desc}</p>
+                <div className="mt-6 flex items-center gap-2 text-sm font-bold text-blue-600">
+                  {redirectToOrder ? "Chat with Agent" : "Start Ticket"}
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </Link>
             );
           })}
         </div>
 
-        <section id="support-form" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-slate-900">Contact support</h2>
-            <p className="text-sm text-slate-600">We attach your account and order details automatically.</p>
+        {/* Support Form Section */}
+        <section id="support-form" className="max-w-3xl mx-auto rounded-[32px] border border-slate-200 bg-white p-8 md:p-10 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Sparkles className="w-32 h-32" />
+          </div>
+          <div className="relative z-10 mb-8">
+            <h2 className="text-2xl font-bold text-slate-900">Send a priority message</h2>
+            <p className="text-slate-500 mt-1">We attach your account and order details automatically for faster resolution.</p>
           </div>
           <SupportForm
             userEmail={user?.email || undefined}
@@ -54,6 +98,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
             initialCategory={initialCategory}
             orderId={orderId}
             reportId={reportId}
+            orders={orders}
           />
         </section>
       </div>

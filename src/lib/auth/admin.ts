@@ -16,6 +16,12 @@ export async function requireAdminUser() {
   }
 
   // Local dev: insert your auth user id into public.admin_users to unlock admin pages.
+  // Restricted to specific email
+  const allowedEmails = ['k.myungjun@nexsupply.net']
+  if (user.email && allowedEmails.includes(user.email)) {
+    return user
+  }
+
   const { data: adminRow } = await supabase
     .from('admin_users')
     .select('user_id')

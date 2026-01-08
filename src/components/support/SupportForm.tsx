@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { Upload, X, CheckCircle2, AlertCircle, Package, Send } from "lucide-react";
 
 const categories = [
   { id: "sourcing_quotes", label: "Sourcing & Quotes" },
@@ -15,16 +16,19 @@ interface SupportFormProps {
   initialCategory?: string | null;
   orderId?: string | null;
   reportId?: string | null;
+  orders?: any[];
 }
 
-export function SupportForm({ userEmail, userId, initialCategory, orderId, reportId }: SupportFormProps) {
+export function SupportForm({ userEmail, userId, initialCategory, orderId, reportId, orders = [] }: SupportFormProps) {
   const [email, setEmail] = useState(userEmail || "");
   const [category, setCategory] = useState(initialCategory || "sourcing_quotes");
+  const [selectedOrderId, setSelectedOrderId] = useState(orderId || "");
   const [message, setMessage] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialCategory) setCategory(initialCategory);
@@ -69,7 +73,7 @@ export function SupportForm({ userEmail, userId, initialCategory, orderId, repor
 
     return {
       userId: userId || null,
-      orderId: orderId || null,
+      orderId: selectedOrderId || orderId || null,
       reportId: reportId || null,
       url,
       userAgent,
@@ -109,72 +113,146 @@ export function SupportForm({ userEmail, userId, initialCategory, orderId, repor
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="text-sm text-slate-700 flex flex-col gap-1">
-          Email
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid gap-6 sm:grid-cols-2 text-left">
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
           <input
             type="email"
             required
+            placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
           />
-        </label>
-        <label className="text-sm text-slate-700 flex flex-col gap-1">
-          Category
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none cursor-pointer"
           >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.label}</option>
             ))}
           </select>
-        </label>
+        </div>
       </div>
 
-      <label className="text-sm text-slate-700 flex flex-col gap-1">
-        Message
+      {orders.length > 0 && (
+        <div className="flex flex-col gap-2 text-left">
+          <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Related Order (Optional)</label>
+          <div className="relative">
+            <select
+              value={selectedOrderId}
+              onChange={(e) => setSelectedOrderId(e.target.value)}
+              className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none cursor-pointer"
+            >
+              <option value="">Select an order</option>
+              {orders.map((o) => (
+                <option key={o.id} value={o.id}>
+                  #{o.order_number} - {o.product_name} ({o.status.replace('_', ' ')})
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <Package className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2 text-left">
+        <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">How can we help?</label>
         <textarea
           required
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          rows={4}
-          placeholder="Describe your question or issue"
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          rows={5}
+          placeholder="Please provide as much detail as possible..."
+          className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all resize-none"
         />
-      </label>
+      </div>
 
-      <label className="text-sm text-slate-700 flex flex-col gap-1">
-        Screenshot (optional)
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="text-sm"
-        />
-      </label>
+      <div className="flex flex-col gap-2 text-left">
+        <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Screenshot (optional)</label>
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className={`group relative rounded-2xl border-2 border-dashed transition-all cursor-pointer p-6 flex flex-col items-center justify-center gap-2 ${
+            screenshot ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50'
+          }`}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          {screenshot ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-slate-900 truncate">{screenshot.name}</p>
+                <p className="text-xs text-slate-500">{(screenshot.size / 1024).toFixed(1)} KB</p>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setScreenshot(null); }}
+                className="p-1 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                <Upload className="w-6 h-6" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-bold text-slate-600">Click or drag image to upload</p>
+                <p className="text-xs text-slate-400 mt-0.5">PNG, JPG up to 10MB</p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {status === "success" && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          Request sent. We will reply soon.
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 flex items-start gap-3">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
+          <div className="text-left">
+            <p className="text-sm font-bold text-emerald-900">Message sent successfully!</p>
+            <p className="text-xs text-emerald-700 mt-0.5">nexi and our support team will get back to you shortly via email.</p>
+          </div>
         </div>
       )}
       {status === "error" && error && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          {error}
+        <div className="rounded-2xl bg-red-50 border border-red-100 p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+          <div className="text-left">
+            <p className="text-sm font-bold text-red-900">Failed to send request</p>
+            <p className="text-xs text-red-700 mt-0.5">{error}</p>
+          </div>
         </div>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-4">
         <button
           type="submit"
           disabled={!canSubmit || submitting}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 py-4 text-[15px] font-bold text-white shadow-xl shadow-slate-200 transition-all hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? "Sending..." : "Send"}
+          {submitting ? (
+            "Processing..."
+          ) : (
+            <>
+              Send Ticket
+              <Send className="w-4 h-4" />
+            </>
+          )}
         </button>
       </div>
     </form>

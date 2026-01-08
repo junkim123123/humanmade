@@ -22,8 +22,22 @@ const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: s
 );
 
 export default function ConfidenceBuilder({ report, onUpgrade }: ConfidenceBuilderProps) {
-  const marginPotential = 42; // Example potential margin
-  const currentMargin = 28; // Example current margin
+  // Calculate current margin if shelf price exists
+  const reportAny = report as any;
+  const targetSellPrice = reportAny.targetSellPrice || (reportAny._proof?.inputStatus?.shelfPrice) || 14.99;
+  const costRange = report.baseline?.costRange;
+  const currentUnitCost = costRange ? (
+    (costRange.standard?.unitPrice || 0) +
+    (costRange.standard?.shippingPerUnit || 0) +
+    (costRange.standard?.dutyPerUnit || 0) +
+    (costRange.standard?.feePerUnit || 0)
+  ) : 0;
+
+  const currentMargin = targetSellPrice && currentUnitCost > 0 
+    ? Math.round(((targetSellPrice - currentUnitCost) / targetSellPrice) * 100) 
+    : 28;
+  
+  const marginPotential = Math.round(currentMargin * 1.5); // Assume 50% improvement potential
 
   return (
     <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden">

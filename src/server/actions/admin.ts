@@ -382,18 +382,74 @@ export async function addAdminOrderUpload(orderId: string, input: { title: strin
   }
 }
 
-export async function adminGrantUserCredits(userId: string, amount: number) {
+export async function pushSourcingUpdate(orderId: string, updateText: string) {
   try {
     await requireAdminUser();
-    const result = await adminGrantCredits(userId, amount);
-    if (!result.success) throw new Error(result.error || 'Grant failed');
     const admin = getSupabaseAdmin();
-    await (admin.from('order_events') as any).insert({ order_id: null, event_type: 'credits_granted', metadata: { userId, amount } });
+    const { error } = await (admin.from('order_events') as any).insert({
+      order_id: orderId,
+      event_type: 'note',
+      metadata: { text: updateText, type: 'sourcing_update' },
+    });
+    if (error) throw error;
     return { success: true };
   } catch (error: any) {
-    if (isNextRedirectError(error)) throw error;
-    console.error('[adminGrantUserCredits] failed', error);
-    return { success: false, error: error.message || 'Failed to grant credits' };
+    console.error('[pushSourcingUpdate] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function saveInternalNote(orderId: string, note: string) {
+  try {
+    await requireAdminUser();
+    const admin = getSupabaseAdmin();
+    
+    // Fetch current metadata
+    const { data: order } = await (admin.from('orders') as any)
+      .select('metadata')
+      .eq('id', orderId)
+      .single();
+    
+    const newMetadata = {
+      ...(order?.metadata || {}),
+      internal_notes: note
+    };
+
+    const { error } = await (admin.from('orders') as any)
+      .update({ metadata: newMetadata })
+      .eq('id', orderId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error: any) {
+    console.error('[saveInternalNote] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function publishFinalQuotes(orderId: string) {
+  try {
+    await requireAdminUser();
+    const admin = getSupabaseAdmin();
+    
+    // Update order status
+    const { error: statusError } = await (admin.from('orders') as any)
+      .update({ status: 'awaiting_payment' })
+      .eq('id', orderId);
+    
+    if (statusError) throw statusError;
+
+    // Add a final event
+    await (admin.from('order_events') as any).insert({
+      order_id: orderId,
+      event_type: 'note',
+      metadata: { text: 'Final negotiated quotes have been published.', type: 'milestone' },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('[publishFinalQuotes] failed', error);
+    return { success: false, error: error.message };
   }
 }
 

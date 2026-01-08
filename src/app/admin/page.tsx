@@ -1,11 +1,9 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { Card } from '@/components/ui/card'
-import { Users, FileText, CheckSquare, ShoppingCart, Inbox, UploadCloud, MessageSquare, DollarSign, TrendingUp } from 'lucide-react'
+import { FileText, CheckSquare, Inbox, MessageSquare, DollarSign, TrendingUp } from 'lucide-react'
 import type { ComponentType, SVGProps } from 'react'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
+import { requireAdminUser } from '@/lib/auth/admin'
 
 const queueStatuses = ['awaiting_contact', 'contacted', 'meeting_scheduled']
 
@@ -268,33 +266,7 @@ function StatCard({
 }
 
 export default async function AdminDashboard() {
-  // TEMP: Allow bypassing role check but still require authentication
-  const FORCE_ALLOW_ADMIN = true
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/signin?next=/admin')
-  }
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  const email = user.email ?? 'unknown'
-  console.log('[AdminGuard]', {
-    userId: user.id,
-    email,
-    profileRole: profile?.role ?? 'none',
-    profileError: profileError?.message ?? null,
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  })
-  const hardcodedAdmins = ['k.myungjun@wustl.edu']
-  const isHardcodedAdmin = hardcodedAdmins.includes((user.email ?? '').toLowerCase())
-  if (!FORCE_ALLOW_ADMIN && (profileError || (profile?.role !== 'admin' && !isHardcodedAdmin))) {
-    redirect('/app')
-  }
+  await requireAdminUser()
 
   const stats = await getStats()
   const revenueStats = await getRevenueStats()
@@ -387,12 +359,12 @@ export default async function AdminDashboard() {
           <p className="text-xs text-blue-600 mt-2 font-semibold">View Queue →</p>
         </Link>
         <Link
-          href="/admin/leads"
+          href="/admin/users"
           className="rounded-xl border-2 border-slate-200 bg-white p-6 hover:border-blue-400 hover:shadow-md transition-all"
         >
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Lead Pool (Free)</h3>
-          <p className="text-sm text-slate-600">Browse free analysis reports and potential leads</p>
-          <p className="text-xs text-blue-600 mt-2 font-semibold">View Leads →</p>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">User Mgmt</h3>
+          <p className="text-sm text-slate-600">Monitor user activity and manage reports</p>
+          <p className="text-xs text-blue-600 mt-2 font-semibold">View Users →</p>
         </Link>
       </div>
     </div>
