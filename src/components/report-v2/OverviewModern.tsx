@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import type { Report } from "@/lib/report/types";
 import { motion, useSpring, useTransform } from "framer-motion";
 import { normalizeRange } from "@/lib/calc/cost-normalization";
 import { computeDataQuality } from "@/lib/report/data-quality";
 import { getSupplierMatches } from "@/lib/report/normalizeReport";
 import { extractProductName } from "@/lib/report/extractProductName";
+import { ShieldCheck } from "lucide-react";
 import AssumptionsCard from "./cards/AssumptionsCard";
 import ConfirmedFactsPanel from "./cards/ConfirmedFactsPanel";
 import OCRRecoveryCard from "./cards/OCRRecoveryCard";
