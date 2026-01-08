@@ -480,7 +480,21 @@ export async function getUserOrders(options?: {
  */
 export async function getOrderDetail(
   orderId: string
-): Promise<{ success: boolean; order?: any; milestones?: any[]; documents?: any[]; events?: any[]; messages?: any[]; quotes?: any[]; cost?: any; rfq?: any; assignment?: any; uploads?: any[]; error?: string }> {
+): Promise<{ 
+  success: boolean; 
+  order?: any; 
+  milestones?: any[]; 
+  documents?: any[]; 
+  events?: any[]; 
+  messages?: any[]; 
+  quotes?: any[]; 
+  cost?: any; 
+  rfq?: any; 
+  assignment?: any; 
+  uploads?: any[]; 
+  report?: any;
+  error?: string 
+}> {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();

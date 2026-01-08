@@ -70,8 +70,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ success: true, messages: data || [] })
 }
 
-export async function POST(req: NextRequest, ctx: RouteContext<'/api/admin/orders/[orderId]/messages'>) {
-  const { orderId } = await ctx.params;
+export async function POST(req: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
+  const { orderId } = await params;
   try {
     const url = new URL(req.url)
     const raw = await req.text()
