@@ -29,10 +29,10 @@ async function handleAdminUpload(formData: FormData) {
   revalidatePath(`/admin/orders/${orderId}`)
 }
 
-export default async function AdminOrderWorkspace({ params, searchParams }: { params: { orderId: string }; searchParams?: { tab?: string } }) {
+export default async function AdminOrderWorkspace({ params, searchParams }: { params: Promise<{ orderId: string }>; searchParams: Promise<{ tab?: string }> }) {
   await requireAdminUser()
-  const { orderId } = params
-  const resolvedSearch = searchParams || {}
+  const { orderId } = await params
+  const resolvedSearch = await searchParams || {}
   const allowedTabs = ['overview', 'messages', 'quotes']
   const tab = allowedTabs.includes((resolvedSearch?.tab || '') as string) ? (resolvedSearch?.tab as string) : 'overview'
   const detail = await getAdminOrderWorkspace(orderId)

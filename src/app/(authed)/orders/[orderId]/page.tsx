@@ -25,8 +25,8 @@ async function handleUserUpload(formData: FormData) {
   revalidatePath(`/app/orders/${orderId}`)
 }
 
-export default async function UserOrderPage({ params }: { params: { orderId: string } }) {
-  const orderId = params.orderId
+export default async function UserOrderPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const { orderId } = await params
   const result = await getOrderDetail(orderId)
   if (!result.success || !result.order) {
     return <div className="p-6 text-slate-700">Order not found.</div>
