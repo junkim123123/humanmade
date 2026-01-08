@@ -183,6 +183,7 @@ export async function createVerificationRequest(options: {
     }
 
     // Credits: consume 1 if available
+    let consumedCredit = false;
     const { data: creditRow, error: creditError } = await (admin
       .from('user_credits') as any)
       .select('credits_balance')
