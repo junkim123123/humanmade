@@ -141,5 +141,4 @@ export default function ProfitConversionCard({ report, onUnlock }: ProfitConvers
       </div>
     </section>
   );
-  );
 }
