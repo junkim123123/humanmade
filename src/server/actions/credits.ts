@@ -22,8 +22,8 @@ export async function getMyCredits(): Promise<{ success: boolean; balance?: numb
   }
 
   const { data, error } = await supabase
-    .from("credits")
-    .select("balance")
+    .from("user_credits")
+    .select("credits_balance")
     .eq("user_id", user.id)
     .single();
 
@@ -32,7 +32,7 @@ export async function getMyCredits(): Promise<{ success: boolean; balance?: numb
     return { success: false, error: error.message };
   }
 
-  return { success: true, balance: data?.balance || 0 };
+  return { success: true, balance: data?.credits_balance || 0 };
 }
 
 export async function getMyCreditTransactions(): Promise<{ success: boolean; transactions?: CreditTransaction[]; error?: string }> {
@@ -69,8 +69,8 @@ export async function adminGrantCredits(
   try {
     // 1. Get current balance or create credits record if it doesn't exist
     const { data: existingCredits, error: fetchError } = await supabase
-      .from("credits")
-      .select("balance")
+      .from("user_credits")
+      .select("credits_balance")
       .eq("user_id", userId)
       .single();
 
@@ -79,10 +79,10 @@ export async function adminGrantCredits(
     if (fetchError && fetchError.code === 'PGRST116') {
       // Credits record doesn't exist, create it
       const { error: insertError } = await supabase
-        .from("credits")
+        .from("user_credits")
         .insert({
           user_id: userId,
-          balance: 0,
+          credits_balance: 0,
           updated_at: new Date().toISOString()
         });
 
@@ -95,7 +95,7 @@ export async function adminGrantCredits(
       console.error("[adminGrantCredits] Error fetching credits:", fetchError);
       return { success: false, error: fetchError.message };
     } else {
-      currentBalance = existingCredits?.balance || 0;
+      currentBalance = existingCredits?.credits_balance || 0;
     }
 
     // 2. Calculate new balance
@@ -120,9 +120,9 @@ export async function adminGrantCredits(
 
     // 4. Update credits balance
     const { error: updateError } = await supabase
-      .from("credits")
+      .from("user_credits")
       .update({
-        balance: newBalance,
+        credits_balance: newBalance,
         updated_at: new Date().toISOString()
       })
       .eq("user_id", userId);
@@ -145,8 +145,8 @@ export async function adminGrantCredits(
 export async function adminGetAllUserCredits(): Promise<{ success: boolean; users?: any[]; error?: string }> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("credits")
-    .select("user_id, balance, updated_at")
+    .from("user_credits")
+    .select("user_id, credits_balance, updated_at")
     .order("updated_at", { ascending: false });
 
   if (error) {

@@ -76,8 +76,8 @@ export function ProjectCard({ project, onCancel }: ProjectCardProps) {
       const reportId = project.reportId || "toy-example";
       router.push(`/reports/${reportId}/v2?focus=verified`);
     } else {
-      // View details - could route to project detail page
-      router.push(`/projects/${project.id}`);
+      // View details - route to order detail page
+      router.push(`/app/orders/${project.id}`);
     }
   };
 
@@ -135,7 +135,7 @@ export function ProjectCard({ project, onCancel }: ProjectCardProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => router.push(`/projects/${project.id}?focus=${recommendation.key}`)}
+              onClick={() => router.push(`/app/orders/${project.id}?focus=${recommendation.key}`)}
               className="flex-shrink-0 border-electric-blue-300 text-electric-blue-700 hover:bg-electric-blue-50"
             >
               {recommendation.cta}

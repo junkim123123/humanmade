@@ -61,8 +61,8 @@ export function PricingCards() {
           "Shipping handoff and documentation support",
         ]}
         cta={{
-          label: "View projects",
-          href: "/projects",
+          label: "View orders",
+          href: "/app/orders",
           variant: "outline",
         }}
       />

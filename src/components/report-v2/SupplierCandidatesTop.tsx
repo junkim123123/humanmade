@@ -96,9 +96,10 @@ interface SupplierMatch {
 
 interface SupplierCandidatesTopProps {
   matches: SupplierMatch[];
+  onUnlock?: () => void;
 }
 
-export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTopProps) {
+export default function SupplierCandidatesTop({ matches, onUnlock }: SupplierCandidatesTopProps) {
   const [showAll, setShowAll] = useState(false);
   const [showLogistics, setShowLogistics] = useState(false);
 
@@ -315,7 +316,10 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
                     <p className="text-[13px] text-slate-600 font-medium leading-relaxed">
                       Our network indicates 4 alternative manufacturers in this cluster with <span className="text-emerald-600 font-bold">15-20% better price tiers</span>.
                     </p>
-                    <button className="mt-3 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-tight">
+                    <button 
+                      onClick={onUnlock}
+                      className="mt-3 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-tight"
+                    >
                       Unlock Blueprint to access
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -416,7 +420,12 @@ export default function SupplierCandidatesTop({ matches }: SupplierCandidatesTop
             </p>
             <p className="text-[13px] text-slate-600 font-medium leading-relaxed">
               Public trade data is just the beginning. Our network intelligence filters for factories with direct pricing and superior MOQ tiers. 
-              <span className="text-blue-600 font-bold ml-1 hover:underline cursor-pointer uppercase tracking-tight text-[11px]">Unlock Full Blueprint</span>
+              <span 
+                onClick={onUnlock}
+                className="text-blue-600 font-bold ml-1 hover:underline cursor-pointer uppercase tracking-tight text-[11px]"
+              >
+                Unlock Full Blueprint
+              </span>
             </p>
           </div>
         </div>

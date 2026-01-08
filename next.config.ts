@@ -27,6 +27,16 @@ const nextConfig: NextConfig = {
         destination: "/reports/:reportId/v2",
         permanent: false, // Use temporary redirect to allow override by page.tsx
       },
+      {
+        source: "/projects",
+        destination: "/app/orders",
+        permanent: true,
+      },
+      {
+        source: "/projects/:projectId",
+        destination: "/app/orders/:projectId",
+        permanent: true,
+      },
     ];
   },
 };

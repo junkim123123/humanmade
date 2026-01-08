@@ -62,8 +62,8 @@ export function EvidenceBar({ report, onEvidenceUpdated }: EvidenceBarProps) {
     const verificationStatus = report.signals?.verificationStatus ?? "none";
 
     if (verificationStatus !== "none") {
-      // View project: redirect to projects page
-      router.push(`/projects?reportId=${report.id}`);
+      // View project: redirect to orders page
+      router.push(`/app/orders?reportId=${report.id}`);
       return;
     }
 

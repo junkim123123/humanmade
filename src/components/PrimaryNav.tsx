@@ -11,7 +11,7 @@ const primaryNavItems = [
   { href: "/analyze", label: "Analyze", icon: Search },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/reports/sample-report/v2", label: "Sample Report", icon: FileText },
-  { href: "/projects", label: "Orders", icon: FolderKanban },
+  { href: "/app/orders", label: "Orders", icon: FolderKanban },
 ];
 
 const moreNavItems = [

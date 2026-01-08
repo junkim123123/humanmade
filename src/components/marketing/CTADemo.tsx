@@ -58,8 +58,8 @@ export function CTADemo({ isActive }: CTADemoProps) {
               size="lg"
               className="w-full border-slate-300"
             >
-              <Link href="/projects">
-                View projects
+              <Link href="/app/orders">
+                View orders
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>

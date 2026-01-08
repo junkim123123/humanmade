@@ -432,7 +432,12 @@ export default function OverviewModern({ report }: OverviewModernProps) {
           }
           
           if (supplierMatches.length > 0) {
-            return <SupplierCandidatesTop matches={supplierMatches} />;
+            return (
+              <SupplierCandidatesTop 
+                matches={supplierMatches} 
+                onUnlock={() => setShowVerificationModal(true)} 
+              />
+            );
           } else {
             return (
               <SupplierCandidatesEmptyState 

@@ -43,7 +43,7 @@ function ProjectPageContent() {
         if (searchParams.get("started") === "1") {
           setShowSuccessBanner(true);
           // Remove query param from URL without reload
-          router.replace(`/projects/${projectId}`, { scroll: false });
+          router.replace(`/app/orders/${projectId}`, { scroll: false });
         }
 
         // Fetch report to get product name
@@ -95,10 +95,10 @@ function ProjectPageContent() {
             </h1>
             <p className="text-slate-600 mb-6">{error || "Project not found"}</p>
             <button
-              onClick={() => router.push("/projects")}
+              onClick={() => router.push("/app/orders")}
               className="px-6 py-2 bg-electric-blue-600 text-white rounded-lg hover:bg-electric-blue-700 transition-colors"
             >
-              Back to Projects
+              Back to Orders
             </button>
           </div>
         </div>

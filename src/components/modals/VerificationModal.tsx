@@ -43,8 +43,8 @@ export function VerificationModal({
       // Immediately update to "verifying"
       updateProject(project.id, { status: "verifying" });
 
-      // Route to /projects
-      router.push("/projects");
+      // Route to /app/orders
+      router.push("/app/orders");
     } catch (error) {
       console.error("Failed to create project:", error);
       setIsSubmitting(false);
