@@ -117,9 +117,9 @@ function DecisionCard({ report }: { report: Report }) {
   if (inputStatus.boxSizeDefaultUsed) missingInputs.push("Box size default used");
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+    <div className="rounded-2xl border border-slate-200/60 bg-white overflow-hidden shadow-sm">
       {/* Hero Section - Big, Bold, Clean */}
-      <div className="px-8 py-10 bg-gradient-to-br from-slate-50 to-white">
+      <div className="px-8 py-12 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="max-w-3xl">
           <div className="flex items-center gap-3 mb-6">
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${evidenceColors[safeStrength] ?? evidenceColors.low}`}>
@@ -130,22 +130,27 @@ function DecisionCard({ report }: { report: Report }) {
           <div className="space-y-6">
             {/* Main Price */}
             <div>
-              <p className="text-sm font-medium text-slate-600 mb-3">Estimated Landed Cost</p>
+              <div className="flex items-center gap-3 mb-3">
+                <p className="text-sm font-bold text-slate-900 uppercase tracking-tight">Estimated Landed Cost</p>
+                <span className="px-2 py-0.5 rounded bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest">
+                  Target Floor Price
+                </span>
+              </div>
               <div className="flex items-baseline gap-4">
-                <span className="text-5xl sm:text-6xl font-bold text-slate-900 tracking-tight">
+                <span className="text-6xl sm:text-7xl font-bold text-slate-900 tracking-tighter">
                   ${bestEstimate.toFixed(2)}
                 </span>
-                <span className="text-lg text-slate-500">per unit</span>
+                <span className="text-xl text-slate-500 font-medium">per unit</span>
               </div>
             </div>
 
             {/* Range Info */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50/60 border border-amber-200/60">
-              <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-slate-200/60 shadow-sm">
+              <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm text-amber-900">
-                Range: ${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}
+              <span className="text-sm text-slate-600 font-medium">
+                Market Range: <span className="text-slate-900 font-bold">${normalized.min.toFixed(2)} – ${normalized.max.toFixed(2)}</span>
               </span>
             </div>
           </div>
@@ -167,14 +172,14 @@ function DecisionCard({ report }: { report: Report }) {
         </div>
       )}
       {/* Shelf Price Input & Margin Calculator - Redesigned */}
-      <div className="px-8 py-8 border-t border-slate-200">
-        <div className="grid lg:grid-cols-2 gap-6">
+      <div className="px-8 py-8 border-t border-slate-200/60 bg-white">
+        <div className="grid lg:grid-cols-2 gap-8">
           <div>
-            <label htmlFor="shelf-price-input" className="block text-sm font-semibold text-slate-900 mb-3">
+            <label htmlFor="shelf-price-input" className="block text-sm font-bold text-slate-900 mb-4 uppercase tracking-tight">
               Your Retail Price
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-lg">$</span>
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-xl font-bold">$</span>
               <input
                 id="shelf-price-input"
                 type="text"
@@ -184,34 +189,38 @@ function DecisionCard({ report }: { report: Report }) {
                 onChange={handleShelfPriceChange}
                 onBlur={handleShelfPriceBlur}
                 onKeyDown={handleShelfPriceKeyDown}
-                className="w-full h-14 pl-10 pr-4 border-2 border-slate-300 rounded-xl text-lg font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all bg-white"
+                className="w-full h-16 pl-12 pr-4 border border-slate-200 rounded-2xl text-2xl font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all bg-slate-50/50"
               />
             </div>
+            <p className="text-xs text-slate-500 mt-3 font-medium">Enter your target shelf price to calculate net margin.</p>
           </div>
 
           {/* Margin Display */}
           {previewPrice && profitPerUnit !== null && marginPercent !== null && (
             <motion.div 
-              className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border-2 border-emerald-200"
+              className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <p className="text-sm font-semibold text-emerald-900 mb-4">Your Profit</p>
-              <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <p className="text-sm font-bold text-emerald-900 uppercase tracking-tight">Estimated Net Profit</p>
+              </div>
+              <div className="space-y-4">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-sm text-emerald-700">Per unit:</span>
+                  <span className="text-sm font-medium text-emerald-700">Profit per unit</span>
                   <motion.span 
-                    className="text-2xl font-bold text-emerald-600"
+                    className="text-3xl font-bold text-emerald-600 tracking-tight"
                     key={`profit-${profitPerUnit?.toFixed(2)}`}
                   >
                     ${profitPerUnit.toFixed(2)}
                   </motion.span>
                 </div>
-                <div className="flex items-baseline justify-between pt-3 border-t-2 border-emerald-200">
-                  <span className="text-sm text-emerald-700">Margin:</span>
+                <div className="flex items-baseline justify-between pt-4 border-t border-emerald-200/50">
+                  <span className="text-sm font-medium text-emerald-700">Net Margin</span>
                   <motion.span 
-                    className="text-3xl font-bold text-emerald-600"
+                    className="text-5xl font-bold text-emerald-600 tracking-tighter"
                     key={`margin-${marginPercent?.toFixed(1)}`}
                   >
                     {marginPercent.toFixed(0)}%
@@ -223,15 +232,21 @@ function DecisionCard({ report }: { report: Report }) {
         </div>
       </div>
 
-      <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-amber-50/50 border-t border-amber-100">
-        <div className="flex gap-2">
-          <button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full px-5 py-2.5 text-[14px] font-semibold border border-amber-400 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            Upload missing photos
-          </button>
+      <div className="px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50 border-t border-slate-200/60">
+        <div className="flex items-center gap-3">
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-6 w-6 rounded-full border-2 border-slate-50 bg-slate-200"></div>
+            ))}
+          </div>
+          <p className="text-xs text-slate-500 font-medium">84 other users searched this category today</p>
         </div>
+        <button className="bg-white text-slate-900 rounded-full px-6 py-2.5 text-sm font-bold border border-slate-200 shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Refine Analysis with Photos
+        </button>
       </div>
     </div>
   );

@@ -20,36 +20,82 @@ function SupplierTypeBadge({ type }: { type: string | null | undefined }) {
   if (!type) return null;
   
   const config = {
-    Manufacturer: { icon: Factory, color: "bg-blue-100 text-blue-800" },
-    Trading: { icon: ShoppingBag, color: "bg-purple-100 text-purple-800" },
-    Logistics: { icon: Truck, color: "bg-orange-100 text-orange-800" },
-    Unknown: { icon: HelpCircle, color: "bg-slate-100 text-slate-800" },
+    Manufacturer: { icon: Factory, color: "bg-blue-50 text-blue-700 border-blue-100" },
+    Trading: { icon: ShoppingBag, color: "bg-slate-100 text-slate-600 border-slate-200" },
+    Logistics: { icon: Truck, color: "bg-orange-50 text-orange-700 border-orange-100" },
+    Unknown: { icon: HelpCircle, color: "bg-slate-50 text-slate-500 border-slate-100" },
   };
   
   const match = config[type as keyof typeof config] || config.Unknown;
   const Icon = match.icon;
   
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${match.color}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight border ${match.color}`}>
       <Icon className="w-3 h-3" />
       {type}
     </span>
   );
 }
 
+const toTitleCase = (str: string) => {
+  if (!str) return "";
+  if (str === str.toUpperCase() && str !== str.toLowerCase()) {
+    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+  return str;
+};
+
+const MatchScoreCircle = ({ score }: { score: number }) => {
+  const radius = 14;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
+  
+  const strokeColor = score >= 70 ? "#10b981" : score >= 40 ? "#3b82f6" : "#94a3b8";
+
+  return (
+    <div className="relative flex items-center justify-center w-10 h-10">
+      <svg className="w-10 h-10 transform -rotate-90">
+        <circle
+          cx="20"
+          cy="20"
+          r={radius}
+          stroke="#f1f5f9"
+          strokeWidth="3"
+          fill="transparent"
+        />
+        <circle
+          cx="20"
+          cy="20"
+          r={radius}
+          stroke={strokeColor}
+          strokeWidth="3"
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-1000 ease-out"
+        />
+      </svg>
+      <span className="absolute text-[10px] font-bold text-slate-700">
+        {Math.round(score)}%
+      </span>
+    </div>
+  );
+};
+
 function EvidenceBadge({ strength }: { strength: string | null | undefined }) {
   if (!strength) return null;
   
   const config = {
-    strong: { label: "Strong evidence", color: "bg-green-100 text-green-800" },
-    medium: { label: "Keyword signal", color: "bg-yellow-100 text-yellow-800" },
-    weak: { label: "NexSupply Verified Pending", color: "bg-slate-100 text-slate-800 animate-pulse" },
+    strong: { label: "Strong evidence", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+    medium: { label: "Keyword signal", color: "bg-blue-50 text-blue-700 border-blue-100" },
+    weak: { label: "NexSupply Verified Pending", color: "bg-amber-50 text-amber-700 border-amber-100 animate-pulse" },
   };
   
   const match = config[strength as keyof typeof config] || config.weak;
   
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${match.color}`}>
+    <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight border ${match.color}`}>
       {match.label}
     </span>
   );
@@ -104,13 +150,13 @@ function cleanSupplierName(supplier: any): string {
 }
 
 function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; report: Report; questionsChecklist?: ReportV2SourcingLeadsProps["report"]["_questionsChecklist"] }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const flags = supplier.flags || {};
   const supplierType = supplier._supplierType?.type || flags.supplierType || flags.type || null;
   const evidenceStrength = flags.evidence_strength || "weak";
   const whyLines = flags.why_lines || [];
   const supplierTypeReason = supplier._supplierType?.reason || null;
-  const displayName = cleanSupplierName(supplier);
+  const displayName = toTitleCase(cleanSupplierName(supplier));
 
   const handleCopyChecklist = () => {
     if (!questionsChecklist) return;
@@ -132,54 +178,60 @@ function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; rep
     return "Category signal match";
   };
 
+  const matchScore = supplier.matchScore || supplier.rerankScore || 0;
+
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
+    <div className="border border-slate-200/60 rounded-2xl overflow-hidden bg-white hover:border-slate-300 transition-all hover:shadow-sm">
       {/* Header - Collapsed */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
-      >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="w-full px-5 py-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          {matchScore > 0 && (
+            <div className="flex-shrink-0">
+              <MatchScoreCircle score={matchScore} />
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <a
               href={`https://www.google.com/search?q=${encodeURIComponent(displayName)}`}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="font-medium text-blue-600 hover:text-blue-800 hover:underline truncate block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:rounded"
+              className="text-base font-bold text-slate-900 hover:text-blue-600 transition-colors truncate block"
             >
               {displayName}
             </a>
-            <div className="text-xs text-slate-500 mt-0.5">
-              <span className="font-medium text-slate-600">Match reason:</span> {getWhyShown()}
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+              <span className="font-bold uppercase tracking-widest text-slate-400">Analysis:</span> 
+              <span className="font-medium">{getWhyShown()}</span>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <MatchConfidenceBadge matchScore={supplier.matchScore} rerankScore={supplier.rerankScore} />
             <SupplierTypeBadge type={supplierType} />
             <EvidenceBadge strength={evidenceStrength} />
           </div>
         </div>
-        <div className="ml-4 flex-shrink-0">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-shrink-0 h-8 w-8 rounded-full hover:bg-slate-50 flex items-center justify-center transition-colors text-slate-400"
+        >
           {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-slate-400" />
+            <ChevronUp className="w-5 h-5" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-slate-400" />
+            <ChevronDown className="w-5 h-5" />
           )}
-        </div>
-      </button>
+        </button>
+      </div>
 
       {/* Expanded Drawer */}
       {isExpanded && (
-        <div className="border-t border-slate-200 bg-slate-50 px-4 py-4 space-y-4">
+        <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-5 space-y-5">
           {/* Why this lead */}
           {whyLines.length > 0 && (
             <div>
-              <div className="text-xs font-medium text-slate-700 mb-2">Why this lead</div>
-              <ul className="space-y-1">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Internal Validation Logic</div>
+              <ul className="space-y-2">
                 {whyLines.map((line: string, idx: number) => (
-                  <li key={idx} className="text-xs text-slate-600 flex items-start gap-1.5">
-                    <span className="text-slate-400 mt-0.5">•</span>
+                  <li key={idx} className="text-sm text-slate-600 font-medium flex items-start gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-slate-300 mt-1.5 flex-shrink-0"></div>
                     <span>{line}</span>
                   </li>
                 ))}
@@ -189,31 +241,34 @@ function LeadCard({ supplier, report, questionsChecklist }: { supplier: any; rep
 
           {/* Supplier type reason */}
           {supplierTypeReason && (
-            <div>
-              <div className="text-xs font-medium text-slate-700 mb-1">Why this type</div>
-              <p className="text-xs text-slate-600">{supplierTypeReason}</p>
+            <div className="bg-white p-3 rounded-xl border border-slate-200/60">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Entity Profile Confidence</div>
+              <p className="text-sm text-slate-600 font-medium">{supplierTypeReason}</p>
             </div>
           )}
 
           {/* What to ask checklist */}
           {questionsChecklist && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-xs font-medium text-slate-700">What to ask</div>
+            <div className="bg-slate-900 rounded-2xl p-5 text-white shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sourcing Playbook</div>
                 <button
                   onClick={handleCopyChecklist}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs text-slate-600 hover:text-slate-900 hover:bg-white rounded border border-slate-300 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-slate-300 hover:text-white hover:bg-white/10 rounded-lg border border-white/10 transition-all uppercase tracking-tight"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-3.5 h-3.5" />
                   Copy checklist
                 </button>
               </div>
-              <div className="text-xs text-slate-500 mb-2">{questionsChecklist.title}</div>
-              <ul className="space-y-2">
+              <div className="text-sm font-bold mb-4 text-slate-200">{questionsChecklist.title}</div>
+              <ul className="space-y-4">
                 {questionsChecklist.items.map((item, idx) => (
-                  <li key={idx} className="text-xs text-slate-700">
-                    <div className="font-medium">{idx + 1}. {item.q}</div>
-                    <div className="text-slate-500 mt-0.5">{item.why}</div>
+                  <li key={idx} className="group">
+                    <div className="text-[13px] font-bold text-white mb-1 flex items-center gap-2">
+                      <span className="h-5 w-5 rounded-md bg-blue-600 flex items-center justify-center text-[10px]">{idx + 1}</span>
+                      {item.q}
+                    </div>
+                    <div className="text-[12px] text-slate-400 pl-7 font-medium leading-relaxed">{item.why}</div>
                   </li>
                 ))}
               </ul>
@@ -284,72 +339,88 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
   };
 
   const hasAnySuppliers = verifiedLeads.length > 0 || filteredUnverifiedLeads.length > 0;
-  const hasTradingLeads = allSupplierMatches.some((s: any) => {
-    const type = s._supplierType?.type || s.flags?.supplierType || s.flags?.type || null;
-    return type === "Trading";
-  });
 
   return (
-    <section className="bg-white rounded-lg border border-slate-200 p-6">
-      <h2 className="text-lg font-semibold text-slate-900 mb-6">Sourcing leads</h2>
+    <section className="bg-white rounded-2xl border border-slate-200/60 p-8 shadow-sm">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Sourcing Leads</h2>
+          <p className="text-sm text-slate-500 font-medium mt-1">Discovery through global trade records and network matching.</p>
+        </div>
+        {hasAnySuppliers && (
+          <div className="px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-widest">
+            {verifiedLeads.length + filteredUnverifiedLeads.length} Matches Found
+          </div>
+        )}
+      </div>
       
       {!hasAnySuppliers ? (
         /* Empty State - No Public Export Records */
-        <div className="border border-amber-200 rounded-lg p-8 bg-gradient-to-br from-amber-50 to-white text-center">
+        <div className="border border-amber-200 rounded-2xl p-10 bg-gradient-to-br from-amber-50/50 to-white text-center">
           <div className="max-w-xl mx-auto">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mb-4">
-              <HelpCircle className="w-6 h-6 text-amber-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100/50 mb-6">
+              <HelpCircle className="w-8 h-8 text-amber-600" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">No public export records found</h3>
-            <p className="text-sm text-slate-600 mb-6">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">No public export records found</h3>
+            <p className="text-sm text-slate-600 font-medium mb-8 leading-relaxed">
               We searched 300,000+ public trade records but couldn't find exact matches for this specific product. 
-              This doesn't mean suppliers don't exist—they may not appear in public customs data or may use different product descriptions.
+              This often means suppliers use private networks or alternative descriptions.
             </p>
             
             {/* Premium Verification CTA */}
-            <div className="bg-white rounded-lg border-2 border-blue-500 p-6 mb-4">
-              <h4 className="text-base font-semibold text-slate-900 mb-2">
+            <div className="bg-white rounded-2xl border border-blue-200 p-8 shadow-xl shadow-blue-500/5 mb-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.03]">
+                <Factory className="w-24 h-24 text-blue-600" />
+              </div>
+              <h4 className="text-lg font-bold text-slate-900 mb-2 flex items-center justify-center gap-2">
                 🔓 Unlock Private Network Factories
               </h4>
-              <p className="text-sm text-slate-600 mb-4">
-                Get access to 4+ verified factories from our private network, plus manual sourcing by our experts.
+              <p className="text-sm text-slate-500 font-medium mb-6">
+                Get access to 4+ verified factories from our private network, plus manual sourcing by our regional experts.
               </p>
-              <button className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]">
-                Unlock Premium Verification - $49
+              <button className="w-full h-14 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 uppercase tracking-tight text-base active:scale-[0.98]">
+                Unlock Premium Verification — $49
               </button>
-              <p className="text-xs text-slate-500 mt-3">
-                ✓ Manual factory sourcing by experts<br />
-                ✓ 4+ pre-vetted supplier contacts<br />
-                ✓ Direct manufacturer quotes
-              </p>
+              <div className="mt-6 grid grid-cols-3 gap-4">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">✓ Manual Sourcing</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">✓ Vetted Contacts</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">✓ Direct Quotes</div>
+              </div>
             </div>
             
-            <p className="text-xs text-slate-500">
-              Or contact us at <a href="mailto:support@nexsupply.com" className="text-blue-600 hover:underline">support@nexsupply.com</a> for custom sourcing assistance.
+            <p className="text-xs text-slate-400 font-medium">
+              Or contact us at <a href="mailto:support@nexsupply.com" className="text-blue-600 hover:underline">support@nexsupply.com</a> for assistance.
             </p>
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {hasTradingLeads && (
-            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 flex items-start gap-2 mb-2">
-              <HelpCircle className="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-indigo-900 leading-relaxed">
-                <strong>Public data mostly shows trading intermediaries.</strong> Unlock to find direct factories with better MOQ and pricing tiers.
-              </p>
+            <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 flex items-start gap-4 mb-4 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:scale-110 transition-transform">
+                <ShoppingBag className="w-16 h-16 text-slate-900" />
+              </div>
+              <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <HelpCircle className="w-5 h-5 text-slate-600" />
+              </div>
+              <div className="flex-1 pr-10">
+                <p className="text-sm text-slate-900 leading-relaxed font-medium">
+                  <strong>Public data mostly shows trading intermediaries.</strong> Unlock the Full Blueprint to find direct factories with <span className="text-emerald-600 font-bold">15-20% better pricing tiers</span> and lower MOQs.
+                </p>
+              </div>
             </div>
           )}
 
           {/* Suggested Suppliers (Verified) */}
           {verifiedLeads.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-900">Suggested suppliers</h3>
-                <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
-                  {verifiedLeads.length} {verifiedLeads.length === 1 ? 'match' : 'matches'}
+              <div className="flex items-center justify-between mb-4 pl-1">
+                <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">Recommended Match Cluster</h3>
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 rounded-md border border-blue-100 uppercase tracking-tight">
+                  {verifiedLeads.length} Verified Records
                 </span>
               </div>
-              <div className="max-h-[600px] overflow-y-auto space-y-3 pr-2">
+              <div className="space-y-4 pr-1">
                 {verifiedLeads.map((supplier: any) => (
                   <LeadCard
                     key={supplier.id || supplier.supplier_id}
@@ -365,18 +436,18 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
           {/* Unverified Leads - Always visible */}
           {filteredUnverifiedLeads.length > 0 && (
             <div>
-              <div className="mb-3">
+              <div className="mb-4 pl-1">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold text-slate-900 animate-pulse">NexSupply Verified Pending</h3>
-                  <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 rounded">
-                    {filteredUnverifiedLeads.length} {filteredUnverifiedLeads.length === 1 ? 'match' : 'matches'}
+                  <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">NexSupply Verified Pending</h3>
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-slate-50 text-slate-500 rounded-md border border-slate-200 uppercase tracking-tight">
+                    {filteredUnverifiedLeads.length} Candidates
                   </span>
                 </div>
-                <p className="text-xs text-slate-600">
-                  Potential matches based on category and keywords. Click company name to search.
+                <p className="text-xs text-slate-500 font-medium">
+                  Potential matches based on cross-category trade signals. Manual audit required.
                 </p>
               </div>
-              <div className="max-h-[600px] overflow-y-auto space-y-3 pr-2">
+              <div className="space-y-4 pr-1">
                 {filteredUnverifiedLeads.map((supplier: any) => (
                   <LeadCard
                     key={supplier.id || supplier.supplier_id}
@@ -391,14 +462,14 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
 
           {/* Excluded Leads */}
           {finalExcludedLeads.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-900">Excluded</h3>
+            <div className="pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">Low Confidence Signals</h3>
                 <button
                   onClick={() => setShowExcluded(!showExcluded)}
-                  className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1"
+                  className="text-[11px] font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1 uppercase tracking-tight"
                 >
-                  {showExcluded ? "Hide" : "Show"} excluded ({finalExcludedLeads.length})
+                  {showExcluded ? "Hide" : "Show"} filtered ({finalExcludedLeads.length})
                   {showExcluded ? (
                     <ChevronUp className="w-4 h-4" />
                   ) : (
@@ -407,40 +478,35 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
                 </button>
               </div>
               {showExcluded && (
-                <div className="space-y-2">
+                <div className="grid sm:grid-cols-2 gap-3">
                   {finalExcludedLeads.map((supplier: any) => {
                     const flags = supplier.flags || {};
                     const excludedReason = flags.excluded_reason || "unknown";
                     
-                    // Map exclusion reason to display text
                     const getReasonLabel = (reason: string) => {
                       const reasonMap: Record<string, string> = {
-                        "logistics_only": "Logistics company",
-                        "low_quality": "Low-quality match",
-                        "toy_mismatch": "Toy company",
-                        "food_mismatch": "Food-only supplier",
-                        "duplicate": "Duplicate",
+                        "logistics_only": "Logistics Only",
+                        "low_quality": "Weak Data Signal",
+                        "toy_mismatch": "Category Mismatch",
+                        "food_mismatch": "Category Mismatch",
+                        "duplicate": "Duplicate Entity",
                       };
                       return reasonMap[reason] || reason;
                     };
                     
                     const reasonLabel = getReasonLabel(excludedReason);
                     
-                    // Determine badge color based on reason
                     const getReasonColor = (reason: string) => {
-                      if (reason.includes("logistics")) return "bg-orange-100 text-orange-700";
-                      if (reason.includes("toy")) return "bg-purple-100 text-purple-700";
-                      if (reason.includes("food")) return "bg-amber-100 text-amber-700";
-                      if (reason.includes("quality")) return "bg-red-100 text-red-700";
-                      return "bg-slate-100 text-slate-700";
+                      if (reason.includes("logistics")) return "text-orange-600 bg-orange-50 border-orange-100";
+                      return "text-slate-500 bg-slate-50 border-slate-200";
                     };
                     
                     return (
-                      <div key={supplier.id || supplier.supplier_id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
+                      <div key={supplier.id || supplier.supplier_id} className="flex items-center justify-between p-4 bg-white border border-slate-200/60 rounded-xl hover:bg-slate-50 transition-colors">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-slate-900 truncate">{cleanSupplierName(supplier)}</div>
+                          <div className="text-sm font-bold text-slate-900 truncate tracking-tight">{toTitleCase(cleanSupplierName(supplier))}</div>
                         </div>
-                        <span className={`ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getReasonColor(excludedReason)}`}>
+                        <span className={`ml-3 inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight border ${getReasonColor(excludedReason)}`}>
                           {reasonLabel}
                         </span>
                       </div>
@@ -455,73 +521,71 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
 
       {/* Raw Customs Companies */}
       {importKeyCompanies.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <div className="flex items-center justify-between mb-3">
+        <div className="mt-12 pt-8 border-t border-slate-100">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-sm font-semibold text-slate-900">Raw customs companies</h3>
-                <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 rounded">
-                  {importKeyCompanies.length}
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Raw Customs Context</h3>
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-md border border-slate-200 uppercase tracking-tight">
+                  {importKeyCompanies.length} Entities
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
-                Customs-derived company list. Shows import activity but not vetted as recommendations.
+              <p className="text-[13px] text-slate-500 font-medium">
+                Unvetted list showing general import activity in this product cluster.
               </p>
             </div>
             <button
               onClick={() => setShowRawCustoms(!showRawCustoms)}
-              className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1 flex-shrink-0"
+              className="px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 transition-all uppercase tracking-tight"
             >
-              {showRawCustoms ? "Hide" : "Show"}
-              {showRawCustoms ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
+              {showRawCustoms ? "Hide Data" : "View Raw Data"}
             </button>
           </div>
           {showRawCustoms && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Disclaimer */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-xs text-blue-900">
-                  <strong>Trust context:</strong> This raw list shows companies involved in similar imports. Increases transparency but contact info not included. Based on {similarRecordsCount} customs record{similarRecordsCount === 1 ? "" : "s"}.
+              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                <HelpCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-blue-900 font-medium leading-relaxed">
+                  <strong>Cluster Analysis:</strong> This list identifies companies involved in imports similar to your product. While these companies show relevant activity, contact information and vetted capabilities require the Premium Factory Blueprint. Based on {similarRecordsCount} global records.
                 </p>
               </div>
 
               {/* Company List */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="border border-slate-200/60 rounded-2xl overflow-hidden bg-white">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-200">
+                    <thead className="bg-slate-50/80 border-b border-slate-200/60">
                       <tr>
-                        <th className="text-left py-2 px-3 text-slate-600 font-medium">Company</th>
-                        <th className="text-left py-2 px-3 text-slate-600 font-medium">Role</th>
-                        <th className="text-right py-2 px-3 text-slate-600 font-medium">Shipments</th>
-                        <th className="text-left py-2 px-3 text-slate-600 font-medium">Last seen</th>
-                        <th className="text-left py-2 px-3 text-slate-600 font-medium">Origin</th>
+                        <th className="text-left py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Entity Name</th>
+                        <th className="text-left py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Inferred Role</th>
+                        <th className="text-right py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Volume</th>
+                        <th className="text-left py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Activity</th>
+                        <th className="text-left py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Region</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {importKeyCompanies.slice(0, 20).map((company: any, index: number) => (
-                        <tr key={index} className="hover:bg-slate-50">
-                          <td className="py-2 px-3 text-slate-900 font-medium">{company.companyName}</td>
-                          <td className="py-2 px-3 text-slate-600">{company.role}</td>
-                          <td className="py-2 px-3 text-right text-slate-900">{company.shipmentsCount}</td>
-                          <td className="py-2 px-3 text-slate-600">
+                        <tr key={index} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-3 px-4 text-slate-900 font-bold tracking-tight">{toTitleCase(company.companyName)}</td>
+                          <td className="py-3 px-4">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight px-2 py-0.5 bg-slate-100 rounded-md">{company.role}</span>
+                          </td>
+                          <td className="py-3 px-4 text-right text-slate-900 font-medium">{company.shipmentsCount}</td>
+                          <td className="py-3 px-4 text-slate-500 font-medium text-xs">
                             {company.lastSeen 
-                              ? new Date(company.lastSeen).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                              ? new Date(company.lastSeen).toLocaleDateString("en-US", { month: "short", year: "numeric" })
                               : "—"}
                           </td>
-                          <td className="py-2 px-3 text-slate-600">{company.originCountry || "—"}</td>
+                          <td className="py-3 px-4 text-slate-600 font-bold text-[11px] uppercase tracking-tight">{company.originCountry || "—"}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
                 {importKeyCompanies.length > 20 && (
-                  <div className="border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600 text-center">
-                    Showing top 20 of {importKeyCompanies.length} companies
+                  <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-3 text-[11px] font-bold text-slate-400 text-center uppercase tracking-widest">
+                    Showing top 20 of {importKeyCompanies.length} cluster matches
                   </div>
                 )}
               </div>
