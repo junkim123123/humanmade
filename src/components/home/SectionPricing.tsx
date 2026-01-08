@@ -32,8 +32,8 @@ interface PlanData {
 
 const PLANS: PlanData[] = [
   {
-    label: "FREE",
-    title: "Cost range",
+    label: "Analyze",
+    title: "무료 Analyze",
     priceMain: "$0",
     description: "Delivered cost range in minutes",
     bullets: ["Market range baseline", "Sign in to run and save"],
@@ -42,9 +42,9 @@ const PLANS: PlanData[] = [
     ctaLink: "/signin?next=%2Fapp%2Fanalyze",
   },
   {
-    label: "VERIFICATION",
+    label: "Blueprint",
     title: "Verified quotes",
-    priceMain: "$45",
+    priceMain: "$49",
     priceSub: "Per product",
     description: "At least 3 factory options with MOQ and lead time confirmed in about a week.",
     bullets: [
@@ -53,12 +53,12 @@ const PLANS: PlanData[] = [
       "Execution plan and compliance checklist",
     ],
     bestFor: "Reorder ready numbers",
-    ctaText: "Start verification",
+    ctaText: "Start Verification",
     ctaLink: "/analyze",
     recommended: true,
   },
   {
-    label: "ORDER",
+    label: "Execute",
     title: "Execution support",
     priceMain: "7% of FOB",
     priceSub: "Only when you place an order",
@@ -143,7 +143,7 @@ function PricingCard({ plan }: { plan: PlanData }) {
               {plan.priceSub}
             </div>
           ) : null}
-          {plan.label === "VERIFICATION" && (
+          {plan.label === "Blueprint" && (
             <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
               Credited on your order
             </div>

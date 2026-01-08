@@ -7,13 +7,13 @@ interface OrderTimelineProps {
 }
 
 const milestoneLabels: Record<string, { label: string; description: string; icon: any }> = {
-  quote_accepted: { label: 'Queued', description: 'Verification request queued', icon: Clock },
-  pi_issued: { label: 'Supplier outreach', description: 'We are contacting suppliers', icon: Clock },
-  payment_received: { label: 'Classification check', description: 'HS and duty checks underway', icon: Clock },
-  production_started: { label: 'Quotes ready', description: 'Supplier quotes prepared for you', icon: CheckCircle2 },
-  ready_to_ship: { label: 'Completed', description: 'Deliverables shared in about a week', icon: CheckCircle2 },
-  shipped: { label: 'Shipped', description: 'In transit', icon: Clock },
-  delivered: { label: 'Delivered', description: 'Order received', icon: CheckCircle2 },
+  quote_accepted: { label: 'Queued', description: 'Verification request queued (under 3h)', icon: Clock },
+  pi_issued: { label: 'Supplier outreach', description: 'Contacting factories (1-2 days)', icon: Clock },
+  payment_received: { label: 'Classification check', description: 'HS and duty checks (1 day)', icon: Clock },
+  production_started: { label: 'Quotes ready', description: 'Verified quotes prepared (3-5 days)', icon: CheckCircle2 },
+  ready_to_ship: { label: 'Completed', description: 'Final deliverables ready', icon: CheckCircle2 },
+  shipped: { label: 'Shipped', description: 'In transit to warehouse', icon: Clock },
+  delivered: { label: 'Delivered', description: 'Order received at destination', icon: CheckCircle2 },
 };
 
 const defaultSteps = [

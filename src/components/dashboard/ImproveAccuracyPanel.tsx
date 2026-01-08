@@ -163,7 +163,7 @@ export function ImproveAccuracyPanel({
           className="text-sm font-medium text-slate-800 hover:no-underline py-2 disabled:opacity-50"
         >
           <span>
-            Improve accuracy <span className="text-slate-400 font-normal">(optional)</span>
+            Refine results <span className="text-slate-400 font-normal">(optional)</span>
           </span>
         </AccordionTrigger>
         <AccordionContent>

@@ -71,7 +71,7 @@ export default function ConfidenceBuilder({ report, onUpgrade }: ConfidenceBuild
           whileTap={{ scale: 0.98 }}
           className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
         >
-          <span>Start Verification ($49)</span>
+          <span>Start Verification</span>
           <ArrowRight size={18} />
         </motion.button>
       </div>

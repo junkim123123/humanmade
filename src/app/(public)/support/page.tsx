@@ -45,10 +45,11 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
           <div className="space-y-2">
             <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center gap-3">
               <Sparkles className="w-6 h-6 text-blue-500" />
-              nexi is here to help
+              Nexi, your sourcing manager
             </h1>
-            <p className="text-slate-600 text-lg font-medium">
-              Your dedicated sourcing manager and AI assistant are ready to assist you 24/7.
+            <p className="text-slate-600 text-lg font-medium leading-relaxed">
+              Account and order context attached automatically for faster resolution.<br/>
+              Response time: within 12 hours.
             </p>
           </div>
         </header>
@@ -75,7 +76,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
                 <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{card.title}</h3>
                 <p className="text-slate-500 text-sm mt-2 leading-relaxed flex-1">{card.desc}</p>
                 <div className="mt-6 flex items-center gap-2 text-sm font-bold text-blue-600">
-                  {redirectToOrder ? "Chat with Agent" : "Start Ticket"}
+                  {redirectToOrder ? "Live chat" : "Submit ticket"}
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>

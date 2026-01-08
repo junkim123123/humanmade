@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, MessageCircle, Send, Clock, Mail, Phone } from "lucide-react";
+import { ArrowLeft, AlertCircle, MessageCircle, Send, Clock, Mail, Phone, Check } from "lucide-react";
 import { getOrderDetail, sendOrderMessage, updateOrderContact } from "@/server/actions/orders";
 import OrderTimeline from "@/components/orders/OrderTimeline";
 
@@ -189,148 +189,216 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
 
   const status = statusConfig[order.status] || { bg: "bg-slate-100", text: "text-slate-600" };
 
+  const quickReplies = [
+    "Need Korean manager",
+    "Samples first, please",
+    "Target price is $X",
+    "Target quantity is Y"
+  ];
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-white pb-20">
+      <div className="border-b border-slate-200 bg-white sticky top-0 z-30">
         <div className="container mx-auto px-4 sm:px-6 max-w-3xl py-6">
-          <Link href="/app/orders" className="inline-flex items-center gap-1 text-[14px] text-slate-500 hover:text-slate-900 mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/app/orders" className="inline-flex items-center gap-1 text-[14px] text-slate-500 hover:text-slate-900 transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Pipeline
+            </Link>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[12px] font-medium text-slate-500">Live Case</span>
+            </div>
+          </div>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[13px] text-slate-400">Order #{order.order_number}</p>
-              <h1 className="text-[22px] font-bold text-slate-900 mt-1">{order.product_name}</h1>
+              <p className="text-[13px] text-slate-400 font-medium">Order #{order.order_number}</p>
+              <h1 className="text-[24px] font-bold text-slate-900 mt-1">{order.product_name}</h1>
             </div>
-            <span className={`px-2.5 py-1 rounded-full text-[12px] font-medium ${status.bg} ${status.text}`}>
+            <span className={`px-3 py-1 rounded-full text-[12px] font-bold tracking-tight uppercase ${status.bg} ${status.text}`}>
               {order.status.replace(/_/g, " ")}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 max-w-3xl py-8 space-y-6">
-        {/* Manager Contact Notice */}
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-          <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+      <div className="container mx-auto px-4 sm:px-6 max-w-3xl py-8 space-y-8">
+        {/* Manager Profile Notice */}
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                N
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full" />
+            </div>
             <div className="flex-1">
-              <h3 className="text-[15px] font-semibold text-slate-900">A dedicated manager will contact you within 12 hours</h3>
-              <p className="text-[13px] text-slate-600 mt-1">
-                Leave your contact info below to get notified, or send a message with any questions.
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-[16px] font-bold text-slate-900">Nexy (Dedicated Manager)</h3>
+                <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">Online</span>
+              </div>
+              <p className="text-[14px] text-slate-600 leading-relaxed">
+                I&apos;ll be handling your factory outreach and logistics. Standard response time is under 3 hours.
               </p>
-              
-              {!contactSaved ? (
-                <div className="mt-4 space-y-3">
-                  <div className="flex gap-3">
-                    <div className="flex-1 relative">
-                      <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="email"
-                        value={contactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
-                        placeholder="Email (optional)"
-                        className="w-full h-10 pl-10 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                    <div className="flex-1 relative">
-                      <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="tel"
-                        value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
-                        placeholder="Phone / WhatsApp (optional)"
-                        className="w-full h-10 pl-10 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleSaveContact}
-                    disabled={isSavingContact || (!contactEmail.trim() && !contactPhone.trim())}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-[13px] font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
-                  >
-                    {isSavingContact ? "Saving..." : "Save contact info"}
-                  </button>
+            </div>
+          </div>
+          
+          {!contactSaved ? (
+            <div className="mt-6 p-4 rounded-xl bg-white border border-blue-100 space-y-4">
+              <p className="text-[13px] font-semibold text-slate-700">Get notified when quotes arrive:</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="email"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    placeholder="Email (optional)"
+                    className="w-full h-11 pl-10 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                  />
                 </div>
-              ) : (
-                <p className="mt-3 text-[13px] text-emerald-700 font-medium">
-                  Contact info saved. We will reach out soon.
-                </p>
-              )}
+                <div className="flex-1 relative">
+                  <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="tel"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    placeholder="WhatsApp (optional)"
+                    className="w-full h-11 pl-10 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleSaveContact}
+                disabled={isSavingContact || (!contactEmail.trim() && !contactPhone.trim())}
+                className="w-full h-11 bg-slate-900 text-white rounded-lg font-bold text-[14px] hover:bg-slate-800 disabled:opacity-50 transition-all"
+              >
+                {isSavingContact ? "Saving..." : "Keep me updated"}
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="mt-4 flex items-center gap-2 text-[13px] text-emerald-700 font-bold bg-emerald-50 w-fit px-3 py-1.5 rounded-lg border border-emerald-100">
+              <Check className="w-4 h-4" />
+              Contact info saved. Nexy will notify you soon.
+            </div>
+          )}
         </div>
 
-        {/* Order Summary */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-[16px] font-semibold text-slate-900 mb-4">Order Details</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div>
-              <p className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Supplier</p>
-              <p className="text-[14px] text-slate-900 mt-0.5">{order.supplier_name || "TBD"}</p>
+        {/* Order Details Grid */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[16px] font-bold text-slate-900 uppercase tracking-widest">Order Details</h2>
+            <Link href={`/reports/${orderId}/v2`} className="text-[12px] font-bold text-blue-600 hover:underline">View Blueprint →</Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="space-y-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Supplier</p>
+              <p className="text-[15px] font-bold text-slate-900">{order.supplier_name || "Contacting factories..."}</p>
             </div>
-            <div>
-              <p className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Quantity</p>
-              <p className="text-[14px] text-slate-900 mt-0.5">{order.quantity ? `${order.quantity} units` : "TBD"}</p>
+            <div className="space-y-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Quantity</p>
+              <p className="text-[15px] font-bold text-slate-900">{order.quantity ? `${order.quantity.toLocaleString()} units` : "Target units needed"}</p>
             </div>
-            <div>
-              <p className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Total</p>
-              <p className="text-[14px] text-slate-900 mt-0.5">
-                {order.total_amount ? `$${order.total_amount.toLocaleString()}` : "TBD"}
+            <div className="space-y-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Landed Total</p>
+              <p className="text-[15px] font-bold text-slate-900">
+                {order.total_amount ? `$${order.total_amount.toLocaleString()}` : "Calculating..."}
               </p>
             </div>
-            <div>
-              <p className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Created</p>
-              <p className="text-[14px] text-slate-900 mt-0.5">{new Date(order.created_at).toLocaleDateString()}</p>
+            <div className="space-y-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Created</p>
+              <p className="text-[15px] font-bold text-slate-900">{new Date(order.created_at).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}</p>
             </div>
           </div>
         </div>
 
-        {/* Execution Timeline */}
+        {/* Action Callout */}
+        <div className="rounded-2xl border border-amber-100 bg-amber-50/30 p-6 flex items-start gap-4">
+          <div className="p-2.5 rounded-xl bg-amber-100">
+            <AlertCircle className="w-5 h-5 text-amber-700" />
+          </div>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-900 mb-1">Boost Quote Speed</h3>
+            <p className="text-[14px] text-slate-600 leading-relaxed mb-4">
+              Enter your target quantity and upload a clear label photo to speed up HS classification and supplier negotiation.
+            </p>
+            <div className="flex gap-3">
+              <button className="px-4 py-2 rounded-lg bg-white border border-amber-200 text-[13px] font-bold text-amber-800 hover:bg-amber-50 transition-colors shadow-sm">
+                Set Target Quantity
+              </button>
+              <button className="px-4 py-2 rounded-lg bg-white border border-amber-200 text-[13px] font-bold text-amber-800 hover:bg-amber-50 transition-colors shadow-sm">
+                Upload Label
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline */}
         <OrderTimeline milestones={milestones} />
 
         {/* Messages */}
-        <div className="rounded-xl border border-slate-200 bg-white">
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div>
-              <h2 className="text-[16px] font-semibold text-slate-900">Messages</h2>
-              <p className="text-[13px] text-slate-500 mt-0.5">Ask questions or share details before we call</p>
+              <h2 className="text-[16px] font-bold text-slate-900 uppercase tracking-widest">Direct Support</h2>
+              <p className="text-[13px] text-slate-500 mt-1 font-medium">Chat with Nexy about this product</p>
             </div>
-            <div className="flex items-center gap-1.5 text-[12px] text-slate-400">
-              <MessageCircle className="w-4 h-4" />
-              Real-time
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-[12px] font-bold text-slate-400">
+              <MessageCircle className="w-4 h-4 text-blue-500" />
+              Real-time Channel
             </div>
           </div>
 
-          <div className="p-5">
-            <div className="bg-slate-50 rounded-lg p-4 space-y-3 h-64 overflow-y-auto mb-4">
-              {formattedMessages.length > 0 ? (
-                formattedMessages.map((message) => (
-                  <div key={message.id || message.created_at} className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] rounded-xl px-4 py-3 ${
-                      message.isUser
-                        ? "bg-slate-900 text-white"
-                        : "bg-white text-slate-900 border border-slate-200"
-                    }`}>
-                      <div className="flex items-center justify-between gap-3 mb-1 text-[11px] uppercase tracking-wide font-medium">
-                        <span className={message.isUser ? "text-white/70" : "text-slate-400"}>{message.label}</span>
-                        <span className={message.isUser ? "text-white/50" : "text-slate-300"}>{message.timestamp}</span>
-                      </div>
-                      <p className="text-[14px] whitespace-pre-wrap leading-relaxed">{message.body}</p>
-                    </div>
+          <div className="p-6">
+            <div className="bg-slate-50/80 rounded-2xl p-6 space-y-4 h-[400px] overflow-y-auto mb-6 scrollbar-hide border border-slate-100">
+              {formattedMessages.length === 0 && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] rounded-2xl px-5 py-4 bg-white text-slate-900 border border-blue-100 shadow-sm">
+                    <p className="text-[11px] uppercase tracking-widest font-bold text-blue-600 mb-2">Nexy • Just now</p>
+                    <p className="text-[14px] leading-relaxed">
+                      Hello! I&apos;m your sourcing manager. To speed up your quotes, please let me know:<br/><br/>
+                      1. Your target unit price<br/>
+                      2. Estimated order quantity<br/>
+                      3. If you need samples first
+                    </p>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-slate-400">
-                  <MessageCircle className="w-6 h-6 mx-auto mb-2" />
-                  <p className="text-[14px]">No messages yet</p>
-                  <p className="text-[13px]">Share any questions or preferences</p>
                 </div>
               )}
+              {formattedMessages.map((message) => (
+                <div key={message.id || message.created_at} className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-5 py-4 shadow-sm ${
+                    message.isUser
+                      ? "bg-slate-900 text-white"
+                      : "bg-white text-slate-900 border border-slate-200"
+                  }`}>
+                    <div className="flex items-center justify-between gap-4 mb-2 text-[10px] uppercase tracking-widest font-bold">
+                      <span className={message.isUser ? "text-white/60" : "text-slate-400"}>{message.label}</span>
+                      <span className={message.isUser ? "text-white/40" : "text-slate-300"}>{message.timestamp}</span>
+                    </div>
+                    <p className="text-[14px] whitespace-pre-wrap leading-relaxed font-medium">{message.body}</p>
+                  </div>
+                </div>
+              ))}
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="flex items-end gap-3">
+            {/* Quick Replies */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {quickReplies.map((reply) => (
+                <button
+                  key={reply}
+                  onClick={() => setMessageInput(reply)}
+                  className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-[12px] font-bold hover:bg-blue-50 hover:text-blue-700 transition-all border border-slate-200 hover:border-blue-200"
+                >
+                  {reply}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-end gap-3 bg-white p-1 rounded-2xl border border-slate-200 focus-within:ring-2 focus-within:ring-blue-600 transition-all shadow-inner">
+              <button className="p-3 text-slate-400 hover:text-blue-600 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+              </button>
               <textarea
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
@@ -340,22 +408,19 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
                     handleSendMessage();
                   }
                 }}
-                placeholder="e.g. I prefer Korean-speaking manager, need samples first..."
-                rows={2}
-                className="flex-1 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 p-3 text-[14px] resize-none"
+                placeholder="Message Nexy..."
+                rows={1}
+                className="flex-1 bg-transparent border-none focus:outline-none p-3 text-[14px] resize-none font-medium"
               />
               <button
                 onClick={handleSendMessage}
                 disabled={isSending || !messageInput.trim()}
-                className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md m-1"
               >
                 {isSending ? (
                   <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Send
-                  </>
+                  <Send className="w-5 h-5" />
                 )}
               </button>
             </div>

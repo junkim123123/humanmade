@@ -438,7 +438,7 @@ export const VERDICT_TEMPLATES: VerdictTemplate[] = [
   {
     id: 70,
     decision: "HOLD",
-    statement: "No brand anchor lowers matching accuracy. Front and bottom package photos improve it significantly.",
+    statement: "No brand anchor lowers matching precision. Front and bottom package photos improve it significantly.",
     categoryHints: ["food", "beauty", "electronics"],
   },
   

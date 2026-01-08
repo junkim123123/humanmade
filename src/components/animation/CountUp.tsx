@@ -35,7 +35,16 @@ export function CountUp({
     if (decimals === 0) {
       return Math.floor(current).toString();
     }
-    return current.toFixed(decimals);
+    const val = current.toFixed(decimals);
+    // If it ends in .00, return just the integer part
+    if (val.endsWith('.' + '0'.repeat(decimals))) {
+      return Math.floor(current).toString();
+    }
+    // Remove trailing zeros after decimal
+    if (val.includes('.')) {
+      return parseFloat(val).toString();
+    }
+    return val;
   });
 
   useEffect(() => {

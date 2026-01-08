@@ -107,7 +107,7 @@ async function getRevenueStats() {
   lastMonth.setMonth(lastMonth.getMonth() - 1)
 
   try {
-    // Get verification fees ($45 per verification request order)
+    // Get verification fees ($49 per verification request order)
     const { data: verificationOrders } = await supabase
       .from('orders')
       .select('id, created_at, metadata')
@@ -115,7 +115,7 @@ async function getRevenueStats() {
       .gte('created_at', lastMonth.toISOString())
       .in('status', ['awaiting_payment', 'in_progress', 'pending_shipment', 'shipped'])
 
-    const verificationFees = (verificationOrders?.length || 0) * 45
+    const verificationFees = (verificationOrders?.length || 0) * 49
 
     // Get execution commissions (7% of FOB - simplified: count orders that moved past verification)
     const { data: executionOrders } = await supabase
@@ -291,7 +291,7 @@ export default async function AdminDashboard() {
           <div className="bg-white/70 rounded-lg p-4">
             <p className="text-sm font-medium text-slate-600 mb-1">Verification Fees</p>
             <p className="text-2xl font-bold text-slate-900">${revenueStats.verificationFees.toLocaleString()}</p>
-            <p className="text-xs text-slate-500 mt-1">$45 per verification request</p>
+            <p className="text-xs text-slate-500 mt-1">$49 per verification request</p>
           </div>
           <div className="bg-white/70 rounded-lg p-4">
             <p className="text-sm font-medium text-slate-600 mb-1">Execution Commissions</p>

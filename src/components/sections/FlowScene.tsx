@@ -309,7 +309,7 @@ function SceneContent() {
             <StepCard
               position={[0, 1.5, 0]}
               label="Verify"
-              price="$45"
+              price="$49"
               color="#8B5CF6"
             />
             <StepCard

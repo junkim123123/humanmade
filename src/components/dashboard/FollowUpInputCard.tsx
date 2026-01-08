@@ -67,7 +67,7 @@ export function FollowUpInputCard({
             Additional Information to Improve Accuracy
           </h3>
           <p className="text-sm text-slate-600">
-            No similar internal records found. Labels and barcodes will significantly improve accuracy.
+            No similar internal records found. Labels and barcodes will significantly improve precision.
           </p>
         </div>
       </div>

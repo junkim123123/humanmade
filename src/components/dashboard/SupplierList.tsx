@@ -292,7 +292,7 @@ function MarketEstimateCard({ estimate }: { estimate: MarketEstimate }) {
                     )}
                   </div>
                   <p className="text-xs text-blue-700 mt-3 italic">
-                    Answering these questions will improve HS code confidence and accuracy.
+                    Answering these questions will improve HS code confidence and precision.
                   </p>
                 </div>
               );
@@ -328,7 +328,7 @@ function MarketEstimateCard({ estimate }: { estimate: MarketEstimate }) {
                     </div>
                   </div>
                   <p className="text-xs text-blue-700 mt-3 italic">
-                    Answering these questions will improve HS code confidence and accuracy.
+                    Answering these questions will improve HS code confidence and precision.
                   </p>
                 </div>
               );

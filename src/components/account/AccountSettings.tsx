@@ -7,7 +7,7 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { updateProfile, updateNotificationSettings, UserProfile } from "@/server/actions/profile";
 import Link from "next/link";
 
-const CREDIT_VALUE = 45;
+const CREDIT_VALUE = 49;
 
 interface AccountSettingsProps {
   email: string;
@@ -179,7 +179,7 @@ export function AccountSettings({
               Available Credits: <span className="font-semibold text-emerald-600">${balanceInDollars}</span>
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              Credits from your deposits are applied to future execution fees.
+              Your $49 deposit is credited toward your first factory order total.
             </p>
           </div>
           <Link
@@ -346,8 +346,11 @@ export function AccountSettings({
             <p className="text-sm text-slate-600">
               {profile?.shipping_city && profile?.shipping_country
                 ? `${profile.shipping_city}, ${profile.shipping_state || ""} ${profile.shipping_country}`
-                : "Shipping Address and EIN / Tax ID required for Customs Clearance"
+                : "Required for Customs Clearance"
               }
+            </p>
+            <p className="text-[11px] text-blue-600 font-bold mt-1 uppercase tracking-tight">
+              Unlocks faster customs clearance when you order
             </p>
           </div>
           <button
@@ -361,35 +364,21 @@ export function AccountSettings({
 
         {companyOpen && (
           <div className="mt-4 space-y-3">
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 mb-2">
-              <p className="text-xs text-blue-800 font-medium">
-                Required for Customs Clearance: Shipping Address and EIN / Tax ID
-              </p>
-            </div>
-            
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-slate-900">Shipping Address</h4>
-              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                Address line 1
-                <input
-                  type="text"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={addressLine1}
-                  onChange={(e) => setAddressLine1(e.target.value)}
-                  placeholder="123 Main Street"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                Address line 2
-                <input
-                  type="text"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={addressLine2}
-                  onChange={(e) => setAddressLine2(e.target.value)}
-                  placeholder="Suite 100 (optional)"
-                />
-              </label>
+              <h4 className="text-sm font-semibold text-slate-900">Shipping Destination</h4>
               <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  Country
+                  <select
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  >
+                    <option value="United States">United States</option>
+                    <option value="South Korea">South Korea</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
                 <label className="flex flex-col gap-1 text-sm text-slate-700">
                   City
                   <input
@@ -397,67 +386,37 @@ export function AccountSettings({
                     className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="New York"
-                  />
-                </label>
-                <label className="flex flex-col gap-1 text-sm text-slate-700">
-                  State / Province
-                  <input
-                    type="text"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    placeholder="NY"
+                    placeholder="e.g. Los Angeles"
                   />
                 </label>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="flex flex-col gap-1 text-sm text-slate-700">
-                  Postal code
-                  <input
-                    type="text"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                    placeholder="10001"
-                  />
-                </label>
-                <label className="flex flex-col gap-1 text-sm text-slate-700">
-                  Country
-                  <input
-                    type="text"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    placeholder="United States"
-                  />
-                </label>
-              </div>
+              
+              {country === "United States" && (
+                <div className="pt-3 border-t border-slate-100">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-2">US Import Details</h4>
+                  <label className="flex flex-col gap-1 text-sm text-slate-700">
+                    EIN / Tax ID
+                    <input
+                      type="text"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      value={taxId}
+                      onChange={(e) => setTaxId(e.target.value)}
+                      placeholder="12-3456789"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">Required for US Customs clearance</p>
+                  </label>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-3 pt-3 border-t border-slate-200">
-              <h4 className="text-sm font-semibold text-slate-900">Tax Information</h4>
-              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                EIN / Tax ID
-                <input
-                  type="text"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-                  value={taxId}
-                  onChange={(e) => setTaxId(e.target.value)}
-                  placeholder="12-3456789"
-                />
-                <p className="text-xs text-slate-500 mt-1">Required for US Customs clearance</p>
-              </label>
-            </div>
-
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <button
                 type="button"
                 onClick={handleSaveCompany}
                 disabled={savingCompany}
                 className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {savingCompany ? "Saving..." : "Save import settings"}
+                {savingCompany ? "Saving..." : "Save settings"}
               </button>
             </div>
           </div>

@@ -320,7 +320,7 @@ export default function SupplierCandidatesTop({ matches, onUnlock }: SupplierCan
                       onClick={onUnlock}
                       className="mt-3 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-tight"
                     >
-                      Unlock Blueprint to access
+                      Start Verification to access
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                       </svg>

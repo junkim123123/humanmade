@@ -98,7 +98,7 @@ export function VerificationDemo({ isActive }: VerificationDemoProps) {
           </Button>
           <div className="mt-3 text-center">
             <p className="text-xs text-slate-600 mb-1">
-              $45 deposit, credited if you place an order
+              $49 deposit, credited if you place an order
             </p>
             <Link
               href="/pricing"

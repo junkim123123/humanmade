@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle, Gift, Check, X, ShieldCheck } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle, Gift, Check, X, ShieldCheck, Plus } from "lucide-react";
 import { fetchMyCredits, fetchMyCreditTransactions } from "./actions";
 import type { CreditTransaction } from "@/server/actions/credits";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const CREDIT_VALUE = 45; // $45 per credit
+const CREDIT_VALUE = 49; // $49 per credit
 
 const transactionTypeConfig: Record<string, { label: string; icon: any; color: string }> = {
   admin_grant: { label: "Credit added", icon: ArrowUpRight, color: "text-emerald-600" },
@@ -24,9 +24,17 @@ export default function BillingPage() {
   const [codeInput, setCodeInput] = useState("");
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeMessage, setCodeMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [showPromo, setShowPromo] = useState(false);
 
   // Convert credits to dollar amount
   const balanceInDollars = balance * CREDIT_VALUE;
+
+  const usedCredits = transactions
+    .filter(tx => tx.type === 'verification_used')
+    .reduce((acc, tx) => acc + Math.abs(tx.amount), 0);
+
+  const processingCredits = transactions.filter(tx => tx.type === 'admin_grant' && tx.description?.toLowerCase().includes('pending')).length;
+  const lifetimeUsed = usedCredits;
 
   // --- [FIX] Refactor data loading into a single function ---
   const loadData = async () => {
@@ -114,11 +122,11 @@ export default function BillingPage() {
               Sourcing Credits
             </h1>
             <p className="text-[15px] text-slate-400 max-w-md mx-auto mb-6">
-              Manage your balance and view verification history. Each credit ($45) covers one full product verification.
+              1 credit = 1 product verification. Your deposit is credited back on your first order. No expiry.
             </p>
             <div className="inline-flex items-center gap-2 text-[13px] text-slate-300 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
               <ShieldCheck className="w-4 h-4 text-blue-400" />
-              <span>100% Credited back to your first order</span>
+              <span>100% Credited back to your first order total</span>
             </div>
           </div>
         </div>
@@ -148,72 +156,87 @@ export default function BillingPage() {
                   <span className="text-slate-400 font-medium text-xl uppercase">USD</span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Processing</p>
+                    <p className="text-[18px] font-bold">{processingCredits} <span className="text-[12px] font-normal text-slate-500">Credits</span></p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Lifetime Used</p>
+                    <p className="text-[18px] font-bold">{lifetimeUsed} <span className="text-[12px] font-normal text-slate-500">Credits</span></p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
                   <button
                     onClick={() => alert("Payment gateway integration in progress. Please contact support for bulk credits.")}
-                    className="flex-1 h-14 bg-white text-slate-900 rounded-2xl font-bold text-[16px] hover:bg-slate-50 transition-all shadow-lg flex items-center justify-center gap-2"
+                    className="w-full h-16 bg-white text-slate-900 rounded-2xl font-bold text-[18px] hover:bg-slate-50 transition-all shadow-lg flex items-center justify-center gap-2"
                   >
-                    <ArrowUpRight className="w-5 h-5" />
-                    Add Credit ($45)
+                    <Plus className="w-5 h-5" />
+                    Add Credit ($49)
                   </button>
-                  <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm">
-                    <Clock className="w-5 h-5 text-slate-400" />
-                    <div>
-                      <p className="text-[11px] text-slate-400 uppercase font-bold leading-none mb-1">Last Update</p>
-                      <p className="text-[14px] font-bold">Just now</p>
-                    </div>
+                  <div className="flex items-center justify-between px-2">
+                    <p className="text-[12px] text-slate-400">1 credit = 1 product verification</p>
+                    <button 
+                      onClick={() => setShowPromo(!showPromo)}
+                      className="text-[12px] text-blue-400 font-bold hover:underline"
+                    >
+                      {showPromo ? "Hide promo code" : "Have a promo code?"}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Redeem Code */}
-            <Card className="p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="p-3 rounded-2xl bg-blue-50">
-                  <Gift className="w-6 h-6 text-blue-600" />
+            {/* Redeem Code - Collapsible */}
+            {showPromo && (
+              <Card className="p-8 animate-in slide-in-from-top-4 duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3 rounded-2xl bg-blue-50">
+                    <Gift className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-[18px] font-bold text-slate-900">Promo Code</h3>
+                    <p className="text-[14px] text-slate-500">Credits will be added instantly upon redemption.</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-[18px] font-bold text-slate-900">Have a promo code?</h3>
-                  <p className="text-[14px] text-slate-500">Enter your code below to redeem credits.</p>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={codeInput}
+                    onChange={(e) => {
+                      setCodeInput(e.target.value.toUpperCase());
+                      setCodeMessage(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !codeLoading) {
+                        handleRedeemCode();
+                      }
+                    }}
+                    placeholder="ENTER CODE"
+                    className="flex-1 h-14 px-6 border-2 border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all uppercase placeholder:text-slate-300"
+                    disabled={codeLoading}
+                  />
+                  <Button
+                    onClick={handleRedeemCode}
+                    disabled={codeLoading || !codeInput.trim()}
+                    className="px-10 h-14 rounded-2xl text-base"
+                  >
+                    {codeLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Apply"}
+                  </Button>
                 </div>
-              </div>
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={codeInput}
-                  onChange={(e) => {
-                    setCodeInput(e.target.value.toUpperCase());
-                    setCodeMessage(null);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !codeLoading) {
-                      handleRedeemCode();
-                    }
-                  }}
-                  placeholder="ENTER PROMO CODE"
-                  className="flex-1 h-14 px-6 border-2 border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all uppercase placeholder:text-slate-300"
-                  disabled={codeLoading}
-                />
-                <Button
-                  onClick={handleRedeemCode}
-                  disabled={codeLoading || !codeInput.trim()}
-                  className="px-10 h-14 rounded-2xl text-base"
-                >
-                  {codeLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Redeem"}
-                </Button>
-              </div>
-              {codeMessage && (
-                <div className={`mt-4 flex items-center gap-3 p-4 rounded-2xl ${
-                  codeMessage.type === "success" 
-                    ? "bg-emerald-50 text-emerald-800 border border-emerald-100" 
-                    : "bg-red-50 text-red-800 border border-red-100"
-                }`}>
-                  {codeMessage.type === "success" ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
-                  <p className="text-[14px] font-semibold">{codeMessage.text}</p>
-                </div>
-              )}
-            </Card>
+                {codeMessage && (
+                  <div className={`mt-4 flex items-center gap-3 p-4 rounded-2xl ${
+                    codeMessage.type === "success" 
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-100" 
+                      : "bg-red-50 text-red-800 border border-red-100"
+                  }`}>
+                    {codeMessage.type === "success" ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
+                    <p className="text-[14px] font-semibold">{codeMessage.text}</p>
+                  </div>
+                )}
+              </Card>
+            )}
 
             {/* Transaction History */}
             <Card className="overflow-hidden">
@@ -284,7 +307,7 @@ export default function BillingPage() {
               <div className="absolute top-0 right-0 -mr-8 -mt-8 opacity-10">
                 <Check className="w-32 h-32" />
               </div>
-              <h3 className="text-[18px] font-bold mb-6 relative z-10">Verification Guarantee</h3>
+              <h3 className="text-[18px] font-bold mb-6 relative z-10">Verification Support</h3>
               <ul className="space-y-6 relative z-10">
                 <li className="flex items-start gap-4">
                   <div className="p-1 rounded-full bg-blue-500/50 mt-0.5">
@@ -292,7 +315,7 @@ export default function BillingPage() {
                   </div>
                   <p className="text-[14px] leading-relaxed">
                     <strong>100% Credited Back</strong><br/>
-                    <span className="text-blue-100">Your $45 deposit is applied to your first order with the factory.</span>
+                    <span className="text-blue-100">Your $49 deposit is credited toward your first order within 60 days.</span>
                   </p>
                 </li>
                 <li className="flex items-start gap-4">
@@ -341,4 +364,3 @@ export default function BillingPage() {
     </div>
   );
 }
-

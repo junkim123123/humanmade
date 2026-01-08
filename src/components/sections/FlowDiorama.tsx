@@ -41,10 +41,10 @@ export default function FlowDiorama() {
           <div className="text-center md:text-left">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
               <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-              <h3 className="text-lg font-semibold text-slate-900">Verify ($45)</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Verify ($49)</h3>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              Deposit $45 to start factory validation. We reach out to verified suppliers and confirm pricing, MOQ, and lead times.
+              Deposit $49 to start factory validation. We reach out to verified suppliers and confirm pricing, MOQ, and lead times.
             </p>
           </div>
 

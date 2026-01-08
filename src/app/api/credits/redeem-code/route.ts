@@ -27,17 +27,17 @@ export async function POST(request: NextRequest) {
     const normalizedCode = code.trim().toUpperCase();
     
     if (normalizedCode === "NEXSOURCE") {
-      // Grant 1 credit ($45 value)
+      // Grant 1 credit ($49 value)
       const result = await adminGrantCredits(
         user.id,
-        1, // 1 credit = $45
+        1, // 1 credit = $49
         `Redeemed code: ${normalizedCode}`
       );
 
       if (result.success) {
         return NextResponse.json({
           success: true,
-          message: "Code redeemed successfully! $45 credit added to your account.",
+          message: "Code redeemed successfully! $49 credit added to your account.",
           newBalance: result.newBalance,
         });
       } else {

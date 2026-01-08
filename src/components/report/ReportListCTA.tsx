@@ -81,7 +81,7 @@ export function ReportListCTA({ reportId, status }: ReportListCTAProps) {
   };
 
   const label = (() => {
-    if (status === "completed") return loading ? "Starting..." : "Request verification";
+    if (status === "completed") return loading ? "Starting..." : "Start verification";
     if (status === "processing") return "View status";
     if (status === "failed") return "Retry analysis";
     return "View report";
@@ -111,7 +111,7 @@ export function ReportListCTA({ reportId, status }: ReportListCTAProps) {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-colors bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {loading ? "Starting..." : "Request verification"}
+            {loading ? "Starting..." : "Start verification"}
           </button>
         </div>
         <VerificationConfirmModal

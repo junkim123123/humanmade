@@ -37,7 +37,7 @@ const statusConfig = {
     borderColor: "border-red-200",
     textColor: "text-red-700",
     iconColor: "text-red-600",
-    tooltip: "Upload barcode/label to increase accuracy",
+    tooltip: "Upload barcode/label to increase precision",
   },
 };
 

@@ -142,7 +142,7 @@ export default function ActionPlan48hCard({ report, actionPlan }: ActionPlan48hC
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <FileText className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
-                    <span className="text-[11px] sm:text-[12px] font-semibold text-purple-900">Optimize Sourcing & Unlock Network</span>
+                    <span className="text-[11px] sm:text-[12px] font-semibold text-purple-900">Start Verification</span>
                   </div>
                   <span className="inline-block mt-1.5 text-[10px] font-medium text-purple-700 group-hover/blueprint:text-purple-800 transition-colors">
                     {isRequesting ? "Starting..." : "Upgrade now →"}

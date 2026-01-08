@@ -64,7 +64,10 @@ export function MiniReportPreview({
     if (compact || variant === "hero") setActiveTab("summary");
   }, [compact, variant]);
 
-  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+  const formatCurrency = (value: number) => {
+    // Remove trailing .00 for cleaner display in demos
+    return `$${parseFloat(value.toFixed(2))}`;
+  };
 
   const costStackValues = displayData.costStack || MOCK_DATA.costStack;
   const costStackTotal = useMemo(() => {
@@ -208,7 +211,7 @@ export function MiniReportPreview({
                       <p className="text-[10px] text-slate-700 leading-tight">Use the baseline to decide. Verify when ready to buy.</p>
                     </div>
                     <ul className="space-y-0.5 text-[10px] text-slate-600">
-                      <li>• Deposit $45 per product, credited on order</li>
+                      <li>• Deposit $49 per product, credited on order</li>
                       <li>• Up to 3 supplier quotes</li>
                       <li>• MOQ and lead time confirmed</li>
                     </ul>
@@ -224,7 +227,7 @@ export function MiniReportPreview({
                 className="h-10 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold shadow-lg"
                 onClick={onStartVerification}
               >
-                Optimize Sourcing & Unlock Network
+                Secure Verified Quotes
               </Button>
             </div>
           )}

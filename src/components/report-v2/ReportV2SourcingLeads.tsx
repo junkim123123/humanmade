@@ -379,7 +379,7 @@ export default function ReportV2SourcingLeads({ report }: ReportV2SourcingLeadsP
                 Get access to 4+ verified factories from our private network, plus manual sourcing by our regional experts.
               </p>
               <button className="w-full h-14 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 uppercase tracking-tight text-base active:scale-[0.98]">
-                Unlock Premium Verification — $49
+                Start Verification
               </button>
               <div className="mt-6 grid grid-cols-3 gap-4">
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">✓ Manual Sourcing</div>

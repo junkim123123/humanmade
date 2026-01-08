@@ -29,7 +29,7 @@ export function PricingCards() {
       {/* Verification */}
       <PricingCard
         title="Verification"
-        price="$45 deposit per product"
+        price="$49 deposit per product"
         description={SLA_DESCRIPTION}
         badge="Credited on order"
         slaLine={SLA_UPDATE}
@@ -41,7 +41,7 @@ export function PricingCards() {
           "3 supplier options with confirmed quotes",
         ]}
         cta={{
-          label: "Start verification",
+          label: "Start Verification",
           href: "/analyze",
           onClick: () => setShowVerificationModal(true),
         }}

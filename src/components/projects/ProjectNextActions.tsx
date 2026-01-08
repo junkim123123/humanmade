@@ -15,7 +15,7 @@ const getActions = (targetMoq: number) => [
   {
     id: "back_label",
     label: "Upload back label photo",
-    description: "If missing, upload product label for better accuracy",
+    description: "If missing, upload product label for better precision",
     icon: Upload,
     completed: false,
   },

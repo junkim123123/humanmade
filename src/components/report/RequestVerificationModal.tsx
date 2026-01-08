@@ -183,7 +183,7 @@ export function RequestVerificationModal({
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Quotes verified for accuracy and compliance</span>
+                    <span>Quotes verified for precision and compliance</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
@@ -374,7 +374,7 @@ export function RequestVerificationModal({
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-xs">
                         <p className="text-xs">
-                          The deposit covers factory outreach and verification work. If you proceed with an order, $45 is credited.
+                          The deposit covers factory outreach and verification work. If you proceed with an order, $49 is credited.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -391,7 +391,7 @@ export function RequestVerificationModal({
                     <h3 className="text-lg font-semibold text-slate-900">
                       Verification Deposit
                     </h3>
-                    <div className="text-2xl font-bold text-slate-900">$45</div>
+                    <div className="text-2xl font-bold text-slate-900">$49</div>
                   </div>
 
                   <ul className="space-y-2 text-sm text-slate-600 mb-6">
@@ -448,7 +448,7 @@ export function RequestVerificationModal({
                     disabled={isProcessingPayment || !acknowledgedDeposit}
                     className="bg-electric-blue-600 hover:bg-electric-blue-700"
                   >
-                    {isProcessingPayment ? "Processing..." : "Pay $45 and start verification"}
+                    {isProcessingPayment ? "Processing..." : "Pay $49 and start verification"}
                   </Button>
                 </div>
               </div>

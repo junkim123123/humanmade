@@ -39,11 +39,11 @@ export default function PricingPage() {
         >
           {/* Free / Verification / Execution stack */}
           <div className="divide-y divide-slate-200">
-            {/* Free Analysis */}
+            {/* 무료 Analyze */}
             <div className="p-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex-1">
                 <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
-                  Free Analysis
+                  무료 Analyze
                 </h2>
                 <p className="text-[14px] text-slate-600 max-w-md">
                   Instant Landed Cost &amp; Profit Analysis using AI and import data.
@@ -61,12 +61,12 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Verification */}
+            {/* Blueprint */}
             <div id="deposit" className="p-6 bg-slate-50/90">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
-                    Verification
+                    Blueprint
                   </h2>
                   <p className="text-[14px] text-slate-600 max-w-md">
                     We validate the factory, negotiate MOQs, and confirm the exact landed cost blueprint.
@@ -74,7 +74,7 @@ export default function PricingPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[26px] font-bold text-slate-900">
-                    $45
+                    $49
                   </div>
                   <p className="text-[12px] text-slate-500 mt-1">
                     Sourcing Deposit
@@ -92,12 +92,12 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Execution */}
+            {/* Execute */}
             <div className="p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
-                    Execution
+                    Execute
                   </h2>
                   <p className="text-[14px] text-slate-600 max-w-md">
                     End-to-end logistics coordination, from factory floor to your door.
@@ -125,7 +125,7 @@ export default function PricingPage() {
             What you get
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Free */}
+            {/* 무료 Analyze */}
             <div
               className="
                 rounded-2xl border border-slate-200 bg-white/90 p-6
@@ -133,7 +133,7 @@ export default function PricingPage() {
                 transition-all hover:translate-y-[-2px] hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)]
               "
             >
-              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Free Analysis</h3>
+              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">무료 Analyze</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -154,7 +154,7 @@ export default function PricingPage() {
               </ul>
             </div>
 
-            {/* Verification */}
+            {/* Blueprint */}
             <div
               className="
                 rounded-2xl border-2 border-slate-900 bg-white/95 p-6
@@ -162,7 +162,7 @@ export default function PricingPage() {
                 transition-all hover:translate-y-[-2px] hover:shadow-[0_22px_55px_rgba(15,23,42,0.22)]
               "
             >
-              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Verification</h3>
+              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Blueprint</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -179,7 +179,7 @@ export default function PricingPage() {
               </ul>
             </div>
 
-            {/* Execution */}
+            {/* Execute */}
             <div
               className="
                 rounded-2xl border border-slate-200 bg-white/90 p-6
@@ -187,7 +187,7 @@ export default function PricingPage() {
                 transition-all hover:translate-y-[-2px] hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)]
               "
             >
-              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Execution</h3>
+              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Execute</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -290,8 +290,8 @@ export default function PricingPage() {
                 a: "A practical range for quick margin checks based on category benchmarks and shipping assumptions. Use it for go/no-go and sizing next steps.",
               },
               {
-                q: "What do I get for $45?",
-                a: "Outreach starts within 12 hours. In about a week you get at least 3 viable quotes with MOQ, lead time, and label/origin checks. The $45 is a deposit, not a fee—100% credited back to your first order.",
+                q: "What do I get for $49?",
+                a: "Outreach starts within 12 hours. In about a week you get at least 3 viable quotes with MOQ, lead time, and label/origin checks. The $49 is a deposit, not a fee—100% credited back to your first order.",
               },
               {
                 q: "When is evidence attached?",

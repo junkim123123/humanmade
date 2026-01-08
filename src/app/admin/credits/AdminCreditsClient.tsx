@@ -16,10 +16,10 @@ interface Props {
 }
 
 export default function AdminCreditsClient({ users }: Props) {
-  const CREDIT_VALUE = 45;
+  const CREDIT_VALUE = 49;
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserCredits | null>(null);
-  const [dollarAmount, setDollarAmount] = useState<number>(45);
+  const [dollarAmount, setDollarAmount] = useState<number>(49);
   const [description, setDescription] = useState("");
   const [isGranting, setIsGranting] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -40,7 +40,7 @@ export default function AdminCreditsClient({ users }: Props) {
     if (!selectedUser || dollarAmount === 0) return;
     const credits = Math.round(dollarAmount / CREDIT_VALUE);
     if (credits === 0) {
-      alert("Amount must be at least $45");
+      alert("Amount must be at least $49");
       return;
     }
     const finalCredits = isAdding ? credits : -credits;
@@ -57,7 +57,7 @@ export default function AdminCreditsClient({ users }: Props) {
         );
         setShowModal(false);
         setSelectedUser(null);
-        setDollarAmount(45);
+        setDollarAmount(49);
         setDescription("");
       } else {
         alert("Failed to update balance");
@@ -73,7 +73,7 @@ export default function AdminCreditsClient({ users }: Props) {
   const openGrantModal = (user: UserCredits, adding: boolean) => {
     setSelectedUser(user);
     setIsAdding(adding);
-    setDollarAmount(45);
+    setDollarAmount(49);
     setDescription("");
     setShowModal(true);
   };
@@ -198,14 +198,14 @@ export default function AdminCreditsClient({ users }: Props) {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                   <input
                     type="number"
-                    step="45"
-                    min="45"
+                    step="49"
+                    min="49"
                     value={dollarAmount}
                     onChange={(e) => setDollarAmount(parseInt(e.target.value) || 0)}
                     className="w-full h-10 pl-7 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900"
                   />
                 </div>
-                <p className="text-[12px] text-slate-400 mt-1">Minimum $45 per credit</p>
+                <p className="text-[12px] text-slate-400 mt-1">Minimum $49 per credit</p>
               </div>
               <div>
                 <label className="block text-[13px] font-medium text-slate-700 mb-1">Note (optional)</label>
@@ -227,7 +227,7 @@ export default function AdminCreditsClient({ users }: Props) {
               </button>
               <button
                 onClick={handleGrantCredits}
-                disabled={isGranting || dollarAmount < 45}
+                disabled={isGranting || dollarAmount < 49}
                 className={`flex-1 h-10 px-4 text-white text-[14px] font-medium rounded-lg transition-colors disabled:opacity-50 ${
                   isAdding
                     ? "bg-emerald-600 hover:bg-emerald-700"

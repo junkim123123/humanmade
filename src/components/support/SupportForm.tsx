@@ -115,23 +115,32 @@ export function SupportForm({ userEmail, userId, initialCategory, orderId, repor
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2 text-left">
-        <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
-          <input
-            type="email"
-            required
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
-          />
-        </div>
+        {userEmail ? (
+          <div className="flex flex-col gap-2">
+            <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Account Email</label>
+            <div className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
+              {userEmail}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
+            <input
+              type="email"
+              required
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none cursor-pointer"
+            className="rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none cursor-pointer"
           >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.label}</option>
@@ -142,17 +151,17 @@ export function SupportForm({ userEmail, userId, initialCategory, orderId, repor
 
       {orders.length > 0 && (
         <div className="flex flex-col gap-2 text-left">
-          <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Related Order (Optional)</label>
+          <label className="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Related Product (Optional)</label>
           <div className="relative">
             <select
               value={selectedOrderId}
               onChange={(e) => setSelectedOrderId(e.target.value)}
-              className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none cursor-pointer"
+              className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none cursor-pointer"
             >
-              <option value="">Select an order</option>
+              <option value="">Select a product</option>
               {orders.map((o) => (
                 <option key={o.id} value={o.id}>
-                  #{o.order_number} - {o.product_name} ({o.status.replace('_', ' ')})
+                  {o.product_name} ({o.status.replace('_', ' ')})
                 </option>
               ))}
             </select>
@@ -249,7 +258,7 @@ export function SupportForm({ userEmail, userId, initialCategory, orderId, repor
             "Processing..."
           ) : (
             <>
-              Send Ticket
+              Submit Ticket
               <Send className="w-4 h-4" />
             </>
           )}

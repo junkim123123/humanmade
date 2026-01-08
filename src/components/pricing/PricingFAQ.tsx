@@ -11,7 +11,7 @@ const FAQ_ITEMS = [
   {
     question: "What does deposit credited mean?",
     answer:
-      "The $45 deposit covers factory outreach and verification work. If you proceed with an order, the $45 is credited toward your first order total.",
+      "The $49 deposit covers factory outreach and verification work. If you proceed with an order, the $49 is credited toward your first order total.",
   },
   {
     question: "What counts as per product?",
@@ -29,14 +29,14 @@ const FAQ_ITEMS = [
       "We coordinate shipping handoff and provide documentation support. Customs clearance is typically handled by your freight forwarder or customs broker.",
   },
   {
-    question: "When does the 5% execution fee apply?",
+    question: "When does the 7% execution fee apply?",
     answer:
-      "The 5% FOB execution fee applies only when you place an order after receiving verified quotes. Baseline reports and verification are separate services.",
+      "The 7% FOB execution fee applies only when you place an order after receiving verified quotes. Baseline reports and verification are separate services.",
   },
   {
     question: "What is premium development?",
     answer:
-      "Premium development (9% FOB) is optional for custom product development with design modifications, tooling, and extensive prototyping. Standard execution is 5%.",
+      "Premium development (9% FOB) is optional for custom product development with design modifications, tooling, and extensive prototyping. Standard execution is 7%.",
   },
 ];
 

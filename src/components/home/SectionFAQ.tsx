@@ -11,23 +11,23 @@ interface SectionFAQProps {
 const faqs = [
   {
     q: "How accurate are AI estimates?",
-    a: "Initial analysis uses market average data. At the $45 Blueprint stage, we match actual invoices and customs data to guarantee 95%+ accuracy. All assumptions are clearly labeled.",
+    a: "Initial analysis uses market average data. At the $49 Blueprint stage, we refine estimates using actual invoices and customs data. All assumptions are clearly labeled.",
   },
   {
-    q: "When is the $45 refunded?",
-    a: "The $45 is credited (not refunded) toward your first order if you proceed within 60 days of receiving the Blueprint. It's essentially a free verification—you only pay if you actually order.",
+    q: "When is the $49 refunded?",
+    a: "The $49 is credited (not refunded) toward your first order if you proceed within 60 days of receiving the Blueprint. It's essentially a free verification—you only pay if you actually order.",
   },
   {
     q: "What products can you source?",
     a: "We specialize in consumer goods (food, toys, general merchandise). Machinery or chemical products require separate consultation. Upload a photo to see if we can help.",
   },
   {
-    q: "What's the difference between the free analysis and $45 Blueprint?",
-    a: "Free analysis gives you AI-powered estimates. The $45 Blueprint includes real factory quotes, HS code verification, compliance review, and a detailed execution plan—everything you need to make a confident sourcing decision.",
+    q: "What's the difference between the free analysis and $49 Blueprint?",
+    a: "Free analysis gives you AI-powered estimates. The $49 Blueprint includes real factory quotes, HS code verification, compliance review, and a detailed execution plan—everything you need to make a confident sourcing decision.",
   },
   {
     q: "What if I don't place an order after the Blueprint?",
-    a: "You keep the Blueprint report with all factory quotes and analysis. The $45 is only credited if you place an order within 60 days—no obligation, no pressure.",
+    a: "You keep the Blueprint report with all factory quotes and analysis. The $49 is only credited if you place an order within 60 days—no obligation, no pressure.",
   },
 ];
 

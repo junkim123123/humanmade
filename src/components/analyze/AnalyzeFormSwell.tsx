@@ -396,7 +396,7 @@ export function AnalyzeFormSwell({ mode }: AnalyzeFormSwellProps) {
             Product photos
           </h1>
           <p className="mt-1 text-[14px] text-slate-600 max-w-xl">
-            Upload a product photo to start. Barcode and label photos are optional but recommended for accuracy. 3 minutes. Assumptions are always labeled.
+            Upload a product photo to start. Barcode and label photos are optional but recommended for precision. 3 minutes. Assumptions are always labeled.
           </p>
         </header>
 
@@ -432,7 +432,7 @@ export function AnalyzeFormSwell({ mode }: AnalyzeFormSwellProps) {
                     title="Barcode photo"
                     optionalLabel="Optional"
                     description="UPC or EAN close-up. Avoid glare. Fill the frame."
-                    helper="Barcode/Label highly recommended for accuracy, but not required."
+                    helper="Barcode/Label highly recommended for precision, but not required."
                     file={files.barcode}
                     preview={previews.barcode}
                     error={validationErrors.barcode}
@@ -446,7 +446,7 @@ export function AnalyzeFormSwell({ mode }: AnalyzeFormSwellProps) {
                     title="Label photo"
                     optionalLabel="Optional"
                     description="Back label with net weight, materials, warnings, and origin if shown."
-                    helper="Barcode/Label highly recommended for accuracy, but not required."
+                    helper="Barcode/Label highly recommended for precision, but not required."
                     file={files.label}
                     preview={previews.label}
                     error={validationErrors.label}

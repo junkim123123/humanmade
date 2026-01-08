@@ -18,9 +18,38 @@ function SignInPageContent() {
   const [notice, setNotice] = useState<string | null>(null);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [usePassword, setUsePassword] = useState(false);
 
   const supabase = createClient();
   const origin = typeof window !== "undefined" ? window.location.origin : "";
+
+  const handleMagicLink = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setNotice(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+
+      if (error) throw error;
+      setNotice("Check your email for the login link!");
+    } catch (err: any) {
+      setError(err.message || "Failed to send magic link");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePasswordAuth = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,8 +106,8 @@ function SignInPageContent() {
           <div className="flex flex-col gap-6">
             <div className="space-y-1">
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Sign in</p>
-              <h1 className="text-[28px] font-bold text-slate-900">Welcome back</h1>
-              <p className="text-[14px] text-slate-600">Sign in to save your sourcing reports and track verification.</p>
+              <h1 className="text-[28px] font-bold text-slate-900 leading-tight">리포트 저장하고<br/>진행 상황까지 한 번에</h1>
+              <p className="text-[14px] text-slate-600">내 분석 결과와 검증 진행 상황을 한 곳에서 관리하세요.</p>
             </div>
 
             {error && (
@@ -117,75 +146,123 @@ function SignInPageContent() {
                 <span className="h-px flex-1 bg-slate-200" />
               </div>
 
-              <form onSubmit={handlePasswordAuth} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-700">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={loading}
-                    className="w-full h-11 px-4 border border-slate-200 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 disabled:opacity-50 transition"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-700">Password</label>
-                  <div className="relative">
+              {!usePassword ? (
+                <form onSubmit={handleMagicLink} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-slate-700">Email</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       disabled={loading}
-                      className="w-full h-11 px-4 pr-11 border border-slate-200 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 disabled:opacity-50 transition"
-                      placeholder="Password"
-                      autoComplete="current-password"
+                      className="w-full h-11 px-4 border border-slate-200 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 disabled:opacity-50 transition"
+                      placeholder="you@example.com"
+                      autoComplete="email"
                     />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-medium rounded-full transition-colors disabled:opacity-50"
+                  >
+                    {loading ? "Sending..." : "Send Magic Link"}
+                  </button>
+
+                  <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => setPasswordVisible((v) => !v)}
-                      className="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-600"
-                      aria-pressed={passwordVisible}
-                      aria-label={passwordVisible ? "Hide password" : "Show password"}
+                      onClick={() => setUsePassword(true)}
+                      className="text-[13px] text-slate-500 hover:text-slate-900 font-medium"
                     >
-                      {passwordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      Sign in with password instead
                     </button>
                   </div>
-                  <div className="flex justify-between text-[13px] pt-1">
-                    <span className="text-slate-500">Forgot your password? Reset anytime.</span>
-                    <Link href="/forgot-password" className="text-slate-900 font-medium hover:underline">
-                      Forgot password?
-                    </Link>
+
+                  <p className="text-[12px] text-slate-500 text-center">리포트는 기본 비공개이며 본인만 접근 가능합니다.</p>
+                </form>
+              ) : (
+                <form onSubmit={handlePasswordAuth} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-slate-700">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="w-full h-11 px-4 border border-slate-200 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 disabled:opacity-50 transition"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                    />
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-medium rounded-full transition-colors disabled:opacity-50"
-                >
-                  {loading ? "Signing in..." : "Sign in"}
-                </button>
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-slate-700">Password</label>
+                    <div className="relative">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setPasswordFocused(false)}
+                        required
+                        disabled={loading}
+                        className="w-full h-11 px-4 pr-11 border border-slate-200 bg-white rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 disabled:opacity-50 transition"
+                        placeholder="Password"
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPasswordVisible((v) => !v)}
+                        className="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-600"
+                        aria-pressed={passwordVisible}
+                        aria-label={passwordVisible ? "Hide password" : "Show password"}
+                      >
+                        {passwordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <div className="flex justify-between text-[13px] pt-1">
+                      <span className="text-slate-500">Forgot your password?</span>
+                      <Link href="/forgot-password" className="text-slate-900 font-medium hover:underline">
+                        Reset here
+                      </Link>
+                    </div>
+                  </div>
 
-                <p className="text-[12px] text-slate-500">We keep your reports private and only share with you. Questions? Email support@nexsupply.com.</p>
-                <p className="text-[12px] text-slate-500">By continuing, you agree to our <Link href="/terms" className="text-slate-700 hover:underline">Terms</Link> and <Link href="/privacy" className="text-slate-700 hover:underline">Privacy Policy</Link>.</p>
-                <p className="text-[14px] text-slate-600">Need an account? <Link href="/signup" className="text-slate-900 font-medium hover:underline">Create one</Link>.</p>
-              </form>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-medium rounded-full transition-colors disabled:opacity-50"
+                  >
+                    {loading ? "Signing in..." : "Sign in"}
+                  </button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setUsePassword(false)}
+                      className="text-[13px] text-slate-500 hover:text-slate-900 font-medium"
+                    >
+                      Use Magic Link instead
+                    </button>
+                  </div>
+
+                  <p className="text-[12px] text-slate-500 text-center">리포트는 기본 비공개이며 본인만 접근 가능합니다.</p>
+                </form>
+              )}
+
+              <p className="text-[14px] text-slate-600 text-center">Need an account? <Link href="/signup" className="text-slate-900 font-medium hover:underline">Create one</Link>.</p>
             </div>
           </div>
 
           {/* Right: Why sign in */}
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 space-y-5">
             <div>
-              <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Why sign in</p>
-              <h2 className="text-[22px] font-bold text-slate-900 mt-1">Save work, not just logins.</h2>
-              <p className="text-[14px] text-slate-600 mt-1">Your sourcing intelligence OS — all your reports and decisions in one place.</p>
+              <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Why NexSupply</p>
+              <h2 className="text-[22px] font-bold text-slate-900 mt-1">Sourcing Intelligence OS</h2>
+              <p className="text-[14px] text-slate-600 mt-1">분석 결과, HS 결정, verification 요청을 같은 워크스페이스에 쌓아둡니다.</p>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
@@ -198,10 +275,12 @@ function SignInPageContent() {
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Request verification and track orders from a single dashboard.</span>
+                <span>Track verification and orders from a single dashboard.</span>
               </li>
             </ul>
-            <p className="text-[12px] text-slate-500 pt-3 border-t border-slate-200">By signing in you agree to our <Link href="/terms" className="text-slate-700 hover:underline">Terms</Link> and <Link href="/privacy" className="text-slate-700 hover:underline">Privacy</Link>.</p>
+            <div className="pt-3 border-t border-slate-200">
+              <p className="text-[12px] text-slate-500">By continuing, you agree to our <Link href="/terms" className="text-slate-700 hover:underline">Terms</Link> and <Link href="/privacy" className="text-slate-700 hover:underline">Privacy Policy</Link>.</p>
+            </div>
           </div>
         </div>
       </div>

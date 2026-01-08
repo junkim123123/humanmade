@@ -13,8 +13,10 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
     return (
       <div ref={ref} className="bg-gradient-to-b from-slate-50 to-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="text-center mb-10 sm:mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-4 uppercase tracking-wider">
+              예시 기준 • 샘플 제품: 프리미엄 코튼 티셔츠
+            </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
               Simple, Transparent Pricing
             </h2>
@@ -36,7 +38,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                     <h3 className="text-lg font-semibold text-slate-600 mb-3">Monthly Free Credit</h3>
                     <div className="flex items-baseline gap-1 mb-3">
                       <span className="text-2xl font-medium text-slate-400">$</span>
-                      <span className="text-5xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-none">45</span>
+                      <span className="text-5xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-none">49</span>
                     </div>
                     <p className="text-base text-slate-700 mb-2">
                       <span className="font-semibold text-emerald-700">1 FREE sourcing credit</span> every month
@@ -117,7 +119,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 href="/analyze"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-8 text-base font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-700 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Start verification
+                Start Verification
               </a>
               <Link
                 href="/sample-report"
@@ -130,7 +132,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
                 View Sample AI Analysis
               </Link>
               <p className="text-sm text-slate-500 text-center max-w-md">
-                $45 is fully credited toward your first order within 60 days. Essentially free verification.
+                $49 is fully credited toward your first order within 60 days. Essentially free verification.
               </p>
             </div>
           </div>

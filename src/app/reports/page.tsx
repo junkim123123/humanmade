@@ -10,8 +10,8 @@ import { useState } from "react";
 // Stats data for hero section
 const stats = [
   {
-    value: "95%+",
-    label: "Accuracy",
+    value: "Refined",
+    label: "Data Precision",
   },
   {
     value: "$3-5",

@@ -141,9 +141,20 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
           {/* Row 2: Product Info - Clean and Spacious */}
           <div className="pb-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 leading-tight">
-              {extractProductName(report.productName || (report as any).product_name)}
-            </h1>
+            <div className="flex flex-col gap-2 mb-3">
+              {(report as any).isSample && (
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100 w-fit uppercase tracking-tight">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                  예시 분석 기준 제품: 프리미엄 코튼 티셔츠
+                </div>
+              )}
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
+                {extractProductName(report.productName || (report as any).product_name)}
+              </h1>
+            </div>
             <p className="text-base text-slate-600 max-w-2xl">
               Initial cost analysis complete. Review the estimate below and optimize with our verified network.
             </p>
@@ -172,7 +183,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
             >
-              {isRequesting ? "Starting..." : isVerified ? "View Order" : "Unlock Network ($49)"}
+              {isRequesting ? "Starting..." : isVerified ? "View Order" : "Start Verification"}
             </button>
           </div>
         </div>

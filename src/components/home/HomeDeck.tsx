@@ -42,7 +42,7 @@ function FinalCta() {
                 href="/analyze"
                 className="inline-flex h-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-8 text-base sm:text-lg font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-700 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Calculate My Savings (Free)
+                Analyze My Sourcing (Free)
               </a>
               <a
                 href="/sample-report"
@@ -119,7 +119,7 @@ export default function HomeDeck() {
               subtitle="Photo to cost to door."
               steps={[
                 {
-                  title: "Analyze (Free)",
+                  title: "무료 Analyze",
                   description: "Upload a product photo. Our AI calculates your real landed cost and margin estimate in minutes.",
                   color: "blue",
                   visual: (
@@ -159,8 +159,8 @@ export default function HomeDeck() {
                   ),
                 },
                 {
-                  title: "Blueprint ($45)",
-                  description: "$45 gets you a pro sourcing report: 3 optimized factory quotes, MOQ & lead times, HS code & tariff info, compliance basics, and a door-to-door logistics plan.",
+                  title: "Blueprint ($49)",
+                  description: "$49 gets you a pro sourcing report: 3 optimized factory quotes, MOQ & lead times, HS code & tariff info, compliance basics, and a door-to-door logistics plan.",
                   color: "purple",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
@@ -286,7 +286,7 @@ export default function HomeDeck() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            <span className="font-medium">Delivery guarantee</span>
+                            <span className="font-medium">On-time delivery plan</span>
                           </div>
                         </div>
                       </div>

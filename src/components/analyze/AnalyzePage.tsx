@@ -15,7 +15,7 @@ export function AnalyzePage({ mode }: AnalyzePageProps) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="max-w-2xl">
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mb-1">
-                Analyze your product
+                Analyze (Free)
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
                 Upload a product photo to get your real landed cost and margin estimate in minutes.

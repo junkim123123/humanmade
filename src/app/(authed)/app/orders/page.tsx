@@ -139,15 +139,15 @@ export default function OrdersPage() {
               </div>
             </div>
 
-            <h3 className="text-[24px] font-bold text-slate-900 mb-3">Your supply chain is waiting.</h3>
+            <h3 className="text-[24px] font-bold text-slate-900 mb-3">No active shipments yet.</h3>
             <p className="text-[15px] text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
-              Once you approve a quote in Reports, we take over. Watch your product move from the factory floor to your door right here.
+              Once you approve a factory quote from your Blueprint, we take over execution. Your product moves through production, QC, and freight right here.
             </p>
             <Link
               href="/app/reports"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-[15px] font-semibold rounded-full hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white text-[15px] font-bold rounded-full hover:bg-slate-800 transition-all hover:scale-105 shadow-lg"
             >
-              Go to Verified Quotes
+              Go to Blueprints
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

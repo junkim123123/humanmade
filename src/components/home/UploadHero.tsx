@@ -43,7 +43,7 @@ export default function UploadHero({ onPrimaryClick }: UploadHeroProps) {
                 onClick={handlePrimary}
                 className="inline-flex h-12 items-center justify-center rounded-full bg-slate-900 px-6 text-[15px] font-medium text-white transition-all hover:bg-slate-800 active:scale-[0.98] whitespace-nowrap"
               >
-                Start Free Analysis
+                무료 Analyze
               </button>
               <a
                 className="inline-flex h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-[15px] font-medium text-slate-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] whitespace-nowrap"

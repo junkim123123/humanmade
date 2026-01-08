@@ -146,9 +146,9 @@ function ComparisonColumn({
 
 export default function MarginComparison() {
   const diyItems: CostItem[] = [
-    { label: "Alibaba sourcing", amount: "$3.50", proofStatus: "assumption" as const },
-    { label: "Hidden fees & quality issues", amount: "+$2.00", proofStatus: "assumption" as const },
-    { label: "Total cost", amount: "$5.50", type: "total", proofStatus: "assumption" as const },
+    { label: "Alibaba sourcing", amount: "$3.5", proofStatus: "assumption" as const },
+    { label: "Hidden fees & quality issues", amount: "+$2", proofStatus: "assumption" as const },
+    { label: "Total cost", amount: "$5.5", type: "total", proofStatus: "assumption" as const },
   ];
 
   const nexSupplyItems: CostItem[] = [
@@ -178,6 +178,9 @@ export default function MarginComparison() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-bold mb-4 uppercase tracking-wider">
+              예시 기준 • 샘플 제품: 스테인리스 텀블러
+            </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 px-2">
               DIY vs NexSupply
             </h2>
@@ -441,7 +444,7 @@ function SocialProof() {
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
                   <span className="text-xs font-semibold text-slate-700">Profit Unlocked:</span>
-                  <span className="text-sm font-bold text-emerald-600">+${testimonial.profitUnlocked.toFixed(2)}</span>
+                  <span className="text-sm font-bold text-emerald-600">+${parseFloat(testimonial.profitUnlocked.toFixed(2))}</span>
                 </div>
               </div>
             </div>
@@ -513,7 +516,7 @@ function ProfitBadge() {
             Profit unlocked
           </div>
           <div className="text-3xl lg:text-4xl font-black text-emerald-600">
-            <CountUp from={0} to={3.31} decimals={2} prefix="+$" suffix=" / unit" />
+            <CountUp from={0} to={3.3} decimals={1} prefix="+$" suffix=" / unit" />
           </div>
         </div>
         <div className="text-sm text-slate-500 text-center sm:text-right">

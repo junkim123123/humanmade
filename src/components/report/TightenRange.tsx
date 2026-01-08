@@ -74,7 +74,7 @@ export function TightenRange({ report, onUpdate }: TightenRangeProps) {
       {/* What's needed */}
       <div className="mb-6">
         <h3 className="text-sm font-semibold text-slate-700 mb-2">
-          Information needed to improve accuracy (3 items)
+          Information needed to improve precision (3 items)
         </h3>
         <ul className="space-y-1">
           {neededInfo.map((info, i) => (

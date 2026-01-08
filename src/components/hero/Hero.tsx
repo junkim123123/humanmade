@@ -67,8 +67,11 @@ function FloatingUICard() {
       >
         {/* Card Header */}
         <div className="mb-6 pb-6 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">Price Comparison</h3>
-          <p className="text-sm text-slate-500 mt-1">Per unit cost analysis</p>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-lg font-semibold text-slate-900">Price Comparison</h3>
+            <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider">예시 기준</span>
+          </div>
+          <p className="text-sm text-slate-500">샘플 제품: 프리미엄 코튼 티셔츠</p>
         </div>
 
         {/* Comparison Rows */}
@@ -80,7 +83,7 @@ function FloatingUICard() {
               <p className="text-sm text-slate-500">Traditional sourcing</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold text-slate-900">$12.50</p>
+              <p className="text-xl font-bold text-slate-900">$12.5</p>
               <p className="text-xs text-slate-500">per unit</p>
             </div>
           </div>
@@ -92,7 +95,7 @@ function FloatingUICard() {
               <p className="text-sm text-purple-600">Direct sourcing</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-purple-600">$8.30</p>
+              <p className="text-2xl font-bold text-purple-600">$8.3</p>
               <p className="text-xs text-purple-600 font-medium">per unit</p>
             </div>
           </div>
@@ -103,7 +106,7 @@ function FloatingUICard() {
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-slate-500">Profit Unlocked</span>
             <span className="text-lg font-bold text-emerald-600">
-              <CountUp from={0} to={4.20} decimals={2} prefix="$" suffix="/unit" />
+              <CountUp from={0} to={4.2} decimals={1} prefix="$" suffix="/unit" />
             </span>
           </div>
         </div>
@@ -125,9 +128,18 @@ export default function Hero() {
           {/* Left Column - Copy */}
           <div className="flex flex-col gap-6 sm:gap-8 lg:gap-12 w-full lg:w-1/2">
             {/* Eyebrow */}
-            <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
-              Your AI Sourcing Team
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
+                Your AI Sourcing Team
+              </p>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100 w-fit uppercase tracking-tight">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                샘플 분석 기준 제품: 프리미엄 코튼 티셔츠
+              </div>
+            </div>
 
             {/* Headline - Premium sizing - Updated to concise messaging */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-slate-900 leading-[1.05] drop-shadow-sm">
@@ -147,7 +159,7 @@ export default function Hero() {
                 href="/analyze"
                 className="inline-flex items-center justify-center h-14 px-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0"
               >
-                Calculate My Savings (Free)
+                Analyze My Sourcing (Free)
               </Link>
               <Link
                 href="/reports/sample-report/v2"

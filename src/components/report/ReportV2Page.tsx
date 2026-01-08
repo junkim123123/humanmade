@@ -107,7 +107,7 @@ export default function ReportV2Page({ reportId, report, initialReport }: Report
             className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-lg shadow-xl shadow-slate-200 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
           >
             <Lock className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            Unlock Factory Blueprint — $49
+            Start Verification
           </button>
         </div>
       </div>

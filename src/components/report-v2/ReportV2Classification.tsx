@@ -93,7 +93,7 @@ export default function ReportV2Classification({ report }: ReportV2Classificatio
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
             <div className="text-sm font-medium text-slate-900 mb-2">No HS code candidates available</div>
             <p className="text-xs text-slate-600 mb-3">
-              Upload a packaging photo or barcode image to improve HS code classification accuracy.
+              Upload a packaging photo or barcode image to improve HS code classification precision.
             </p>
             <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">
               Upload packaging photo →

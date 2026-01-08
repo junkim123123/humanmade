@@ -14,9 +14,9 @@ const steps = [
   {
     icon: Calculator,
     number: 2,
-    title: "Verify ($45)",
+    title: "Verify ($49)",
     desc: "We validate the factory, negotiate MOQs, and confirm precise costs.",
-    price: "$45",
+    price: "$49",
   },
   {
     icon: FileCheck,

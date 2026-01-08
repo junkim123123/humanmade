@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { getMyCredits } from "@/server/actions/credits";
 
-const CREDIT_VALUE = 45;
+const CREDIT_VALUE = 49;
 
 interface VerificationConfirmModalProps {
   isOpen: boolean;
