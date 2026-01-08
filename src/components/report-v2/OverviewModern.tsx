@@ -311,6 +311,9 @@ export default function OverviewModern({ report }: OverviewModernProps) {
   
   const decisionSummary = (reportAny._decisionSummary || reportAny.data?._decisionSummary) as any;
   
+  const verificationStatus = reportAny.signals?.verificationStatus || reportAny.baseline?.signals?.verificationStatus || "none";
+  const isVerified = verificationStatus !== "none";
+  
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* IP/Brand Licensing Alert */}
@@ -377,6 +380,26 @@ export default function OverviewModern({ report }: OverviewModernProps) {
           {supplierMatches[0]?.supplierName ? ` • ${supplierMatches[0].supplierName}` : ""}
         </div>
       ) : null}
+      
+      {isVerified && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-full">
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-blue-900">Verification in Progress</p>
+              <p className="text-xs text-blue-700">We are currently verifying direct factories for this product.</p>
+            </div>
+          </div>
+          <Link 
+            href={`/app/orders/${reportAny.signals?.verificationOrderId}`}
+            className="text-sm font-bold text-blue-600 hover:underline"
+          >
+            View Order
+          </Link>
+        </div>
+      )}
 
       {/* Details and rest of report */}
       <details className="rounded-xl border border-slate-200 bg-white group" open={false}>
@@ -435,7 +458,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             return (
               <SupplierCandidatesTop 
                 matches={supplierMatches} 
-                onUnlock={() => setShowVerificationModal(true)} 
+                onUnlock={isVerified ? undefined : () => setShowVerificationModal(true)} 
               />
             );
           } else {
@@ -452,11 +475,11 @@ export default function OverviewModern({ report }: OverviewModernProps) {
       {/* Profit Conversion Card */}
       <ProfitConversionCard 
         report={report} 
-        onUnlock={() => setShowVerificationModal(true)} 
+        onUnlock={isVerified ? () => {} : () => setShowVerificationModal(true)} 
       />
 
       {/* Assumptions */}
-      <ConfidenceBuilder report={report} onUpgrade={() => setShowVerificationModal(true)} />
+      <ConfidenceBuilder report={report} onUpgrade={isVerified ? undefined : () => setShowVerificationModal(true)} />
 
       {/* Label Confirmation Modal */}
       {showLabelConfirmation && (

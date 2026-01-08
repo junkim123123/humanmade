@@ -6,6 +6,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Milestone keys for order execution timeline
@@ -119,7 +120,17 @@ export async function createVerificationRequest(options: {
       return { success: false, error: 'missing_reportId' };
     }
 
-    const admin = getSupabaseAdmin();
+    const admin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      }
+    );
 
     const activeStatuses: OrderStatus[] = [
       'awaiting_contact',
@@ -182,10 +193,15 @@ export async function createVerificationRequest(options: {
       console.error('[createVerificationRequest] credits fetch failed', creditError);
     }
 
-    let consumedCredit = false;
     if (creditRow && typeof creditRow.credits_balance === 'number' && creditRow.credits_balance > 0) {
-      const { error: consumeError } = await (admin.from('user_credits') as any)
-        .upsert({ user_id: user.id, credits_balance: creditRow.credits_balance - 1 });
+      // Use RPC to consume credit and log transaction in one go
+      const { data: newBalance, error: consumeError } = await admin.rpc("add_user_credits", {
+        p_user_id: user.id,
+        p_amount: -1,
+        p_type: 'verification_used',
+        p_description: `Verification started for report: ${options.reportId}`
+      });
+
       if (consumeError) {
         console.error('[createVerificationRequest] consume credit failed', consumeError);
       } else {
@@ -245,12 +261,24 @@ export async function createVerificationRequest(options: {
       status: 'new',
     };
 
-    const { error: leadError } = await (admin.from('leads') as any)
+    const { error: leadError } =     await (admin.from('leads') as any)
       .upsert(leadPayload, { onConflict: 'order_id' });
 
     if (leadError) {
       console.error('[createVerificationRequest] lead upsert failed', leadError);
     }
+
+    // Update report signals to reflect verification status
+    const currentSignals = report.signals || {};
+    await (admin.from('reports') as any)
+      .update({
+        signals: {
+          ...currentSignals,
+          verificationStatus: 'requested',
+          verificationOrderId: order.id,
+        }
+      })
+      .eq('id', report.id);
 
     await ensurePartnerWorkflowSeeds(admin, order.id, productName, user.id);
 

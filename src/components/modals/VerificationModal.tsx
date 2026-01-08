@@ -30,23 +30,34 @@ export function VerificationModal({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!reportId) return;
+    
     setIsSubmitting(true);
 
     try {
-      // Create project with status "requested"
-      const project = createProject({
-        reportId,
-        productName,
+      const response = await fetch("/api/orders/from-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportId }),
       });
 
-      // Immediately update to "verifying"
-      updateProject(project.id, { status: "verifying" });
+      if (response.status === 401) {
+        const next = encodeURIComponent(window.location.pathname);
+        router.push(`/signin?next=${next}`);
+        return;
+      }
 
-      // Route to /app/orders
-      router.push("/app/orders");
+      const payload = await response.json();
+
+      if (!response.ok || !payload?.orderId) {
+        throw new Error(payload?.error || "Failed to start verification");
+      }
+
+      // Route to /app/orders/[orderId]
+      router.push(`/app/orders/${payload.orderId}`);
     } catch (error) {
-      console.error("Failed to create project:", error);
+      console.error("Failed to create verification request:", error);
       setIsSubmitting(false);
     }
   };

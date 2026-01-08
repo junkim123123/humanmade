@@ -53,6 +53,9 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
   const supplierMatches = getSupplierMatches(reportAny);
   const factoryCount = supplierMatches.length > 0 ? supplierMatches.length : 3; // Default to 3 if no matches
 
+  const verificationStatus = reportAny.signals?.verificationStatus || reportAny.baseline?.signals?.verificationStatus || "none";
+  const isVerified = verificationStatus !== "none";
+
   // Track header height
   useEffect(() => {
     const updateHeight = () => {
@@ -73,6 +76,10 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
   }, [onHeightChange]);
 
   const handleRequestVerification = () => {
+    if (isVerified) {
+      router.push(`/app/orders/${reportAny.signals?.verificationOrderId}`);
+      return;
+    }
     setShowConfirmModal(true);
   };
 
@@ -105,6 +112,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           statusText: response.statusText,
           payload,
         });
+        // You might want to show a toast error here
         setShowConfirmModal(false);
         return;
       }
@@ -149,18 +157,22 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1">
               <p className="text-sm font-semibold text-slate-900 mb-1">
-                Ready to optimize your sourcing?
+                {isVerified ? "Verification in progress" : "Ready to optimize your sourcing?"}
               </p>
               <p className="text-sm text-slate-600">
-                Access verified factories with 15-20% better margins
+                {isVerified ? "We're currently contacting direct factories." : "Access verified factories with 15-20% better margins"}
               </p>
             </div>
             <button
               onClick={handleRequestVerification}
               disabled={isRequesting}
-              className="inline-flex items-center justify-center h-12 px-8 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+              className={`inline-flex items-center justify-center h-12 px-8 text-base font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap ${
+                isVerified 
+                  ? "bg-slate-100 text-slate-900 hover:bg-slate-200" 
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
             >
-              {isRequesting ? "Starting..." : "Unlock Network ($49)"}
+              {isRequesting ? "Starting..." : isVerified ? "View Order" : "Unlock Network ($49)"}
             </button>
           </div>
         </div>

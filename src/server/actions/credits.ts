@@ -2,6 +2,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 export interface CreditTransaction {
   id: string;
@@ -63,73 +65,34 @@ export async function adminGrantCredits(
   amount: number,
   description?: string
 ): Promise<{ success: boolean; newBalance?: number; error?: string }> {
-  const supabase = await createClient();
-  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  // Use a fresh admin client directly to ensure service role key usage
+  const admin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    }
+  );
 
   try {
-    // 1. Get current balance or create credits record if it doesn't exist
-    const { data: existingCredits, error: fetchError } = await supabase
-      .from("user_credits")
-      .select("credits_balance")
-      .eq("user_id", userId)
-      .single();
+    // Use the RPC function which is SECURITY DEFINER to bypass RLS reliably
+    const { data: newBalance, error: rpcError } = await admin.rpc("add_user_credits", {
+      p_user_id: userId,
+      p_amount: amount,
+      p_type: 'admin_grant',
+      p_description: description || null
+    });
 
-    let currentBalance = 0;
-    
-    if (fetchError && fetchError.code === 'PGRST116') {
-      // Credits record doesn't exist, create it
-      const { error: insertError } = await supabase
-        .from("user_credits")
-        .insert({
-          user_id: userId,
-          credits_balance: 0,
-          updated_at: new Date().toISOString()
-        });
-
-      if (insertError) {
-        console.error("[adminGrantCredits] Error creating credits record:", insertError);
-        return { success: false, error: insertError.message };
-      }
-      currentBalance = 0;
-    } else if (fetchError) {
-      console.error("[adminGrantCredits] Error fetching credits:", fetchError);
-      return { success: false, error: fetchError.message };
-    } else {
-      currentBalance = existingCredits?.credits_balance || 0;
-    }
-
-    // 2. Calculate new balance
-    const newBalance = currentBalance + amount;
-
-    // 3. Insert transaction record
-    const { error: transactionError } = await supabase
-      .from("credit_transactions")
-      .insert({
-        user_id: userId,
-        amount: amount,
-        balance_after: newBalance,
-        type: 'admin_grant',
-        description: description || null,
-        created_at: new Date().toISOString()
-      });
-
-    if (transactionError) {
-      console.error("[adminGrantCredits] Error inserting transaction:", transactionError);
-      return { success: false, error: transactionError.message };
-    }
-
-    // 4. Update credits balance
-    const { error: updateError } = await supabase
-      .from("user_credits")
-      .update({
-        credits_balance: newBalance,
-        updated_at: new Date().toISOString()
-      })
-      .eq("user_id", userId);
-
-    if (updateError) {
-      console.error("[adminGrantCredits] Error updating credits:", updateError);
-      return { success: false, error: updateError.message };
+    if (rpcError) {
+      console.error("[adminGrantCredits] RPC Error:", rpcError);
+      return { 
+        success: false, 
+        error: `Credit grant failed: ${rpcError.message}` 
+      };
     }
 
     return { success: true, newBalance };
