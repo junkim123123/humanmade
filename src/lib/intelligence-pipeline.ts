@@ -25,6 +25,54 @@ import { matchSuppliersFallback } from "@/utils/intelligence/supplier-matching";
 import { resolveHsCodeCandidates } from "./report/hs-resolver";
 
 // ============================================================================
+// Top Global Suppliers (Emergency Fallback)
+// ============================================================================
+const TOP_GLOBAL_SUPPLIERS: Record<string, any[]> = {
+  "Toys": [
+    { supplier_name: "Guangdong Loongon Animation & Toys Industrial Co., Ltd.", product_name: "Building Blocks & Educational Toys" },
+    { supplier_name: "Shantou Chenghai Plastic Toys Factory", product_name: "Plastic Toys & Games" },
+    { supplier_name: "Zhejiang Xinyun Crafts Co., Ltd.", product_name: "Wooden Toys" },
+    { supplier_name: "Dongguan Toy Town Co., Ltd.", product_name: "Plush Toys" },
+    { supplier_name: "Goodbaby International Holdings Ltd.", product_name: "Strollers & Juvenile Products" }
+  ],
+  "Food": [
+    { supplier_name: "Nestlé S.A.", product_name: "Packaged Foods & Beverages" },
+    { supplier_name: "Mondelēz International", product_name: "Confectionery & Snacks" },
+    { supplier_name: "Cargill, Incorporated", product_name: "Food Ingredients" },
+    { supplier_name: "Archer Daniels Midland Company (ADM)", product_name: "Agricultural Processing" },
+    { supplier_name: "Danone S.A.", product_name: "Dairy & Plant-Based Products" }
+  ],
+  "Furniture": [
+    { supplier_name: "IKEA (Ingka Holding B.V.)", product_name: "Home Furniture & Accessories" },
+    { supplier_name: "Ashley Furniture Industries", product_name: "Residential Furniture" },
+    { supplier_name: "Herman Miller, Inc.", product_name: "Office Furniture" },
+    { supplier_name: "Steelcase Inc.", product_name: "Office Furniture" },
+    { supplier_name: "Zinus Inc.", product_name: "Mattresses & Bed Frames" }
+  ],
+  "Electronics": [
+    { supplier_name: "Foxconn Technology Group", product_name: "Electronic Components & Assembly" },
+    { supplier_name: "Samsung Electronics Co., Ltd.", product_name: "Consumer Electronics & Semiconductors" },
+    { supplier_name: "Huawei Technologies Co., Ltd.", product_name: "Telecommunications & Consumer Electronics" },
+    { supplier_name: "Pegatron Corporation", product_name: "Electronic Manufacturing Services" },
+    { supplier_name: "Quanta Computer Inc.", product_name: "Notebooks & Computing Hardware" }
+  ],
+  "Apparel": [
+    { supplier_name: "Inditex (Zara)", product_name: "Fashion Apparel & Accessories" },
+    { supplier_name: "H&M (Hennes & Mauritz AB)", product_name: "Clothing & Fast Fashion" },
+    { supplier_name: "Nike, Inc.", product_name: "Sportswear & Footwear" },
+    { supplier_name: "Fast Retailing (Uniqlo)", product_name: "Casual Wear" },
+    { supplier_name: "VF Corporation", product_name: "Outdoor & Workwear" }
+  ],
+  "Home": [
+    { supplier_name: "Procter & Gamble (P&G)", product_name: "Household Products" },
+    { supplier_name: "Unilever", product_name: "Consumer Goods & Home Care" },
+    { supplier_name: "Henkel AG & Co. KGaA", product_name: "Home Care & Laundry" },
+    { supplier_name: "Reckitt Benckiser Group", product_name: "Hygiene & Home Products" },
+    { supplier_name: "SC Johnson & Son", product_name: "Household Cleaning & Storage" }
+  ]
+};
+
+// ============================================================================
 // Type Definitions
 // ============================================================================
 
@@ -473,51 +521,40 @@ async function analyzeProductImage(
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Analyze this product image and extract structured information in JSON format.
-1.  Extract the brand name and key adjectives (e.g., flavor, material, design features) from the product name.
+
+CRITICAL: 
+- Even if you are not 100% sure what the product is, you MUST generate the most likely product name based on its visual characteristics (material, shape, color, usage). 
+- NEVER return "Unknown Product" or "null" for the productName. Always provide your best professional estimate.
+- Be extremely aggressive in extracting material and manufacturing process keywords.
+
+Instructions:
+1.  Extract the brand name (if any) and key adjectives (e.g., flavor, material, design features) for the product.
 2.  Add the following attributes to the 'attributes' object:
-    *   'complexityScore': A score from 1 to 10 (1-3 for simple processing like raw materials/simple assembly, 7-10 for complex processes/certifications/electronics).
-    *   'logisticsType': 'bulky' (for furniture/mattresses/large items), 'fragile' (for plates/glass/lighting), or 'standard' (for jelly/clothing/general merchandise).
-    *   'materialPremium': 'economy', 'standard', or 'premium' (based on visual quality and material type).
-    *   'estimatedUnitCBM': Estimate the Cubic Meters (CBM) per unit based on visual dimensions. IMPORTANT for bulky items.
-    *   'unitWeightKg': Estimate the weight in KG per unit.
-3.  Clearly specify the main category, such as 'Food', 'Furniture', 'Lighting', 'Tableware', 'Electronics', 'Apparel', etc.
-4.  Generate an 'extendedKeywordSet' for sourcing. This should include:
-    *   'processBased': Keywords related to manufacturing techniques (e.g., "Puffed candy extrusion", "Gelatin-based confectionery").
-    *   'categoryBased': Broader category terms (e.g., "Camping snacks", "S'mores ingredients").
-    *   'supplyChainBased': Keywords about competitor supply chains or OEM regions.
-    *   'hsCodeExpansion': Related HS codes beyond the primary one (e.g., "1806" for chocolate-containing sweets if primary is "1704.90").
+    *   'material': Identify the material (Plastic, Wood, Metal, Glass, Silicone, Cotton, etc.) very specifically.
+    *   'manufacturingProcess': Infer the manufacturing process (Injection molding, Die-casting, CNC machining, Extrusion, Weaving, etc.).
+    *   'complexityScore': A score from 1 to 10 (1-3 for simple processing, 7-10 for complex processes).
+    *   'logisticsType': 'bulky', 'fragile', or 'standard'.
+3.  Clearly specify the main category: 'Food', 'Furniture', 'Lighting', 'Tableware', 'Electronics', 'Apparel', 'Toys', 'Sports', 'Home', etc.
+4.  Generate an extensive set of 'keywords' for supplier matching, including materials, processes, and category terms.
 
 Return only valid JSON in the following format:
 {
-  "productName": {
-    "brand": "brand name or null",
-    "fullName": "full product name",
-    "keyAdjectives": ["adj1", "adj2"]
-  },
+  "productName": "Most likely product name (MANDATORY: NEVER USE UNKNOWN)",
   "description": "detailed product description",
-  "category": "Food | Furniture | Lighting | Tableware | Electronics | Apparel | Other",
+  "category": "Food | Furniture | Lighting | Tableware | Electronics | Apparel | Toys | Sports | Home | Other",
   "hsCode": "HS Code if identifiable (format: XXXX.XX.XX)",
   "attributes": {
-    "material": "material type",
+    "material": "material type (BE SPECIFIC)",
+    "manufacturingProcess": "inferred process (BE AGGRESSIVE)",
     "color": "color",
     "size": "size/dimensions",
-    "weight": "weight if applicable",
     "complexityScore": "1-10",
-    "logisticsType": "bulky | fragile | standard",
-    "materialPremium": "economy | standard | premium",
-    "estimatedUnitCBM": 0.5,
-    "unitWeightKg": 10.5
+    "logisticsType": "bulky | fragile | standard"
   },
-  "keywords": ["keyword1", "keyword2", "keyword3"],
-  "extendedKeywordSet": {
-    "processBased": ["Puffed candy extrusion", "Gelatin-based confectionery"],
-    "categoryBased": ["Camping snacks", "S'mores ingredients"],
-    "supplyChainBased": ["Major US marshmallow brand OEM regions"],
-    "hsCodeExpansion": ["1806", "1704.90"]
-  }
+  "keywords": ["keyword1", "keyword2", "process_keyword", "material_keyword"]
 }
 
-Be specific and accurate. If HS Code is not clearly identifiable, set it to null.`;
+Be specific and aggressive in keyword generation.`;
 
     // Convert ArrayBuffer to base64 or extract from data URL
     let imageBase64: string;
@@ -1684,36 +1721,10 @@ async function findSupplierMatches(
   analysisId?: string,
   runtimeAllowHs2?: string[],
   warnOnce?: (message: string) => void,
-  reportId?: string // EMERGENCY FIX: Add reportId parameter
+  reportId?: string
 ): Promise<{ matches: SupplierMatch[]; cached: boolean }> {
-  console.log("[Pipeline Step 2] Starting supplier matching...");
+  console.log("[Pipeline Step 2] Starting 3-Stage Search Ladder Strategy...");
   const supabase = await createClient();
-  
-  // Track noise token removal for final summary
-  let hasRemovedNoiseTokens = false;
-
-  // ============================================================================
-  // Category Profile Setup
-  // ============================================================================
-  const categoryKey = determineCategoryKey({
-    category: analysis.category,
-    keywords: analysis.keywords,
-    hsCode: analysis.hsCode,
-    productName: analysis.productName,
-  });
-  const profile = getCategoryProfile(categoryKey);
-  const profileLimits = profile.limits || { maxCandidatesBeforeRerank: 250, maxFinal: 10 };
-  console.log(`[Pipeline Step 2] Category: ${categoryKey}, Profile: ${profile.label || categoryKey}`);
-
-  // Extract brand phrases for anchor matching (strict mode)
-  const brandPhrases = extractBrandPhrasesStrict(analysis.productName, analysis.keywords || []);
-  const anchorTerms = buildAnchorTermsStrict(analysis.productName, analysis.keywords || [], brandPhrases);
-  if (brandPhrases.length > 0) {
-    console.log(`[Pipeline Step 2] Brand phrases: ${brandPhrases.join(", ")}`);
-  }
-  if (anchorTerms.length > 0) {
-    console.log(`[Pipeline Step 2] Anchor terms: ${anchorTerms.join(", ")}`);
-  }
 
   // Check if we have cached matches for this product/analysis
   const cacheKey = productId || analysisId;
@@ -1748,1852 +1759,204 @@ async function findSupplierMatches(
     }
   }
 
-  console.log("[Pipeline Step 2] Cache miss. Searching supplier_products...");
+  // [Step 3] Preprocessing: All keywords to UPPERCASE
+  const productName = (analysis.productName || "").toUpperCase();
+  const category = (analysis.category || "Home").toUpperCase();
+  const material = (analysis.attributes?.material || "").toUpperCase();
+  
+  const productTokens = productName
+    .replace(/[^A-Z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(t => t.length >= 2 && !['AND', 'WITH', 'FOR', 'FROM', 'BY', 'THE', 'A', 'AN', 'OF', 'IN', 'ON', 'AT', 'TO', 'AS'].includes(t));
 
-  // Search in supplier_products table
-  // Priority 1: HS Code match (most accurate)
-  const allProducts = new Map<string, Record<string, unknown>>();
+  const allProducts = new Map<string, any>();
 
-  if (analysis.hsCode) {
-    console.log("[Pipeline Step 2] Searching by HS Code:", analysis.hsCode);
-    const { data: hsCodeMatches } = await supabase
+  // ============================================================================
+  // [Stage 1] Precision Search (2+ tokens matching)
+  // ============================================================================
+  if (productTokens.length >= 2) {
+    console.log("[Search Ladder Stage 1] Precision token search:", productTokens.slice(0, 5));
+    const stage1Terms = productTokens.slice(0, 5);
+    const stage1Filter = stage1Terms.flatMap(t => [
+      `product_name.ilike.%${t}%`,
+      `product_description.ilike.%${t}%`
+    ]).join(",");
+
+    const { data: stage1Data } = await supabase
       .from("supplier_products")
       .select("*")
-      .eq("hs_code", analysis.hsCode)
-      .limit(50);
+      .or(stage1Filter)
+      .limit(150);
 
-    hsCodeMatches?.forEach((product) => {
-      const key = `${product.supplier_id}_${product.product_name}`;
-      if (!allProducts.has(key)) {
-        allProducts.set(key, product);
+    (stage1Data || []).forEach(item => {
+      const text = `${item.product_name} ${item.product_description}`.toUpperCase();
+      const matchCount = productTokens.filter(t => text.includes(t)).length;
+      if (matchCount >= 2) {
+        allProducts.set(`${item.supplier_id}_${item.product_name}`, item);
       }
     });
   }
 
-  // Generate universal manufacturing keywords based on materials and usage (works for all categories)
-  const manufacturingKeywords = await generateManufacturingKeywords(
-    analysis.productName,
-    (analysis.attributes?.keyAdjectives as string[]) || [],
-    analysis.attributes?.material,
-    analysis.category
-  );
-
-  // Priority 2: Expanded multi-keyword search
-  // Search with EACH manufacturing keyword individually to maximize matches
-  const allManufacturingMatches = new Map<string, Record<string, unknown>>();
-  
-  // Search with each manufacturing keyword individually
-  if (manufacturingKeywords.length > 0) {
-    console.log(`[Pipeline Step 2] ========================================`);
-    console.log(`[Pipeline Step 2] SEARCH KEYWORDS (Manufacturing): ${JSON.stringify(manufacturingKeywords)}`);
-    console.log(`[Pipeline Step 2] Searching ${manufacturingKeywords.length} keywords in supplier_products (300K+ records)...`);
-    console.log(`[Pipeline Step 2] ========================================`);
-    
-    for (const keyword of manufacturingKeywords) {
-      try {
-        const normalizedKeyword = keyword.toLowerCase().trim();
-        if (normalizedKeyword.length < 3) continue;
-        
-        // Search in supplier_products table (primary source)
-        // Search across product_name, product_description, AND supplier_name for maximum recall
-        const { data: keywordResults } = await supabase
-          .from("supplier_products")
-          .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
-          .or(`product_name.ilike.%${normalizedKeyword}%,product_description.ilike.%${normalizedKeyword}%,supplier_name.ilike.%${normalizedKeyword}%`)
-          .limit(30); // Increased limit per keyword for better coverage
-        
-        // Extract real company names from product_description if supplier_name is dummy
-        if (keywordResults && keywordResults.length > 0) {
-          enrichSupplierNamesFromDescription(keywordResults);
-        }
-        
-        // Also search in report_importkey_companies for real trade data company names
-        // This expands search to actual shipper/exporter names from ImportKey customs data
-        try {
-          const { data: importKeyCompanies } = await supabase
-            .from("report_importkey_companies")
-            .select("company_name,role,origin_country")
-            .ilike("company_name", `%${normalizedKeyword}%`)
-            .limit(10); // Limit to 10 additional matches from ImportKey data
-          
-          // Convert ImportKey companies to supplier_products-like format for merging
-          if (importKeyCompanies && importKeyCompanies.length > 0) {
-            importKeyCompanies.forEach((company) => {
-              // Only use Shipper/Exporter roles (actual suppliers, not importers)
-              if (company.role === "Shipper" || company.role === "Exporter") {
-                const syntheticKey = `importkey_${company.company_name}_${Date.now()}`;
-                // Add to allManufacturingMatches if not already present
-                if (!allManufacturingMatches.has(syntheticKey)) {
-                  allManufacturingMatches.set(syntheticKey, {
-                    supplier_id: syntheticKey,
-                    supplier_name: company.company_name, // Real trade data name - no masking
-                    product_name: `${normalizedKeyword} products`, // Placeholder product name
-                    unit_price: 0, // No pricing data from ImportKey companies table
-                    moq: 1,
-                    lead_time: 0,
-                    category: null,
-                    hs_code: null,
-                    import_key_id: null,
-                  });
-                }
-              }
-            });
-          }
-        } catch (importKeyError) {
-          // Silently fail if report_importkey_companies table doesn't exist or query fails
-          console.warn(`[Pipeline Step 2] Could not search report_importkey_companies:`, importKeyError);
-        }
-        
-        if (keywordResults && keywordResults.length > 0) {
-          keywordResults.forEach((product) => {
-            const key = `${product.supplier_id}_${product.product_name}`;
-            if (!allProducts.has(key) && !allManufacturingMatches.has(key)) {
-              allManufacturingMatches.set(key, product);
-            }
-          });
-          console.log(`[Pipeline Step 2] ✓ Keyword "${keyword}": FOUND ${keywordResults.length} raw matches → ${allManufacturingMatches.size} unique total`);
-        } else {
-          console.log(`[Pipeline Step 2] ✗ Keyword "${keyword}": 0 matches in DB`);
-        }
-      } catch (error) {
-        console.warn(`[Pipeline Step 2] Error searching with keyword "${keyword}":`, error);
-      }
-    }
-    
-    // Merge manufacturing keyword matches into allProducts
-    allManufacturingMatches.forEach((product, key) => {
-      if (!allProducts.has(key)) {
-        allProducts.set(key, product);
-      }
-    });
-    
-    console.log(`[Pipeline Step 2] ========================================`);
-    console.log(`[Pipeline Step 2] TOTAL FOUND: ${allProducts.size} unique products from manufacturing keywords`);
-    console.log(`[Pipeline Step 2] ========================================`);
-  }
-
   // ============================================================================
-  // Data Preprocessing Functions
+  // [Stage 2] Expansion: Category + Material (If < 5 results)
   // ============================================================================
-  
-  /**
-   * Remove unnecessary modifiers from product name (with, and, for, etc.)
-   * This helps extract core product terms for better search recall
-   */
-  function preprocessProductName(productName: string): string {
-    if (!productName || typeof productName !== "string") return "";
-    
-    // Remove common modifiers that don't help with supplier matching
-    const modifiers = /\b(with|and|for|from|by|the|a|an|of|in|on|at|to|as)\b/gi;
-    let cleaned = productName.replace(modifiers, " ").replace(/\s+/g, " ").trim();
-    
-    return cleaned;
-  }
-  
-  /**
-   * Extract core nouns (2 most important words) from product name for fallback search
-   * Prioritizes material and category terms
-   */
-  function extractCoreNouns(productName: string, keywords: string[] = [], category?: string, material?: string): string[] {
-    const coreNouns: string[] = [];
-    
-    // Add material if available (high priority)
-    if (material && material.length >= 3) {
-      coreNouns.push(material.toLowerCase());
-    }
-    
-    // Add category if available (high priority)
-    if (category && category.length >= 3) {
-      const categoryWords = category.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
-      coreNouns.push(...categoryWords.slice(0, 1)); // Take first meaningful word
-    }
-    
-    // Extract nouns from product name (skip common words)
-    const preprocessed = preprocessProductName(productName);
-    const words = preprocessed.toLowerCase().split(/\s+/).filter(w => {
-      // Skip common words
-      const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'with', 'for', 'from', 'by', 'of', 'in', 'on', 'at', 'to', 'as'];
-      return w.length >= 3 && !commonWords.includes(w);
-    });
-    
-    // Prioritize longer words (likely to be nouns)
-    const sortedWords = words.sort((a, b) => b.length - a.length);
-    coreNouns.push(...sortedWords.slice(0, 2));
-    
-    // Add keywords if not already included
-    keywords.forEach(kw => {
-      if (kw && kw.length >= 3 && !coreNouns.includes(kw.toLowerCase())) {
-        coreNouns.push(kw.toLowerCase());
-      }
-    });
-    
-    // Return top 2 unique nouns
-    return Array.from(new Set(coreNouns)).slice(0, 2);
-  }
-
-  // Priority 2: Optimized single-query search
-  // Build search terms from product name, keywords, category, and material
-  // Wrapped in try-catch for error resilience
-  // INCLUDES: Noise token removal (character/franchise names, marketing fluff)
-  function buildSearchTerms(analysis: ImageAnalysisResult): string[] {
-    try {
-    const raw = [
-      // Prioritize unique keywords from product name (first 2 words)
-      ...(analysis.productName ? analysis.productName.split(' ').slice(0, 2) : []),
-      analysis.productName,
-      ...(asArrayString(analysis.keywords)),
-      analysis.category,
-      analysis.attributes?.material,
-      ...manufacturingKeywords,
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    // Remove noise tokens to improve search recall
-    // Character names, marketing fluff won't distract supplier matching
-    const noiseRemoval = removeNoiseTokens(raw, analysis.category);
-    const cleanRaw = noiseRemoval.filteredTokens.join(" ");
-    
-    // Track if noise tokens were removed (for final summary)
-    if (noiseRemoval.hadNoiseRemoval) {
-      hasRemovedNoiseTokens = true;
-    }
-
-    const tokens = cleanRaw
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w.length >= 3);
-
-    // Log noise removal for debugging
-    if (noiseRemoval.removedTokens.length > 0) {
-      console.log(`[Pipeline Step 2] Removed noise tokens from search: ${noiseRemoval.removedTokens.join(", ")}`);
-    }
-
-    return Array.from(new Set(tokens));
-    } catch (error) {
-      console.warn("[Pipeline Step 2] Error building search terms:", {
-        error: error instanceof Error ? error.message : String(error),
-        productName: analysis.productName,
-        hasKeywords: !!analysis.keywords,
-        hasCategory: !!analysis.category,
-      });
-      // Return minimal safe terms
-      return [analysis.productName || "product"].filter(Boolean);
-    }
-  }
-
-  // Normalize search terms to prevent SQL injection and ensure clean OR filter
-  // Stronger normalization: remove all special chars that could break OR filter
-  // EMERGENCY FIX: Convert to UPPERCASE for ImportKey data compatibility
-  const normalizeTerm = (t: string) => {
-    if (!t || typeof t !== 'string') return '';
-    // Remove common stop words (AND, WITH, FOR, etc.)
-    const stopWords = /\b(and|with|for|from|by|the|a|an|of|in|on|at|to|as)\b/gi;
-    let cleaned = t.replace(stopWords, " ").replace(/\s+/g, " ").trim();
-    
-    return cleaned
-      .toUpperCase() // EMERGENCY FIX: Uppercase for ImportKey data
-      .replace(/[%_(),.]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 40); // Limit length to prevent extremely long terms
-  };
-
-  const searchTerms = buildSearchTerms(analysis);
-  // Ensure searchTerms is an array before processing
-  const safeSearchTerms = Array.isArray(searchTerms) ? searchTerms : [];
-  
-  // Universal keyword expansion - no category-specific limitations
-  // The manufacturing keywords from AI already cover all categories (food, furniture, apparel, electronics, etc.)
-  // Additional expansion is handled by the AI-generated keywords, not hardcoded category lists
-  let expandedTerms = [...safeSearchTerms];
-  
-  // Add generic high-recall keywords to maximize DB matches
-  // These broad terms help find real trade data even when specific product names don't match
-  const genericKeywords: string[] = [];
-  const categoryLower = (analysis.category || "").toLowerCase();
-  const materialLower = (analysis.attributes?.material || "").toLowerCase();
-  
-  // Material-based keywords
-  if (materialLower.includes("plastic")) genericKeywords.push("plastic", "polymer");
-  if (materialLower.includes("wood")) genericKeywords.push("wood", "wooden");
-  if (materialLower.includes("metal")) genericKeywords.push("metal", "steel", "aluminum");
-  if (materialLower.includes("fabric") || materialLower.includes("textile")) genericKeywords.push("fabric", "textile");
-  if (materialLower.includes("rubber")) genericKeywords.push("rubber");
-  
-  // Category-based keywords
-  if (categoryLower.includes("toy")) genericKeywords.push("toy", "toys");
-  if (categoryLower.includes("food") || categoryLower.includes("confection")) genericKeywords.push("food", "confectionery");
-  if (categoryLower.includes("furniture")) genericKeywords.push("furniture");
-  if (categoryLower.includes("electronic")) genericKeywords.push("electronic", "electronics");
-  if (categoryLower.includes("apparel") || categoryLower.includes("clothing")) genericKeywords.push("apparel", "clothing", "garment");
-  if (categoryLower.includes("home")) genericKeywords.push("home", "household");
-  
-  // Add generic keywords to expanded terms (at the end, so specific terms take priority)
-  if (genericKeywords.length > 0) {
-    console.log(`[Pipeline Step 2] Adding ${genericKeywords.length} generic keywords for broader matching:`, genericKeywords);
-    expandedTerms.push(...genericKeywords);
-  }
-  
-  // Remove category-specific hardcoded keywords - rely on AI-generated universal keywords instead
-  // This ensures the pipeline works for all categories: Food, Furniture, Apparel, Electronics, Toys, etc.
-
-  const limitedTerms = (expandedTerms
-    .map(normalizeTerm)
-    .filter((t) => t && t.length >= 2) || []) // Minimum 2 chars
-    .slice(0, 15); // Increased limit to capture more universal matches
-
-  console.log("[Pipeline Step 2] Searching by terms (limited to 15):", limitedTerms);
-  console.log("[Pipeline Step 2] Actual DB query keywords:", JSON.stringify(limitedTerms));
-
-  // ============================================================================
-  // Multi-Stage Search Strategy
-  // ============================================================================
-  
-  // EMERGENCY FIX: Broad Recall Search - Token-based matching
-  // Split product name into tokens and match if at least 2 tokens match
-  const buildTokenBasedSearchQuery = (productName: string, keywords: string[] = [], category?: string, material?: string) => {
-    // Extract all meaningful tokens from product name
-    const preprocessed = preprocessProductName(productName);
-    const tokens = preprocessed
-      .toUpperCase() // Uppercase for ImportKey compatibility
-      .replace(/[^A-Z0-9\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w.length >= 2) // Minimum 2 chars
-      .filter(w => !['AND', 'WITH', 'FOR', 'FROM', 'BY', 'THE', 'A', 'AN', 'OF', 'IN', 'ON', 'AT', 'TO', 'AS'].includes(w));
-    
-    // Add keywords, category, material as tokens
-    if (category) {
-      const catTokens = category.toUpperCase().split(/\s+/).filter(w => w.length >= 2);
-      tokens.push(...catTokens);
+  if (allProducts.size < 5) {
+    console.log("[Search Ladder Stage 2] Category + Material expansion:", { category, material });
+    const stage2Filters = [];
+    if (category && category !== "UNCATEGORIZED") {
+      stage2Filters.push(`category.ilike.%${category}%`, `product_name.ilike.%${category}%`);
     }
     if (material) {
-      const matTokens = material.toUpperCase().split(/\s+/).filter(w => w.length >= 2);
-      tokens.push(...matTokens);
-    }
-    keywords.forEach(kw => {
-      if (kw && kw.length >= 2) {
-        tokens.push(kw.toUpperCase());
-      }
-    });
-    
-    // Remove duplicates
-    const uniqueTokens = Array.from(new Set(tokens));
-    
-    // Build OR filter for each token
-    // Each token searches in product_name, product_description, and category
-    const tokenFilters = uniqueTokens
-      .flatMap((t) => [
-        `product_name.ilike.%${t}%`,
-        `product_description.ilike.%${t}%`,
-        `category.ilike.%${t}%`
-      ])
-      .join(",");
-    
-    return { tokenFilters, tokens: uniqueTokens };
-  };
-
-  // Stage 1: Primary search with token-based matching (BROAD RECALL)
-  // Build OR filter to search product_name, product_description, AND category
-  // EMERGENCY FIX: Token-based search for maximum recall
-  const buildOrFilter = (terms: string[]) => {
-    return terms
-      .flatMap((t) => [
-        `product_name.ilike.%${t}%`,
-        `product_description.ilike.%${t}%`,
-        `category.ilike.%${t}%` // ADDED: Search category field too
-      ])
-      .join(",");
-  };
-
-  // Also create uppercase versions for ALL CAPS data (ImportKey characteristic)
-  const buildOrFilterWithCaps = (terms: string[]) => {
-    // Terms are already uppercase from normalizeTerm
-    return terms
-      .flatMap((t) => [
-        `product_name.ilike.%${t}%`,
-        `product_description.ilike.%${t}%`,
-        `category.ilike.%${t}%`
-      ])
-      .join(",");
-  };
-
-  // EMERGENCY FIX: Use token-based search for maximum recall
-  const tokenSearch = buildTokenBasedSearchQuery(
-    analysis.productName || "",
-    asArrayString(analysis.keywords),
-    analysis.category,
-    analysis.attributes?.material
-  );
-  
-  console.log(`[Pipeline Step 2] Token-based search with ${tokenSearch.tokens.length} tokens:`, tokenSearch.tokens.slice(0, 10));
-  
-  // Also include traditional keyword search as fallback
-  const orFilter = buildOrFilterWithCaps(limitedTerms);
-  const combinedFilter = `${tokenSearch.tokenFilters},${orFilter}`;
-
-  const { data: searchResults, error: searchError } = await supabase
-    .from("supplier_products")
-    .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
-    .or(combinedFilter)
-    .limit(200); // EMERGENCY FIX: Increased limit for broad recall
-  
-  console.log(`[Pipeline Step 2] Stage 1 (Primary) search returned ${searchResults?.length || 0} raw results for ${limitedTerms.length} keywords`);
-  console.log(`[Pipeline Step 2] Stage 1 query filter (first 200 chars):`, orFilter.substring(0, 200));
-    if (searchResults && searchResults.length > 0) {
-      console.log(`[Pipeline Step 2] Sample matches:`, searchResults.slice(0, 3).map(r => ({
-        supplier: r.supplier_name,
-        product: r.product_name,
-        description: (r.product_description as string)?.substring(0, 50)
-      })));
-    }
-    
-    // Extract real company names from product_description if supplier_name is dummy
-    if (searchResults && searchResults.length > 0) {
-      enrichSupplierNamesFromDescription(searchResults);
+      stage2Filters.push(`product_name.ilike.%${material}%`, `product_description.ilike.%${material}%`);
     }
 
-  // Stage 2: Fallback search if Stage 1 results < 5
-  let fallbackResults: any[] = [];
-  if (!searchError && (!searchResults || searchResults.length < 5)) {
-    console.log(`[Pipeline Step 2] Stage 1 returned ${searchResults?.length || 0} results (< 5), starting Stage 2 (Fallback) search...`);
-    
-    // Extract core nouns (2 most important words) for fallback search
-    const coreNouns = extractCoreNouns(
-      analysis.productName || "",
-      asArrayString(analysis.keywords),
-      analysis.category,
-      analysis.attributes?.material
-    );
-    
-    console.log(`[Pipeline Step 2] Stage 2 core nouns extracted:`, coreNouns);
-    
-    if (coreNouns.length > 0) {
-      try {
-        const normalizedCoreNouns = coreNouns
-          .map(normalizeTerm)
-          .filter((t) => t && t.length >= 2);
-        
-        if (normalizedCoreNouns.length > 0) {
-          const fallbackOrFilter = buildOrFilterWithCaps(normalizedCoreNouns);
-          
-          console.log(`[Pipeline Step 2] Stage 2 query keywords:`, JSON.stringify(normalizedCoreNouns));
-          console.log(`[Pipeline Step 2] Stage 2 query filter (first 200 chars):`, fallbackOrFilter.substring(0, 200));
-          
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from("supplier_products")
-            .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
-            .or(fallbackOrFilter)
-            .limit(50);
-          
-          if (fallbackError) {
-            console.warn(`[Pipeline Step 2] Stage 2 search error:`, fallbackError);
-          } else {
-            fallbackResults = fallbackData || [];
-            console.log(`[Pipeline Step 2] Stage 2 (Fallback) search returned ${fallbackResults.length} raw results`);
-            
-            // Extract real company names from fallback results
-            if (fallbackResults.length > 0) {
-              enrichSupplierNamesFromDescription(fallbackResults);
-            }
-          }
-        }
-      } catch (fallbackErr) {
-        console.warn(`[Pipeline Step 2] Stage 2 search exception:`, fallbackErr);
-      }
-    }
-  }
-
-  // Combine Stage 1 and Stage 2 results
-  const combinedResults = [
-    ...(searchResults || []),
-    ...fallbackResults.filter(fb => {
-      // Avoid duplicates
-      const key = `${fb.supplier_id}_${fb.product_name}`;
-      return !searchResults?.some(sr => `${sr.supplier_id}_${sr.product_name}` === key);
-    })
-  ];
-
-  if (searchError) {
-    console.error("[Pipeline Step 2] supplier_products search error:", searchError);
-    // Even if Stage 1 failed, try to use Stage 2 results
-    if (fallbackResults.length > 0) {
-      console.log(`[Pipeline Step 2] Using Stage 2 fallback results (${fallbackResults.length} results) despite Stage 1 error`);
-    }
-  } else {
-    // EMERGENCY FIX: Don't filter - only remove truly invalid entries (banned products)
-    // All other entries will be scored and sorted, even with penalties
-    const cleaned = (combinedResults ?? []).filter((p) => {
-      const productName = ((p.product_name as string) ?? "").toString().toLowerCase();
-      
-      // Only filter banned products (safety issue)
-      if (isBannedCandidate(productName)) {
-        return false;
-      }
-      
-      // Keep everything else - penalties will be applied in calculateMatchScore
-      return true;
-    });
-
-    console.log(
-      `[Pipeline Step 2] Combined search (Stage 1 + Stage 2) returned: ${combinedResults.length} results, after minimal filtering: ${cleaned.length} candidates`
-    );
-    
-    // Detailed logging when results are low
-    if (cleaned.length < 5) {
-      console.log(`[Pipeline Step 2] ========================================`);
-      console.log(`[Pipeline Step 2] WARNING: Only ${cleaned.length} supplier matches found`);
-      console.log(`[Pipeline Step 2] Stage 1 keywords used:`, JSON.stringify(limitedTerms));
-      console.log(`[Pipeline Step 2] Stage 1 raw results: ${searchResults?.length || 0}`);
-      if (fallbackResults.length > 0) {
-        console.log(`[Pipeline Step 2] Stage 2 core nouns used:`, JSON.stringify(extractCoreNouns(
-          analysis.productName || "",
-          asArrayString(analysis.keywords),
-          analysis.category,
-          analysis.attributes?.material
-        )));
-        console.log(`[Pipeline Step 2] Stage 2 raw results: ${fallbackResults.length}`);
-      }
-      console.log(`[Pipeline Step 2] Product name: "${analysis.productName}"`);
-      console.log(`[Pipeline Step 2] Category: "${analysis.category}"`);
-      console.log(`[Pipeline Step 2] Material: "${analysis.attributes?.material || 'N/A'}"`);
-      console.log(`[Pipeline Step 2] Keywords:`, JSON.stringify(asArrayString(analysis.keywords)));
-      console.log(`[Pipeline Step 2] Emergency fallback will ensure minimum 5 results`);
-      console.log(`[Pipeline Step 2] ========================================`);
-    }
-
-    cleaned.forEach((product) => {
-      const key = `${product.supplier_id}_${product.product_name}`;
-      if (!allProducts.has(key)) {
-        allProducts.set(key, product);
-      }
-    });
-  }
-
-  // Category search with timeout guard and category_family filter
-  // Strategy: Use category_family to narrow candidate pool first, then exact match
-  if (analysis.category) {
-    const categorySearchStartTime = Date.now();
-    const CATEGORY_SEARCH_TIMEOUT_MS = 1000; // 1 second hard timeout
-    
-    try {
-      // Use category_family to filter candidates first (indexed field)
-      const categoryProfile = resolveCategoryProfile(analysis.category);
-      
-      let categoryQuery = supabase
-        .from("supplier_products")
-        .select("id,supplier_id,supplier_name,product_name,unit_price,moq,lead_time,category,hs_code,currency,import_key_id")
-        .limit(30); // Hard limit early to prevent timeout
-      
-      // First try exact category match (fastest, uses index)
-      categoryQuery = categoryQuery.eq("category", analysis.category);
-      
-      // If category family is known and not "Other", add family filter to narrow pool
-      // This helps when exact match returns too many results
-      if (categoryProfile.familyLabel && categoryProfile.familyLabel !== "Other") {
-        // Note: This assumes category field might contain family keywords
-        // If not, we'll rely on exact match only
-      }
-      
-      const { data: categoryResults, error: categoryError } = await categoryQuery;
-      
-      // Extract real company names from product_description
-      if (categoryResults && categoryResults.length > 0) {
-        enrichSupplierNamesFromDescription(categoryResults);
-      }
-      
-      const categorySearchDuration = Date.now() - categorySearchStartTime;
-      
-      // Hard timeout guard: if search took too long, skip it
-      if (categorySearchDuration > CATEGORY_SEARCH_TIMEOUT_MS) {
-        console.warn(
-          `[Pipeline Step 2] Category search took ${categorySearchDuration}ms, skipping to prevent timeout`
-        );
-      } else if (categoryError) {
-        // Check if it's a timeout error
-        if (categoryError.code === "57014" || categoryError.message?.includes("timeout") || categoryError.message?.includes("cancel")) {
-          console.warn("[Pipeline Step 2] Category search timeout, skipping:", categoryError.message);
-        } else {
-          console.error("[Pipeline Step 2] Category search error:", categoryError);
-        }
-      } else if (categoryResults && categoryResults.length > 0) {
-        categoryResults.forEach((product) => {
-          const key = `${product.supplier_id}_${product.product_name}`;
-          if (!allProducts.has(key)) {
-            allProducts.set(key, product);
-          }
-        });
-        console.log(`[Pipeline Step 2] Category search found ${categoryResults.length} products in ${categorySearchDuration}ms`);
-      }
-    } catch (err: any) {
-      const categorySearchDuration = Date.now() - categorySearchStartTime;
-      // Check if it's a timeout
-      if (err?.code === "57014" || err?.message?.includes("timeout") || err?.message?.includes("cancel")) {
-        console.warn(`[Pipeline Step 2] Category search timeout after ${categorySearchDuration}ms, skipping`);
-      } else {
-        console.error("[Pipeline Step 2] Category search error, skipping:", err);
-      }
-      // Don't throw - continue with other search results
-    }
-  }
-
-  // Calculate match scores and transform
-  // EMERGENCY FIX: Lower threshold significantly for broad recall
-  const threshold = analysis.hsCode ? 10 : 5; // Much lower threshold
-  
-  // Ensure allProducts is a valid Map before processing
-  const safeAllProducts = allProducts && allProducts instanceof Map ? allProducts : new Map();
-  let matches: SupplierMatch[] = [];
-  try {
-    const allProductsArray = Array.from(safeAllProducts.values()) || [];
-    const mapped = allProductsArray.map((item) => {
-      // EMERGENCY FIX: Don't filter - let calculateMatchScore apply penalties
-      const { score, reason } = calculateMatchScore(item, analysis);
-      
-      // Normalize product name (convert ALL CAPS to Title Case)
-      const rawProductName = item.product_name as string;
-      const normalizedProductName = normalizeProductName(rawProductName);
-      
-      return {
-        supplierId: item.supplier_id as string,
-        supplierName: supplierNameRaw || "Unknown Supplier",
-        productName: normalizedProductName,
-        unitPrice: (item.unit_price as number) || 0,
-        moq: (item.moq as number) || 1,
-        leadTime: (item.lead_time as number) || 0,
-        matchScore: score,
-        matchReason: reason,
-        importKeyId: (item.import_key_id as string) || null,
-        currency: (item.currency as string) || "USD",
-        isInferred: false, // Exact matches are not inferred
-      };
-    });
-    // EMERGENCY FIX: Filter only banned products, keep all others (even with negative scores)
-    const filtered = Array.isArray(mapped) ? mapped.filter((match) => match && match.matchScore > -100) : [];
-    const sorted = Array.isArray(filtered) ? filtered.sort((a, b) => b.matchScore - a.matchScore) : [];
-    matches = Array.isArray(sorted) ? sorted : []; // Return ALL matches, no limit
-  } catch (err) {
-    console.error("[Pipeline Step 2] Error processing matches:", err);
-    matches = []; // Fallback to empty array
-  }
-
-  console.log(
-    `[Pipeline Step 2] Found ${matches.length} exact supplier matches (from ${allProducts.size} candidates)`
-  );
-  console.log(
-    `[Pipeline Step 2] Top score: ${matches[0]?.matchScore ?? "null (no matches)"}, threshold: ${threshold}`
-  );
-  
-  // Debug: Log first 10 candidates after OR query cleanup
-  if (matches.length > 0) {
-    console.log("[Pipeline Step 2] Top 10 candidates after filtering:");
-    matches.slice(0, 10).forEach((m, idx) => {
-      const textLength = (m.productName || "").length;
-      console.log(`  ${idx + 1}. ${m.supplierName} | ${m.productName?.substring(0, 40)} | len=${textLength} | score=${m.matchScore}`);
-    });
-  } else {
-    console.log("[Pipeline Step 2] No matches found after filtering. Check if calculateMatchScore is returning valid numbers.");
-  }
-
-  // ============================================================================
-  // Fallback Strategy: AI Inference (Anchor Keywords → HS6 → Category → Material)
-  // ============================================================================
-  // If we have fewer than 3 exact matches, try to find similar suppliers
-  // Search order: 1) Anchor keywords, 2) HS6, 3) Category, 4) Material (last resort)
-  if (matches.length < 3) {
-    console.log(
-      `[Pipeline Step 2] Only ${matches.length} exact matches found. Starting AI inference fallback...`
-    );
-
-    const inferredMatches: SupplierMatch[] = [];
-    const inferredProducts = new Map<string, Record<string, unknown>>();
-    
-    // Track filtering statistics for fallback rounds
-    const fallbackStats = {
-      anchorRound: { searched: 0, filtered: 0, added: 0 },
-      hs6Round: { searched: 0, filtered: 0, added: 0 },
-      categoryRound: { searched: 0, filtered: 0, added: 0 },
-      materialRound: { searched: 0, filtered: 0, added: 0 },
-      hardRejects: { banned: 0, shouldRemoveName: 0, toyMismatch: 0, foodMismatch: 0 },
-      softDemotes: { logistics: 0, lowQuality: 0 },
-    };
-
-    // Helper function to add product to inferredProducts with filters
-    const addInferredProduct = (product: Record<string, unknown>, roundName?: string) => {
-      const productName = ((product.product_name as string) ?? "").toLowerCase();
-      let supplierNameRaw = (product.supplier_name as string) ?? "";
-      
-      // If supplier_name is dummy, try to extract from product_description
-      if (isDummySupplierName(supplierNameRaw) && product.product_description) {
-        const extractedName = extractCompanyNameFromDescription(product.product_description);
-        if (extractedName) {
-          supplierNameRaw = extractedName; // Use extracted name
-          product.supplier_name = extractedName; // Update the product object too
-        }
-      }
-      
-      const supplierName = normalizeName(supplierNameRaw);
-      
-      // HARD FILTER: Remove forwarders/logistics companies (not manufacturers)
-      if (isLikelyLogistics(supplierName)) {
-        fallbackStats.hardRejects.banned++;
-        if (round && round !== "hardRejects" && round !== "softDemotes") {
-          fallbackStats[round].filtered++;
-        }
-        return; // Remove forwarders completely
-      }
-      
-      // Track round
-      const round = roundName as keyof typeof fallbackStats;
-      if (round && round !== "hardRejects" && round !== "softDemotes") {
-        fallbackStats[round].searched++;
-      }
-      
-      // Filter out banned candidates (HARD REJECT)
-      if (isBannedCandidate(productName)) {
-        fallbackStats.hardRejects.banned++;
-        if (round && round !== "hardRejects" && round !== "softDemotes") {
-          fallbackStats[round].filtered++;
-        }
-        return;
-      }
-      
-      // Filter out industry mismatches (HARD REJECT)
-      if (isMismatchForCategory(analysis, productName)) {
-        if (round && round !== "hardRejects" && round !== "softDemotes") {
-          fallbackStats[round].filtered++;
-        }
-        return;
-      }
-      
-      // Toy category hard mismatch filter (HARD REJECT: industrial equipment, not toys)
-      if (isToyCategory(analysis.category)) {
-        const text = `${productName} ${(product.category as string) || ""} ${(product.product_description as string) || ""}`;
-        if (isMismatchForToyCandidate(text)) {
-          fallbackStats.hardRejects.toyMismatch++;
-          if (round && round !== "hardRejects" && round !== "softDemotes") {
-            fallbackStats[round].filtered++;
-          }
-          return;
-        }
-        if (isHs2MismatchForToy((product.hs_code as string) || null)) {
-          fallbackStats.hardRejects.toyMismatch++;
-          if (round && round !== "hardRejects" && round !== "softDemotes") {
-            fallbackStats[round].filtered++;
-          }
-          return;
-        }
-      }
-      
-      // Food category hard mismatch filter (HARD REJECT: furniture, machinery, not food)
-      if (isFoodCategory(analysis.category)) {
-        const text = `${productName} ${(product.category as string) || ""} ${(product.product_description as string) || ""}`;
-        if (isMismatchForFoodCandidate(text)) {
-          fallbackStats.hardRejects.foodMismatch++;
-          if (round && round !== "hardRejects" && round !== "softDemotes") {
-            fallbackStats[round].filtered++;
-          }
-          return;
-        }
-        if (isHs2MismatchForFood((product.hs_code as string) || null)) {
-          fallbackStats.hardRejects.foodMismatch++;
-          if (round && round !== "hardRejects" && round !== "softDemotes") {
-            fallbackStats[round].filtered++;
-          }
-          return;
-        }
-      }
-      
-      // Only remove truly invalid names (HARD REJECT)
-      if (shouldRemoveName(supplierNameRaw)) {
-        fallbackStats.hardRejects.shouldRemoveName++;
-        if (round && round !== "hardRejects" && round !== "softDemotes") {
-          fallbackStats[round].filtered++;
-        }
-        return;
-      }
-      
-      // SOFT DEMOTE: Track suspicious but kept candidates
-      if (isLikelyLogistics(supplierName)) {
-        fallbackStats.softDemotes.logistics++;
-        // Still add it as inferred match (soft demote, not removal)
-      }
-      if (isLowQualityName(supplierNameRaw)) {
-        fallbackStats.softDemotes.lowQuality++;
-        // Still add it as inferred match (soft demote, not removal)
-      }
-      
-      const key = `${product.supplier_id}_${product.product_name}`;
-      // Skip if already in exact matches
-      if (
-        !matches.some(
-          (m) =>
-            m.supplierId === product.supplier_id &&
-            m.productName === product.product_name
-        ) &&
-        !inferredProducts.has(key)
-      ) {
-        inferredProducts.set(key, product);
-        if (round && round !== "hardRejects" && round !== "softDemotes") {
-          fallbackStats[round].added++;
-        }
-      }
-    };
-
-    // Step 1: Search by anchor keywords (product name, keywords) - most reliable
-    // Limit to top 6 keywords to prevent statement timeout (MVP optimization)
-    const fallbackAnchorTermsRaw =
-      anchorTerms.length > 0
-        ? anchorTerms
-        : buildAnchorTermsStrict(analysis.productName, analysis.keywords || [], brandPhrases);
-
-    // Reuse normalizeTerm and limitedTerms pattern for consistency
-    // Ensure fallbackAnchorTermsRaw is an array before processing
-    const safeFallbackTerms = Array.isArray(fallbackAnchorTermsRaw) ? fallbackAnchorTermsRaw : [];
-    const fallbackLimitedTerms = (safeFallbackTerms
-      .map(normalizeTerm)
-      .filter((t) => t && t.length >= 2) || [])
-      .slice(0, 6);
-
-    console.log("[Pipeline Step 2 Fallback] Anchor keywords (limited to 6):", fallbackLimitedTerms);
-
-    if (fallbackLimitedTerms.length > 0) {
-      const orFilter = fallbackLimitedTerms
-        .map((t: string) => `product_name.ilike.%${t}%`)
-        .join(",");
-
-        const { data: anchorMatches, error: anchorError } = await supabase
-        .from("supplier_products")
-        .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id")
-        .or(orFilter)
-        .limit(20);
-        
-        // Extract real company names from product_description
-        if (anchorMatches && anchorMatches.length > 0) {
-          enrichSupplierNamesFromDescription(anchorMatches);
-        }
-
-      if (anchorError) {
-        console.error(`[Pipeline Step 2 Fallback] Anchor keywords search error:`, anchorError);
-      } else {
-        anchorMatches?.forEach((product) => {
-          addInferredProduct(product, "anchorRound");
-        });
-        console.log(
-          `[Pipeline Step 2 Fallback] Anchor keywords search found ${anchorMatches?.length ?? 0} candidates, ${inferredProducts.size} after filtering`
-        );
-      }
-    }
-
-    // Step 2: Search by HS6 if we have HS code candidates
-    if (inferredProducts.size < 5 && analysis.hsCode) {
-      const hs6 = normalizeHs6(analysis.hsCode);
-      if (hs6) {
-        console.log(
-          `[Pipeline Step 2 Fallback] Searching by HS6: ${hs6}`
-        );
-
-        const { data: hs6Matches, error: hs6Error } = await supabase
-          .from("supplier_products")
-          .select("*")
-          .ilike("hs_code", `${hs6}%`)
-          .limit(20);
-
-        if (hs6Error) {
-          console.error(`[Pipeline Step 2 Fallback] HS6 search error:`, hs6Error);
-        } else {
-          // Extract real company names from product_description
-          if (hs6Matches && hs6Matches.length > 0) {
-            enrichSupplierNamesFromDescription(hs6Matches);
-          }
-          hs6Matches?.forEach((product) => {
-            addInferredProduct(product, "hs6Round");
-          });
-          console.log(
-            `[Pipeline Step 2 Fallback] HS6 search found ${hs6Matches?.length ?? 0} candidates, ${inferredProducts.size} after filtering`
-          );
-        }
-      }
-    }
-
-    // Step 3: Search by category if still not enough results
-    if (inferredProducts.size < 5 && analysis.category) {
-      console.log(
-        `[Pipeline Step 2 Fallback] Searching by category: "${analysis.category}"`
-      );
-
-      const { data: categoryMatches, error: categoryError } = await supabase
+    if (stage2Filters.length > 0) {
+      const { data: stage2Data } = await supabase
         .from("supplier_products")
         .select("*")
-        .ilike("category", `%${analysis.category}%`)
+        .or(stage2Filters.join(","))
+        .limit(100);
+
+      (stage2Data || []).forEach(item => {
+        const key = `${item.supplier_id}_${item.product_name}`;
+        if (!allProducts.has(key)) allProducts.set(key, item);
+      });
+    }
+  }
+
+  // ============================================================================
+  // [Stage 3] Cargo Description Broad Search (If still insufficient)
+  // ============================================================================
+  if (allProducts.size < 5) {
+    console.log("[Search Ladder Stage 3] Cargo Description broad search with category words");
+    const categoryWords = category.split(/\s+/).filter(w => w.length >= 3);
+    if (categoryWords.length > 0) {
+      const stage3Filter = categoryWords.map(w => `product_description.ilike.%${w}%`).join(",");
+      const { data: stage3Data } = await supabase
+        .from("supplier_products")
+        .select("*")
+        .or(stage3Filter)
+        .order("updated_at", { ascending: false })
         .limit(20);
-      
-      // Extract real company names from product_description
-      if (categoryMatches && categoryMatches.length > 0) {
-        enrichSupplierNamesFromDescription(categoryMatches);
-      }
 
-      if (categoryError) {
-        console.error(`[Pipeline Step 2 Fallback] Category search error:`, categoryError);
-      } else {
-        // Extract real company names from product_description
-        if (categoryMatches && categoryMatches.length > 0) {
-          enrichSupplierNamesFromDescription(categoryMatches);
-        }
-        categoryMatches?.forEach((product) => {
-          addInferredProduct(product, "categoryRound");
-        });
-        console.log(
-          `[Pipeline Step 2 Fallback] Category search found ${categoryMatches?.length ?? 0} candidates, ${inferredProducts.size} after filtering`
-        );
-      }
+      (stage3Data || []).forEach(item => {
+        const key = `${item.supplier_id}_${item.product_name}`;
+        if (!allProducts.has(key)) allProducts.set(key, item);
+      });
     }
+  }
 
-    // Step 4: Universal material search (works for all categories: food, furniture, apparel, electronics, etc.)
-    if (inferredProducts.size < 5) {
-      const material = analysis.attributes?.material;
-      if (material) {
-        // Universal material search - no category-specific limitations
-        // Works for all categories by analyzing material composition and manufacturing processes
-        console.log(
-          `[Pipeline Step 2 Fallback] Universal material search (last resort): "${material}"`
-        );
+  // ============================================================================
+  // [Step 4] Emergency Fallback: Top Global Suppliers (If 0 results)
+  // ============================================================================
+  if (allProducts.size === 0) {
+    console.log("[Search Ladder Fallback] Using Top Global Suppliers for:", analysis.category);
+    const cat = (analysis.category || "Home") as string;
+    const fallbackList = TOP_GLOBAL_SUPPLIERS[cat] || TOP_GLOBAL_SUPPLIERS["Home"];
+    
+    fallbackList.forEach((s, i) => {
+      const item = {
+        supplier_id: `global_${cat}_${i}`,
+        supplier_name: s.supplier_name,
+        product_name: s.product_name,
+        product_description: `Top Global Supplier for ${cat}`,
+        unit_price: 0,
+        moq: 1,
+        lead_time: 0,
+        is_inferred: true
+      };
+      allProducts.set(item.supplier_id, item);
+    });
+  }
 
-        const materialTokens = extractMaterialTokens(material);
-        
-        // Also generate manufacturing keywords from material for better cross-category matching
-        const materialKeywords = await generateManufacturingKeywords(
-          material,
-          [],
-          material,
-          analysis.category
-        );
-        
-        // Combine material tokens with AI-generated material keywords
-        const allMaterialTerms = [...materialTokens, ...materialKeywords.map(k => k.toLowerCase())];
-        const uniqueMaterialTerms = Array.from(new Set(allMaterialTerms));
-        
-        if (uniqueMaterialTerms.length > 0) {
-          console.log(
-            `[Pipeline Step 2 Fallback] Material search terms (universal): ${uniqueMaterialTerms.join(", ")}`
-          );
-
-          for (const keyword of uniqueMaterialTerms) {
-            const { data: materialMatches, error: materialError } = await supabase
-              .from("supplier_products")
-              .select("*")
-              .or(
-                `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%,supplier_name.ilike.%${keyword}%`
-              )
-              .limit(20); // Limit to 20 matches per keyword
-
-            if (materialError) {
-              console.error(`[Pipeline Step 2 Fallback] Material search error for "${keyword}":`, materialError);
-            } else {
-              // Extract real company names from product_description
-              if (materialMatches && materialMatches.length > 0) {
-                enrichSupplierNamesFromDescription(materialMatches);
-              }
-              materialMatches?.forEach((product) => {
-                addInferredProduct(product, "materialRound");
-              });
-            }
-          }
-          console.log(
-            `[Pipeline Step 2 Fallback] Material search completed, ${inferredProducts.size} total candidates`
-          );
-        } else {
-          console.log(
-            `[Pipeline Step 2 Fallback] Material "${material}" filtered out all tokens (stopwords only)`
-          );
-          
-          // Universal fallback: Generate manufacturing keywords from material for all categories
-          // No category-specific limitations - works for food, furniture, apparel, electronics, toys, etc.
-          if (inferredProducts.size < 5) {
-            console.log("[Pipeline Step 2 Fallback] Attempting universal material keyword fallback...");
-            
-            // Generate universal manufacturing keywords from material
-            const materialFallbackKeywords = await generateManufacturingKeywords(
-              material,
-              [],
-              material,
-              analysis.category
-            );
-            
-            // Use first 5 keywords as fallback search terms
-            const fallbackTerms = materialFallbackKeywords.slice(0, 5);
-            
-            for (const keyword of fallbackTerms) {
-              const { data: fallbackMatches, error: fallbackError } = await supabase
-                .from("supplier_products")
-                .select("*")
-                .or(
-                  `product_name.ilike.%${keyword}%,category.ilike.%${keyword}%,supplier_name.ilike.%${keyword}%`
-                )
-                .limit(20); // Limit to 20 matches per keyword
-
-              if (fallbackError) {
-                console.error(`[Pipeline Step 2 Fallback] Universal keyword search error for "${keyword}":`, fallbackError);
-              } else {
-                // Extract real company names from product_description
-                if (fallbackMatches && fallbackMatches.length > 0) {
-                  enrichSupplierNamesFromDescription(fallbackMatches);
-                }
-                fallbackMatches?.forEach((product) => {
-                  addInferredProduct(product, "materialRound");
-                });
-              }
-            }
-            console.log(
-              `[Pipeline Step 2 Fallback] Universal material keyword fallback completed, ${inferredProducts.size} total candidates`
-            );
-          }
-        }
-      }
-    }
-
-    // Log fallback statistics for debugging
-    console.log("[Pipeline Step 2 Fallback] Statistics:", {
-      rounds: {
-        anchor: fallbackStats.anchorRound,
-        hs6: fallbackStats.hs6Round,
-        category: fallbackStats.categoryRound,
-        material: fallbackStats.materialRound,
-      },
-      filtering: {
-        hardRejects: fallbackStats.hardRejects,
-        softDemotes: fallbackStats.softDemotes,
-      },
+  // Final Scoring and Enrichment
+  const matches: SupplierMatch[] = [];
+  const allItems = Array.from(allProducts.values());
+  
+  for (const item of allItems) {
+    const { score, reason } = calculateMatchScore(item, analysis);
+    
+    // [Step 3] Increase weight for Cargo Description
+    let finalScore = score;
+    const desc = (item.product_description || "").toUpperCase();
+    productTokens.forEach(t => {
+      if (desc.includes(t)) finalScore += 5; 
     });
 
-    // Transform inferred products into matches with lower scores
-    if (inferredProducts.size > 0) {
-      console.log(
-        `[Pipeline Step 2 Fallback] Found ${inferredProducts.size} inferred candidates`
-      );
-
-      // Track which search method found each product (for better match reasons)
-      const productSearchMethod = new Map<string, "anchor" | "hs6" | "category" | "material">();
-      
-      // Note: We can't track which method found which product easily, so we'll use a simpler approach
-      // Base score depends on search method priority: anchor > HS6 > category > material
-      const material = analysis.attributes?.material;
-      
-      // Transform and clean inferred candidates
-      // Ensure inferredProducts is a valid Map before processing
-      const safeInferredProducts = inferredProducts && inferredProducts instanceof Map ? inferredProducts : new Map();
-      const inferredCandidates = (Array.from(safeInferredProducts.values()) || [])
-        .map((item) => {
-          const { score, reason } = calculateMatchScore(item, analysis);
-          
-          // Determine base score and match reason based on what likely matched
-          // Priority: anchor keywords (highest) > HS6 > category > material (lowest)
-          let baseScore = 15; // Default for category/material
-          let inferredReason = "";
-          
-          // Check if it matches anchor terms (most reliable)
-          // anchorTerms is already built above in the function scope
-          const productNameLower = ((item.product_name as string) ?? "").toLowerCase();
-          const matchesAnchor = anchorTerms.some((term) => productNameLower.includes(term.toLowerCase()));
-          
-          if (matchesAnchor) {
-            baseScore = 30; // Anchor keywords get higher base score
-            inferredReason = `Matches product keywords or name. May be a related supplier. Verification required.`;
-          } else if (analysis.hsCode && item.hs_code) {
-            const itemHs6 = normalizeHs6(item.hs_code.toString());
-            const analysisHs6 = normalizeHs6(analysis.hsCode);
-            if (itemHs6 && analysisHs6 && itemHs6 === analysisHs6) {
-              baseScore = 25; // HS6 match
-              inferredReason = `Matches HS code (${analysisHs6}). May be a related supplier. Verification required.`;
-            } else if (analysis.category) {
-              baseScore = 20; // Category match
-              inferredReason = `Operates in a related product category (${analysis.category}). Fit is unconfirmed. Verification required.`;
-            } else {
-              baseScore = 15; // Material match (lowest priority)
-              const isIngredient = material && ["sugar", "gelatin", "agar", "pectin", "starch", "flour", "cocoa"].some(ing => material.toLowerCase().includes(ing));
-              if (isIngredient) {
-                inferredReason = `Matches ingredients used in this product including ${material}. May be a component supplier rather than the primary product manufacturer. Verification required.`;
-              } else {
-                inferredReason = `Matches related materials used in this product including ${material}. May be a packaging or component supplier rather than the primary product manufacturer. Verification required.`;
-              }
-            }
-          } else if (analysis.category) {
-            baseScore = 20; // Category match
-            inferredReason = `Operates in a related product category (${analysis.category}). Fit is unconfirmed. Verification required.`;
-          } else if (material) {
-            baseScore = 15; // Material match (lowest priority)
-            const isIngredient = material && ["sugar", "gelatin", "agar", "pectin", "starch", "flour", "cocoa"].some(ing => material.toLowerCase().includes(ing));
-            if (isIngredient) {
-              inferredReason = `Matches ingredients used in this product including ${material}. May be a component supplier rather than the primary product manufacturer. Verification required.`;
-            } else {
-              inferredReason = `Matches related materials used in this product including ${material}. May be a packaging or component supplier rather than the primary product manufacturer. Verification required.`;
-            }
-          } else {
-            inferredReason = "Has equipment or inputs commonly used for this product type. Fit is unconfirmed. Verification required.";
-          }
-          
-          // Base score + calculated score, capped at 70
-          const baseInferredScore = Math.min(70, baseScore + score);
-          
-          let supplierNameRaw = (item.supplier_name as string) || "Unknown Supplier";
-          
-          // If supplier_name is dummy, try to extract from product_description
-          if (isDummySupplierName(supplierNameRaw) && item.product_description) {
-            const extractedName = extractCompanyNameFromDescription(item.product_description);
-            if (extractedName) {
-              supplierNameRaw = extractedName; // Use extracted name
-            }
-          }
-          
-          const supplierName = normalizeName(supplierNameRaw);
-          
-          // HARD FILTER: Remove forwarders/logistics companies
-          if (isLikelyLogistics(supplierName)) {
-            return null; // Skip forwarders
-          }
-          
-          // Apply factory boost and logistics penalty
-          const finalScore = scoreCandidate(baseInferredScore, supplierName);
-          
-          // Normalize product name (convert ALL CAPS to Title Case)
-          const rawProductName = item.product_name as string;
-          const normalizedProductName = normalizeProductName(rawProductName);
-
-          return {
-            supplierId: item.supplier_id as string,
-            supplierName,
-            productName: normalizedProductName,
-            unitPrice: (item.unit_price as number) || 0,
-            moq: (item.moq as number) || 1,
-            leadTime: (item.lead_time as number) || 0,
-            matchScore: finalScore,
-            matchReason: inferredReason,
-            importKeyId: (item.import_key_id as string) || null,
-            currency: (item.currency as string) || "USD",
-            isInferred: true, // Mark as AI-inferred match
-          };
-        });
-
-      // Clean: filter out null entries (forwarders) and ensure array
-      // Logistics companies are now filtered out completely (return null)
-      const safeInferredCandidates = (Array.isArray(inferredCandidates) ? inferredCandidates : [])
-        .filter((m): m is SupplierMatch => m !== null); // Remove null entries (forwarders)
-      const cleanedInferred = safeInferredCandidates
-        .filter((c) => !shouldRemoveName(c.supplierName));
-
-      // Rank by score - return ALL matches, no limit
-      // Ensure cleanedInferred is an array before sorting
-      const safeCleanedInferred = Array.isArray(cleanedInferred) ? cleanedInferred : [];
-      const ranked = safeCleanedInferred
-        .sort((a, b) => b.matchScore - a.matchScore);
-
-      inferredMatches.push(...ranked);
-
-      // Combine exact matches with inferred matches
-      // Ensure matches is an array before spreading
-      const safeMatches = Array.isArray(matches) ? matches : [];
-      const safeInferredMatches = Array.isArray(inferredMatches) ? inferredMatches : [];
-      try {
-        const combined = [...safeMatches, ...safeInferredMatches];
-        const sorted = Array.isArray(combined) ? combined.sort((a, b) => {
-          // Sort by: exact matches first, then by score
-          if (a.isInferred !== b.isInferred) {
-            return a.isInferred ? 1 : -1;
-          }
-          return b.matchScore - a.matchScore;
-        }) : [];
-        matches = Array.isArray(sorted) ? sorted : []; // Return ALL matches, no limit
-      } catch (err) {
-        console.error("[Pipeline Step 2] Error combining matches:", err);
-        matches = safeMatches; // Fallback to just exact matches
-      }
-
-      console.log(
-        `[Pipeline Step 2] Combined ${matches.filter((m) => !m.isInferred).length} exact + ${matches.filter((m) => m.isInferred).length} inferred matches`
-      );
-    }
+    matches.push({
+      supplierId: item.supplier_id,
+      supplierName: item.supplier_name || "Unknown Supplier",
+      productName: item.product_name || "Product",
+      unitPrice: item.unit_price || 0,
+      moq: item.moq || 1,
+      leadTime: item.lead_time || 0,
+      matchScore: Math.max(finalScore, item.is_inferred ? 1 : 0),
+      matchReason: item.is_inferred ? "Top Global Supplier" : reason,
+      importKeyId: item.import_key_id || null,
+      currency: item.currency || "USD",
+      isInferred: !!item.is_inferred
+    });
   }
 
-  // Final filter: Track removal reasons and demote low-quality to Candidate instead of removing
-  const filterStats = {
-    demotedByDummyId: 0, // Dummy IDs demoted to candidate (not removed)
-    removedByEmptyName: 0,
-    removedByBadName: 0,
-    removedByGarbageProductName: 0,
-    demotedToCandidate: 0, // Logistics companies and low quality names
-    passed: 0,
-  };
+  const resultMatches = matches
+    .filter(m => m.matchScore >= 1) // Threshold 1
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 10);
 
-  const filteredMatches: SupplierMatch[] = [];
-  const demotedToCandidate: SupplierMatch[] = [];
-
-  // Ensure matches is an array before iterating
-  const safeMatches = Array.isArray(matches) ? matches : [];
-  for (const m of safeMatches) {
-    const supplierName = normalizeName(m.supplierName);
-    let supplierId = m.supplierId || "";
-    
-    // Hard filters: immediately exclude (cannot be candidates either)
-    // Use shouldRemoveName (only truly invalid entries)
-    if (shouldRemoveName(m.supplierName)) {
-      filterStats.removedByBadName++;
-      continue;
-    }
-    
-    if (supplierName === "Unknown Supplier" || supplierName.length === 0) {
-      filterStats.removedByEmptyName++;
-      continue;
-    }
-    
-    // Dummy ID: Generate stable synthetic ID and demote to candidate (don't remove)
-    if (isDummySupplierId(supplierId)) {
-      // Generate stable synthetic ID
-      const normalizedName = m.normalizedName || supplierName;
-      supplierId = ensureStableSupplierId(m, normalizedName);
-      
-      // Demote to candidate instead of removing
-      const demoted = {
-        ...m,
-        supplierId, // Use new synthetic ID
-        isInferred: true, // Force to candidate
-        matchScore: Math.max(0, (m.matchScore ?? 0) - 10), // Small penalty
-      };
-      demotedToCandidate.push(demoted);
-      filterStats.demotedByDummyId++;
-      continue;
-    }
-    
-    // Low quality names: demote to candidate instead of removing
-    if (isLowQualityName(m.supplierName)) {
-      // Mark as low quality but keep as candidate
-      const demoted = {
-        ...m,
-        isInferred: true, // Force to candidate
-        matchScore: Math.max(0, (m.matchScore ?? 0) - 5), // Small penalty
-      };
-      demotedToCandidate.push(demoted);
-      continue;
-    }
-    
-    // Check for generic manifest text (reduce score but don't exclude completely)
-    if (isGenericManifestText(m.productName)) {
-      // Reduce match score for generic descriptions
-      m.matchScore = Math.max(0, (m.matchScore ?? 0) - 10);
-      filterStats.removedByGarbageProductName++;
-      // Still allow through, just with lower score
-    }
-    
-    // Logistics companies: Demote to Candidate instead of removing
-    if (isLikelyLogistics(supplierName)) {
-      // Mark as logistics and demote to candidate
-      const demoted = {
-        ...m,
-        supplierType: "logistics" as const,
-        isInferred: true, // Force to candidate
-        matchScore: Math.max(0, (m.matchScore ?? 0) - 20), // Penalize score
-      };
-      demotedToCandidate.push(demoted);
-      filterStats.demotedToCandidate++;
-      continue;
-    }
-    
-    // Check for default values that indicate missing data
-    // unit_price = 1, moq = 0, lead_time = 0 are likely defaults, not real data
-    if (m.unitPrice === 1 && m.moq === 0 && m.leadTime === 0) {
-      // Don't exclude, but mark as needing quote (already handled in UI)
-    }
-    
-    // Passed all filters
-    filteredMatches.push(m);
-    filterStats.passed++;
-  }
-
-  // Add demoted matches (dummy IDs, logistics, low quality) back to filtered matches (they'll be candidates)
-  if (demotedToCandidate.length > 0) {
-    filteredMatches.push(...demotedToCandidate);
-    console.log(
-      `[Pipeline Step 2] Demoted ${demotedToCandidate.length} matches to Candidate (dummy IDs, logistics, low quality - not removed)`
-    );
-  }
-
-  console.log(
-    `[Pipeline Step 2] Final filtered matches: ${filteredMatches.length} (${matches.length - filteredMatches.length} total removed, ${demotedToCandidate.length} demoted to candidate)`
-  );
-  console.log(
-    `[Pipeline Step 2] Filter breakdown:`,
-    {
-      demotedByDummyId: filterStats.demotedByDummyId,
-      removedByEmptyName: filterStats.removedByEmptyName,
-      removedByBadName: filterStats.removedByBadName,
-      removedByGarbageProductName: filterStats.removedByGarbageProductName,
-      demotedToCandidate: filterStats.demotedToCandidate,
-      passed: filterStats.passed,
-    }
-  );
-
-  // ============================================================================
-  // Step 2.5: AI Enrichment - Collect evidence and enrich with AI
-  // ============================================================================
-  console.log("[Pipeline Step 2.5] Enriching suppliers with evidence and AI...");
-  
+  // Enrichment (Evidence & AI)
   const enrichedMatches: SupplierMatch[] = [];
-  
-  // Process matches in batches to avoid overwhelming the API
-  const batchSize = 5;
-  // Ensure filteredMatches is an array before processing
-  const safeFilteredMatches = Array.isArray(filteredMatches) ? filteredMatches : [];
-  for (let i = 0; i < safeFilteredMatches.length; i += batchSize) {
-    const batch = safeFilteredMatches.slice(i, i + batchSize);
-    
-    const enrichmentPromises = batch.map(async (match) => {
-      // Collect evidence from database (MANDATORY - always collect even if empty)
+  for (const match of resultMatches) {
+    try {
       const evidence = await collectSupplierEvidence(match.supplierId, supabase);
-      
-      // Enrich with AI (normalization, classification - but NOT summary)
       const enriched = await enrichSupplierWithAI(match, evidence);
       
-      // Build summary deterministically from code (not LLM)
-      const summary = buildSummary(match.matchReason, evidence);
-      
-      // Merge enriched data into match
-      // ALWAYS include evidence, even if empty (UI needs to show it)
-      return {
+      enrichedMatches.push({
         ...match,
         ...enriched,
-        // Use normalized name if available, otherwise keep original
         supplierName: enriched.normalizedName || match.supplierName,
-        // Always include evidence (mandatory for credibility)
         evidence: evidence,
-        // Use code-generated summary (deterministic, consistent)
-        summary: summary,
-      } as SupplierMatch;
-    });
-    
-    const enrichedBatch = await Promise.all(enrichmentPromises);
-    enrichedMatches.push(...enrichedBatch);
-  }
-  
-  console.log(`[Pipeline Step 2.5] Enriched ${enrichedMatches.length} suppliers`);
-  
-  // ============================================================================
-  // Step 2.6: Category Profile Reranking
-  // ============================================================================
-  console.log("[Pipeline Step 2.6] Applying category profile reranking...");
-  
-  // Get runtime allowHs2 (from parameter or fallback to analysis)
-  const effectiveRuntimeAllowHs2 = runtimeAllowHs2 || allowHs2FromAnalysis({
-    analysisHs: analysis.hsCode,
-    hsCandidates: [],
-  });
-  
-  // Store original product data for HS code lookup
-  // Note: allProducts is in scope from earlier in findSupplierMatches
-  const productHsMap = new Map<string, string | null>();
-  
-  // Collect HS codes from all matches (both exact and inferred)
-  // We need to track this from the original product data
-  const allMatchesWithHs = new Map<string, string | null>();
-  
-  // For exact matches, get HS from allProducts
-  // Ensure allProducts is a valid Map before iterating
-  const safeAllProductsForHs = allProducts && allProducts instanceof Map ? allProducts : new Map();
-  for (const [key, product] of safeAllProductsForHs.entries()) {
-    const supplierId = (product.supplier_id as string) || "";
-    const productName = (product.product_name as string) || "";
-    const mapKey = `${supplierId}_${productName}`;
-    allMatchesWithHs.set(mapKey, (product.hs_code as string | null) || null);
-  }
-  
-  // For inferred matches, we'll need to get from the original inferredProducts
-  // This is a limitation - we may not have HS codes for all inferred products
-  // In practice, we can skip HS2 check if HS code is not available
-  
-  // Rerank all matches with profile
-  const rerankedMatches = enrichedMatches.map((match) => {
-    const productTextRaw = `${match.productName} ${match.evidence?.productTypes?.join(" ") || ""}`;
-    const productText = productTextRaw.toLowerCase(); // Must be lowercase for rerankWithProfile
-    
-    const fullText = `${match.supplierName} ${productText}`;
-    // Use strict anchor hit counting (whole token matching)
-    const anchorHits = countAnchorHitsStrict(fullText, anchorTerms);
-    
-    // Find which anchors matched (up to 2 examples)
-    const matchedAnchors = findMatchedAnchors(anchorTerms, fullText);
-    
-    // Count brand phrase hits separately (stronger signal)
-    const brandPhraseHits = brandPhrases.filter((phrase: string) => 
-      fullText.toLowerCase().includes(phrase.toLowerCase())
-    ).length;
-    
-    // Get HS code from original product data
-    const mapKey = `${match.supplierId}_${match.productName}`;
-    const supplierHs = allMatchesWithHs.get(mapKey) || null;
-    
-    // Extract HS code from evidence if not available in product data
-    let effectiveSupplierHs = supplierHs;
-    if (!effectiveSupplierHs && match.evidence?.evidenceSnippet) {
-      const hsMatch = match.evidence.evidenceSnippet.match(/\bHS\s*CODE?\s*:?\s*(\d{4,10})\b/i);
-      if (hsMatch) {
-        effectiveSupplierHs = hsMatch[1];
-      }
-    }
-    
-    // Apply recency and volume boosts (Data-Driven Sorting)
-    let finalRerankScore = score;
-    const recordCount = match.evidence?.recordCount || 0;
-    const lastSeenDays = match.evidence?.lastSeenDays;
-
-    // Boost for high volume (established supplier)
-    if (recordCount > 50) finalRerankScore += 10;
-    else if (recordCount > 10) finalRerankScore += 5;
-
-    // Boost for recency (active supplier)
-    if (lastSeenDays !== null && lastSeenDays !== undefined) {
-      if (lastSeenDays < 90) finalRerankScore += 10; // Very recent
-      else if (lastSeenDays < 180) finalRerankScore += 5; // Recent
-      else if (lastSeenDays > 730) finalRerankScore -= 10; // Old (>2 years)
-    }
-
-    // Cap score at 100
-    finalRerankScore = Math.min(100, finalRerankScore);
-    
-    // Resolve category profile for category_family
-    const categoryProfile = resolveCategoryProfile(analysis.category || "unknown");
-    
-    // Compute why_lines and evidence_strength (category-agnostic)
-    const whyLines = buildWhyLines({
-      anchorHits,
-      brandPhraseHits,
-      matchedAnchors,
-      category: analysis.category || "unknown",
-      productCount: match.evidence?.productCount,
-      priceCoverage: undefined, // Will be filled later from intel
-    });
-    
-    // Check for low quality indicators
-    const hasLowQuality = match.supplierId?.includes("dummy") || 
-                          match.supplierId?.includes("test") ||
-                          flags.some(f => f.includes("low_quality") || f.includes("dummy"));
-    
-    const evidenceStrength = computeEvidenceStrength({
-      anchorHits,
-      recordCount: match.evidence?.recordCount,
-      productCount: match.evidence?.productCount,
-      priceCoverage: undefined, // Will be filled later from intel
-      isLogistics: match.supplierType === "logistics",
-      hasDummyId: match.supplierId?.includes("dummy") || false,
-      hasLowQuality: hasLowQuality,
-    });
-    
-    return {
-      ...match,
-      rerankScore: finalRerankScore, // Store reranked score separately
-      // Keep original matchScore for reference
-      // Store flags for debugging (not exposed to UI)
-      _rerankFlags: flags,
-      // Store matched anchors for UI display (up to 2)
-      _matchedAnchors: matchedAnchors,
-      // Store why_lines and evidence_strength for explainable lead cards
-      _whyLines: whyLines,
-      _evidenceStrength: evidenceStrength,
-      // Store category family for grouping (optional, not displayed as product fact)
-      _categoryFamily: categoryProfile.familyLabel,
-    };
-  });
-  
-  // Apply filters: minAnchorHits and minScoreToKeep (using defaults for backward compatibility)
-  const minAnchorHits = 1; // Default minimum anchor hits
-  const minScoreToKeep = 10; // Default minimum score
-  
-  const filteredByAnchor = rerankedMatches.filter((match) => {
-    // Check minAnchorHits (optional filter)
-    if (minAnchorHits > 0) {
-      const fullText = `${match.supplierName} ${match.productName}`.toLowerCase();
-      const anchorHits = countAnchorHitsStrict(fullText, anchorTerms);
-      if (anchorHits < minAnchorHits) {
-        match._removalReasons = [...(match._removalReasons || []), `anchor_hits_too_low:${anchorHits}`];
-        return false;
-      }
-    }
-    
-    // Check minScoreToKeep
-    const finalScore = match.rerankScore ?? match.matchScore;
-    if (finalScore < minScoreToKeep) {
-      match._removalReasons = [...(match._removalReasons || []), `score_too_low:${finalScore}`];
-      return false;
-    }
-    
-    return true;
-  });
-
-  // Safety net for hybrid profiles: if reranking dropped all candidates but we had some pre-filter,
-  // restore the best pre-filter candidates with low confidence flag
-  let hybridFallbackApplied = false;
-  let finalCandidatesBeforeFallback = filteredByAnchor;
-  
-  if (categoryKey === "hybrid" && filteredByAnchor.length === 0 && rerankedMatches.length > 0) {
-    console.log(
-      `[Pipeline Step 2.6] HYBRID SAFETY NET: Reranking dropped all ${rerankedMatches.length} candidates. Restoring best pre-filter matches with low confidence.`
-    );
-    
-    // Restore top 3 candidates from pre-filter, sorted by original matchScore
-    const topPreFilter = rerankedMatches
-      .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0))
-      .slice(0, 3)
-      .map(m => ({
-        ...m,
-        rerankScore: Math.max(1, (m.matchScore ?? 0) * 0.5), // Halve score as low-confidence indicator
-        _rerankFlags: [...(m._rerankFlags || []), 'hybrid_fallback'],
-        _fallbackReason: 'hybrid_rerank_zero_candidates',
-      }));
-    
-    finalCandidatesBeforeFallback = topPreFilter;
-    hybridFallbackApplied = true;
-    
-    console.log(
-      `[Pipeline Step 2.6] HYBRID SAFETY NET: Restored ${topPreFilter.length} candidates with halved confidence scores`
-    );
-  }
-  
-  // Deduplicate by supplier_id before final sorting
-  // Group by supplier_id (or canonicalized supplier_name if supplier_id is missing)
-  const supplierGroups = new Map<string, SupplierMatch[]>();
-  for (const match of finalCandidatesBeforeFallback) {
-    const groupKey = match.supplierId && match.supplierId !== "unknown" 
-      ? match.supplierId 
-      : match.supplierName.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").substring(0, 100);
-    
-    if (!supplierGroups.has(groupKey)) {
-      supplierGroups.set(groupKey, []);
-    }
-    supplierGroups.get(groupKey)!.push(match);
-  }
-  
-  // Pick best match per supplier (highest rerankScore)
-  const deduplicatedMatches: SupplierMatch[] = [];
-  for (const [groupKey, groupMatches] of supplierGroups.entries()) {
-    // Sort group by rerankScore and pick the best one
-    const bestMatch = groupMatches.sort((a, b) => {
-      const scoreA = a.rerankScore ?? a.matchScore ?? 0;
-      const scoreB = b.rerankScore ?? b.matchScore ?? 0;
-      return scoreB - scoreA;
-    })[0];
-    
-    // Merge matched anchors from all matches in the group
-    const allAnchors = new Set<string>();
-    groupMatches.forEach(m => {
-      const anchors = (m as any)._matchedAnchors || [];
-      anchors.forEach((a: string) => allAnchors.add(a));
-    });
-    const safeAnchors = Array.from(allAnchors);
-    (bestMatch as any)._matchedAnchors = safeAnchors.slice(0, 2);
-    
-    // Merge why_lines from all matches
-    const allWhyLines = new Set<string>();
-    groupMatches.forEach(m => {
-      const whyLines = (m as any)._whyLines || [];
-      if (Array.isArray(whyLines)) {
-        whyLines.forEach((w: string) => {
-          if (typeof w === 'string') allWhyLines.add(w);
-    });
-      }
-    });
-    const safeWhyLines = Array.from(allWhyLines);
-    (bestMatch as any)._whyLines = safeWhyLines.slice(0, 3);
-    
-    // Keep strongest evidence_strength
-    const strengthOrder = { strong: 3, medium: 2, weak: 1 };
-    let bestStrength = "weak";
-    let bestStrengthScore = 1;
-    groupMatches.forEach(m => {
-      const strength = (m as any)._evidenceStrength || "weak";
-      const score = strengthOrder[strength as keyof typeof strengthOrder] || 1;
-      if (score > bestStrengthScore) {
-        bestStrengthScore = score;
-        bestStrength = strength;
-      }
-    });
-    (bestMatch as any)._evidenceStrength = bestStrength;
-    
-    // Infer company type from supplier name
-    (bestMatch as any)._companyType = inferCompanyType(bestMatch.supplierName);
-    
-    deduplicatedMatches.push(bestMatch);
-  }
-  
-  // Sort by rerankScore (not matchScore!) and apply final limit
-  // Ensure deduplicatedMatches is an array before processing
-  const safeDeduplicatedMatches = Array.isArray(deduplicatedMatches) ? deduplicatedMatches : [];
-  // Ensure profileLimits.maxFinal is a valid number
-  const maxFinal = (profileLimits?.maxFinal && typeof profileLimits.maxFinal === 'number') ? profileLimits.maxFinal : 10;
-  const finalMatches = safeDeduplicatedMatches
-    .sort((a, b) => {
-      // Sort by: exact matches first, then by rerankScore (not matchScore!)
-      if (a.isInferred !== b.isInferred) {
-        return a.isInferred ? 1 : -1;
-      }
-      const scoreA = a.rerankScore ?? a.matchScore;
-      const scoreB = b.rerankScore ?? b.matchScore;
-      return scoreB - scoreA;
-    });
-    // Return ALL matches, no limit - removed .slice(0, maxFinal)
-  
-  // Log top 5 for debugging
-  console.log(`[Pipeline Step 2.6] Top 5 after reranking:`);
-  if (Array.isArray(finalMatches) && finalMatches.length > 0) {
-    finalMatches.slice(0, 5).forEach((m, i) => {
-      console.log(
-        `  ${i + 1}. ${m.supplierName} | matchScore: ${m.matchScore} | rerankScore: ${m.rerankScore ?? m.matchScore} | flags: ${m._rerankFlags?.join(", ") || "none"}`
-      );
-    });
-  }
-  
-  console.log(
-    `[Pipeline Step 2.6] Reranked ${enrichedMatches.length} matches to ${finalMatches.length} final candidates (category: ${categoryKey})${hybridFallbackApplied ? ' [FALLBACK APPLIED]' : ''}`
-  );
-
-  // Cache the matches using admin client (bypasses RLS)
-  if (cacheKey && finalMatches.length > 0) {
-    const supabaseAdmin = createAdminClient();
-    
-    // Use onConflict with the appropriate unique index
-    // Migration must be applied: migration_fix_supplier_matches_cache.sql
-    // Guard: analysis_id must not be null when using analysis_id,supplier_id conflict target
-    let conflictColumns: string;
-    if (productId) {
-      conflictColumns = "product_id,supplier_id";
-    } else {
-      if (!analysisId) {
-        console.warn(
-          "[Pipeline Step 2.5] Cannot cache matches: analysis_id is null but productId is also null. Skipping cache."
-        );
-        return {
-          matches: finalMatches,
-          cached: false,
-        };
-      }
-      conflictColumns = "analysis_id,supplier_id";
-    }
-    
-    // EMERGENCY FIX: Store report_id if available (passed as parameter)
-    const { error: cacheError } = await supabaseAdmin
-      .from("product_supplier_matches")
-      .upsert(
-        finalMatches.map((match) => ({
-          product_id: productId || null,
-          analysis_id: analysisId || null,
-          report_id: reportId || null, // EMERGENCY FIX: Also store report_id for hydration
-          supplier_id: match.supplierId,
-          supplier_name: match.supplierName,
-          product_name: match.productName,
-          unit_price: match.unitPrice,
-          moq: match.moq,
-          lead_time: match.leadTime,
-          match_score: match.matchScore,
-          match_reason: match.matchReason,
-          import_key_id: match.importKeyId,
-          currency: match.currency,
-          updated_at: new Date().toISOString(),
-        })),
-        {
-          onConflict: conflictColumns,
-        }
-      );
-    
-    if (cacheError) {
-      // Check if it's the 42P10 error (missing unique constraint)
-      if (cacheError.code === "42P10" || cacheError.message?.includes("unique constraint") || cacheError.message?.includes("ON CONFLICT")) {
-        // Log only once per request using request-scoped warnOnce callback
-        if (warnOnce) {
-          warnOnce(
-            `[Pipeline Step 2.5] Cache upsert skipped: Missing unique index. Please run migration: supabase/migration_fix_supplier_matches_cache.sql. Continuing without cache.`
-          );
-        }
-        // Continue without caching - don't fail the pipeline
-      } else {
-        console.warn(`[Pipeline Step 2.5] Cache error (non-fatal):`, cacheError.message || cacheError);
-        // Don't throw - cache errors shouldn't break the pipeline
-      }
-    } else {
-      console.log(
-        `[Pipeline Step 2.5] Successfully cached ${finalMatches.length} supplier matches`
-      );
+        summary: match.matchReason,
+      });
+    } catch (err) {
+      console.warn(`[Pipeline] Enrichment failed for ${match.supplierId}:`, err);
+      enrichedMatches.push(match);
     }
   }
 
-  // ============================================================================
-  // Final Summary: Matching Quality Metrics
-  // ============================================================================
-  // Count exclusions for summary logging
-  // Ensure allMatches is defined to avoid ReferenceError
-  const allMatches = finalMatches;
-  let logisticsExcludedCount = 0;
-  let otherExcludedCount = 0;
-  
-  // Note: At this stage, excluded_reason flags are set but matches aren't removed
-  // They will be filtered in the reports API layer
-  allMatches.forEach((match) => {
-    const flags = match.flags || {};
-    if (flags.excluded_reason === "logistics_only") {
-      logisticsExcludedCount++;
-    } else if (flags.excluded_reason) {
-      otherExcludedCount++;
-    }
-  });
-  
-  const matchingSummary = {
-    totalMatches: finalMatches.length,
-    exactMatches: finalMatches.filter((m) => !m.isInferred).length,
-    inferredMatches: finalMatches.filter((m) => m.isInferred).length,
-    excludedCount: logisticsExcludedCount + otherExcludedCount,
-    logisticsExcludedCount,
-    topScore: finalMatches[0]?.matchScore ?? null,
-    topRerankScore: finalMatches[0]?.rerankScore ?? null,
-    recommendedCount: finalMatches.filter((m) => !m.isInferred && (m.rerankScore ?? m.matchScore ?? 0) >= 50).length,
-    candidateCount: finalMatches.filter((m) => m.isInferred || (m.rerankScore ?? m.matchScore ?? 0) < 50).length,
-  };
-  
-  console.log(
-    "[Pipeline Step 2] Final Supplier Matching Summary:",
-    matchingSummary
-  );
-  
-  // Log noise token impact if applicable
-  if (hasRemovedNoiseTokens) {
-    console.log(
-      "[Pipeline Step 2] Noise tokens were removed during search. This may have improved recall for character-branded products."
-    );
-  }
-  
-  // Log food material tightening impact
-  if (isFoodCategory(analysis.category)) {
-    console.log(
-      "[Pipeline Step 2] Food category: Used tightened 2-token material fallback to reduce garbage recalls"
-    );
-  }
-
-  // EMERGENCY FIX: Guarantee minimum 5 results
-  // If we have fewer than 5 matches, add category-based fallback matches
-  if (finalMatches.length < 5) {
-    console.log(`[Pipeline Step 2] EMERGENCY: Only ${finalMatches.length} matches found. Adding category-based fallback...`);
-    
+  // Cache the results if we have matches
+  if (cacheKey && enrichedMatches.length > 0) {
     try {
-      // Search for large exporters in the same category
-      const categoryFallbackQuery = supabase
-        .from("supplier_products")
-        .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id,currency")
-        .limit(50);
+      const supabaseAdmin = createAdminClient();
+      let conflictColumns = productId ? "product_id,supplier_id" : "analysis_id,supplier_id";
       
-      if (analysis.category) {
-        categoryFallbackQuery.ilike("category", `%${analysis.category.toUpperCase()}%`);
-      }
-      
-      const { data: categoryFallback, error: fallbackError } = await categoryFallbackQuery;
-      
-      if (!fallbackError && categoryFallback && categoryFallback.length > 0) {
-        // Extract real company names
-        enrichSupplierNamesFromDescription(categoryFallback);
-        
-        // Convert to matches with lower scores
-        const existingIds = new Set(finalMatches.map(m => m.supplierId));
-        const fallbackMatches = categoryFallback
-          .filter(item => {
-            const supplierNameRaw = (item.supplier_name as string) || "";
-            // Skip if already in results or if truly invalid
-            if (existingIds.has(item.supplier_id as string)) return false;
-            if (isBannedCandidate((item.product_name as string || "").toLowerCase())) return false;
-            return true;
-          })
-          .slice(0, 10 - finalMatches.length) // Fill up to 10 total
-          .map((item) => {
-            const { score } = calculateMatchScore(item, analysis);
-            // Give fallback matches lower but positive scores
-            const fallbackScore = Math.max(5, score - 20);
-            
-            return {
-              supplierId: item.supplier_id as string,
-              supplierName: (item.supplier_name as string) || "Unknown Supplier",
-              productName: normalizeProductName(item.product_name as string),
-              unitPrice: (item.unit_price as number) || 0,
-              moq: (item.moq as number) || 1,
-              leadTime: (item.lead_time as number) || 0,
-              matchScore: fallbackScore,
-              matchReason: "Category fallback match",
-              importKeyId: (item.import_key_id as string) || null,
-              currency: (item.currency as string) || "USD",
-              isInferred: true, // Mark as inferred/fallback
-            };
-          });
-        
-        // Add fallback matches to final results
-        finalMatches.push(...fallbackMatches);
-        finalMatches.sort((a, b) => b.matchScore - a.matchScore);
-        
-        console.log(`[Pipeline Step 2] EMERGENCY: Added ${fallbackMatches.length} category fallback matches. Total: ${finalMatches.length}`);
-      }
-    } catch (emergencyErr) {
-      console.warn(`[Pipeline Step 2] EMERGENCY fallback error:`, emergencyErr);
-    }
-    
-    // If still less than 5, search for any category matches
-    if (finalMatches.length < 5) {
-      console.log(`[Pipeline Step 2] EMERGENCY: Still only ${finalMatches.length} matches. Searching for any category matches...`);
-      try {
-        const emergencyQuery = supabase
-          .from("supplier_products")
-          .select("id,supplier_id,supplier_name,product_name,product_description,unit_price,moq,lead_time,category,hs_code,import_key_id,currency")
-          .limit(20);
-        
-        if (analysis.category) {
-          emergencyQuery.ilike("category", `%${analysis.category.toUpperCase()}%`);
-        }
-        
-        const { data: emergencyData } = await emergencyQuery;
-        
-        if (emergencyData && emergencyData.length > 0) {
-          enrichSupplierNamesFromDescription(emergencyData);
-          
-          const existingIds = new Set(finalMatches.map(m => m.supplierId));
-          const emergencyMatches = emergencyData
-            .filter(item => {
-              const supplierId = item.supplier_id as string;
-              if (existingIds.has(supplierId)) return false;
-              if (isBannedCandidate((item.product_name as string || "").toLowerCase())) return false;
-              return true;
-            })
-            .slice(0, 5 - finalMatches.length)
-            .map((item) => {
-              const { score } = calculateMatchScore(item, analysis);
-              return {
-                supplierId: item.supplier_id as string,
-                supplierName: (item.supplier_name as string) || "Unknown Supplier",
-                productName: normalizeProductName(item.product_name as string),
-                unitPrice: (item.unit_price as number) || 0,
-                moq: (item.moq as number) || 1,
-                leadTime: (item.lead_time as number) || 0,
-                matchScore: Math.max(1, score), // Minimum score of 1
-                matchReason: "Emergency fallback",
-                importKeyId: (item.import_key_id as string) || null,
-                currency: (item.currency as string) || "USD",
-                isInferred: true,
-              };
-            });
-          
-          finalMatches.push(...emergencyMatches);
-          finalMatches.sort((a, b) => b.matchScore - a.matchScore);
-          console.log(`[Pipeline Step 2] EMERGENCY: Added ${emergencyMatches.length} emergency matches. Total: ${finalMatches.length}`);
-        }
-      } catch (emergencyErr) {
-        console.warn(`[Pipeline Step 2] EMERGENCY fallback error:`, emergencyErr);
-      }
+      await supabaseAdmin
+        .from("product_supplier_matches")
+        .upsert(
+          enrichedMatches.map((match) => ({
+            product_id: productId || null,
+            analysis_id: analysisId || null,
+            report_id: reportId || null,
+            supplier_id: match.supplierId,
+            supplier_name: match.supplierName,
+            product_name: match.productName,
+            unit_price: match.unitPrice,
+            moq: match.moq,
+            lead_time: match.leadTime,
+            match_score: match.matchScore,
+            match_reason: match.matchReason,
+            import_key_id: match.importKeyId,
+            currency: match.currency,
+            updated_at: new Date().toISOString(),
+          })),
+          { onConflict: conflictColumns }
+        );
+      console.log(`[Pipeline Step 2] Cached ${enrichedMatches.length} matches`);
+    } catch (err) {
+      console.warn("[Pipeline Step 2] Failed to cache matches:", err);
     }
   }
 
-  return {
-    matches: finalMatches,
-    cached: false,
-  };
+  return { matches: enrichedMatches, cached: false };
 }
 
 /**
@@ -3670,13 +2033,13 @@ function calculateMatchScore(
     .filter((w) => w.length >= 2)
     .filter(w => !['AND', 'WITH', 'FOR', 'FROM', 'BY', 'THE', 'A', 'AN', 'OF', 'IN', 'ON', 'AT', 'TO', 'AS'].includes(w));
   
-  const itemTokens = itemProductName
-    .toUpperCase()
+  const itemProductNameUpper = itemProductName.toUpperCase();
+  const itemTokens = itemProductNameUpper
     .replace(/[^A-Z0-9\s]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length >= 2);
   
-  // Count matching tokens
+  // Count matching tokens in product name
   const matchingTokens = analysisTokens.filter(t => itemTokens.includes(t));
   const tokenMatchCount = matchingTokens.length;
   const minTokensForMatch = 2; // EMERGENCY FIX: At least 2 tokens must match
@@ -3684,14 +2047,26 @@ function calculateMatchScore(
   // Token overlap score (0-40 points) - Based on token count
   if (tokenMatchCount >= minTokensForMatch) {
     // Base score for having minimum tokens
-    score += 20;
+    score += 25; // Increased from 20
     // Bonus for more matching tokens
-    score += Math.min(20, (tokenMatchCount - minTokensForMatch) * 5);
-    reasons.push(`${tokenMatchCount} token match(es)`);
+    score += Math.min(25, (tokenMatchCount - minTokensForMatch) * 5);
+    reasons.push(`${tokenMatchCount} name token match(es)`);
   } else if (tokenMatchCount === 1) {
     // Single token match gets lower score but still included
     score += 10;
-    reasons.push("1 token match");
+    reasons.push("1 name token match");
+  }
+
+  // EMERGENCY FIX: Cargo Description (product_description) match bonus (0-40 points)
+  // HIGHER WEIGHT for ImportKey trade data compatibility
+  if (item.product_description) {
+    const desc = (item.product_description as string).toUpperCase();
+    const matchingDescTokens = analysisTokens.filter(t => desc.includes(t));
+    if (matchingDescTokens.length > 0) {
+      const descBonus = 20 + Math.min(20, matchingDescTokens.length * 5);
+      score += descBonus;
+      reasons.push(`${matchingDescTokens.length} description token match(es)`);
+    }
   }
 
   // Name similarity (0-35 points) - Levenshtein based (fallback)
