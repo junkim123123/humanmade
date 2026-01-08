@@ -515,7 +515,7 @@ function normalizeMatch(match: any, index: number): NormalizedSupplierMatch {
 
     // Format to Title Case if all uppercase
     if (supplierName === supplierName.toUpperCase() && supplierName !== supplierName.toLowerCase()) {
-      supplierName = supplierName.toLowerCase().split(' ').map(word => {
+      supplierName = supplierName.toLowerCase().split(' ').map((word: string) => {
         return word.charAt(0).toUpperCase() + word.slice(1);
       }).join(' ');
     }
