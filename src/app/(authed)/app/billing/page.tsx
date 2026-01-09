@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle, Gift, Check, X, ShieldCheck, Plus } from "lucide-react";
 import { fetchMyCredits, fetchMyCreditTransactions } from "./actions";
+import type { CreditTransaction } from "@/server/actions/credits";
 import { formatDate, formatCurrency } from "@/lib/utils/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
