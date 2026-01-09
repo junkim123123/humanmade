@@ -174,12 +174,12 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">💳 Billing</h3>
+            <h3 className="text-base font-semibold text-slate-900">Billing</h3>
             <p className="text-sm text-slate-600">
-              Available Credits: <span className="font-semibold text-emerald-600">${balanceInDollars}</span>
+              Available Credits: <span className="font-semibold text-emerald-600">{balance}</span>
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              Your $49 deposit is credited toward your first factory order total.
+              Credits are used for Blueprint verifications. Applied to your first factory order based on our policy.
             </p>
           </div>
           <Link
@@ -195,7 +195,7 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">👤 Profile</h3>
+            <h3 className="text-base font-semibold text-slate-900">Profile</h3>
             <p className="text-sm text-slate-600">
               {profile?.full_name || profile?.company_name 
                 ? `${profile.full_name || ""}${profile.full_name && profile.company_name ? " · " : ""}${profile.company_name || ""}`
@@ -262,7 +262,7 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">🔔 Notifications</h3>
+            <h3 className="text-base font-semibold text-slate-900">Notifications</h3>
             <p className="text-sm text-slate-600">Email notification preferences</p>
           </div>
           <button
@@ -342,7 +342,7 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">🏢 Import Settings</h3>
+            <h3 className="text-base font-semibold text-slate-900">Import Settings</h3>
             <p className="text-sm text-slate-600">
               {profile?.shipping_city && profile?.shipping_country
                 ? `${profile.shipping_city}, ${profile.shipping_state || ""} ${profile.shipping_country}`
@@ -350,7 +350,7 @@ export function AccountSettings({
               }
             </p>
             <p className="text-[11px] text-blue-600 font-bold mt-1 uppercase tracking-tight">
-              Unlocks faster customs clearance when you order
+              This unlocks faster customs clearance when you place an order
             </p>
           </div>
           <button
@@ -427,7 +427,7 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">💬 Sourcing Support</h3>
+            <h3 className="text-base font-semibold text-slate-900">Sourcing Support</h3>
             <p className="text-sm text-slate-600">Get help with sourcing questions or issues</p>
           </div>
           <Link
@@ -443,7 +443,7 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">🔐 Password login</h3>
+            <h3 className="text-base font-semibold text-slate-900">Password login</h3>
             <p className="text-sm text-slate-600">Use a password to sign in without email links</p>
           </div>
           <button
@@ -499,7 +499,7 @@ export function AccountSettings({
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">⚙️ Advanced</h3>
+            <h3 className="text-base font-semibold text-slate-900">Advanced</h3>
             <p className="text-sm text-slate-600">For troubleshooting only</p>
           </div>
           <button

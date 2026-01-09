@@ -48,8 +48,8 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
               Nexi, your sourcing manager
             </h1>
             <p className="text-slate-600 text-lg font-medium leading-relaxed">
-              Account and order context attached automatically for faster resolution.<br/>
-              Response time: within 12 hours.
+              Contact support with your account and order context attached<br/>
+              Response time: within 12 hours for verification related requests
             </p>
           </div>
         </header>

@@ -187,7 +187,7 @@ export function PublicNavbar({ user }: PublicNavbarProps) {
 
   const navItems = useMemo(
     () => [
-      { href: "/analyze", label: "Analyze (Free)" },
+      { href: "/analyze", label: "Free Analyze" },
       { href: "/pricing", label: "Pricing" },
       { href: "/sample-report", label: "Sample Report" },
       { href: "/proof", label: "Proof" },
@@ -300,9 +300,9 @@ export function AppNavbar({ user, needsAttentionCount = 0, showBilling = true }:
 
   const navItems = useMemo(
     () => [
-      { href: "/app/analyze", label: "Analyze (Free)", icon: Search },
-      { href: "/app/reports", label: "Blueprints", icon: FileText },
-      { href: "/app/orders", label: "Execution", icon: ShoppingBag, badge: needsAttentionCount },
+      { href: "/app/analyze", label: "Free Analyze", icon: Search },
+      { href: "/app/reports", label: "Blueprint", icon: FileText },
+      { href: "/app/orders", label: "Execute", icon: ShoppingBag, badge: needsAttentionCount },
     ],
     [needsAttentionCount]
   );

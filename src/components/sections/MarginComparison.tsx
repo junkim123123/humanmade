@@ -188,7 +188,7 @@ export default function MarginComparison() {
               Compare self-sourcing on Alibaba vs our full-service factory direct sourcing.
             </p>
             <p className="text-sm font-semibold text-blue-600 bg-blue-50 w-fit mx-auto px-3 py-1 rounded-full border border-blue-100">
-              Specialized in Korea/Japan Retail Sourcing (Don Quijote partners)
+              Specialized in Korea/Japan Retail Sourcing
             </p>
           </div>
 

@@ -615,20 +615,20 @@ async function login(page: Page): Promise<boolean> {
 }
 
 /**
- * 키워드로 검색하고 CSV 다운로드
+ * Search by keyword and download CSV
  */
 /**
- * 키워드를 URL-safe 형식으로 변환
- * 예: "Glass Pipe" -> "glass-pipe"
+ * Normalize keyword to URL-safe format
+ * Example: "Glass Pipe" -> "glass-pipe"
  */
 function normalizeKeyword(keyword: string): string {
   return keyword
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9\s-]/g, '') // 특수문자 제거 (하이픈 제외)
-    .replace(/\s+/g, '-') // 공백을 하이픈으로
-    .replace(/-+/g, '-') // 연속된 하이픈을 하나로
-    .replace(/^-|-$/g, ''); // 앞뒤 하이픈 제거
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except hyphen
+    .replace(/\s+/g, '-') // Replace spaces with hyphen
+    .replace(/-+/g, '-') // Replace multiple hyphens with one
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
 
 async function harvestKeyword(

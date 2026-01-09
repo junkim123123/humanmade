@@ -287,7 +287,7 @@ export default function PricingPage() {
             {[
               {
                 q: "How accurate is the free estimate?",
-                a: "A practical range for quick margin checks based on category benchmarks and shipping assumptions. Use it for go/no-go and sizing next steps.",
+                a: "Initial analysis uses market average data. At the $49 Blueprint stage, we refine estimates using actual invoices and customs data. All assumptions are clearly labeled.",
               },
               {
                 q: "What do I get for $49?",

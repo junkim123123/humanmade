@@ -25,7 +25,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Optimized sourcing via network intelligence",
     category: "Confectionery",
     colorClass: "bg-gradient-to-br from-rose-100 to-teal-100 border-rose-200",
-    image: "/product-photos/fruit-marshmallows/mmexport1758763658404.jpg",
+    image: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
     icon: <Candy className="w-16 h-16 text-rose-500" />,
   },
   {
@@ -34,7 +34,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Data-driven factory matching",
     category: "Toys",
     colorClass: "bg-gradient-to-br from-sky-100 to-indigo-100 border-sky-200",
-    image: "/product-photos/demon-slayer-keyring/mmexport1758763260109.jpg",
+    image: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
     icon: <ToyBrick className="w-16 h-16 text-blue-600" />,
   },
   {
@@ -43,7 +43,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Network-optimized quotes delivered",
     category: "Snacks",
     colorClass: "bg-gradient-to-br from-amber-100 to-violet-100 border-amber-200",
-    image: "/product-photos/3d-jelly/mmexport1758762843530.jpg",
+    image: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
     icon: <Cookie className="w-16 h-16 text-purple-600" />,
   },
 ];
@@ -54,8 +54,7 @@ interface ProofShowcaseProps {
 
 export default function ProofShowcase({ products = sampleProducts }: ProofShowcaseProps) {
   return (
-      <section className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-24 lg:py-32">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Retailer Logos Row */}
         <RetailerLogos className="mb-10" />
         {/* Header */}
@@ -91,8 +90,8 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                   }}
                 />
                 {/* Product Visual Area - Unified 1:1 aspect ratio */}
-                <div className="relative aspect-square rounded-xl overflow-hidden mb-5 bg-white/50 backdrop-blur-sm shadow-sm"
-                  style={{ height: '300px' }}>
+                <div className="relative aspect-square rounded-xl overflow-hidden mb-5 bg-white/50 backdrop-blur-sm shadow-sm mx-auto"
+                  style={{ width: '100%', maxWidth: '300px', height: '300px' }}>
                   {product.image ? (
                     <img
                       src={product.image.split('/').map(segment => encodeURIComponent(segment)).join('/')}
@@ -133,17 +132,17 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                   )}
                 </div>
                 {/* Category Tag */}
-                <div className="mb-2 relative z-10">
+                <div className="mb-2 relative z-10 flex justify-center">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-slate-700 border border-slate-200/50 shadow-sm">
                     {product.category}
                   </span>
                 </div>
                 {/* Product Name */}
-                <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2 relative z-10">
+                <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2 relative z-10 text-center">
                   {product.name}
                 </h3>
                 {/* Key Metric */}
-                <p className="text-base font-medium text-slate-500 relative z-10">
+                <p className="text-base font-medium text-slate-500 relative z-10 text-center">
                   {product.metric}
                 </p>
               </motion.div>
@@ -167,7 +166,6 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
           </div>
         </FadeUp>
       </div>
-    </section>
   );
 }
 

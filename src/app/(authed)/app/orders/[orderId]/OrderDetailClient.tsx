@@ -254,7 +254,7 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
                     type="email"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
-                    placeholder="Email (optional)"
+                    placeholder="Enter email for weekly status reports"
                     className="w-full h-11 pl-10 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
                   />
                 </div>
@@ -264,7 +264,7 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
                     type="tel"
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
-                    placeholder="WhatsApp (optional)"
+                    placeholder="Enter phone for instant quote alerts"
                     className="w-full h-11 pl-10 pr-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
                   />
                 </div>
@@ -357,7 +357,7 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
                   <div className="max-w-[85%] rounded-2xl px-5 py-4 bg-white text-slate-900 border border-blue-100 shadow-sm">
                     <p className="text-[11px] uppercase tracking-widest font-bold text-blue-600 mb-2">Nexy AI • Sourcing Assistant</p>
                     <p className="text-[14px] leading-relaxed">
-                      Hello! I&apos;m Nexy, your AI-assisted sourcing manager. I&apos;ve started researching your product. To speed up factory matching, please confirm:<br/><br/>
+                      Hello! I&apos;m Nexy, your dedicated sourcing manager. I&apos;ve started researching your product. To speed up factory matching, please confirm:<br/><br/>
                       1. Your target unit price<br/>
                       2. Estimated order quantity<br/>
                       3. If you need samples first

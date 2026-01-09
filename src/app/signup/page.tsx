@@ -219,8 +219,8 @@ function SignUpPageContent() {
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 space-y-5">
             <div>
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Why create an account</p>
-              <h2 className="text-[22px] font-bold text-slate-900 mt-1">Unlock full sourcing history.</h2>
-              <p className="text-[14px] text-slate-600 mt-1">Build your sourcing intelligence OS — all your reports and decisions in one place.</p>
+              <h2 className="text-[22px] font-bold text-slate-900 mt-1">Sourcing Intelligence OS</h2>
+              <p className="text-[14px] text-slate-600 mt-1">Analysis results, HS decisions, and verification requests are accumulated in the same workspace.</p>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-[14px] text-slate-700">

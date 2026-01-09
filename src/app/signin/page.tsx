@@ -107,7 +107,7 @@ function SignInPageContent() {
             <div className="space-y-1">
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Sign in</p>
               <h1 className="text-[28px] font-bold text-slate-900 leading-tight">Save your reports and<br/>track progress all at once</h1>
-              <p className="text-[14px] text-slate-600">Manage your analysis results and verification progress in one place.</p>
+              <p className="text-[14px] text-slate-600">Analysis results, HS decisions, and verification requests are accumulated in the same workspace.</p>
             </div>
 
             {error && (
@@ -262,16 +262,16 @@ function SignInPageContent() {
             <div>
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Why NexSupply</p>
               <h2 className="text-[22px] font-bold text-slate-900 mt-1">Sourcing Intelligence OS</h2>
-              <p className="text-[14px] text-slate-600 mt-1">Keep analysis results, HS decisions, and verification requests in the same workspace.</p>
+              <p className="text-[14px] text-slate-600 mt-1">Analysis results, HS decisions, and verification requests are accumulated in the same workspace.</p>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Save every report and revisit them anytime.</span>
+                <span>Save work, not just logins.</span>
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Keep your landed cost and HS decisions in one place.</span>
+                <span>Save every report and revisit them anytime.</span>
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-700">
                 <Check className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />

@@ -127,7 +127,7 @@ export default async function AppReportsPage() {
                 href="/app/analyze"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-slate-900 text-[14px] font-semibold hover:bg-slate-100 transition-colors"
               >
-                + Analyze (Free)
+                + Free Analyze
               </Link>
               {totalPotentialSavings > 0 && (
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm">
@@ -145,7 +145,7 @@ export default async function AppReportsPage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-[18px] font-semibold text-slate-900 mb-1">Pipeline Summary</h2>
-            <p className="text-[13px] text-slate-500">Real-time status of your sourcing projects</p>
+            <p className="text-[13px] text-slate-500">Track every step from analysis to warehouse delivery</p>
           </div>
           <div className="text-[12px] text-slate-400 font-medium bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
             Updated just now
@@ -159,7 +159,7 @@ export default async function AppReportsPage() {
               <div className="p-2 rounded-lg bg-blue-50">
                 <Hourglass className="w-5 h-5 text-blue-600" />
               </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Analyze</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Free Analyze</span>
             </div>
             <div className="text-[32px] font-bold text-slate-900 leading-none">{pendingCount}</div>
             <p className="text-[13px] text-slate-500 mt-2">Awaiting verification</p>
@@ -170,7 +170,7 @@ export default async function AppReportsPage() {
               <div className="p-2 rounded-lg bg-amber-50">
                 <Clock className="w-5 h-5 text-amber-600" />
               </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Verification</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Blueprint</span>
             </div>
             <div className="text-[32px] font-bold text-slate-900 leading-none">{inVerificationCount}</div>
             <p className="text-[13px] text-amber-600 mt-2 font-medium">Outreach in progress</p>
@@ -181,7 +181,7 @@ export default async function AppReportsPage() {
               <div className="p-2 rounded-lg bg-emerald-50">
                 <Check className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Execution</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Execute</span>
             </div>
             <div className="text-[32px] font-bold text-slate-900 leading-none">{completedCount}</div>
             <p className="text-[13px] text-emerald-600 mt-2 font-medium">Quotes confirmed</p>

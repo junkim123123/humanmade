@@ -11,7 +11,7 @@ interface SectionFAQProps {
 const faqs = [
   {
     q: "How accurate are AI estimates?",
-    a: "Initial analysis uses market average data from 2024-2025 customs records. At the $49 Blueprint stage, we refine estimates using actual invoices and verified factory data. All assumptions are clearly labeled to ensure full transparency.",
+    a: "Initial analysis uses market average data. At the $49 Blueprint stage, we refine estimates using actual invoices and customs data. All assumptions are clearly labeled.",
   },
   {
     q: "When is the $49 refunded?",

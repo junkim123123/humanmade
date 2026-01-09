@@ -9,9 +9,9 @@ export function PricingCards() {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      {/* Free */}
+      {/* Free Analyze */}
       <PricingCard
-        title="Free"
+        title="Free Analyze"
         price="$0"
         description="Baseline ranges from LLM and category signals."
         included={[
@@ -26,9 +26,9 @@ export function PricingCards() {
         }}
       />
 
-      {/* Verification */}
+      {/* Blueprint */}
       <PricingCard
-        title="Verification"
+        title="Blueprint"
         price="$49 deposit per product"
         description={SLA_DESCRIPTION}
         badge="Credited on order"
@@ -41,16 +41,16 @@ export function PricingCards() {
           "3 supplier options with confirmed quotes",
         ]}
         cta={{
-          label: "Start Verification",
+          label: "Start verification",
           href: "/analyze",
           onClick: () => setShowVerificationModal(true),
         }}
       />
 
-      {/* Execution */}
+      {/* Execute */}
       <PricingCard
-        title="Execution"
-        price="5% of FOB"
+        title="Execute"
+        price="7% of FOB"
         priceSubLine="Only if you place an order"
         description={EXECUTION_FEE_LINE}
         included={[

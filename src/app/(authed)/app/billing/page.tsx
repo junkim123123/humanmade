@@ -114,12 +114,10 @@ export default function BillingPage() {
               Sourcing Credits
             </h1>
             <p className="text-[15px] text-slate-400 max-w-md mx-auto mb-6">
-              1 credit = 1 product verification. Your deposit is credited back on your first order. No expiry.
+              1 credit = 1 product verification<br/>
+              Deposit credited back on your first order<br/>
+              No expiry
             </p>
-            <div className="inline-flex items-center gap-2 text-[13px] text-slate-300 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
-              <ShieldCheck className="w-4 h-4 text-blue-400" />
-              <span>100% Credited back to your first order total</span>
-            </div>
           </div>
         </div>
       </div>

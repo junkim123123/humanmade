@@ -11,8 +11,8 @@ const milestoneLabels: Record<string, { label: string; description: string; icon
   pi_issued: { label: 'Supplier outreach', description: 'Contacting factories (1-2 days)', icon: Clock },
   payment_received: { label: 'Classification check', description: 'HS and duty checks (1 day)', icon: Clock },
   production_started: { label: 'Quotes ready', description: 'Verified quotes prepared (3-5 days)', icon: CheckCircle2 },
-  ready_to_ship: { label: 'Completed', description: 'Final deliverables ready', icon: CheckCircle2 },
-  shipped: { label: 'Shipped', description: 'In transit to warehouse', icon: Clock },
+  ready_to_ship: { label: 'Execution in Progress', description: 'Production and quality control', icon: CheckCircle2 },
+  shipped: { label: 'Shipment Tracking', description: 'In transit to warehouse', icon: Clock },
   delivered: { label: 'Delivered', description: 'Order received at destination', icon: CheckCircle2 },
 };
 
