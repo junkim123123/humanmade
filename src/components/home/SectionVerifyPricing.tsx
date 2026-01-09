@@ -15,7 +15,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-4 uppercase tracking-wider">
-              Example Basis • Sample Product: Premium Cotton T-shirt
+              Example Basis • Sample Product: Fruit Gummies Variety Pack
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
               Simple, Transparent Pricing
