@@ -9,7 +9,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold text-electric-blue-600">NexSupply</span>
           </Link>
 

@@ -48,7 +48,7 @@ export default function TopNav({ role = "VIEWER" }: { role?: UserRole }) {
       <div className="mx-auto max-w-[1040px] px-4 sm:px-6 h-[var(--topbar-h)]">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center h-full">
           {/* Logo */}
-          <Link href="/app/reports" className="flex items-center gap-2 text-xl font-bold text-electric-blue-600 shrink-0">
+          <Link href="/app/reports" className="text-xl font-bold text-electric-blue-600 shrink-0">
             NexSupply
           </Link>
 

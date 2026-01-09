@@ -83,7 +83,7 @@ export function TopNav({ variant, user }: TopNavProps) {
     <nav ref={navRef} className="border-b border-slate-200 bg-white sticky top-0 z-50" data-home-chrome="true">
       <div className="mx-auto max-w-[1040px] px-4 sm:px-6 h-[var(--topbar-h)]">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center h-full">
-          <Link href={variant === "public" ? "/" : "/app"} className="flex items-center gap-2 text-xl font-bold text-electric-blue-600 shrink-0">
+          <Link href={variant === "public" ? "/" : "/app"} className="text-xl font-bold text-electric-blue-600 shrink-0">
             <span>NexSupply</span>
           </Link>
           

@@ -401,10 +401,6 @@ export const ThreeImageUpload = forwardRef<ThreeImageUploadHandle, ThreeImageUpl
       <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[60fr_40fr]">
         {/* Main Dropzone (60%) */}
         <div className="space-y-3">
-          <div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">Product Photo</h3>
-            {/* <p className="text-xs text-slate-500">Required • Drag & drop your product image here</p> */}
-          </div>
           {renderSlot("product", "Product photo", "Clear front photo of the product or package. Make the name readable.", productGalleryInputRef, productCameraInputRef, productSlotRef, true, "", false)}
         </div>
         {/* Sub Dropzone (40%) - Stacked, below on mobile */}
