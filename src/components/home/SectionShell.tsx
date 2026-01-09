@@ -64,14 +64,14 @@ function extractSlots(children: React.ReactNode) {
     const props = node.props as { className?: string; children?: React.ReactNode };
     const className = (props?.className ?? "") as string;
 
-    // wrapper div 감지 (w-full h-full flex flex-col 같은 클래스를 가진 div)
+    // Detect wrapper div (div with classes like w-full h-full flex flex-col)
     const isWrapper = 
       typeof className === "string" &&
       className.includes("w-full") &&
       className.includes("h-full") &&
       (className.includes("flex") || className.includes("flex-col"));
 
-    // wrapper div가 아닐 때만 슬롯 체크 (wrapper 자체는 슬롯이 아님)
+    // Check slots only when it's not a wrapper div (the wrapper itself is not a slot)
     if (!isWrapper) {
       (Object.keys(SLOT_CLASS) as SlotKey[]).forEach((k) => {
         if (!found[k] && className.includes(SLOT_CLASS[k])) {
@@ -84,7 +84,7 @@ function extractSlots(children: React.ReactNode) {
 
     if (done()) return;
 
-    // children 탐색 (wrapper든 아니든 children은 탐색)
+    // Explore children (explore children whether it's a wrapper or not)
     const child = props?.children;
     if (child) {
       walk(child);

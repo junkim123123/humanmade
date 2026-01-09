@@ -119,7 +119,7 @@ export default function HomeDeck() {
               subtitle="Photo to cost to door."
               steps={[
                 {
-                  title: "무료 Analyze",
+                  title: "Free Analyze",
                   description: "Upload a product photo. Our AI calculates your real landed cost and margin estimate in minutes.",
                   color: "blue",
                   visual: (

@@ -36,9 +36,9 @@ export function AdvancedDetailsSlide({ report }: AdvancedDetailsSlideProps) {
       const parts: string[] = [];
       if (certs.length > 0) parts.push(`${certs.length} certification${certs.length > 1 ? "s" : ""} required`);
       if (labeling.length > 0) parts.push(`${labeling.length} labeling risk${labeling.length > 1 ? "s" : ""}`);
-      return parts.join(", ") + " (카테고리 기반, 불확실성 포함)";
+      return parts.join(", ") + " (Category-based, contains uncertainty)";
     }
-    return "카테고리 기반 추정, 추가 검증 권장";
+    return "Category-based estimate, further verification recommended";
   })();
 
   return (
@@ -86,23 +86,23 @@ export function AdvancedDetailsSlide({ report }: AdvancedDetailsSlideProps) {
                     .map(([reason, count]) => {
                       const label = (() => {
                         switch (reason) {
-                          case "tooShort": return "제품명 너무 짧음";
-                          case "various": return "Various 키워드";
-                          case "assorted": return "Assorted 키워드";
-                          case "mixed": return "Mixed 키워드";
-                          case "random": return "Random 키워드";
-                          case "banned": return "금지 키워드";
-                          case "badName": return "더미/무효 공급사명";
-                          case "logistics": return "물류 키워드";
-                          case "toyMismatch": return "카테고리 불일치 (toy)";
-                          case "foodMismatch": return "카테고리 불일치 (food)";
+                          case "tooShort": return "Product name too short";
+                          case "various": return "Various keyword";
+                          case "assorted": return "Assorted keyword";
+                          case "mixed": return "Mixed keyword";
+                          case "random": return "Random keyword";
+                          case "banned": return "Banned keyword";
+                          case "badName": return "Dummy/Invalid supplier name";
+                          case "logistics": return "Logistics keyword";
+                          case "toyMismatch": return "Category mismatch (toy)";
+                          case "foodMismatch": return "Category mismatch (food)";
                           default: return reason;
                         }
                       })();
                       return (
                         <div key={reason} className="flex items-center justify-between text-sm">
                           <span className="text-slate-700">{label}</span>
-                          <span className="font-medium text-slate-900">{count as number}개</span>
+                          <span className="font-medium text-slate-900">{count as number} items</span>
                         </div>
                       );
                     })}

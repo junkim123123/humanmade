@@ -1,38 +1,38 @@
 # NexSupply Design System
-## "Swell 계열 비주얼 + B2B 소싱 OS"
+## "Swell-style Visuals + B2B Sourcing OS"
 
-### 전체 방향
-- **비주얼**: Swell처럼 부드러운 카드/여백/톤
-- **구조·언어**: 파이프라인, 리포트, 검증, 오더 중심의 B2B OS
+### Overall Direction
+- **Visuals**: Soft cards, generous whitespace, and friendly tones inspired by Swell.
+- **Structure & Language**: A B2B OS centered around pipeline, reports, verification, and orders.
 
 ---
 
-## 화면별 역할 정리
+## Screen Roles & Definitions
 
-### 1. 마케팅 사이트 (`/`)
-**역할**: 신뢰/트랙레코드 강조
-- Don Quijote, 7‑Eleven, Amazon 사례
-- Hero, Flow Diorama, Margin Comparison, Proof Showcase
+### 1. Marketing Site (`/`)
+**Role**: Emphasize trust and track record
+- Use cases: Don Quijote, 7‑Eleven, Amazon
+- Components: Hero, Flow Diorama, Margin Comparison, Proof Showcase
 
-### 2. Analyze / Sample report (`/analyze`, `/sample-report/v2`)
-**역할**: "Draft buy plan" — 숫자+리스크 요약 카드
+### 2. Analyze / Sample Report (`/analyze`, `/sample-report/v2`)
+**Role**: "Draft buy plan" — Summary cards for figures and risks
 - Pre-verification estimate
-- Facts / Estimate / Proof 3단 구조
-- Draft → Verification → Execution 흐름 명시
+- 3-tier structure: Facts / Estimate / Proof
+- Clearly define the flow: Draft → Verification → Execution
 
-### 3. App 홈 / Reports (`/app/reports`)
-**역할**: "Supply Chain Control Center" — 파이프라인 보드
+### 3. App Home / Reports (`/app/reports`)
+**Role**: "Supply Chain Control Center" — Pipeline board
 - Sourcing, verification, logistics — all in one place
-- Draft → Verification → Execution 시각화
-- Pipeline 상태: Analyzing → Verifying → Ready to Order
+- Visualize the Draft → Verification → Execution flow
+- Pipeline Statuses: Analyzing → Verifying → Ready to Order
 
 ---
 
-## UI 스타일 가이드
+## UI Style Guide
 
-### 카드 (Card)
+### Card
 
-#### Level 1: 섹션 래퍼 카드
+#### Level 1: Section Wrapper Card
 ```tsx
 className="
   rounded-3xl border border-slate-200 bg-white/95
@@ -41,7 +41,7 @@ className="
 "
 ```
 
-#### Level 2: 내부 컨텐츠 카드
+#### Level 2: Internal Content Card
 ```tsx
 className="
   rounded-2xl border border-slate-200 bg-white/90
@@ -52,7 +52,7 @@ className="
 "
 ```
 
-#### Level 3: 작은 정보 카드
+#### Level 3: Small Info Card
 ```tsx
 className="
   rounded-xl border border-slate-200 bg-slate-50/90
@@ -61,17 +61,17 @@ className="
 "
 ```
 
-**공통 원칙:**
-- 라운드 코너: `rounded-3xl` (Level 1), `rounded-2xl` (Level 2), `rounded-xl` (Level 3)
-- 연한 그림자: 깊이감 있지만 부드럽게
-- 섹션별 헤더 + 짧은 설명 한 줄
-- Hover 효과: 살짝 위로 떠오르는 느낌 (`-translate-y-[2px]`)
+**Common Principles:**
+- Corner Radius: `rounded-3xl` (Level 1), `rounded-2xl` (Level 2), `rounded-xl` (Level 3)
+- Light Shadows: Deep but soft
+- Section Header + Concise one-line description
+- Hover Effect: Subtle upward lift (`-translate-y-[2px]`)
 
 ---
 
-### 뱃지 (Badge)
+### Badge
 
-#### 상태 뱃지 (Status Badge)
+#### Status Badge
 ```tsx
 // Completed
 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-[12px] font-medium"
@@ -89,15 +89,15 @@ className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-1
 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 text-[12px] font-medium"
 ```
 
-**원칙:**
-- Pill형 (`rounded-full`)
-- 색은 절제: emerald, amber, slate, yellow, blue만 사용
-- 텍스트: `text-[12px] font-medium`
-- 아이콘 포함 가능 (gap-1.5)
+**Principles:**
+- Pill-shaped (`rounded-full`)
+- Restrained color palette: Use only emerald, amber, slate, yellow, and blue
+- Typography: `text-[12px] font-medium`
+- Icon inclusion allowed (gap-1.5)
 
 ---
 
-### 버튼 (Button)
+### Button
 
 #### Primary CTA
 ```tsx
@@ -133,16 +133,16 @@ className="
 "
 ```
 
-**원칙:**
-- 항상 "동사 + 도메인 명사": "Start verification", "View report", "Move to orders"
-- Primary: 깊은 그림자, Secondary: 얕은 그림자 또는 border만
+**Principles:**
+- Always "Verb + Domain Noun": "Start verification", "View report", "Move to orders"
+- Primary: Deep shadow; Secondary: Shallow shadow or border-only
 - `rounded-full` (pill shape)
 
 ---
 
-### 타이포그래피 (Typography)
+### Typography
 
-#### 헤더
+#### Headers
 ```tsx
 // H1 (Hero)
 className="text-[28px] sm:text-[32px] font-bold text-slate-900 leading-tight"
@@ -154,7 +154,7 @@ className="text-[20px] sm:text-[22px] font-semibold text-slate-900"
 className="text-[16px] font-semibold text-slate-900"
 ```
 
-#### 바디
+#### Body
 ```tsx
 // Body Large
 className="text-[15px] text-slate-600 leading-relaxed"
@@ -169,39 +169,39 @@ className="text-[13px] text-slate-600 leading-relaxed"
 className="text-[12px] text-slate-500"
 ```
 
-**원칙:**
-- 헤더는 굵고 짧게 (`font-bold` 또는 `font-semibold`)
-- 바디는 13–14px로 읽기 편하게
-- 색상: `text-slate-900` (헤더), `text-slate-600` (바디), `text-slate-500` (캡션)
+**Principles:**
+- Headers should be bold and concise (`font-bold` or `font-semibold`)
+- Body text should be 13–14px for readability
+- Colors: `text-slate-900` (Header), `text-slate-600` (Body), `text-slate-500` (Caption)
 
 ---
 
-### 색상 (Color Palette)
+### Color Palette
 
-#### 베이스
-- **White**: `bg-white` / `bg-white/95` (카드 배경)
-- **Slate 50**: `bg-slate-50` (섹션 배경)
-- **Slate 100**: `bg-slate-100` (뱃지, 아이콘 배경)
-- **Slate 200**: `border-slate-200` (경계선)
-- **Slate 600**: `text-slate-600` (바디 텍스트)
-- **Slate 900**: `text-slate-900` (헤더, Primary 버튼)
+#### Base
+- **White**: `bg-white` / `bg-white/95` (Card background)
+- **Slate 50**: `bg-slate-50` (Section background)
+- **Slate 100**: `bg-slate-100` (Badge, Icon background)
+- **Slate 200**: `border-slate-200` (Borders)
+- **Slate 600**: `text-slate-600` (Body text)
+- **Slate 900**: `text-slate-900` (Headers, Primary buttons)
 
-#### 포인트 색상 (1–2색만 사용)
-- **Emerald** (성공/완료): `bg-emerald-100 text-emerald-700 border-emerald-200`
-- **Amber** (진행중/주의): `bg-amber-100 text-amber-700 border-amber-200`
-- **Blue** (정보/액션 필요): `bg-blue-100 text-blue-700 border-blue-200`
-- **Yellow** (경고/리스크): `bg-yellow-100 text-yellow-700 border-yellow-200`
+#### Accent Colors (Use only 1–2 per context)
+- **Emerald** (Success/Completed): `bg-emerald-100 text-emerald-700 border-emerald-200`
+- **Amber** (In-progress/Caution): `bg-amber-100 text-amber-700 border-amber-200`
+- **Blue** (Info/Action Required): `bg-blue-100 text-blue-700 border-blue-200`
+- **Yellow** (Warning/Risk): `bg-yellow-100 text-yellow-700 border-yellow-200`
 
-**원칙:**
-- 베이스는 흰색/슬레이트
-- 포인트는 딱 1–2색만 사용 (상황에 따라)
-- 절제된 색상 사용
+**Principles:**
+- Base is white/slate
+- Point colors should be limited to 1–2 per context
+- Use restrained, sophisticated color choices
 
 ---
 
-### 여백 (Spacing)
+### Spacing
 
-#### 섹션 간격
+#### Section Spacing
 ```tsx
 // Section Padding
 className="py-12 lg:py-16"
@@ -214,7 +214,7 @@ className="max-w-5xl mx-auto" // Reports/App
 className="max-w-6xl mx-auto" // Marketing
 ```
 
-#### 카드 내부 여백
+#### Card Internal Spacing
 ```tsx
 // Level 1 Card
 className="p-5 sm:p-6"
@@ -226,35 +226,35 @@ className="p-4 sm:p-5"
 className="p-3 sm:p-4"
 ```
 
-**원칙:**
-- Swell처럼 넉넉한 여백
-- 반응형: 모바일은 작게, 데스크톱은 크게
+**Principles:**
+- Generous whitespace like Swell
+- Responsive: Tighter on mobile, more spacious on desktop
 
 ---
 
-### 파이프라인 시각화
+### Pipeline Visualization
 
-#### 3단계 흐름
+#### 3-Step Flow
 ```
 Draft → Verification → Execution
 ```
 
-**시각 표현:**
-- 각 단계는 카드로 표시
-- 화살표 또는 경로로 연결
-- 상태 뱃지로 현재 단계 표시
+**Visual Representation:**
+- Represent each step as a card
+- Connect with arrows or paths
+- Use status badges to indicate the current step
 
-**텍스트:**
-- "Draft buy plan" (초안)
-- "Start verification" (검증 시작)
-- "Move to orders" (주문으로 이동)
+**Text:**
+- "Draft buy plan"
+- "Start verification"
+- "Move to orders"
 
 ---
 
-## 카피 가이드
+## Copy Guide
 
-### 버튼/액션 텍스트
-항상 **"동사 + 도메인 명사"** 형식:
+### Button/Action Text
+Always follow the **"Verb + Domain Noun"** format:
 - ✅ "Start verification"
 - ✅ "View report"
 - ✅ "Move to orders"
@@ -262,21 +262,21 @@ Draft → Verification → Execution
 - ❌ "Verify now"
 - ❌ "See details"
 
-### 섹션 헤더
-**"역할 + 한 줄 설명"** 형식:
+### Section Headers
+Follow the **"Role + One-line Description"** format:
 - "Draft buy plan — we'll lock numbers after verification."
 - "Supply Chain Control Center — monitor your sourcing pipeline"
 - "Facts — captured from your product photos"
 
-### 상태 설명
-**"현재 상태 + 다음 액션"** 형식:
+### Status Descriptions
+Follow the **"Current Status + Next Action"** format:
 - "Draft range (duty, freight, unit landed cost). Confirmed during verification."
 - "Suggested by trade data — verify before ordering."
 - "Ready to move? Start verification and we'll take it to production."
 
 ---
 
-## 컴포넌트 예시
+## Component Examples
 
 ### Report Card
 ```tsx
@@ -335,9 +335,9 @@ Draft → Verification → Execution
 
 ---
 
-## Figma 컴포넌트 스타일
+## Figma Component Styles
 
-### 카드 스타일
+### Card Style
 - **Corner Radius**: 
   - Level 1: 24px (`rounded-3xl`)
   - Level 2: 16px (`rounded-2xl`)
@@ -348,9 +348,9 @@ Draft → Verification → Execution
   - Level 2 Hover: `0px 24px 60px rgba(15, 23, 42, 0.22)`
   - Level 3: `0px 8px 20px rgba(15, 23, 42, 0.08)`
 - **Border**: `1px solid #E2E8F0` (slate-200)
-- **Background**: `#FFFFFF` 또는 `rgba(255, 255, 255, 0.95)`
+- **Background**: `#FFFFFF` or `rgba(255, 255, 255, 0.95)`
 
-### 뱃지 스타일
+### Badge Style
 - **Shape**: Pill (100% corner radius)
 - **Padding**: 12px horizontal, 6px vertical
 - **Typography**: 12px, Medium weight
@@ -361,7 +361,7 @@ Draft → Verification → Execution
   - Risk: Background `#FEF9C3`, Text `#854D0E`, Border `#FDE047`
   - Action: Background `#DBEAFE`, Text `#1E40AF`, Border `#BFDBFE`
 
-### 버튼 스타일
+### Button Style
 - **Primary**:
   - Shape: Pill (100% corner radius)
   - Background: `#0F172A` (slate-900)
@@ -375,7 +375,7 @@ Draft → Verification → Execution
   - Border: `1px solid #E2E8F0` (slate-200)
   - Hover: Background `#E2E8F0` (slate-200)
 
-### 타이포그래피 스타일
+### Typography Style
 - **H1**: 32px, Bold, `#0F172A`
 - **H2**: 22px, Semibold, `#0F172A`
 - **H3**: 16px, Semibold, `#0F172A`
@@ -386,30 +386,29 @@ Draft → Verification → Execution
 
 ---
 
-## 구현 체크리스트
+## Implementation Checklist
 
-### 각 화면에 추가할 것
-- [ ] 상단에 "이 화면이 무슨 역할인지" 한 줄 설명
-- [ ] Draft → Verification → Execution 3단계 시각화
-- [ ] 상태 뱃지로 현재 단계 표시
-- [ ] 버튼/액션은 "동사 + 도메인 명사" 형식
+### Add to Each Screen
+- [ ] Top-level one-line description of the screen's role
+- [ ] 3-step visualization: Draft → Verification → Execution
+- [ ] Current stage indicator using status badges
+- [ ] Buttons/Actions in "Verb + Domain Noun" format
 
-### 스타일 통일
-- [ ] 카드: Level 1/2/3 구분 명확히
-- [ ] 뱃지: Pill형, 절제된 색상
-- [ ] 버튼: Primary/Secondary 구분
-- [ ] 타이포: 헤더 굵고 짧게, 바디 13–14px
-- [ ] 색상: 베이스는 슬레이트, 포인트는 1–2색만
-
----
-
-## 참고 레퍼런스
-
-- **Swell**: 부드러운 카드, 넉넉한 여백, 친근한 톤
-- **B2B OS**: 파이프라인 중심, 상태 기반, 액션 명확
-- **기존 NexSupply**: 무역/로지스틱스 용어 유지
+### Unified Styling
+- [ ] Card levels (1/2/3) clearly differentiated
+- [ ] Badges: Pill-shaped, restrained colors
+- [ ] Buttons: Clear Primary/Secondary distinction
+- [ ] Typography: Bold/concise headers, 13–14px body
+- [ ] Color: Slate base, maximum 1–2 accent colors per context
 
 ---
 
-*이 가이드는 NexSupply의 "Swell 계열 비주얼 + B2B 소싱 OS" 정체성을 유지하면서 일관된 사용자 경험을 제공하기 위한 것입니다.*
+## References
 
+- **Swell**: Soft cards, generous whitespace, friendly tone
+- **B2B OS**: Pipeline-centric, status-based, clear actions
+- **Legacy NexSupply**: Maintain trade/logistics terminology
+
+---
+
+*This guide is intended to provide a consistent user experience while maintaining NexSupply's "Swell visual style + B2B sourcing OS" identity.*

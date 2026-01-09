@@ -179,7 +179,7 @@ export default function MarginComparison() {
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-bold mb-4 uppercase tracking-wider">
-              예시 기준 • 샘플 제품: 스테인리스 텀블러
+              Example Basis • Sample Product: Stainless Steel Tumbler
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 px-2">
               DIY vs NexSupply

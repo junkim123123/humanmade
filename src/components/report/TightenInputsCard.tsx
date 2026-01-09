@@ -32,35 +32,35 @@ export function TightenInputsCard({ report }: TightenInputsCardProps) {
   
   if (hasLabelPhoto && hsCandidatesCount > 1) {
     previewEffects.push({
-      label: "라벨 사진 추가 시",
-      effect: `HS 후보 ${hsCandidatesCount}개에서 1개로 줄 가능성 높음`,
+      label: "With label photo",
+      effect: `Likely to reduce HS candidates from ${hsCandidatesCount} to 1`,
     });
   }
   
   if (upc && similarCount === 0) {
     previewEffects.push({
-      label: "바코드 입력 시",
-      effect: "유사 레코드 매칭 상승 가능",
+      label: "With barcode",
+      effect: "May increase similar record matching",
     });
   }
   
   if (materials && !hasLandedCosts) {
     previewEffects.push({
-      label: "소재와 사이즈 입력 시",
-      effect: "운임 오차 감소",
+      label: "With material & size",
+      effect: "Reduces freight estimation error",
     });
   }
 
   // Calculate preview changes
   const previewHsCount = hasLabelPhoto && hsCandidatesCount > 1 ? 1 : hsCandidatesCount;
-  const previewSimilarCount = upc && similarCount === 0 ? "상승 가능" : similarCount;
+  const previewSimilarCount = upc && similarCount === 0 ? "Potential increase" : similarCount;
 
   return (
     <div className="space-y-6">
       {/* Preview effects */}
       {previewEffects.length > 0 && (
         <Card className="p-5 bg-blue-50 border border-blue-200 rounded-xl">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">예측 효과</h3>
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">Predicted Impact</h3>
           <div className="space-y-2">
             {previewEffects.map((effect, index) => (
               <div key={index} className="text-sm text-slate-700">
@@ -122,18 +122,18 @@ export function TightenInputsCard({ report }: TightenInputsCardProps) {
       {/* Preview changes */}
       {(upc || hasLabelPhoto || materials) && (
         <Card className="p-5 bg-slate-50 border border-slate-200 rounded-xl max-w-2xl">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">미리보기</h3>
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">Preview</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <div className="text-xs text-slate-500 mb-1">HS 후보</div>
+              <div className="text-xs text-slate-500 mb-1">HS Candidates</div>
               <div className="font-medium text-slate-900">
-                {previewHsCount}개 {previewHsCount < hsCandidatesCount && <Badge variant="outline" className="ml-2 h-4 px-1.5 text-xs bg-green-50 text-green-700">개선</Badge>}
+                {previewHsCount} {previewHsCount < hsCandidatesCount && <Badge variant="outline" className="ml-2 h-4 px-1.5 text-xs bg-green-50 text-green-700">Improve</Badge>}
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500 mb-1">유사 레코드</div>
+              <div className="text-xs text-slate-500 mb-1">Similar Records</div>
               <div className="font-medium text-slate-900">
-                {typeof previewSimilarCount === "string" ? previewSimilarCount : `${previewSimilarCount}건`}
+                {typeof previewSimilarCount === "string" ? previewSimilarCount : `${previewSimilarCount} records`}
               </div>
             </div>
           </div>

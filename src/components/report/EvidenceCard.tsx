@@ -37,25 +37,25 @@ export function EvidenceCard({ report }: EvidenceCardProps) {
       <div className="space-y-4">
         {/* Similar records count */}
         <div>
-          <div className="text-xs text-slate-500 mb-1">근거</div>
+          <div className="text-xs text-slate-500 mb-1">Evidence Basis</div>
           <div className="text-sm font-medium text-slate-900">
             {similarCount > 0 
-              ? `internal records ${similarCount}건`
+              ? `${similarCount} internal records`
               : "category_based"}
           </div>
         </div>
 
         {/* HS candidates count */}
         <div>
-          <div className="text-xs text-slate-500 mb-1">HS 후보</div>
+          <div className="text-xs text-slate-500 mb-1">HS Candidates</div>
           <div className="text-sm font-medium text-slate-900">
-            {hsCandidatesCount}개
+            {hsCandidatesCount}
           </div>
         </div>
 
         {/* Price unit */}
         <div>
-          <div className="text-xs text-slate-500 mb-1">단가 단위</div>
+          <div className="text-xs text-slate-500 mb-1">Unit</div>
           <div className="text-sm font-medium text-slate-900">
             {priceUnit}
           </div>
@@ -86,7 +86,7 @@ export function EvidenceCard({ report }: EvidenceCardProps) {
           <Accordion type="single" collapsible>
             <AccordionItem value="samples" className="border-none">
               <AccordionTrigger className="text-xs text-slate-500 hover:no-underline py-2">
-                샘플 {similarRecordsSample.length}개 보기
+                View {similarRecordsSample.length} sample records
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-2 pt-2">

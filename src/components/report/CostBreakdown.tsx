@@ -25,41 +25,41 @@ export function CostBreakdown({ report }: CostBreakdownProps) {
   const costItems = [
     {
       id: "factory",
-      label: "공장가 추정 범위",
+      label: "Factory Price Range",
       conservative: report.baseline.costRange.conservative.unitPrice,
       standard: report.baseline.costRange.standard.unitPrice,
-      reason: "유사 제품 통관 기록과 카테고리 기준 시장가 범위를 참고했습니다",
+      reason: "Based on similar import records and category-specific market benchmarks",
     },
     {
       id: "shipping",
-      label: "물류비 추정 범위",
+      label: "Shipping Cost Range",
       conservative: report.baseline.costRange.conservative.shippingPerUnit,
       standard: report.baseline.costRange.standard.shippingPerUnit,
-      reason: "Air Express 기준, 중량과 부피를 고려한 운임 범위입니다",
+      reason: "Estimated range for Air Express based on product weight and volume",
     },
     {
       id: "duty",
-      label: "관세와 수수료 추정 범위",
+      label: "Duties and Fees Range",
       conservative:
         report.baseline.costRange.conservative.dutyPerUnit +
         report.baseline.costRange.conservative.feePerUnit,
       standard:
         report.baseline.costRange.standard.dutyPerUnit +
         report.baseline.costRange.standard.feePerUnit,
-      reason: "HS 코드 추정 범위에 따른 관세율과 수수료를 적용했습니다",
+      reason: "Applied estimated duty rates and service fees based on HS code range",
     },
     {
       id: "total",
-      label: "단위당 랜디드 코스트 범위",
+      label: "Landed Cost per Unit",
       conservative: report.baseline.costRange.conservative.totalLandedCost,
       standard: report.baseline.costRange.standard.totalLandedCost,
-      reason: "공장가 + 물류비 + 관세/수수료의 합계입니다",
+      reason: "Total of Factory Price + Shipping + Duties and Fees",
     },
   ];
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-      <h2 className="text-xl font-bold text-slate-900 mb-4">비용 분해</h2>
+      <h2 className="text-xl font-bold text-slate-900 mb-4">Cost Breakdown</h2>
       <div className="space-y-4">
         {costItems.map((item) => {
           const isExpanded = expandedItems.has(item.id);
@@ -81,13 +81,13 @@ export function CostBreakdown({ report }: CostBreakdownProps) {
                   </div>
                   <div className="flex items-baseline gap-4">
                     <div>
-                      <div className="text-xs text-slate-500 mb-1">보수적</div>
+                      <div className="text-xs text-slate-500 mb-1">Conservative</div>
                       <div className="text-lg font-bold text-slate-900">
                         ${item.conservative.toFixed(2)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-slate-500 mb-1">기본</div>
+                      <div className="text-xs text-slate-500 mb-1">Standard</div>
                       <div className="text-base font-semibold text-slate-700">
                         ${item.standard.toFixed(2)}
                       </div>

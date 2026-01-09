@@ -13,20 +13,20 @@ export default function ReportNotFound() {
           <AlertCircle className="w-12 h-12 text-slate-400" />
         </div>
         <h1 className="text-2xl font-semibold text-slate-900 mb-2">
-          리포트를 찾을 수 없습니다
+          Report Not Found
         </h1>
         <p className="text-slate-600 mb-6">
-          리포트 생성에 실패했거나 삭제되었을 수 있습니다.
+          The report may have failed to generate or was deleted.
         </p>
         <div className="space-y-3">
           <Link href="/analyze">
             <Button className="w-full bg-electric-blue-600 hover:bg-electric-blue-700">
-              새 분석 시작하기
+              Start New Analysis
             </Button>
           </Link>
           <Link href="/">
             <Button variant="outline" className="w-full">
-              홈으로 돌아가기
+              Go to Home
             </Button>
           </Link>
         </div>

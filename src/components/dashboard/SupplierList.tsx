@@ -354,9 +354,9 @@ function MarketEstimateCard({ estimate }: { estimate: MarketEstimate }) {
                 if (windowDays === 90) {
                   return "Companies that imported similar products in the last 90 days.";
                 } else if (windowDays === 180) {
-                  return "최근 90일 관측 없음, 최근 180일 기준 top importers 표시";
+                  return "No observations in the last 90 days, showing top importers based on the last 180 days";
                 } else {
-                  return "최근 90일 관측 없음, 최근 365일 기준 top importers 표시";
+                  return "No observations in the last 90 days, showing top importers based on the last 365 days";
                 }
               })()}
             </p>
@@ -399,7 +399,7 @@ function MarketEstimateCard({ estimate }: { estimate: MarketEstimate }) {
           </>
         ) : (
           <p className="text-xs text-slate-600">
-            최근 365일 기준 관측된 수입자 없음
+            No importers observed in the last 365 days
           </p>
         )}
       </div>

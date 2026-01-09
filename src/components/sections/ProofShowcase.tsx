@@ -25,7 +25,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Optimized sourcing via network intelligence",
     category: "Confectionery",
     colorClass: "bg-gradient-to-br from-rose-100 to-teal-100 border-rose-200",
-    image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
+    image: "/product-photos/fruit-marshmallows/mmexport1758763658404.jpg",
     icon: <Candy className="w-16 h-16 text-rose-500" />,
   },
   {
@@ -34,7 +34,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Data-driven factory matching",
     category: "Toys",
     colorClass: "bg-gradient-to-br from-sky-100 to-indigo-100 border-sky-200",
-    image: "/product-photos/귀멸의 칼날 키링/mmexport1758763260109.jpg",
+    image: "/product-photos/demon-slayer-keyring/mmexport1758763260109.jpg",
     icon: <ToyBrick className="w-16 h-16 text-blue-600" />,
   },
   {
@@ -43,7 +43,7 @@ const sampleProducts: ProductCard[] = [
     metric: "Network-optimized quotes delivered",
     category: "Snacks",
     colorClass: "bg-gradient-to-br from-amber-100 to-violet-100 border-amber-200",
-    image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
+    image: "/product-photos/3d-jelly/mmexport1758762843530.jpg",
     icon: <Cookie className="w-16 h-16 text-purple-600" />,
   },
 ];
@@ -78,7 +78,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                 className={`group relative rounded-xl border-2 border-slate-200 bg-white/90 shadow-lg overflow-hidden p-5 sm:p-7 h-full transition-all hover:shadow-2xl ${
                   product.colorClass || "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                 }`}
-                style={{ minHeight: '500px' }} // 더 시원하게
+                style={{ minHeight: '500px' }} // Enhanced visual depth
                 whileHover={{ scale: 1.04, y: -6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
@@ -90,7 +90,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
                                "linear-gradient(135deg, #a78bfa, #8b5cf6)"
                   }}
                 />
-                {/* Product Visual Area - 비율 1:1로 통일 */}
+                {/* Product Visual Area - Unified 1:1 aspect ratio */}
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-5 bg-white/50 backdrop-blur-sm shadow-sm"
                   style={{ height: '300px' }}>
                   {product.image ? (

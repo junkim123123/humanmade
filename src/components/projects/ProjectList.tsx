@@ -25,7 +25,7 @@ export function ProjectList({ onProjectUpdate }: ProjectListProps) {
     return (
       <div className="bg-white rounded-xl p-8 border border-slate-200 text-center">
         <p className="text-slate-600 mb-6">
-          아직 진행 중인 프로젝트가 없습니다
+          No active projects yet.
         </p>
       </div>
     );

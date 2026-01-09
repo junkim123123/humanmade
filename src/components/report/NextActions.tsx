@@ -18,7 +18,7 @@ export function NextActions({
 }: NextActionsProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-      <h2 className="text-xl font-bold text-slate-900 mb-4">다음 액션</h2>
+      <h2 className="text-xl font-bold text-slate-900 mb-4">Next Actions</h2>
 
       <div className="space-y-4 mb-6">
         {report.nextActions.map((action, index) => (
@@ -49,14 +49,14 @@ export function NextActions({
           className="flex-1 bg-electric-blue-600 hover:bg-electric-blue-700"
         >
           <MessageCircle className="w-4 h-4 mr-2" />
-          담당자 매칭
+          Connect with Agent
         </Button>
         <Button
           onClick={onFactoryRequest}
           variant="outline"
           className="flex-1"
         >
-          공장 후보 요청
+          Request Factory Candidates
         </Button>
       </div>
     </div>

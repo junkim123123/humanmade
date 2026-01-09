@@ -39,11 +39,11 @@ export default function PricingPage() {
         >
           {/* Free / Verification / Execution stack */}
           <div className="divide-y divide-slate-200">
-            {/* 무료 Analyze */}
+            {/* Free Analyze */}
             <div className="p-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex-1">
                 <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
-                  무료 Analyze
+                  Free Analyze
                 </h2>
                 <p className="text-[14px] text-slate-600 max-w-md">
                   Instant Landed Cost &amp; Profit Analysis using AI and import data.
@@ -125,7 +125,7 @@ export default function PricingPage() {
             What you get
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 무료 Analyze */}
+            {/* Free Analyze */}
             <div
               className="
                 rounded-2xl border border-slate-200 bg-white/90 p-6
@@ -133,7 +133,7 @@ export default function PricingPage() {
                 transition-all hover:translate-y-[-2px] hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)]
               "
             >
-              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">무료 Analyze</h3>
+              <h3 className="text-[16px] font-semibold text-slate-900 mb-4">Free Analyze</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />

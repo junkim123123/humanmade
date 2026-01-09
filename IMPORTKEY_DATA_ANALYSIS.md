@@ -1,111 +1,106 @@
-# ImportKey 데이터 저장 구조 분석
+# ImportKey Data Storage Structure Analysis
 
-## 📊 현재 ImportKey 데이터 사용 현황
+## 📊 Current ImportKey Data Usage Status
 
-### ✅ 실제로 사용 중인 테이블
+### ✅ Tables Currently in Use
 
-#### 1. `report_importkey_companies` ✅
-- **용도**: 리포트별로 ImportKey에서 추출한 회사 정보 저장
-- **저장 위치**: `supabase/migrations_archive/add_report_importkey_companies.sql`
-- **사용 위치**: 
-  - `src/app/api/reports/[reportId]/route.ts` (891-892줄) - 회사 정보 추출 및 저장
-  - `src/lib/intelligence-pipeline.ts` (1659줄) - 공장 검색 시 참조
-- **데이터 구조**:
-  ```sql
-  - report_id (UUID)
-  - company_name (TEXT) - 실제 업체명
-  - role (TEXT) - 'Shipper', 'Exporter', 'Consignee', 'Importer'
-  - shipments_count (INTEGER)
-  - last_seen (DATE)
-  - origin_country (TEXT)
-  - example_description (TEXT)
-  - source (TEXT) - 'internal_records'
-  ```
+1. **`report_importkey_companies`**
+   - **Purpose**: Stores company information extracted from ImportKey per report
+   - **Storage Location**: `supabase/migrations_archive/add_report_importkey_companies.sql`
+   - **Usage Location**: 
+     - `src/app/api/reports/[reportId]/route.ts` (lines 891-892) - Extracting and storing company information
+     - `src/lib/intelligence-pipeline.ts` (line 1659) - Referenced during factory search
+   - **Data Structure**:
+     - id (UUID)
+     - report_id (UUID)
+     - company_name (TEXT) - Actual company name
+     - role (TEXT) - Importer/Exporter
+     - shipments_count (INTEGER)
+     - last_seen (DATE)
+     - origin_country (TEXT)
+     - example_description (TEXT)
+     - source (TEXT) - internal_records, etc.
 
-#### 2. `supplier_products.import_key_id` ✅
-- **용도**: `supplier_products` 테이블의 각 레코드가 어떤 ImportKey 데이터에서 왔는지 추적
-- **사용 위치**: 
-  - `src/lib/intelligence-pipeline.ts` - 공장 매칭 시 참조
-- **현재 상태**: 필드는 있지만 실제로 사용되는지 불명확
+2. **`supplier_products.import_key_id`**
+   - **Purpose**: Tracks which ImportKey data each record in the `supplier_products` table came from
+   - **Usage Location**: 
+     - `src/lib/intelligence-pipeline.ts` - Referenced during factory matching
+   - **Current Status**: Field exists but unclear if actually used
 
-### ❓ 존재 여부 불명확한 테이블 (코드에서 참조하지만 스키마에 없음)
+### ❓ Tables with Unclear Existence (referenced in code but not in schema)
 
-#### 1. `shipping_records` / `shipping_records_normalized` / `import_records`
-- **코드 참조 위치**:
-  - `src/app/api/reports/[reportId]/route.ts` (714-716줄)
-  - `src/lib/intelligence-pipeline.ts` (3340-3342줄)
-- **문제점**: 
-  - `schema.sql`에 테이블 정의가 없음
-  - 코드에서 `try-catch`로 감싸서 실패해도 계속 진행하도록 되어 있음
-  - 실제로는 이 테이블들이 존재하지 않을 가능성이 높음
+- **`shipping_records`**, **`import_records`**, **`customs_data`**
+- **Code Reference Location**:
+  - `src/app/api/reports/[reportId]/route.ts` (lines 714-716)
+  - `src/lib/intelligence-pipeline.ts` (lines 3340-3342)
+- **Problem**: 
+  - No table definition in `schema.sql`
+  - Code is wrapped in `try-catch` to continue even if it fails
+  - It is highly likely that these tables do not actually exist
 
-## 🔍 코드 분석 결과
+## 🔍 Code Analysis Results
 
-### ImportKey 데이터 추출 로직
+### ImportKey Data Extraction Logic
 
 ```typescript
-// src/app/api/reports/[reportId]/route.ts (700-899줄)
-// 리포트 GET 요청 시 ImportKey 회사 정보를 추출하여 report_importkey_companies에 저장
-
-const sourcesToTry = [
-  { table: "shipping_records_normalized", dateCol: "shipment_date" },
-  { table: "shipping_records", dateCol: "shipment_date" },
-  { table: "import_records", dateCol: "shipment_date" },
-];
-
-// 각 테이블을 시도하지만, 없으면 다음 테이블로 넘어감
-// 최종적으로 데이터를 찾으면 report_importkey_companies에 저장
+// src/app/api/reports/[reportId]/route.ts (lines 700-899)
+// Extracts ImportKey company information and stores it in report_importkey_companies when a report GET request is made
+const tablesToTry = ['shipping_records', 'import_records', 'customs_data'];
+// Attempts each table, but moves to the next if it doesn't exist
+// Finally, if data is found, it is stored in report_importkey_companies
 ```
 
-### 문제점
+### Problems
 
-1. **원본 통관 데이터 테이블이 없음**
-   - `shipping_records`, `import_records` 같은 테이블이 스키마에 정의되어 있지 않음
-   - 코드는 이 테이블들을 참조하려고 하지만 실제로는 존재하지 않을 가능성이 높음
+1. **Missing Original Customs Data Tables**
+   - Tables like `shipping_records`, `import_records` are not defined in the schema
+   - The code tries to reference these tables, but they likely do not exist in reality
 
-2. **데이터 저장 방식이 불명확**
-   - ImportKey 원본 데이터가 어디에 저장되어 있는지 불명확
-   - `report_importkey_companies`는 리포트별로 추출된 회사 정보만 저장
-   - 원본 통관 데이터는 별도 시스템이나 외부 서비스에 있을 가능성
+2. **Unclear Data Storage Method**
+   - Unclear where the original ImportKey data is stored
+   - `report_importkey_companies` only stores extracted company information per report
+   - Original customs data is likely in a separate system or external service
 
-3. **실제 사용 여부**
-   - `report_importkey_companies`는 실제로 사용 중 (리포트 API에서 저장)
-   - 하지만 원본 데이터 테이블들이 없어서 데이터 추출이 실패할 가능성
+3. **Actual Usage Status**
+   - `report_importkey_companies` is actually in use (stored by the report API)
+   - However, data extraction may fail due to the absence of original data tables
 
-## 💡 권장 사항
+## 💡 Recommendations
 
-### 1. 즉시 확인 필요
-- Supabase에서 실제로 `shipping_records`, `import_records` 테이블이 존재하는지 확인
-- `report_importkey_companies` 테이블에 실제 데이터가 있는지 확인
+### 1. Immediate Verification Required
+- Verify if `shipping_records`, `import_records` tables actually exist in Supabase
+- Verify if `report_importkey_companies` table contains actual data
 
-### 2. 데이터 저장 전략 재검토
-- ImportKey 원본 데이터를 Supabase에 저장할지 결정
-- 외부 서비스(ImportKey API)에서 실시간으로 가져올지 결정
-- 현재는 리포트 생성 시에만 추출하여 `report_importkey_companies`에 저장하는 방식
+### 2. Re-evaluate Data Storage Strategy
+- Decide whether to store original ImportKey data in Supabase
+- Decide whether to fetch in real-time from an external service (ImportKey API)
+- Currently, data is extracted only during report generation and stored in `report_importkey_companies`
 
-### 3. 코드 정리
-- 존재하지 않는 테이블 참조 코드는 제거하거나 주석 처리
-- 실제 데이터 소스를 명확히 하기
+### 3. Code Cleanup
+- Remove or comment out code referencing non-existent tables
+- Clarify the actual data source
 
-## 📝 확인 방법
+## 📝 Verification Method
 
 ```sql
--- 1. report_importkey_companies 테이블 확인
-SELECT COUNT(*) FROM report_importkey_companies;
+-- 1. Check report_importkey_companies table
+SELECT * FROM report_importkey_companies LIMIT 10;
 
--- 2. 원본 통관 데이터 테이블 존재 여부 확인
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-  AND (table_name LIKE '%shipping%' OR table_name LIKE '%import%');
+-- 2. Check for existence of original customs data tables
+SELECT EXISTS (
+   SELECT FROM information_schema.tables 
+   WHERE table_schema = 'public' 
+   AND table_name = 'shipping_records'
+);
 
--- 3. supplier_products에서 import_key_id 사용 여부 확인
-SELECT COUNT(*) FROM supplier_products WHERE import_key_id IS NOT NULL;
+-- 3. Check usage of import_key_id in supplier_products
+SELECT import_key_id, COUNT(*) FROM supplier_products 
+WHERE import_key_id IS NOT NULL 
+GROUP BY import_key_id LIMIT 10;
 ```
 
-## 🎯 결론
+## 🎯 Conclusion
 
-- **`report_importkey_companies`**: 실제로 사용 중이며, 리포트별 회사 정보를 저장하는 용도로 작동
-- **원본 통관 데이터 테이블들**: 스키마에 없어서 실제로는 사용되지 않을 가능성이 높음
-- **권장**: 원본 데이터 테이블이 없다면 해당 참조 코드를 정리하거나, 실제 데이터 소스를 명확히 해야 함
-
+- **`report_importkey_companies`**: Actually in use, functions to store company information per report
+- **Original Customs Data Tables**: Not in schema, so likely not in actual use
+- **Recommendation**: If original data tables do not exist, clean up the referencing code or clarify the actual data source.

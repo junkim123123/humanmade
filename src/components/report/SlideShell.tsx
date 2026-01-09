@@ -11,7 +11,7 @@ type Props = {
   children: React.ReactNode;
   dataIndex: number;
 
-  // 필요하면 특정 슬라이드만 내부 스크롤 허용
+  // Allow inner scroll for specific slides if needed
   allowInnerScroll?: boolean;
 };
 

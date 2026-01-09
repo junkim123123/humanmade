@@ -16,16 +16,16 @@ export function MarketingHero() {
 
           {/* Headline */}
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
-            랜디드 코스트와 리스크를
+            Calculate Landed Costs
             <br />
-            <span className="text-electric-blue-600">바로 계산한다</span>
+            <span className="text-electric-blue-600">& Risks Instantly</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            사진 한 장으로 시작. 결과는 최악 기준 포함.
+            Start with a single photo. Get results including worst-case scenarios
             <br />
-            다음 행동까지 제시.
+            and actionable next steps.
           </p>
 
           {/* CTA Buttons */}

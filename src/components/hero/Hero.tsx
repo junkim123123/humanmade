@@ -69,9 +69,9 @@ function FloatingUICard() {
         <div className="mb-6 pb-6 border-b border-slate-200">
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-lg font-semibold text-slate-900">Price Comparison</h3>
-            <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider">예시 기준</span>
+            <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider">Example Basis</span>
           </div>
-          <p className="text-sm text-slate-500">샘플 제품: 프리미엄 코튼 티셔츠</p>
+          <p className="text-sm text-slate-500">Sample Product: Premium Cotton T-shirt</p>
         </div>
 
         {/* Comparison Rows */}
@@ -137,7 +137,7 @@ export default function Hero() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
-                샘플 분석 기준 제품: 프리미엄 코튼 티셔츠
+                Sample Analysis Basis: Premium Cotton T-shirt
               </div>
             </div>
 

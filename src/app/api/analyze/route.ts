@@ -1497,7 +1497,7 @@ export async function POST(request: Request) {
       })),
     };
 
-    // DB 저장 전 confidence 값 정제 (DB 제약 조건 준수)
+    // Sanitize confidence value before DB storage (to comply with DB constraints)
     const sanitizeConfidence = (conf: any): "low" | "medium" | "high" => {
       if (typeof conf === "string") {
         const lower = conf.toLowerCase();
@@ -1505,18 +1505,18 @@ export async function POST(request: Request) {
           return lower as "low" | "medium" | "high";
         }
       }
-      // 숫자 값이 들어온 경우 변환 (0-1 범위 또는 0-100 범위)
+      // If numeric value is provided, convert it (assuming 0-1 or 0-100 range)
       if (typeof conf === "number") {
         let normalized = conf;
-        // 1보다 크면 0-100 범위로 가정하고 0-1로 변환
+        // If greater than 1, assume 0-100 range and convert to 0-1
         if (normalized > 1) {
           normalized = normalized / 100;
         }
-        // 0-1 범위로 클램핑
+        // Clamp to 0-1 range
         normalized = Math.min(Math.max(normalized, 0), 1);
         return normalized >= 0.8 ? "high" : normalized >= 0.6 ? "medium" : "low";
       }
-      // 기본값
+      // Default value
       return "medium";
     };
     
@@ -1968,7 +1968,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // readback으로 진짜 저장됐는지 검증 (authenticated users only)
+    // Verify update succeeded with a readback (authenticated users only)
     let savedReport = false;
     if (user && finalReportId) {
       const { data: readback, error: readbackError } = await admin

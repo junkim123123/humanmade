@@ -5,18 +5,18 @@ import { Upload, Brain, FileText } from "lucide-react";
 const steps = [
   {
     icon: Upload,
-    title: "사진 업로드",
-    description: "제품 사진 한 장만 올리세요",
+    title: "Upload Photo",
+    description: "Upload just one photo of your product",
   },
   {
     icon: Brain,
-    title: "AI 분석",
-    description: "HS 코드, 리스크, 비용 범위 자동 계산",
+    title: "AI Analysis",
+    description: "Auto-calculate HS codes, risks, and cost ranges",
   },
   {
     icon: FileText,
-    title: "리포트 생성",
-    description: "최악 기준 포함, 다음 행동까지 제시",
+    title: "Generate Report",
+    description: "Get detailed insights including worst-case scenarios and next steps",
   },
 ];
 
@@ -29,7 +29,7 @@ export function HowItWorks() {
             How it works
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            3단계로 랜디드 코스트와 리스크를 바로 확인하세요
+            Check your landed cost and risk in 3 simple steps
           </p>
         </div>
 

@@ -3,13 +3,13 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import UserFolderList from '@/components/admin/UserFolderList';
 
-// 데이터 구조 정의
+// Data structure definitions
 interface Report {
   id: string;
   product_name: string;
   status: string;
   created_at: string;
-  // 소싱 최적화 데이터 (채팅 시 활용)
+  // Sourcing optimization data (for chat)
   potential_savings?: string; 
 }
 
@@ -19,12 +19,12 @@ interface UserWithReports {
   name: string | null;
   role: string;
   created_at: string;
-  reports: Report[]; // Join 결과물
+  reports: Report[]; // Join results
 }
 
 export default async function AdminUsersPage() {
   const supabase = getSupabaseAdmin();
-  // JOIN 쿼리로 한 번에 가져오기 (성능 최적화)
+  // Fetch profiles with reports via JOIN (Performance optimization)
   const { data: profiles, error } = await supabase
     .from('profiles')
     .select(`
@@ -38,9 +38,9 @@ export default async function AdminUsersPage() {
     `)
     .order('created_at', { ascending: false });
 
-  if (error) return <div>데이터 로드 실패: {error.message}</div>;
+  if (error) return <div>Failed to load data: {error.message}</div>;
 
-  // 필드명 변환 (full_name -> name) 및 타입 안정성 확보
+  // Field mapping (full_name -> name) and type safety
   const users: UserWithReports[] = (profiles || []).map((p: any) => ({
     id: p.id,
     email: p.email,
@@ -58,7 +58,7 @@ export default async function AdminUsersPage() {
       <p className="text-slate-600 mb-6">
         Monitor user activity and manage reports.
       </p>
-      {/* 유저별 폴더 UI 컴포넌트 */}
+      {/* User Folder UI Component */}
       <UserFolderList users={users} />
     </div>
   );

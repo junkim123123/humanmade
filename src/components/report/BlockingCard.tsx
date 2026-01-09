@@ -38,12 +38,12 @@ export function BlockingCard({ report, onTightenClick }: BlockingCardProps) {
     entries.forEach(({ reason, count }) => {
       const label = (() => {
         switch (reason) {
-          case "logistics": return `물류 키워드로 ${count}개 제거됨`;
-          case "badName": return `더미 ID로 ${count}개 제거됨`;
-          case "banned": return `금지 키워드로 ${count}개 제거됨`;
-          case "toyMismatch": return `카테고리 불일치로 ${count}개 제거됨`;
-          case "tooShort": return `제품명 너무 짧아 ${count}개 제거됨`;
-          default: return `${reason}: ${count}개`;
+          case "logistics": return `${count} items removed due to logistics keywords`;
+          case "badName": return `${count} items removed due to dummy IDs`;
+          case "banned": return `${count} items removed due to banned keywords`;
+          case "toyMismatch": return `${count} items removed due to category mismatch`;
+          case "tooShort": return `${count} items removed due to short product names`;
+          default: return `${reason}: ${count} items`;
         }
       })();
       blockers.push({ label, priority: blockers.length + 1 });
@@ -52,7 +52,7 @@ export function BlockingCard({ report, onTightenClick }: BlockingCardProps) {
   
   // If no blockers found, show default
   if (blockers.length === 0) {
-    blockers.push({ label: "추가 검증 권장", priority: 1 });
+    blockers.push({ label: "Further verification recommended", priority: 1 });
   }
 
   return (

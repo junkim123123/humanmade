@@ -17,19 +17,19 @@ export default function AdminUploadPage() {
     setLogs((prev) => [`${timestamp}: ${message}`, ...prev.slice(0, 99)]);
   };
 
-  // 파일 처리 (하나씩 순차 처리)
+  // File processing (sequential)
   const processFiles = async (files: File[]) => {
     setIsProcessing(true);
     setLogs([]);
     setStats({ success: 0, fail: 0, error: 0 });
     setProgress({ current: 0, total: files.length });
 
-    addLog(`🚀 총 ${files.length}개 파일 업로드 시작...`);
+    addLog(`🚀 Starting upload of ${files.length} files...`);
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       setProgress((prev) => ({ ...prev, current: i + 1 }));
-      addLog(`📄 [${i + 1}/${files.length}] 처리 중: ${file.name}`);
+      addLog(`📄 [${i + 1}/${files.length}] Processing: ${file.name}`);
 
       try {
         let jsonData: any[] = [];
@@ -39,25 +39,25 @@ export default function AdminUploadPage() {
         } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
           jsonData = await parseXLSX(file);
         } else {
-          addLog(`⚠️ 지원하지 않는 파일 형식: ${file.name}`);
+          addLog(`⚠️ Unsupported file format: ${file.name}`);
           continue;
         }
 
         if (jsonData.length === 0) {
-          addLog(`⚠️ 데이터가 없습니다: ${file.name}`);
+          addLog(`⚠️ No data found in: ${file.name}`);
           continue;
         }
 
-        // API로 전송
+        // Send to API
         await uploadToDB(jsonData, file.name);
 
       } catch (error: any) {
-        addLog(`❌ 파일 처리 오류 (${file.name}): ${error.message}`);
+        addLog(`❌ Error processing file (${file.name}): ${error.message}`);
         setStats((prev) => ({ ...prev, error: prev.error + 1 }));
       }
     }
 
-    addLog("🎉 모든 작업 완료!");
+    addLog("🎉 All tasks completed!");
     setIsProcessing(false);
   };
 
@@ -78,7 +78,7 @@ export default function AdminUploadPage() {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     
-    // 헤더 행 찾기
+    // Find header row
     const allRows = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
       defval: null,
@@ -127,7 +127,7 @@ export default function AdminUploadPage() {
       }
     }
 
-    // 헤더 추출
+    // Extract header
     const rawHeaders = allRows[headerRowIndex] as (string | null)[];
     const headers: string[] = [];
     const headerIndices: number[] = [];
@@ -144,7 +144,7 @@ export default function AdminUploadPage() {
       return [];
     }
 
-    // 데이터 행 변환
+    // Convert data rows
     const rows = allRows.slice(headerRowIndex + 1) as unknown[][];
     const data = rows
       .filter((row) => {
@@ -183,9 +183,9 @@ export default function AdminUploadPage() {
           fail: prev.fail + result.data.failedCount,
           error: prev.error + result.data.errorCount,
         }));
-        addLog(`✅ ${fileName}: 성공 ${result.data.successCount}건 / 실패 ${result.data.failedCount}건`);
+        addLog(`✅ ${fileName}: Success ${result.data.successCount} / Failed ${result.data.failedCount}`);
       } else {
-        throw new Error(result.error || "서버 오류");
+        throw new Error(result.error || "Server error");
       }
     } catch (error: any) {
       throw error;
@@ -196,14 +196,14 @@ export default function AdminUploadPage() {
     e.preventDefault();
     setIsDragging(false);
     
-    // 여러 파일 받기
+    // Accept multiple files
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) processFiles(files);
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      // 여러 파일 받기
+      // Accept multiple files
       const files = Array.from(e.target.files);
       processFiles(files);
     }
@@ -212,13 +212,13 @@ export default function AdminUploadPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">ImportKey 데이터 주유소 ⛽</h1>
+        <h1 className="text-3xl font-bold text-slate-900">ImportKey Data Station ⛽</h1>
         <p className="text-slate-500 mt-2">
-          수집한 엑셀(CSV/XLSX) 파일을 여기에 몽땅 던져주세요. DB에 자동으로 채워집니다.
+          Upload collected Excel (CSV/XLSX) files here. The database will be populated automatically.
         </p>
       </div>
 
-      {/* 업로드 영역 */}
+      {/* Upload area */}
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
@@ -231,7 +231,7 @@ export default function AdminUploadPage() {
       >
         <input
           type="file"
-          multiple // 중요: 다중 선택 허용
+          multiple // Multi-select allowed
           accept=".csv, .xlsx, .xls"
           onChange={handleFileSelect}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -247,23 +247,23 @@ export default function AdminUploadPage() {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-slate-900">
-              {isProcessing ? "데이터 주입 중..." : "파일을 드래그하거나 클릭하세요"}
+              {isProcessing ? "Injecting data..." : "Drag and drop or click to upload files"}
             </h3>
             <p className="text-sm text-slate-500 mt-1">
-              CSV 또는 Excel 파일 지원 (다중 선택 가능)
+              CSV or Excel files supported (multiple selection allowed)
             </p>
           </div>
         </div>
       </div>
 
-      {/* 진행 상황 및 결과 */}
+      {/* Progress and results */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
           <div className="p-3 bg-green-100 rounded-lg">
             <CheckCircle className="w-6 h-6 text-green-600" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">성공</p>
+            <p className="text-sm text-slate-500">Success</p>
             <p className="text-2xl font-bold text-green-600">{stats.success}</p>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function AdminUploadPage() {
             <AlertCircle className="w-6 h-6 text-red-600" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">실패(중복/누락)</p>
+            <p className="text-sm text-slate-500">Failed (Duplicate/Missing)</p>
             <p className="text-2xl font-bold text-red-600">{stats.fail}</p>
           </div>
         </div>
@@ -283,19 +283,19 @@ export default function AdminUploadPage() {
             <FileText className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">진행률</p>
+            <p className="text-sm text-slate-500">Progress</p>
             <p className="text-2xl font-bold text-blue-600">
               {progress.total > 0 ? `${Math.round((progress.current / progress.total) * 100)}%` : "0%"}
             </p>
-            <p className="text-xs text-slate-400">({progress.current}/{progress.total} 파일)</p>
+            <p className="text-xs text-slate-400">({progress.current}/{progress.total} files)</p>
           </div>
         </div>
       </div>
 
-      {/* 로그창 */}
+      {/* Log window */}
       <div className="bg-slate-900 rounded-xl p-6 h-64 overflow-y-auto font-mono text-sm">
         {logs.length === 0 ? (
-          <p className="text-slate-500">대기 중...</p>
+          <p className="text-slate-500">Waiting...</p>
         ) : (
           logs.map((log, i) => (
             <div key={i} className="text-slate-300 mb-1 border-b border-slate-800 pb-1 last:border-0">

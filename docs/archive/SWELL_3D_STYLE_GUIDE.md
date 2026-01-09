@@ -1,17 +1,17 @@
-# Swell 스타일 3D 통일 가이드
+# Swell-style 3D Unification Guide
 
-## 전체 3D 스타일 원칙
+## Overall 3D Style Principles
 
-### 배경
-- 아주 옅은 gradient + subtle noise, 상단에서 하단으로 살짝 어두워지는 톤
-- `bg-slate-50/80` 또는 `bg-gradient-to-b from-slate-50/90 to-slate-100/80`
+### Background
+- Very subtle gradient + subtle noise, with a slightly darker tone from top to bottom.
+- `bg-slate-50/80` or `bg-gradient-to-b from-slate-50/90 to-slate-100/80`
 - Page padding: `max-w-6xl mx-auto px-4 sm:px-6 lg:px-8`
 
-### 카드/패널 공통 스타일
+### Card/Panel Common Styles
 
-#### 기본 스타일
+#### Basic Style
 - **Radius**: `rounded-2xl` (18–20px)
-- **3D 느낌**:
+- **3D Effect**:
   ```tsx
   className="
     bg-white/90 border border-slate-200
@@ -19,7 +19,7 @@
     backdrop-blur-sm
   "
   ```
-- **Hover 효과**:
+- **Hover Effect**:
   ```tsx
   className="
     hover:translate-y-[-2px]
@@ -27,11 +27,11 @@
     transition-all duration-300
   "
   ```
-- **안쪽 padding**: `p-5 sm:p-6 lg:p-7`
+- **Internal Padding**: `p-5 sm:p-6 lg:p-7`
 
-### 깊이 레벨 (Z-index 계층)
+### Depth Levels (Z-index Hierarchy)
 
-#### Level 1: 섹션 전체 래퍼 카드
+#### Level 1: Full Section Wrapper Card
 ```tsx
 className="
   rounded-3xl border border-slate-200/80 bg-white/95
@@ -41,7 +41,7 @@ className="
 "
 ```
 
-#### Level 2: 내부 카드/패널
+#### Level 2: Internal Card/Panel
 ```tsx
 className="
   rounded-2xl border border-slate-200 bg-slate-50/90
@@ -50,9 +50,9 @@ className="
 "
 ```
 
-#### Level 3: CTA 버튼 및 작은 요소
+#### Level 3: CTA Buttons and Small Elements
 ```tsx
-// CTA 버튼
+// CTA Button
 className="
   rounded-full bg-slate-900 px-4 py-2.5
   shadow-[0_18px_40px_rgba(15,23,42,0.4)]
@@ -60,14 +60,14 @@ className="
   transition-all
 "
 
-// 작은 pill 배지
+// Small Pill Badge
 className="
   rounded-full bg-slate-100 px-2.5 py-1
   text-xs font-medium
 "
 ```
 
-### 색상 토큰
+### Color Tokens
 - **Primary background**: `bg-white/90` ~ `bg-white/95`
 - **Secondary background**: `bg-slate-50/80` ~ `bg-slate-50/90`
 - **Border**: `border-slate-200` ~ `border-slate-200/80`
@@ -75,11 +75,10 @@ className="
 - **Text secondary**: `text-slate-600`
 - **Text muted**: `text-slate-500`
 
-### 적용 범위
-이 스타일 규칙을 다음 섹션에 통일 적용:
-- Hero 섹션
-- Analyze 섹션
-- Pricing 섹션
-- Sample report 섹션
-- Proof 섹션
-
+### Scope of Application
+Apply these style rules consistently to the following sections:
+- Hero section
+- Analyze section
+- Pricing section
+- Sample report section
+- Proof section

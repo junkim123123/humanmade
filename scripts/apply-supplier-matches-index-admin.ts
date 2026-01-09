@@ -29,9 +29,9 @@ async function applyMigration() {
     console.log("❌ Supabase JS client doesn't support raw SQL execution");
     console.log("\n📝 Please apply manually via one of these methods:\n");
     
-    console.log("방법 1: Supabase Dashboard (가장 쉬움)");
-    console.log("  1. Supabase Dashboard > SQL Editor 열기");
-    console.log("  2. 아래 SQL 복사해서 실행:\n");
+    console.log("Method 1: Supabase Dashboard (Easiest)");
+    console.log("  1. Open Supabase Dashboard > SQL Editor");
+    console.log("  2. Copy and execute the following SQL:\n");
     
     const sql = `
 -- Create unique index for product_id + supplier_id combination
@@ -49,11 +49,11 @@ COMMENT ON INDEX product_supplier_matches_analysis_supplier_uq IS 'Unique index 
     `.trim();
     
     console.log(sql);
-    console.log("\n방법 2: Supabase CLI");
+    console.log("\nMethod 2: Supabase CLI");
     console.log("  supabase db push");
-    console.log("  (migration 파일이 supabase/migrations/ 폴더에 있어야 함)");
+    console.log("  (Requires migration file in supabase/migrations/ folder)");
     
-    console.log("\n방법 3: DATABASE_URL 설정 후 스크립트 실행");
+    console.log("\nMethod 3: Set DATABASE_URL and run script");
     console.log("  export DATABASE_URL='postgresql://...'");
     console.log("  npx tsx scripts/apply-supplier-matches-index.ts");
 

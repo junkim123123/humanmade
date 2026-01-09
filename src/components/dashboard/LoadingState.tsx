@@ -31,18 +31,18 @@ export function LoadingState({ progress, currentStep, estimatedTimeRemaining }: 
   const [streamingSteps, setStreamingSteps] = useState<string[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
-  // Animate progress smoothly - 초기에는 빠르게, 후반에는 부드럽게
+  // Animate progress smoothly - fast at start, smooth at end
   useEffect(() => {
     if (progress !== undefined) {
       const target = Math.min(100, Math.max(0, progress));
       const diff = target - animatedProgress;
       if (Math.abs(diff) > 0.5) {
-        // 초기 진행률(0-40%)은 빠르게, 후반(40%+)은 부드럽게
+        // Initial progress (0-40%) is fast, late progress (40%+) is smooth
         const isEarlyStage = animatedProgress < 40;
         const duration = isEarlyStage 
-          ? Math.max(200, Math.min(800, Math.abs(diff) * 10)) // 초기: 200-800ms (빠름)
-          : Math.max(500, Math.min(2000, Math.abs(diff) * 20)); // 후반: 500-2000ms (부드러움)
-        const steps = isEarlyStage ? 20 : 30; // 초기에는 더 적은 단계로 빠르게
+          ? Math.max(200, Math.min(800, Math.abs(diff) * 10)) // Initial: 200-800ms (fast)
+          : Math.max(500, Math.min(2000, Math.abs(diff) * 20)); // Late: 500-2000ms (smooth)
+        const steps = isEarlyStage ? 20 : 30; // Fewer steps for faster initial progress
         const increment = diff / steps;
         let current = animatedProgress;
         const interval = setInterval(() => {

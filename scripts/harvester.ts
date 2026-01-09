@@ -1,12 +1,12 @@
 /**
  * ImportKey.com Data Harvester
  * 
- * 자동으로 ImportKey.com에 로그인하고 키워드 리스트를 순회하며 CSV 데이터를 다운로드합니다.
+ * Automatically logs into ImportKey.com, iterates through a keyword list, and downloads CSV data.
  * 
- * 사용법:
+ * Usage:
  *   npx tsx scripts/harvester.ts
  * 
- * 환경 변수 (.env.local):
+ * Environment Variables (.env.local):
  *   IMPORTKEY_EMAIL=your-email@example.com
  *   IMPORTKEY_PASSWORD=your-password
  */
@@ -16,24 +16,24 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 import * as fs from "fs";
 
-// 환경 변수 로드
+// Load environment variables
 const envPath = path.resolve(process.cwd(), ".env.local");
 const envResult = dotenv.config({ path: envPath, debug: false });
 
-// 디버깅: 환경 변수 로드 상태 확인
+// Debugging: Check environment variable load status
 if (envResult.error) {
-  console.warn(`⚠️  .env.local 파일을 찾을 수 없습니다: ${envPath}`);
-  console.warn("   프로젝트 루트에 .env.local 파일을 생성해주세요.");
+  console.warn(`⚠️  .env.local file not found: ${envPath}`);
+  console.warn("   Please create a .env.local file in the project root.");
 } else {
-  console.log(`✅ 환경 변수 파일 로드됨: ${envPath}`);
-  // 로드된 환경 변수 디버깅
+  console.log(`✅ Environment variable file loaded: ${envPath}`);
+  // Debug loaded environment variables
   if (envResult.parsed) {
-    console.log(`   📦 로드된 변수 수: ${Object.keys(envResult.parsed).length}`);
+    console.log(`   📦 Number of variables loaded: ${Object.keys(envResult.parsed).length}`);
   }
 }
 
 const KEYWORDS = [
-  // 1 광역 문구 표현
+  // 1 General Phrases
   "ARTICLES OF PLASTICS",
   "ARTICLES OF PLASTIC",
   "PLASTICWARE",
@@ -58,7 +58,7 @@ const KEYWORDS = [
   "VARIETY ITEMS",
   "NOVELTY PRODUCTS",
 
-  // 2 리테일 매장 운영 소모품
+  // 2 Retail Store Operating Supplies
   "RETAIL ACCESSORIES",
   "STORE ACCESSORIES",
   "MERCHANDISING ACCESSORIES",
@@ -102,7 +102,7 @@ const KEYWORDS = [
   "GRIDWALL ACCESSORIES",
   "GRIDWALL HOOKS",
 
-  // 3 POS 주변기기 확장
+  // 3 POS Peripherals
   "RETAIL POS EQUIPMENT",
   "POS ACCESSORIES",
   "POS PARTS",
@@ -127,7 +127,7 @@ const KEYWORDS = [
   "BILL TRAY",
   "CARD READER ACCESSORIES",
 
-  // 4 보안 태그류 확장
+  // 4 Security Tags
   "EAS SYSTEM",
   "EAS ACCESSORIES",
   "EAS HARD TAG",
@@ -147,7 +147,7 @@ const KEYWORDS = [
   "SECURITY CABLE",
   "DISPLAY SECURITY CABLE",
 
-  // 5 포장 물류 문서 표현
+  // 5 Packaging & Logistics
   "PACKAGING MATERIAL",
   "PACKAGING MATERIALS",
   "PACKING MATERIAL",
@@ -197,7 +197,7 @@ const KEYWORDS = [
   "WARNING LABELS",
   "FRAGILE LABELS",
 
-  // 6 청소 도구 문서 표현
+  // 6 Cleaning Tools
   "CLEANING ARTICLES",
   "CLEANING PRODUCTS",
   "CLEANING TOOLS",
@@ -227,7 +227,7 @@ const KEYWORDS = [
   "GARBAGE BAGS",
   "TRASH BAGS",
 
-  // 7 주방 소도구 문서 표현
+  // 7 Kitchen Utensils
   "KITCHEN TOOLS",
   "KITCHEN GADGETS",
   "COOKING TOOLS",
@@ -256,7 +256,7 @@ const KEYWORDS = [
   "TUMBLERS",
   "TRAVEL MUGS",
 
-  // 8 욕실 생활 문서 표현
+  // 8 Bathroom & Living
   "BATHROOM ACCESSORIES",
   "BATH ACCESSORIES",
   "SHOWER ACCESSORIES",
@@ -276,7 +276,7 @@ const KEYWORDS = [
   "BATHROOM ORGANIZER",
   "BATHROOM ORGANIZERS",
 
-  // 9 오피스 문구 문서 표현
+  // 9 Office Stationery
   "OFFICE SUPPLIES ITEMS",
   "SCHOOL STATIONERY",
   "WRITING INSTRUMENTS",
@@ -302,7 +302,7 @@ const KEYWORDS = [
   "ART MATERIALS",
   "CRAFT MATERIALS",
 
-  // 10 전자 액세서리 문서 표현
+  // 10 Electronic Accessories
   "ELECTRICAL GOODS",
   "ELECTRICAL ACCESSORIES",
   "USB ACCESSORIES",
@@ -333,7 +333,7 @@ const KEYWORDS = [
   "CABLE CLIPS",
   "CABLE ORGANIZERS",
 
-  // 11 하드웨어 문서 표현
+  // 11 Hardware
   "FASTENERS",
   "SCREWS METAL",
   "BOLTS METAL",
@@ -360,7 +360,7 @@ const KEYWORDS = [
   "CABLE TIES",
   "NYLON CABLE TIES",
 
-  // 12 펫 오토 시즌 문서 표현
+  // 12 Pet, Auto, Seasonal
   "PET PRODUCTS ITEMS",
   "PET ACCESSORIES ITEMS",
   "DOG LEASH",
@@ -390,62 +390,62 @@ const KEYWORDS = [
 
 
 
-// ImportKey 로그인 정보
-// dotenv가 따옴표를 제거하므로, 따옴표가 있어도 없어도 됨
+// ImportKey Login Credentials
+// dotenv removes quotes, so it doesn't matter if they exist or not
 let IMPORTKEY_EMAIL = process.env.IMPORTKEY_EMAIL?.trim() || "";
 let IMPORTKEY_PASSWORD = process.env.IMPORTKEY_PASSWORD?.trim() || "";
 
-// 따옴표 제거 (혹시 남아있을 경우)
+// Remove quotes (in case they still remain)
 IMPORTKEY_EMAIL = IMPORTKEY_EMAIL.replace(/^["']|["']$/g, "");
 IMPORTKEY_PASSWORD = IMPORTKEY_PASSWORD.replace(/^["']|["']$/g, "");
 
-// 디버깅: 환경 변수 확인
-console.log("\n📋 환경 변수 확인:");
-console.log(`   IMPORTKEY_EMAIL: ${IMPORTKEY_EMAIL ? `✅ 설정됨 (${IMPORTKEY_EMAIL.substring(0, 3)}***)` : "❌ 없음"}`);
-console.log(`   IMPORTKEY_PASSWORD: ${IMPORTKEY_PASSWORD ? "✅ 설정됨 (***)" : "❌ 없음"}`);
+// Debugging: Check environment variables
+console.log("\n📋 Environment Variable Check:");
+console.log(`   IMPORTKEY_EMAIL: ${IMPORTKEY_EMAIL ? `✅ Set (${IMPORTKEY_EMAIL.substring(0, 3)}***)` : "❌ Missing"}`);
+console.log(`   IMPORTKEY_PASSWORD: ${IMPORTKEY_PASSWORD ? "✅ Set (***)" : "❌ Missing"}`);
 
-// 원본 값 확인 (디버깅용)
+// Check original values (for debugging)
 if (!IMPORTKEY_EMAIL || !IMPORTKEY_PASSWORD) {
-  console.log("\n🔍 디버깅 정보:");
-  console.log(`   process.env.IMPORTKEY_EMAIL (원본): "${process.env.IMPORTKEY_EMAIL}"`);
-  console.log(`   process.env.IMPORTKEY_PASSWORD (원본): "${process.env.IMPORTKEY_PASSWORD ? "***" : "undefined"}"`);
+  console.log("\n🔍 Debugging Info:");
+  console.log(`   process.env.IMPORTKEY_EMAIL (original): "${process.env.IMPORTKEY_EMAIL}"`);
+  console.log(`   process.env.IMPORTKEY_PASSWORD (original): "${process.env.IMPORTKEY_PASSWORD ? "***" : "undefined"}"`);
   console.log(`   envResult.parsed?.IMPORTKEY_EMAIL: "${envResult.parsed?.IMPORTKEY_EMAIL}"`);
   console.log(`   envResult.parsed?.IMPORTKEY_PASSWORD: "${envResult.parsed?.IMPORTKEY_PASSWORD ? "***" : "undefined"}"`);
 }
 
 if (!IMPORTKEY_EMAIL || !IMPORTKEY_PASSWORD) {
-  console.error("\n❌ 환경 변수가 설정되지 않았습니다.");
-  console.error("\n💡 해결 방법:");
-  console.error(`   1. 프로젝트 루트에 .env.local 파일을 생성하세요: ${path.resolve(process.cwd(), ".env.local")}`);
-  console.error("   2. 다음 내용을 추가하세요:");
+  console.error("\n❌ Environment variables are not set.");
+  console.error("\n💡 Solution:");
+  console.error(`   1. Create a .env.local file in the project root: ${path.resolve(process.cwd(), ".env.local")}`);
+  console.error("   2. Add the following content:");
   console.error("      IMPORTKEY_EMAIL=your-email@example.com");
   console.error("      IMPORTKEY_PASSWORD=your-password");
-  console.error("\n   ⚠️  주의:");
-  console.error("      - 등호(=) 앞뒤에 공백이 없어야 합니다");
-  console.error("      - 따옴표는 필요 없습니다");
-  console.error("      - 주석은 #으로 시작합니다");
+  console.error("\n   ⚠️  Caution:");
+  console.error("      - No spaces around the equals sign (=)");
+  console.error("      - No quotes needed");
+  console.error("      - Comments start with #");
   process.exit(1);
 }
 
-// 다운로드 디렉토리 설정
+// Download directory setup
 const DOWNLOAD_DIR = path.resolve(process.cwd(), "downloads");
 if (!fs.existsSync(DOWNLOAD_DIR)) {
   fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
 }
 
 /**
- * 브라우저 인스턴스 생성
+ * Create browser instance
  */
 async function createBrowser(): Promise<Browser> {
-  console.log("🌐 브라우저 시작 중...");
+  console.log("🌐 Starting browser...");
   
   const browser = await puppeteer.launch({
-    headless: false, // 브라우저가 보이도록 설정
+    headless: false, // Set to true if you don't need to see the browser
     defaultViewport: null,
     args: [
-      "--start-maximized", // 창 최대화
-      `--download.default_directory=${DOWNLOAD_DIR}`, // 다운로드 경로 설정
-      "--disable-blink-features=AutomationControlled", // 자동화 감지 방지
+      "--start-maximized", // Maximize window
+      `--download.default_directory=${DOWNLOAD_DIR}`, // Set download path
+      "--disable-blink-features=AutomationControlled", // Prevent automation detection
     ],
   });
 
@@ -453,23 +453,23 @@ async function createBrowser(): Promise<Browser> {
 }
 
 /**
- * ImportKey.com에 로그인
+ * Log into ImportKey.com
  */
 async function login(page: Page): Promise<boolean> {
   try {
-    console.log("🔐 로그인 페이지로 이동 중...");
+    console.log("🔐 Navigating to login page...");
     await page.goto("https://importkey.com/login", {
       waitUntil: "networkidle2",
       timeout: 30000,
     });
 
-    // 이메일 입력
-    console.log("📧 이메일 입력 중...");
+    // Enter email
+    console.log("📧 Entering email...");
     await page.waitForSelector('input[type="email"], input[name="email"], input[id="email"]', {
       timeout: 10000,
     });
     
-    // 여러 가능한 셀렉터 시도
+    // Try multiple possible selectors
     const emailSelectors = [
       'input[type="email"]',
       'input[name="email"]',
@@ -483,18 +483,18 @@ async function login(page: Page): Promise<boolean> {
         emailInput = await page.$(selector);
         if (emailInput) break;
       } catch (e) {
-        // 다음 셀렉터 시도
+        // Try next selector
       }
     }
 
     if (!emailInput) {
-      throw new Error("이메일 입력 필드를 찾을 수 없습니다.");
+      throw new Error("Email input field not found.");
     }
 
     await emailInput.type(IMPORTKEY_EMAIL, { delay: 1 });
 
-    // 비밀번호 입력
-    console.log("🔑 비밀번호 입력 중...");
+    // Enter password
+    console.log("🔑 Entering password...");
     const passwordSelectors = [
       'input[type="password"]',
       'input[name="password"]',
@@ -507,18 +507,18 @@ async function login(page: Page): Promise<boolean> {
         passwordInput = await page.$(selector);
         if (passwordInput) break;
       } catch (e) {
-        // 다음 셀렉터 시도
+        // Try next selector
       }
     }
 
     if (!passwordInput) {
-      throw new Error("비밀번호 입력 필드를 찾을 수 없습니다.");
+      throw new Error("Password input field not found.");
     }
 
     await passwordInput.type(IMPORTKEY_PASSWORD, { delay: 100 });
 
-    // 로그인 버튼 클릭
-    console.log("🚀 로그인 버튼 클릭 중...");
+    // Click login button
+    console.log("🚀 Clicking login button...");
     const loginButtonSelectors = [
       'button[type="submit"]',
       'button:has-text("Login")',
@@ -533,83 +533,83 @@ async function login(page: Page): Promise<boolean> {
         loginButton = await page.$(selector);
         if (loginButton) break;
       } catch (e) {
-        // 다음 셀렉터 시도
+        // Try next selector
       }
     }
 
     if (!loginButton) {
-      // Enter 키로 시도
+      // Try with Enter key
       await passwordInput.press("Enter");
     } else {
       await loginButton.click();
     }
 
-    // 로그인 완료 대기 (URL 변경 또는 특정 요소 대기)
-    console.log("⏳ 로그인 완료 대기 중...");
+    // Wait for login completion (URL change or specific element)
+    console.log("⏳ Waiting for login completion...");
     
     try {
-      // 네비게이션 대기 (최대 30초)
+      // Wait for navigation (max 30s)
       await Promise.race([
         page.waitForNavigation({
           waitUntil: "networkidle2",
           timeout: 30000,
         }),
-        new Promise((resolve) => setTimeout(resolve, 5000)), // 최소 5초 대기
+        new Promise((resolve) => setTimeout(resolve, 5000)), // Minimum 5s wait
       ]);
     } catch (navError) {
-      // 네비게이션이 발생하지 않아도 계속 진행
-      console.log("   ⚠️  네비게이션 대기 중 타임아웃 (계속 진행)");
+      // Continue even if navigation wait times out
+      console.log("   ⚠️  Navigation wait timeout (continuing)");
     }
 
-    // 추가 대기 (JavaScript 실행 시간 확보)
+    // Additional wait for JavaScript execution
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // 로그인 성공 확인
+    // Verify login success
     const currentUrl = page.url();
-    console.log(`   📄 현재 URL: ${currentUrl}`);
+    console.log(`   📄 Current URL: ${currentUrl}`);
 
-    // 여러 방법으로 로그인 성공 확인
+    // Multiple ways to verify login success
     const isLoginPage = currentUrl.includes("/login");
     const hasError = await page.evaluate(() => {
-      // 에러 메시지가 있는지 확인
+      // Check for error messages
       const errorText = document.body.innerText.toLowerCase();
       return errorText.includes("invalid") || 
              errorText.includes("incorrect") || 
              errorText.includes("error") ||
-             errorText.includes("실패");
+             errorText.includes("failed");
     });
 
     if (hasError) {
-      // 스크린샷 저장
+      // Save screenshot
       const screenshotPath = path.join(DOWNLOAD_DIR, "login-error.png");
       await page.screenshot({ path: screenshotPath, fullPage: true });
-      console.log(`   📸 에러 스크린샷 저장: ${screenshotPath}`);
-      throw new Error("로그인 에러 메시지가 감지되었습니다.");
+      console.log(`   📸 Error screenshot saved: ${screenshotPath}`);
+      throw new Error("Login error message detected.");
     }
 
     if (isLoginPage) {
-      // 스크린샷 저장
+      // Save screenshot
       const screenshotPath = path.join(DOWNLOAD_DIR, "login-still-on-page.png");
       await page.screenshot({ path: screenshotPath, fullPage: true });
-      console.log(`   📸 현재 페이지 스크린샷 저장: ${screenshotPath}`);
-      console.log("   ⚠️  여전히 로그인 페이지에 있습니다.");
-      console.log("   💡 수동으로 로그인을 확인해주세요.");
+      console.log(`   📸 Current page screenshot saved: ${screenshotPath}`);
+      console.log("   ⚠️  Still on the login page.");
+      console.log("   💡 Please complete login manually.");
       
-      // 사용자에게 수동 확인 기회 제공
-      console.log("   ⏸️  10초 대기 중... (수동으로 로그인 완료하세요)");
+      // Give user time to complete login manually
+      console.log("   ⏸️  Waiting 10 seconds... (please complete login)");
       await new Promise((resolve) => setTimeout(resolve, 10000));
       
-      // 다시 URL 확인
+      // Re-check URL
       const newUrl = page.url();
       if (newUrl.includes("/login")) {
-        throw new Error("로그인에 실패했습니다. URL이 변경되지 않았습니다.");
+        throw new Error("Login failed. URL did not change.");
       }
     }
 
-    console.log("✅ 로그인 성공!");
+    console.log("✅ Login successful!");
     return true;
   } catch (error) {
-    console.error("❌ 로그인 실패:", error);
+    console.error("❌ Login failed:", error);
     return false;
   }
 }
@@ -637,72 +637,72 @@ async function harvestKeyword(
   index: number
 ): Promise<boolean> {
   try {
-    console.log(`\n📦 [${index + 1}/${KEYWORDS.length}] 키워드 처리 중: "${keyword}"`);
+    console.log(`\n📦 [${index + 1}/${KEYWORDS.length}] Processing keyword: "${keyword}"`);
 
-    // 키워드 정규화 (URL-safe 형식으로 변환)
+    // Normalize keyword (convert to URL-safe format)
     const normalizedKeyword = normalizeKeyword(keyword);
-    console.log(`   🔤 정규화된 키워드: "${normalizedKeyword}"`);
+    console.log(`   🔤 Normalized keyword: "${normalizedKeyword}"`);
 
-    // ImportKey의 실제 검색 URL 형식: /result/shipment/{keyword}?domain=usimport
+    // ImportKey actual search URL format: /result/shipment/{keyword}?domain=usimport
     const searchUrl = `https://importkey.com/result/shipment/${normalizedKeyword}?domain=usimport`;
     
-    console.log(`   🔍 검색 페이지로 이동: ${searchUrl}`);
+    console.log(`   🔍 Navigating to search page: ${searchUrl}`);
     
-    // Rocket Loader가 완료될 때까지 충분히 대기
+    // Wait sufficiently for Rocket Loader completion
     await page.goto(searchUrl, {
-      waitUntil: "domcontentloaded", // networkidle2 대신 domcontentloaded 사용
-      timeout: 60000, // 타임아웃 증가
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
     });
 
-    // Rocket Loader 및 JavaScript 완전 로드 대기
-    console.log("   ⏳ Rocket Loader 및 JavaScript 로드 대기 중...");
+    // Wait for Rocket Loader and JavaScript full load
+    console.log("   ⏳ Waiting for Rocket Loader and JavaScript to load...");
     
     try {
-      // Rocket Loader가 완료될 때까지 대기 (최대 15초)
+      // Wait for Rocket Loader to complete (max 15s)
       await page.waitForFunction(
         () => {
-          // document.readyState가 complete이고, 주요 스크립트가 로드되었는지 확인
+          // Check if document.readyState is complete and main scripts are loaded
           return document.readyState === "complete" && 
                  typeof window !== "undefined" &&
                  !document.querySelector('script[data-cfasync="false"]:not([src*="rocket"])');
         },
         { timeout: 15000 }
       ).catch(() => {
-        // Rocket Loader 확인 실패해도 계속 진행
-        console.log("   ⚠️  Rocket Loader 확인 스킵 (계속 진행)");
+        // Continue even if Rocket Loader check fails
+        console.log("   ⚠️  Rocket Loader check skipped (continuing)");
       });
     } catch (e) {
-      // 무시하고 계속 진행
+      // Ignore and continue
     }
 
-    // 추가 대기 (동적 콘텐츠 로드 시간 확보)
-    console.log("   ⏳ 동적 콘텐츠 로드 대기 중...");
+    // Additional wait for dynamic content
+    console.log("   ⏳ Waiting for dynamic content to load...");
     await new Promise((resolve) => setTimeout(resolve, 5000));
     
-    // 네트워크 요청이 완료될 때까지 추가 대기
+    // Additional wait for network requests completion
     try {
-      // networkidle2 상태로 추가 네비게이션 대기 (Rocket Loader 완료 확인)
+      // Wait for additional navigation with networkidle2 (verify Rocket Loader completion)
       await page.waitForNavigation({ waitUntil: "networkidle2", timeout: 10000 }).catch(() => {
-        // 네비게이션이 없어도 계속 진행 (이미 로드된 페이지)
+        // Continue even if no navigation occurs (already loaded page)
       });
     } catch (e) {
-      // 무시하고 계속 진행
+      // Ignore and continue
     }
     
-    // 최종 안정화 대기
+    // Final stabilization wait
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    // [날짜 범위 확장] '5 years' 버튼 클릭 시도
-    console.log("   📅 날짜 범위 확장 시도 중...");
+    // [Expand Date Range] Attempt to click '5 years' button
+    console.log("   📅 Attempting to expand date range...");
     try {
-      // 여러 방법으로 '5 years' 버튼 찾기
+      // Multiple ways to find '5 years' button
       const dateRangeSelectors = [
-        // XPath로 텍스트 기반 검색
+        // XPath based on text
         "//span[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '5 years')]",
         "//span[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '5+ years')]",
         "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '5 years')]",
         "//a[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '5 years')]",
-        // CSS 셀렉터
+        // CSS Selectors
         'button:has-text("5 years")',
         'button:has-text("5+ years")',
         'span:has-text("5 years")',
@@ -719,112 +719,112 @@ async function harvestKeyword(
             const elements = await (page as any).$x(selector);
             if (elements && elements.length > 0) {
               dateButton = elements[0];
-              console.log(`   ✅ 날짜 범위 버튼 발견 (XPath): ${selector}`);
+              console.log(`   ✅ Date range button found (XPath): ${selector}`);
               break;
             }
           } else {
-            // CSS 셀렉터
+            // CSS Selector
             const element = await page.$(selector);
             if (element) {
               dateButton = element;
-              console.log(`   ✅ 날짜 범위 버튼 발견 (CSS): ${selector}`);
+              console.log(`   ✅ Date range button found (CSS): ${selector}`);
               break;
             }
           }
         } catch (e) {
-          // 다음 셀렉터 시도
+          // Try next selector
         }
       }
 
       if (dateButton) {
-        // 버튼이 보이도록 스크롤
+        // Scroll button into view
         await dateButton.evaluate((el: HTMLElement) => {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // 클릭 시도
+        // Attempt click
         try {
           await (dateButton as any).click({ delay: 100 });
-          console.log("   ✅ 날짜 범위 확장 완료 (5 years)");
+          console.log("   ✅ Date range expanded (5 years)");
           
-          // 데이터 갱신 대기
+          // Wait for data refresh
           await new Promise((resolve) => setTimeout(resolve, 3000));
           
-          // 네트워크 요청 완료 대기
+          // Wait for network requests completion
           try {
             await page.waitForNavigation({ waitUntil: "networkidle2", timeout: 10000 }).catch(() => {});
           } catch (e) {
-            // 무시
+            // Ignore
           }
         } catch (clickError) {
-          // JavaScript 클릭 시도
+          // Attempt JavaScript click
           try {
             await dateButton.evaluate((el: any) => el.click());
-            console.log("   ✅ 날짜 범위 확장 완료 (JavaScript 클릭)");
+            console.log("   ✅ Date range expanded (JavaScript click)");
             await new Promise((resolve) => setTimeout(resolve, 3000));
           } catch (jsError) {
-            console.log(`   ⚠️  날짜 범위 버튼 클릭 실패: ${jsError}`);
+            console.log(`   ⚠️  Date range button click failed: ${jsError}`);
           }
         }
       } else {
-        console.log("   ⚠️  날짜 범위 버튼을 찾을 수 없습니다 (기본 설정 사용)");
+        console.log("   ⚠️  Date range button not found (using default settings)");
       }
     } catch (e) {
-      console.log(`   ⚠️  날짜 범위 변경 실패 (무시하고 진행): ${e}`);
+      console.log(`   ⚠️  Date range change failed (skipping): ${e}`);
     }
 
-    // Export 버튼 찾기 (간단하고 직접적인 방법)
-    console.log("   🔍 Export 버튼 검색 중...");
+    // Search for Export button
+    console.log("   🔍 Searching for Export button...");
 
-    // 다운로드 시작 전 파일 목록 확인
+    // Check file list before download
     const filesBefore = fs.readdirSync(DOWNLOAD_DIR);
 
     let exportButton = null;
 
-    // 방법 1: 가장 간단한 방법 - 정확히 "Export" 텍스트만 가진 버튼 찾기
+    // Method 1: Simplest method - search for button with exact "Export" text
     try {
-      // 모든 버튼을 찾아서 정확히 "Export"만 가진 것 찾기
+      // Find all buttons and check for exact "Export" text
       const allButtons = await page.$$('button');
       for (const btn of allButtons) {
         const text = await btn.evaluate((el: Element) => el.textContent?.trim() || '');
-        // 정확히 "Export"만 있거나, "Export"만 포함하고 다른 단어가 없는 경우
+        // Exact "Export" or "Export" included with short text
         if (text.toLowerCase() === 'export' || (text.toLowerCase().includes('export') && text.length < 20)) {
-          // 탭 버튼 제외: "Data", "US", "Global", "Mexico" 같은 단어가 없어야 함
+          // Exclude tab buttons
           const isTab = /data|us|global|mexico|import|export data/i.test(text);
           if (!isTab) {
             exportButton = btn;
-            console.log(`   ✅ Export 버튼 발견: "${text}"`);
+            console.log(`   ✅ Export button found: "${text}"`);
             break;
           }
         }
       }
     } catch (e) {
-      console.log(`   ⚠️  버튼 검색 실패: ${e}`);
+      console.log(`   ⚠️  Button search failed: ${e}`);
     }
 
-    // 방법 2: XPath로 정확히 "Export"만 찾기
+    // Method 2: XPath search for exact "Export"
     if (!exportButton) {
       try {
         const buttons = await (page as any).$x('//button[normalize-space(text())="Export"]');
         if (buttons && buttons.length > 0) {
-          // 탭이 아닌지 확인
+          // Check if it's not a tab
           for (const btn of buttons) {
             const text = await btn.evaluate((el: Element) => el.textContent?.trim() || '');
             const isTab = /data|us|global|mexico|import|export data/i.test(text);
             if (!isTab) {
               exportButton = btn;
-              console.log(`   ✅ Export 버튼 발견 (XPath): "${text}"`);
+              console.log(`   ✅ Export button found (XPath): "${text}"`);
               break;
             }
           }
         }
       } catch (e) {
-        console.log(`   ⚠️  XPath 검색 실패: ${e}`);
+        console.log(`   ⚠️  XPath search failed: ${e}`);
       }
     }
 
-    // 방법 3: 페이지 전체에서 "Export" 텍스트를 가진 모든 요소 찾기
+    // Method 3: Scan all elements on page for "Export" text
     if (!exportButton) {
       try {
         const exportElements = await page.evaluate(() => {
@@ -847,66 +847,66 @@ async function harvestKeyword(
         });
 
         if (exportElements && exportElements.length > 0) {
-          console.log(`   📋 Export 버튼 후보 ${exportElements.length}개 발견:`);
+          console.log(`   📋 ${exportElements.length} Export button candidates found:`);
           exportElements.forEach((el: any, i: number) => {
             console.log(`      ${i + 1}. "${el.text}" (${el.tagName})`);
           });
 
-          // 첫 번째 요소 선택
+          // Select first element
           const firstElement = exportElements[0];
           const allElements = await page.$$('button, a, div, span');
           if (allElements[firstElement.index]) {
             exportButton = allElements[firstElement.index];
-            console.log(`   ✅ Export 버튼 선택: "${firstElement.text}"`);
+            console.log(`   ✅ Export button selected: "${firstElement.text}"`);
           }
         }
       } catch (e) {
-        console.log(`   ⚠️  전체 검색 실패: ${e}`);
+        console.log(`   ⚠️  Full scan failed: ${e}`);
       }
     }
 
     if (!exportButton) {
-      console.log(`   ❌ 실패: Export 버튼을 찾을 수 없습니다. (스크린샷 저장)`);
+      console.log(`   ❌ Failed: Export button not found. (Saving screenshot)`);
       const screenshotPath = path.join(DOWNLOAD_DIR, `error-${keyword.replace(/\s+/g, "-")}.png`);
       await page.screenshot({ path: screenshotPath, fullPage: true });
-      console.log(`   📸 스크린샷 저장: ${screenshotPath}`);
+      console.log(`   📸 Screenshot saved: ${screenshotPath}`);
       return false;
     }
 
-    // 🎯 시각적 디버깅: 찾은 버튼에 빨간 테두리 표시
+    // 🎯 Visual debugging: Highlight found button with red border
     try {
       await page.evaluate((el: HTMLElement) => {
         el.style.border = "5px solid red";
         el.style.backgroundColor = "yellow";
         el.scrollIntoView({ behavior: "smooth", block: "center" });
       }, exportButton as any);
-      console.log("   🎯 타겟 버튼에 빨간 테두리를 표시했습니다. 1초 후 클릭합니다.");
+      console.log("   🎯 Targeted button with red border. Clicking in 1 second.");
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (e) {
-      console.log(`   ⚠️  시각적 표시 실패 (계속 진행): ${e}`);
+      console.log(`   ⚠️  Visual display failed (continuing): ${e}`);
     }
 
-    // Export 버튼 클릭
+    // Click Export button
     try {
       await (exportButton as any).click({ delay: 100 });
-      console.log("   🖱️ Export 버튼 클릭 성공!");
+      console.log("   🖱️ Export button click successful!");
     } catch (clickError) {
-      console.log(`   ⚠️  일반 클릭 실패, JavaScript 클릭 시도...`);
+      console.log(`   ⚠️  Standard click failed, attempting JavaScript click...`);
       try {
         await exportButton.evaluate((el: any) => el.click());
-        console.log("   🖱️ Export 버튼 클릭 성공 (JavaScript)");
+        console.log("   🖱️ Export button click successful (JavaScript)");
       } catch (jsError) {
-        console.error(`   ❌ Export 버튼 클릭 실패: ${jsError}`);
+        console.error(`   ❌ Export button click failed: ${jsError}`);
         return false;
       }
     }
 
-    // 모달 팝업 대기
+    // Wait for modal popup
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Export 모달에서 설정 및 Download 버튼 클릭
+    // Configure Export modal and click Download button
     try {
-      // 모달이 나타났는지 확인
+      // Check if modal appeared
       const modalSelectors = [
         'div[class*="modal" i]',
         'div[class*="dialog" i]',
@@ -920,85 +920,85 @@ async function harvestKeyword(
         try {
           modal = await page.$(selector);
           if (modal) {
-            console.log(`   ✅ Export 모달 발견: ${selector}`);
+            console.log(`   ✅ Export modal found: ${selector}`);
             break;
           }
         } catch (e) {
-          // 다음 셀렉터 시도
+          // Try next selector
         }
       }
 
       if (!modal) {
-        // XPath로 "Export As" 텍스트가 있는 모달 찾기
+        // XPath search for modal with "Export As" text
         try {
           const modals = await (page as any).$x('//div[contains(translate(text(), "EXPORT AS", "export as"), "export as")]');
           if (modals && modals.length > 0) {
             modal = modals[0];
-            console.log("   ✅ Export 모달 발견 (XPath)");
+            console.log("   ✅ Export modal found (XPath)");
           }
         } catch (e) {
-          // 무시
+          // Ignore
         }
       }
 
       if (modal) {
-        console.log("   ⚙️  Export 모달 설정 중...");
+        console.log("   ⚙️  Configuring Export modal...");
 
-        // Rows Range를 300으로 설정
-        console.log("   🔢 Rows Range 'to' 필드에 300 입력 중...");
+        // Set Rows Range 'to' field to 300
+        console.log("   🔢 Entering 300 in Rows Range 'to' field...");
         try {
-          // 방법 1: "to" 라벨 옆의 입력 필드 찾기 (XPath)
+          // Method 1: Find input field next to "to" label (XPath)
           let toInput = null;
           try {
             const inputs = await (page as any).$x('//label[contains(text(), "to") or contains(text(), "To")]/following-sibling::input | //input[preceding-sibling::label[contains(text(), "to") or contains(text(), "To")]] | //input[following-sibling::label[contains(text(), "to") or contains(text(), "To")]]');
             if (inputs && inputs.length > 0) {
-              // "to" 필드는 보통 두 번째 입력 필드
+              // "to" field is usually the second input field
               toInput = inputs[inputs.length - 1];
-              console.log("   ✅ 'to' 입력 필드 발견 (XPath)");
+              console.log("   ✅ 'to' input field found (XPath)");
             }
           } catch (e) {
-            // 다음 방법 시도
+            // Try next method
           }
 
-          // 방법 2: 모든 입력 필드 중에서 "to" 필드 찾기
+          // Method 2: Find "to" field among all input fields
           if (!toInput) {
             try {
               const allInputs = await page.$$('input[type="text"], input[type="number"]');
               if (allInputs.length >= 2) {
-                // "From"과 "to" 필드가 있으므로 두 번째가 "to" 필드
+                // Since there are "From" and "to" fields, the second one is "to"
                 toInput = allInputs[allInputs.length - 1];
-                console.log("   ✅ 'to' 입력 필드 발견 (두 번째 입력 필드)");
+                console.log("   ✅ 'to' input field found (second input field)");
               }
             } catch (e) {
-              // 다음 방법 시도
+              // Try next method
             }
           }
 
-          // 방법 3: value가 "300"인 입력 필드 찾기 (이미 300이 설정되어 있을 수 있음)
+          // Method 3: Find input field with value "300" (it might already be set)
           if (!toInput) {
             try {
               const inputs = await page.$$('input[value="300"]');
               if (inputs.length > 0) {
                 toInput = inputs[0];
-                console.log("   ✅ 'to' 입력 필드 발견 (value=300)");
+                console.log("   ✅ 'to' input field found (value=300)");
               }
             } catch (e) {
-              // 다음 방법 시도
+              // Try next method
             }
           }
 
           if (toInput) {
-            // 기존 값 지우고 300 입력
-            await toInput.click({ clickCount: 3 }); // 전체 선택
+            // Clear existing value and type 300
+            await toInput.click({ clickCount: 3 }); // Select all
             await new Promise((resolve) => setTimeout(resolve, 200));
             await toInput.type('300', { delay: 50 });
             await new Promise((resolve) => setTimeout(resolve, 30));
-            console.log("   ✅ Rows Range 'to' 필드에 300 입력 완료");
+            console.log("   ✅ Rows Range 'to' field entry complete");
           } else {
-            // 방법 4: 빠른 선택 버튼 "300" 클릭 시도
-            console.log("   🔍 빠른 선택 버튼 '300' 검색 중...");
+            // Method 4: Attempt to click quick selection button "300"
+            console.log("   🔍 Searching for quick selection button '300'...");
             try {
-              // 모달 내부의 모든 클릭 가능한 요소 찾기
+              // Find all clickable elements within modal
               const clickableElements = await modal.$$eval('button, a, span, div', (elements: Element[]) => {
                 return elements
                   .map((el: Element, index: number) => ({
@@ -1014,36 +1014,36 @@ async function harvestKeyword(
                 const allElements = await modal.$$('button, a, span, div');
                 if (allElements[elementIndex]) {
                   await allElements[elementIndex].click();
-                  console.log("   ✅ 빠른 선택 버튼 '300' 클릭 완료");
+                  console.log("   ✅ Quick selection button '300' clicked");
                   await new Promise((resolve) => setTimeout(resolve, 500));
                 }
               } else {
-                console.log("   ⚠️  'to' 입력 필드와 빠른 선택 버튼을 찾을 수 없습니다 (기본값 사용)");
+                console.log("   ⚠️  'to' input field and quick selection button not found (using default)");
               }
             } catch (e) {
-              console.log(`   ⚠️  빠른 선택 버튼 클릭 실패: ${e}`);
+              console.log(`   ⚠️  Quick selection button click failed: ${e}`);
             }
           }
         } catch (e) {
-          console.log(`   ⚠️  Rows Range 설정 시도 실패 (계속 진행): ${e}`);
+          console.log(`   ⚠️  Rows Range setting failed (continuing): ${e}`);
         }
 
-        // Download 버튼 찾기 및 클릭 (간단하고 직접적인 방법)
-        console.log("   🔍 Download 버튼 검색 중...");
+        // Search for and click Download button
+        console.log("   🔍 Searching for Download button...");
         
         let downloadButton = null;
 
-        // 방법 1: 페이지의 모든 button 요소에서 정확히 "Download" 텍스트 찾기
+        // Method 1: Search for exact "Download" text among all page buttons
         try {
           const allButtons = await page.$$('button');
-          console.log(`   📋 페이지에 ${allButtons.length}개의 button 요소 발견`);
+          console.log(`   📋 ${allButtons.length} button elements found on page`);
           
           for (const btn of allButtons) {
             const text = await btn.evaluate((el: Element) => el.textContent?.trim() || '');
             
-            // 정확히 "Download"만 있거나, "Download"만 포함하고 짧은 텍스트
+            // Exact "Download" or "Download" included with short text
             if (text.toLowerCase() === 'download' || (text.toLowerCase().includes('download') && text.length < 300)) {
-              // 버튼이 보이는지 확인
+              // Verify button is visible
               const isVisible = await btn.evaluate((el: Element) => {
                 const style = window.getComputedStyle(el as HTMLElement);
                 return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
@@ -1051,42 +1051,42 @@ async function harvestKeyword(
               
               if (isVisible) {
                 downloadButton = btn;
-                console.log(`   ✅ Download 버튼 발견: "${text}"`);
+                console.log(`   ✅ Download button found: "${text}"`);
                 break;
               }
             }
           }
         } catch (e) {
-          console.log(`   ⚠️  버튼 검색 실패: ${e}`);
+          console.log(`   ⚠️  Button search failed: ${e}`);
         }
 
-        // 방법 2: 모달 내부에서 찾기 (모달이 있을 경우)
+        // Method 2: Search within modal (if exists)
         if (!downloadButton && modal) {
           try {
             const modalButtons = await modal.$$('button');
-            console.log(`   📋 모달 내부에 ${modalButtons.length}개의 button 요소 발견`);
+            console.log(`   📋 ${modalButtons.length} button elements found within modal`);
             
             for (const btn of modalButtons) {
               const text = await btn.evaluate((el: Element) => el.textContent?.trim() || '');
               if (text.toLowerCase() === 'download' || text.toLowerCase().includes('download')) {
                 downloadButton = btn;
-                console.log(`   ✅ Download 버튼 발견 (모달 내부): "${text}"`);
+                console.log(`   ✅ Download button found (within modal): "${text}"`);
                 break;
               }
             }
           } catch (e) {
-            console.log(`   ⚠️  모달 내부 버튼 검색 실패: ${e}`);
+            console.log(`   ⚠️  Modal internal button search failed: ${e}`);
           }
         }
 
-        // 방법 3: XPath로 정확히 "Download"만 찾기
+        // Method 3: XPath search for exact "Download"
         if (!downloadButton) {
           try {
             const buttons = await (page as any).$x('//button[normalize-space(translate(text(), "DOWNLOAD", "download"))="download"]');
             if (buttons && buttons.length > 0) {
-              console.log(`   📋 XPath로 ${buttons.length}개의 Download 버튼 발견`);
+              console.log(`   📋 ${buttons.length} Download buttons found via XPath`);
               
-              // 보이는 버튼 찾기
+              // Find visible button
               for (const btn of buttons) {
                 const isVisible = await btn.evaluate((el: Element) => {
                   const style = window.getComputedStyle(el as HTMLElement);
@@ -1095,17 +1095,17 @@ async function harvestKeyword(
                 
                 if (isVisible) {
                   downloadButton = btn;
-                  console.log("   ✅ Download 버튼 발견 (XPath)");
+                  console.log("   ✅ Download button found (XPath)");
                   break;
                 }
               }
             }
           } catch (e) {
-            console.log(`   ⚠️  XPath 검색 실패: ${e}`);
+            console.log(`   ⚠️  XPath search failed: ${e}`);
           }
         }
 
-        // 방법 4: 페이지 전체 스캔 (모든 클릭 가능한 요소)
+        // Method 4: Page-wide scan for all clickable elements
         if (!downloadButton) {
           try {
             const downloadElements = await page.evaluate(() => {
@@ -1126,7 +1126,7 @@ async function harvestKeyword(
             });
 
             if (downloadElements && downloadElements.length > 0) {
-              console.log(`   📋 Download 버튼 후보 ${downloadElements.length}개 발견:`);
+              console.log(`   📋 ${downloadElements.length} Download button candidates found:`);
               downloadElements.forEach((el: any, i: number) => {
                 console.log(`      ${i + 1}. "${el.text}" (${el.tagName})`);
               });
@@ -1135,124 +1135,124 @@ async function harvestKeyword(
               const allElements = await page.$$('button, a, div[role="button"], span[role="button"]');
               if (allElements[firstElement.index]) {
                 downloadButton = allElements[firstElement.index];
-                console.log(`   ✅ Download 버튼 선택: "${firstElement.text}"`);
+                console.log(`   ✅ Download button selected: "${firstElement.text}"`);
               }
             }
           } catch (e) {
-            console.log(`   ⚠️  전체 스캔 실패: ${e}`);
+            console.log(`   ⚠️  Full scan failed: ${e}`);
           }
         }
 
         if (downloadButton) {
-          // 🎯 시각적 디버깅: Download 버튼에 빨간 테두리 표시
+          // 🎯 Visual debugging: Highlight Download button with red border
           try {
             await page.evaluate((el: HTMLElement) => {
               el.style.border = "5px solid red";
               el.style.backgroundColor = "yellow";
               el.scrollIntoView({ behavior: "smooth", block: "center" });
             }, downloadButton as any);
-            console.log("   🎯 Download 버튼에 빨간 테두리를 표시했습니다. 1초 후 클릭합니다.");
+            console.log("   🎯 Targeted Download button with red border. Clicking in 1 second.");
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } catch (e) {
-            console.log(`   ⚠️  시각적 표시 실패 (계속 진행): ${e}`);
+            console.log(`   ⚠️  Visual display failed (continuing): ${e}`);
           }
 
-          // Download 버튼 클릭
+          // Click Download button
           try {
             await (downloadButton as any).click({ delay: 100 });
-            console.log("   ✅ Download 버튼 클릭 완료");
+            console.log("   ✅ Download button click complete");
           } catch (clickError) {
-            console.log(`   ⚠️  일반 클릭 실패, JavaScript 클릭 시도...`);
+            console.log(`   ⚠️  Standard click failed, attempting JavaScript click...`);
             try {
               await downloadButton.evaluate((el: any) => el.click());
-              console.log("   ✅ Download 버튼 클릭 완료 (JavaScript)");
+              console.log("   ✅ Download button click complete (JavaScript)");
             } catch (jsError) {
-              console.error(`   ❌ Download 버튼 클릭 실패: ${jsError}`);
+              console.error(`   ❌ Download button click failed: ${jsError}`);
               return false;
             }
           }
 
-          // 모달이 닫힐 때까지 대기
+          // Wait for modal to close
           await new Promise((resolve) => setTimeout(resolve, 1000));
         } else {
-          console.log("   ⚠️  Download 버튼을 찾을 수 없습니다");
-          console.log("   📸 모달 스크린샷 저장 중...");
+          console.log("   ⚠️  Download button not found");
+          console.log("   📸 Saving modal screenshot...");
           const modalScreenshot = path.join(DOWNLOAD_DIR, `modal-${keyword.replace(/\s+/g, "-")}.png`);
           await page.screenshot({ path: modalScreenshot, fullPage: true });
-          console.log(`   📸 스크린샷 저장: ${modalScreenshot}`);
+          console.log(`   📸 Screenshot saved: ${modalScreenshot}`);
           
-          // 모달 닫기 시도
+          // Attempt to close modal
           try {
             const closeButton = await page.$('button[aria-label*="close" i], button:has-text("×"), button:has-text("✕")');
             if (closeButton) {
               await closeButton.click();
             }
           } catch (e) {
-            // 무시
+            // Ignore
           }
           return false;
         }
       } else {
-        console.log("   ⚠️  Export 모달을 찾을 수 없습니다 (직접 다운로드 시도)");
+        console.log("   ⚠️  Export modal not found (attempting direct download)");
       }
     } catch (modalError) {
-      console.log(`   ⚠️  Export 모달 처리 중 오류 (계속 진행): ${modalError}`);
+      console.log(`   ⚠️  Error during Export modal processing (continuing): ${modalError}`);
     }
 
-    // 다운로드 완료 대기
-    console.log("   ⏳ 다운로드 완료 대기 중...");
-    await new Promise((resolve) => setTimeout(resolve, 8000)); // 다운로드 시간 확보
+    // Wait for download completion
+    console.log("   ⏳ Waiting for download completion...");
+    await new Promise((resolve) => setTimeout(resolve, 8000)); // Allow time for download
 
-    // 다운로드된 파일 확인
+    // Verify downloaded file
     const filesAfter = fs.readdirSync(DOWNLOAD_DIR);
     const newFiles = filesAfter.filter((file) => !filesBefore.includes(file));
 
     if (newFiles.length > 0) {
-      console.log(`   ✅ 다운로드 완료: ${newFiles.join(", ")}`);
+      console.log(`   ✅ Download complete: ${newFiles.join(", ")}`);
       return true;
     } else {
-      console.log(`   ⚠️  새 파일이 다운로드되지 않았습니다.`);
+      console.log(`   ⚠️  No new file downloaded.`);
       return false;
     }
   } catch (error) {
-    console.error(`   ❌ 키워드 "${keyword}" 처리 중 오류:`, error);
+    console.error(`   ❌ Error processing keyword "${keyword}":`, error);
     return false;
   }
 }
 
 /**
- * 메인 실행 함수
+ * Main execution function
  */
 async function main() {
-  console.log("🚀 ImportKey Harvester 시작\n");
-  console.log(`📋 처리할 키워드: ${KEYWORDS.length}개`);
-  console.log(`📁 다운로드 경로: ${DOWNLOAD_DIR}\n`);
+  console.log("🚀 Starting ImportKey Harvester\n");
+  console.log(`📋 Keywords to process: ${KEYWORDS.length}`);
+  console.log(`📁 Download path: ${DOWNLOAD_DIR}\n`);
 
   let browser: Browser | null = null;
 
   try {
-    // 브라우저 생성
+    // Create browser
     browser = await createBrowser();
     const page = await browser.newPage();
 
-    // 수동 로그인 모드: ImportKey.com으로 이동하고 사용자가 직접 로그인할 시간 제공
-    console.log("🔐 수동 로그인 모드");
-    console.log("   브라우저가 열리면 직접 로그인을 완료해주세요.");
-    console.log("   로그인 완료 후 이 터미널로 돌아와서 아무 키나 누르세요...");
+    // Manual login mode: Navigate to ImportKey.com and give user time to log in
+    console.log("🔐 Manual Login Mode");
+    console.log("   Please log in manually once the browser opens.");
+    console.log("   After logging in, return to this terminal...");
     
     await page.goto("https://importkey.com/login", {
       waitUntil: "networkidle2",
       timeout: 30000,
     });
 
-    // 사용자가 로그인할 시간 제공 (최대 5분)
-    console.log("\n⏳ 로그인 완료를 기다리는 중... (최대 5분)");
-    console.log("   로그인 후 브라우저에서 대시보드나 검색 페이지로 이동하세요.");
+    // Give user time to log in (max 5 minutes)
+    console.log("\n⏳ Waiting for login... (max 5 minutes)");
+    console.log("   Please navigate to the dashboard or search page after logging in.");
     
-    // URL이 /login에서 변경될 때까지 대기
+    // Wait until URL changes from /login
     let waitTime = 0;
-    const maxWaitTime = 300000; // 5분
-    const checkInterval = 2000; // 2초마다 확인
+    const maxWaitTime = 300000; // 5 minutes
+    const checkInterval = 2000; // Check every 2 seconds
     
     while (waitTime < maxWaitTime) {
       await new Promise((resolve) => setTimeout(resolve, checkInterval));
@@ -1260,28 +1260,27 @@ async function main() {
       
       const currentUrl = page.url();
       if (!currentUrl.includes("/login")) {
-        console.log(`\n✅ 로그인 완료 감지! (${Math.round(waitTime / 1000)}초 소요)`);
-        console.log(`   현재 URL: ${currentUrl}`);
+        console.log(`\n✅ Login detected! (${Math.round(waitTime / 1000)}s elapsed)`);
+        console.log(`   Current URL: ${currentUrl}`);
         break;
       }
       
-      // 10초마다 진행 상황 표시
+      // Progress display every 10 seconds
       if (waitTime % 10000 === 0) {
-        console.log(`   ⏳ 대기 중... (${Math.round(waitTime / 1000)}초 경과)`);
+        console.log(`   ⏳ Waiting... (${Math.round(waitTime / 1000)}s elapsed)`);
       }
     }
 
-    // 여전히 로그인 페이지에 있으면 경고
+    // Warn if still on the login page
     const finalUrl = page.url();
     if (finalUrl.includes("/login")) {
-      console.log("\n⚠️  경고: 여전히 로그인 페이지에 있습니다.");
-      console.log("   계속 진행하시겠습니까? (Y/N)");
-      console.log("   자동으로 계속 진행합니다...");
+      console.log("\n⚠️  Warning: Still on the login page.");
+      console.log("   Continuing automatically...");
     } else {
-      console.log("✅ 로그인 확인 완료!");
+      console.log("✅ Login confirmed!");
     }
 
-    // 키워드 순회 처리
+    // Process keywords
     let successCount = 0;
     let failCount = 0;
 
@@ -1295,37 +1294,37 @@ async function main() {
         failCount++;
       }
 
-      // 다음 키워드 처리 전 잠시 대기 (서버 부하 방지)
+      // Brief wait before next keyword
       if (i < KEYWORDS.length - 1) {
-        console.log("   ⏸️  다음 키워드 처리 전 대기 중...");
+        console.log("   ⏸️  Waiting before next keyword...");
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 
-    // 결과 요약
+    // Result summary
     console.log("\n" + "=".repeat(50));
-    console.log("📊 수확 완료!");
-    console.log(`   ✅ 성공: ${successCount}개`);
-    console.log(`   ❌ 실패: ${failCount}개`);
-    console.log(`   📁 다운로드 경로: ${DOWNLOAD_DIR}`);
+    console.log("📊 Harvest Complete!");
+    console.log(`   ✅ Success: ${successCount}`);
+    console.log(`   ❌ Failed: ${failCount}`);
+    console.log(`   📁 Download path: ${DOWNLOAD_DIR}`);
     console.log("=".repeat(50));
 
   } catch (error) {
-    console.error("\n❌ 치명적 오류 발생:", error);
+    console.error("\n❌ Fatal error occurred:", error);
     process.exit(1);
   } finally {
-    // 브라우저 종료
+    // Close browser
     if (browser) {
-      console.log("\n🔒 브라우저 종료 중...");
+      console.log("\n🔒 Closing browser...");
       await browser.close();
     }
   }
 }
 
-// 스크립트 실행
+// Execute script
 if (require.main === module) {
   main().catch((error) => {
-    console.error("❌ 예상치 못한 오류:", error);
+    console.error("❌ Unexpected error:", error);
     process.exit(1);
   });
 }

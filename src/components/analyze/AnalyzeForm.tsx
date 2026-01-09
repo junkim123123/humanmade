@@ -105,25 +105,25 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
     setLoadingStep("Preparing analysis...");
 
     // Start a fake progress interval to provide immediate feedback
-    // 더 빠르게 초기 진행률을 올려서 사용자 이탈 방지
+    // Increase initial progress faster to prevent user bounce
     const startTime = Date.now();
     const fakeProgressInterval = setInterval(() => {
       setLoadingProgress((prev) => {
         if (prev === undefined) return 0;
         const elapsed = Date.now() - startTime;
-        // 초기 3초 동안 빠르게 25%까지 올림 (렉으로 오해 방지)
+        // Rapidly increase to 25% in the first 3 seconds (to avoid perception of lag)
         if (elapsed < 3000) {
-          // 3초에 25% = 약 8.3% per second
+          // 25% in 3 seconds = approx 8.3% per second
           const target = Math.min(25, (elapsed / 3000) * 25);
           return Math.max(prev, target);
         }
-        // 3초 후에는 천천히 30%까지
+        // Slow down to 30% after 3 seconds
         if (prev < 30 && elapsed < 5000) {
           return prev + 0.5;
         }
         return prev;
       });
-    }, 100); // 더 빠른 업데이트 (100ms)
+    }, 100); // Faster updates (100ms)
 
     const cleanup = (clearProgress = true) => {
       clearInterval(fakeProgressInterval);
@@ -219,10 +219,10 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
         }
         
         setLoadingStep("Initializing analysis...");
-        // API 응답 후 즉시 30%로 설정 (렉으로 오해 방지)
+        // Set to 30% immediately after API response (to avoid perception of lag)
         setLoadingProgress(30);
         
-        // Polling 시작 시간 기록 (서버 시간과의 차이 보정)
+        // Record polling start time (to compensate for server time drift)
         const pollingStartTime = Date.now();
         let lastProgressUpdate = 30;
 
@@ -262,22 +262,22 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                     dataStatus: report.data?.status
                   });
                   
-                  // 완료 시에도 부드럽게 100%까지 올라가도록 처리
+                  // Smoothly animate progress to 100% on completion
                   setLoadingStep("Finalizing report...");
                   
-                  // 현재 진행률에서 100%까지 천천히 올라가도록 (약 1.5초에 걸쳐)
+                  // Gradually increase from current progress to 100% (over approx 1.5 seconds)
                   const startProgress = Math.max(85, Math.min(99, loadingProgress || 85));
                   let smoothProgress = startProgress;
                   
                   const smoothInterval = setInterval(() => {
-                    smoothProgress = Math.min(100, smoothProgress + 1.2); // 1.2%씩 증가
+                    smoothProgress = Math.min(100, smoothProgress + 1.2); // 1.2% increments
                     setLoadingProgress(smoothProgress);
                     
                     if (smoothProgress >= 100) {
                       clearInterval(smoothInterval);
                       setLoadingStep("Analysis complete!");
                       
-                      // 완료 후 약간의 딜레이를 두고 리다이렉트
+                      // Brief delay before redirecting
                       setTimeout(async () => {
                         try {
                           const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -297,20 +297,20 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                         }
                       }, 500);
                     }
-                  }, 60); // 60ms마다 1.2%씩 증가 (약 1.5초에 100% 도달)
+                  }, 60); // 1.2% every 60ms (reaches 100% in approx 1.5s)
                   
                   return;
                 } else if (status === "processing" || status === "queued" || status === "PROCESSING" || status === "QUEUED") {
-                  // 클라이언트 시간 기준으로 경과 시간 계산 (서버 시간 차이 보정)
+                  // Calculate elapsed time based on client time (compensating for server time drift)
                   const clientElapsed = Date.now() - pollingStartTime;
-                  const estimatedTotal = 120000; // 2분 = 120초 = 120,000ms
+                  const estimatedTotal = 120000; // 2 minutes = 120 seconds = 120,000ms
                   
-                  // 30%에서 시작해서 2분 동안 85%까지 올라가도록 계산
-                  // 30% + (elapsed / 120000) * 55 = 30%에서 85%까지
+                  // Calculate progress from 30% to 85% over 2 minutes
+                  // 30% + (elapsed / 120,000) * 55 = 30% to 85%
                   const calculatedProgress = Math.min(85, 30 + (clientElapsed / estimatedTotal) * 55);
                   
-                  // 최소 진행률 보장: 시간이 지나면 최소한 조금씩은 올라가도록
-                  // 매 polling마다 최소 0.2%씩 증가 보장 (렉으로 오해 방지)
+                  // Ensure minimum progress: guarantee a small increase over time
+                  // At least 0.2% increase per polling (to avoid perception of lag)
                   const minProgress = lastProgressUpdate + 0.2;
                   const progress = Math.max(calculatedProgress, minProgress);
                   

@@ -106,8 +106,8 @@ function SignInPageContent() {
           <div className="flex flex-col gap-6">
             <div className="space-y-1">
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Sign in</p>
-              <h1 className="text-[28px] font-bold text-slate-900 leading-tight">리포트 저장하고<br/>진행 상황까지 한 번에</h1>
-              <p className="text-[14px] text-slate-600">내 분석 결과와 검증 진행 상황을 한 곳에서 관리하세요.</p>
+              <h1 className="text-[28px] font-bold text-slate-900 leading-tight">Save your reports and<br/>track progress all at once</h1>
+              <p className="text-[14px] text-slate-600">Manage your analysis results and verification progress in one place.</p>
             </div>
 
             {error && (
@@ -180,7 +180,7 @@ function SignInPageContent() {
                     </button>
                   </div>
 
-                  <p className="text-[12px] text-slate-500 text-center">리포트는 기본 비공개이며 본인만 접근 가능합니다.</p>
+                  <p className="text-[12px] text-slate-500 text-center">Reports are private by default and only accessible by you.</p>
                 </form>
               ) : (
                 <form onSubmit={handlePasswordAuth} className="space-y-4">
@@ -249,7 +249,7 @@ function SignInPageContent() {
                     </button>
                   </div>
 
-                  <p className="text-[12px] text-slate-500 text-center">리포트는 기본 비공개이며 본인만 접근 가능합니다.</p>
+                  <p className="text-[12px] text-slate-500 text-center">Reports are private by default and only accessible by you.</p>
                 </form>
               )}
 
@@ -262,7 +262,7 @@ function SignInPageContent() {
             <div>
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Why NexSupply</p>
               <h2 className="text-[22px] font-bold text-slate-900 mt-1">Sourcing Intelligence OS</h2>
-              <p className="text-[14px] text-slate-600 mt-1">분석 결과, HS 결정, verification 요청을 같은 워크스페이스에 쌓아둡니다.</p>
+              <p className="text-[14px] text-slate-600 mt-1">Keep analysis results, HS decisions, and verification requests in the same workspace.</p>
             </div>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-[14px] text-slate-700">

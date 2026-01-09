@@ -1390,7 +1390,7 @@ function isHs2MismatchForToy(hs: string | null | undefined): boolean {
   const digits = hs.replace(/\D/g, "");
   if (digits.length < 2) return false;
   const hs2 = digits.slice(0, 2);
-  // 84 85는 기계, 전기기기 쪽이라 장난감 후보에서 튀는 경우가 많음
+  // 84 85 are machinery/electrical equipment, often surfacing as false positives for toys
   return hs2 === "84" || hs2 === "85";
 }
 
@@ -1463,7 +1463,7 @@ function isHs2MismatchForFood(hs: string | null | undefined): boolean {
   const digits = hs.replace(/\D/g, "");
   if (digits.length < 2) return false;
   const hs2 = digits.slice(0, 2);
-  // 84 85 94는 기계, 전기기기, 가구 쪽이라 식품 후보에서 튀는 경우가 많음
+  // 84 85 94 are machinery, electrical equipment, and furniture, often surfacing as false positives for food
   return hs2 === "84" || hs2 === "85" || hs2 === "94";
 }
 
@@ -1575,7 +1575,7 @@ function buildAnchorTerms(analysis: ImageAnalysisResult): string[] {
 
   const uniq = Array.from(new Set(base));
 
-  // Jegichagi 같은 케이스를 위해 최소한의 확장
+  // Minimal extension for cases like Jegichagi
   const expanded: string[] = [];
   if (uniq.some((t) => t.includes("jegichagi") || t.includes("jegi"))) {
     expanded.push("shuttlecock", "feather", "badminton", "birdie");
@@ -1618,7 +1618,7 @@ function buildSummary(matchReason: string, evidence: SupplierEvidence): string {
       ? ` ${rc} internal references found. Last shipment ${last ?? "unknown"}.`
       : " No internal references found. Last shipment unknown.";
 
-  // 항상 두 문장 이상이 되도록 보장
+  // Ensure there are always at least two sentences
   return reason + evidenceSentence;
 }
 
@@ -2296,11 +2296,11 @@ function buildAnchorTermsForImporters(analysis: ImageAnalysisResult): string[] {
     .split(/\s+/)
     .filter((w) => w.length >= 4);
 
-  // 너무 흔한 단어는 빼기
+  // Remove overly common words
   const stop = new Set(["kids", "child", "children", "toy", "game", "set", "play"]);
   const filtered = tokens.filter((t) => !stop.has(t));
 
-  // 상위 6개만 사용
+  // Use top 6 only
   return Array.from(new Set(filtered)).slice(0, 6);
 }
 
@@ -2329,8 +2329,8 @@ async function collectRecentImportersLastNDays(
     return { importers: [], windowDaysUsed: windowDays, totalMatchedShipments: 0 };
   }
 
-  // 우선 뷰를 쓰는 걸 추천
-  // 없으면 프로젝트에서 실제 shipping 테이블명으로 바꿔서 쓰면 됨
+  // Recommended to use views first
+  // If not available, replace with the actual shipping table name in the project
   const sourcesToTry = [
     { table: "shipping_records_normalized", dateCol: "shipment_date" },
     { table: "shipping_records", dateCol: "shipment_date" },

@@ -3,9 +3,9 @@
 import { CheckCircle2 } from "lucide-react";
 
 const trustPoints = [
-  "최악 기준 포함",
-  "리스크 명시",
-  "다음 행동 제시",
+  "Conservative Estimates",
+  "Risk Disclosure",
+  "Actionable Next Steps",
 ];
 
 export function TrustBar() {

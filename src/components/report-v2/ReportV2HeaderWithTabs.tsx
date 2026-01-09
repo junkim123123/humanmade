@@ -148,7 +148,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                   </span>
-                  예시 분석 기준 제품: 프리미엄 코튼 티셔츠
+                  Example Analysis Basis: Premium Cotton T-shirt
                 </div>
               )}
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">

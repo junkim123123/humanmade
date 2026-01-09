@@ -96,8 +96,8 @@ const keepSingleToken = (tok: string) => {
   if (!t) return false;
   if (ANCHOR_STOPWORDS.has(t)) return false;
   if (AMBIGUOUS_SINGLE_TOKENS.has(t)) return false;
-  // 너무 짧은 단일 토큰은 노이즈가 많음
-  // 한글은 2자 이상, 영문은 5자 이상만 허용
+  // Very short single tokens are often noise
+  // Require at least 2 chars for CJK/Hangul, 5 chars for Latin
   const hasHangul = [...t].some(isHangul);
   if (hasHangul) return t.length >= 2;
   return t.length >= 5;
@@ -108,10 +108,10 @@ const keepPhrase = (phrase: string) => {
   if (!p) return false;
   const parts = p.split(/\s+/).filter(Boolean);
   if (parts.length < 2) return false;
-  // phrase 안에 모호 토큰이 하나만 있고 나머지가 stopword면 버림
+  // Discard if the phrase only contains one meaningful token and the rest are stopwords
   const meaningful = parts.filter((w) => !ANCHOR_STOPWORDS.has(w));
   if (meaningful.length < 2) return false;
-  // phrase 전체가 모호 토큰만으로 구성되면 버림
+  // Discard if the entire phrase consists of ambiguous tokens
   const allAmbiguous = meaningful.every((w) => AMBIGUOUS_SINGLE_TOKENS.has(w));
   if (allAmbiguous) return false;
   return true;
@@ -122,13 +122,13 @@ const uniq = (arr: string[]) => Array.from(new Set(arr.map(normalize).filter(Boo
 export const extractBrandPhrasesStrict = (productName: string, keywords: string[]) => {
   const phrases: string[] = [];
 
-  // 키워드 중 2단어 이상은 일단 브랜드 후보로 포함
+  // Include keywords with 2 or more words as brand candidates
   for (const k of keywords || []) {
     const p = normalize(k);
     if (p.split(/\s+/).length >= 2) phrases.push(p);
   }
 
-  // productName에서 연속 토큰 bigram trigram 생성 후 후보로
+  // Generate bigram/trigram candidates from sequential tokens in productName
   const toks = tokenizeLoose(productName).filter((t) => !ANCHOR_STOPWORDS.has(t));
   for (let i = 0; i < toks.length - 1; i++) {
     phrases.push(`${toks[i]} ${toks[i + 1]}`);
@@ -137,8 +137,9 @@ export const extractBrandPhrasesStrict = (productName: string, keywords: string[
 
   const cleaned = uniq(phrases).filter(keepPhrase);
 
-  // 안전장치
-  // "line friends"처럼 확실한 브랜드 구문이 있으면 단일 "line"은 절대 앵커로 쓰지 않게 된다
+  // Safety mechanism:
+  // If there is a definitive brand phrase like "line friends", the single token "line" 
+  // will never be used as an anchor.
   return cleaned;
 };
 
@@ -166,12 +167,12 @@ export const buildAnchorTermsStrict = (
 
   const anchors: string[] = [];
 
-  // 1 구문이 최우선
+  // 1. Phrases have highest priority
   for (const p of brandPhrases || []) {
     if (keepPhrase(p)) anchors.push(normalize(p));
   }
 
-  // 2 키워드 단일 토큰은 엄격 허용
+  // 2. Keyword single tokens are strictly allowed
   // Use cleaned keywords (noise tokens already filtered by removeNoiseTokens)
   for (const k of cleanedKeywords) {
     for (const tok of tokenizeLoose(k)) {
@@ -179,14 +180,14 @@ export const buildAnchorTermsStrict = (
     }
   }
 
-  // 3 productName 단일 토큰은 더 엄격
+  // 3. productName single tokens are even more strict
   for (const tok of tokenizeLoose(cleanedProductName)) {
     if (keepSingleToken(tok)) anchors.push(normalize(tok));
   }
 
   const out = uniq(anchors);
 
-  // 너무 빡세서 비면 완화
+  // Relax constraints if it's too strict and results in empty set
   if (out.length === 0) {
     const relaxed = uniq([
       ...tokenizeLoose(cleanedProductName).filter(

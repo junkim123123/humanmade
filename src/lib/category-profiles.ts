@@ -70,18 +70,18 @@ export type CategoryProfile = {
   key: CategoryKey;
   label?: string;
 
-  // HS2는 candidate에 hsCode가 있을 때만 적용하는 걸 추천
-  // hs2가 없으면 통과시키고 다른 스코어로만 랭크
+  // HS2 is recommended to be applied only when there is an hsCode in the candidates
+  // If hs2 is missing, pass through and rank by other scores only
   allowHs2?: string[];
   denyHs2?: string[];
 
-  // 있으면 바로 탈락시키는 강한 단어들
+  // Strong words that cause immediate mismatch/disqualification
   hardMismatchTerms?: string[];
 
-  // 있으면 점수만 깎는 단어들
+  // Words that only apply a score penalty
   softPenaltyTerms?: string[];
 
-  // 앵커 부스트 구문 (브랜드 구문 등)
+  // Anchor boost phrases (brand phrases, etc.)
   anchorBoostPhrases?: string[];
 
   scoringWeights?: {
@@ -96,7 +96,7 @@ export type CategoryProfile = {
     maxFinal: number;
   };
 
-  // 추가 입력 요청 정책 (선택적)
+  // Additional intake request policy (optional)
   intakeRules?: IntakeRule[];
 };
 
@@ -486,9 +486,9 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 12, hs2Match: 10, hardMismatchPenalty: 80, softPenalty: 15 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "barcode", requirement: "recommended", reason: "동일 제품 재분석과 캐시, 구성 추정에 도움" },
-      { key: "age_grade", requirement: "recommended", reason: "ASTM F963, CPSIA 분기 정확도 상승" },
-      { key: "warnings", requirement: "recommended", reason: "small parts, 배터리, 연령 표기 확인" },
+      { key: "barcode", requirement: "recommended", reason: "Helps with re-analysis, caching, and configuration estimation for same product" },
+      { key: "age_grade", requirement: "recommended", reason: "Improves accuracy for ASTM F963 and CPSIA branching" },
+      { key: "warnings", requirement: "recommended", reason: "Verify small parts, batteries, and age markings" },
     ],
   },
 
@@ -508,10 +508,10 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 12, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "barcode", requirement: "recommended", reason: "제품 특정, 동일 SKU 캐시, 리테일팩 확인" },
-      { key: "back_label", requirement: "recommended", reason: "성분, 알러지, 원산지, 순중량 추출" },
-      { key: "ingredients", requirement: "recommended", reason: "HS 후보, 통관 리스크 정확도 상승" },
-      { key: "net_weight", requirement: "recommended", reason: "단가 단위와 물류 산정 정확도 상승" },
+      { key: "barcode", requirement: "recommended", reason: "Product identification, same SKU caching, and retail pack verification" },
+      { key: "back_label", requirement: "recommended", reason: "Extract ingredients, allergens, origin, and net weight" },
+      { key: "ingredients", requirement: "recommended", reason: "Improves HS candidate and customs risk accuracy" },
+      { key: "net_weight", requirement: "recommended", reason: "Improves unit price and logistics calculation accuracy" },
     ],
   },
 
@@ -596,11 +596,11 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     },
     // Intake rules that specifically resolves the 1704 vs 9503 split
     intakeRules: [
-      { key: "barcode", requirement: "recommended", reason: "동일 SKU 캐시와 구성 단위 확인" },
-      { key: "back_label", requirement: "recommended", reason: "캔디 비중, 순중량, 성분 확인" },
-      { key: "ingredients", requirement: "recommended", reason: "식품 분류 신호 강화" },
-      { key: "warnings", requirement: "recommended", reason: "장난감 안전 표기 신호 강화" },
-      { key: "age_grade", requirement: "recommended", reason: "토이 중심 분기 정확도 상승" },
+      { key: "barcode", requirement: "recommended", reason: "Confirm same SKU cache and configuration units" },
+      { key: "back_label", requirement: "recommended", reason: "Verify candy ratio, net weight, and ingredients" },
+      { key: "ingredients", requirement: "recommended", reason: "Strengthen food classification signals" },
+      { key: "warnings", requirement: "recommended", reason: "Strengthen toy safety marking signals" },
+      { key: "age_grade", requirement: "recommended", reason: "Improve accuracy for toy-centric branching" },
     ],
   },
 
@@ -619,10 +619,10 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 14, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "barcode", requirement: "recommended", reason: "모델 특정과 스펙 확인" },
-      { key: "power_spec", requirement: "recommended", reason: "전압, 와트, 플러그 확인" },
-      { key: "battery_label", requirement: "recommended", reason: "배터리 규제와 운송 분기" },
-      { key: "warnings", requirement: "optional", reason: "인증 문구 추출" },
+      { key: "barcode", requirement: "recommended", reason: "Model identification and spec verification" },
+      { key: "power_spec", requirement: "recommended", reason: "Verify voltage, wattage, and plug type" },
+      { key: "battery_label", requirement: "recommended", reason: "Battery regulation and transportation branching" },
+      { key: "warnings", requirement: "optional", reason: "Extract certification statements" },
     ],
   },
 
@@ -641,9 +641,9 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 14, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "care_label", requirement: "recommended", reason: "섬유 조성으로 HS 정확도 급상승" },
-      { key: "dimensions", requirement: "optional", reason: "사이즈 스펙과 포장 산정" },
-      { key: "barcode", requirement: "optional", reason: "리테일 SKU 매칭" },
+      { key: "care_label", requirement: "recommended", reason: "Significantly improves HS accuracy via fiber composition" },
+      { key: "dimensions", requirement: "optional", reason: "Size specs and packaging calculation" },
+      { key: "barcode", requirement: "optional", reason: "Retail SKU matching" },
     ],
   },
 
@@ -661,9 +661,9 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 14, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "back_label", requirement: "recommended", reason: "경고 문구와 용량 확인" },
-      { key: "in_ci", requirement: "recommended", reason: "성분 규제 분기" },
-      { key: "net_weight", requirement: "recommended", reason: "ml, g 단위로 산정 정확도 상승" },
+      { key: "back_label", requirement: "recommended", reason: "Verify warning statements and capacity" },
+      { key: "in_ci", requirement: "recommended", reason: "Ingredient regulation branching" },
+      { key: "net_weight", requirement: "recommended", reason: "Improves accuracy for ml/g based calculations" },
     ],
   },
 
@@ -680,8 +680,8 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 8, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 300, maxFinal: 12 },
     intakeRules: [
-      { key: "dimensions", requirement: "recommended", reason: "부피와 포장 산정에 직결" },
-      { key: "barcode", requirement: "optional", reason: "리테일 SKU 매칭" },
+      { key: "dimensions", requirement: "recommended", reason: "Directly linked to volume and packaging calculation" },
+      { key: "barcode", requirement: "optional", reason: "Retail SKU matching" },
     ],
   },
 
@@ -698,8 +698,8 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 14, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "dimensions", requirement: "critical", reason: "운임과 포장 산정이 거의 전부" },
-      { key: "back_label", requirement: "optional", reason: "소재 확인" },
+      { key: "dimensions", requirement: "critical", reason: "Freight and packaging calculation is almost everything" },
+      { key: "back_label", requirement: "optional", reason: "Verify material" },
     ],
   },
 
@@ -716,8 +716,8 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 14, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 300, maxFinal: 12 },
     intakeRules: [
-      { key: "dimensions", requirement: "recommended", reason: "규격이 HS 분기와 단가에 영향" },
-      { key: "barcode", requirement: "optional", reason: "모델 특정" },
+      { key: "dimensions", requirement: "recommended", reason: "Specs affect HS branching and unit price" },
+      { key: "barcode", requirement: "optional", reason: "Model identification" },
     ],
   },
 
@@ -735,9 +735,9 @@ export const CATEGORY_PROFILES: Record<CategoryKey, CategoryProfile> = {
     scoringWeights: { anchorHit: 10, hs2Match: 14, hardMismatchPenalty: 80, softPenalty: 12 },
     limits: { maxCandidatesBeforeRerank: 250, maxFinal: 10 },
     intakeRules: [
-      { key: "sds", requirement: "recommended", reason: "규제와 운송 분기 핵심" },
-      { key: "back_label", requirement: "recommended", reason: "위험 표지와 성분 확인" },
-      { key: "net_weight", requirement: "recommended", reason: "단가 산정과 운임 계산" },
+      { key: "sds", requirement: "recommended", reason: "Key for regulation and transportation branching" },
+      { key: "back_label", requirement: "recommended", reason: "Verify hazard labels and ingredients" },
+      { key: "net_weight", requirement: "recommended", reason: "Unit price calculation and freight estimation" },
     ],
   },
 

@@ -35,7 +35,7 @@ const caseStudies = [
     borderColor: "border-rose-200/60",
     categoryColor: "text-rose-600",
     bgColor: "bg-rose-50/40",
-    image: "/product-photos/과일먹은 마시멜로우/mmexport1758763658404.jpg",
+    image: "/product-photos/fruit-marshmallows/mmexport1758763658404.jpg",
     icon: Candy,
   },
   {
@@ -48,7 +48,7 @@ const caseStudies = [
     borderColor: "border-blue-200/60",
     categoryColor: "text-blue-600",
     bgColor: "bg-blue-50/40",
-    image: "/product-photos/귀멸의 칼날 키링/mmexport1758763260109.jpg",
+    image: "/product-photos/demon-slayer-keyring/mmexport1758763260109.jpg",
     icon: ToyBrick,
   },
   {
@@ -61,7 +61,7 @@ const caseStudies = [
     borderColor: "border-emerald-200/60",
     categoryColor: "text-emerald-600",
     bgColor: "bg-emerald-50/40",
-    image: "/product-photos/3d젤리/mmexport1758762843530.jpg",
+    image: "/product-photos/3d-jelly/mmexport1758762843530.jpg",
     icon: Cookie,
   },
 ];

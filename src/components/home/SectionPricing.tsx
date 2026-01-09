@@ -33,7 +33,7 @@ interface PlanData {
 const PLANS: PlanData[] = [
   {
     label: "Analyze",
-    title: "무료 Analyze",
+    title: "Free Analyze",
     priceMain: "$0",
     description: "Delivered cost range in minutes",
     bullets: ["Market range baseline", "Sign in to run and save"],

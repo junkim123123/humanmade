@@ -5,16 +5,16 @@ import { runIntelligencePipeline } from "@/lib/intelligence-pipeline";
 /**
  * GET /api/test-pipeline
  * 
- * 테스트용 Intelligence Pipeline 엔드포인트
- * 더미 데이터를 사용하여 파이프라인을 실행하고 결과를 JSON으로 반환합니다.
+ * Test endpoint for Intelligence Pipeline
+ * Runs the pipeline using dummy data or query parameters and returns JSON results.
  * 
  * Query Parameters (optional):
- * - imageUrl: 테스트할 이미지 URL (기본값: 더미 이미지)
- * - quantity: 주문 수량 (기본값: 100)
- * - dutyRate: 관세율 (기본값: 0.15 = 15%)
- * - shippingCost: 배송비 (기본값: 500)
- * - fee: 수수료 (기본값: 100)
- * - productId: 기존 제품 ID (선택사항)
+ * - imageUrl: Product image URL to test (default: dummy image)
+ * - quantity: Order quantity (default: 100)
+ * - dutyRate: Duty rate (default: 0.15 = 15%)
+ * - shippingCost: Shipping cost (default: 500)
+ * - fee: Service fee (default: 100)
+ * - productId: Existing product ID (optional)
  * 
  * Example:
  * GET /api/test-pipeline?imageUrl=https://example.com/product.jpg&quantity=200
@@ -23,10 +23,10 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    // 더미 데이터 또는 쿼리 파라미터에서 가져오기
+    // Get from query params or use dummy data
     const imageUrl =
       searchParams.get("imageUrl") ||
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"; // 더미 이미지
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"; // Dummy image
     const quantity = parseInt(searchParams.get("quantity") || "100", 10);
     const dutyRate = parseFloat(searchParams.get("dutyRate") || "0.15");
     const shippingCost = parseFloat(searchParams.get("shippingCost") || "500");
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       productId,
     });
 
-    // 파이프라인 실행
+    // Execute pipeline
     const result = await runIntelligencePipeline({
       imageUrl,
       quantity,
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
 /**
  * POST /api/test-pipeline
  * 
- * POST 요청으로 파이프라인을 실행할 수도 있습니다.
+ * You can also execute the pipeline via POST request.
  * Request Body:
  * {
  *   "imageUrl": "https://example.com/product.jpg",
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
       productId,
     });
 
-    // 파이프라인 실행
+    // Execute pipeline
     const result = await runIntelligencePipeline({
       imageUrl,
       quantity,

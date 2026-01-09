@@ -20,22 +20,22 @@ export function buildReportFromPipeline(input: {
   const productName = analysis?.productName ?? "Unknown product";
   const category = analysis?.category ?? "unknown";
 
-  // Determine confidence tier - 항상 문자열로 변환하여 DB 제약 조건 준수
+  // Determine confidence tier - always convert to string for DB constraint compliance
   let confidenceTier: "low" | "medium" | "high";
   
   if (market?.confidenceTier) {
-    // market.confidenceTier가 이미 문자열인지 확인
+    // Check if market.confidenceTier is already a string
     const tier = market.confidenceTier;
     if (typeof tier === "string" && (tier === "low" || tier === "medium" || tier === "high")) {
       confidenceTier = tier;
     } else {
-      // 숫자나 다른 값이면 기본값으로
+      // Use default if it's numeric or another value
       confidenceTier = "medium";
     }
   } else {
-    // analysis.confidence를 기반으로 계산 (0-1 범위 가정)
+    // Calculate based on analysis.confidence (assuming 0-1 range)
     const conf = typeof analysis?.confidence === "number" ? analysis.confidence : 0;
-    // 0-1 범위를 클램핑
+    // Clamp to 0-1 range
     const clampedConf = Math.min(Math.max(conf, 0), 1);
     confidenceTier = clampedConf >= 0.8 ? "high" : clampedConf >= 0.6 ? "medium" : "low";
   }

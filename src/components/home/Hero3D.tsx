@@ -162,7 +162,7 @@ export function Hero3D() {
                 size="lg"
                 className="w-full sm:w-auto min-w-[220px] h-14 text-base font-semibold bg-electric-blue-600 hover:bg-electric-blue-700 shadow-xl shadow-electric-blue-500/50 transition-all hover:scale-105"
               >
-                무료 Analyze
+                Free Analyze
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>

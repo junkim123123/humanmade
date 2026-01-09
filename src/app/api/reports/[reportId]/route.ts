@@ -419,7 +419,7 @@ export async function GET(
   // Fetch factories for this category
   const factories = await fetchFactoriesForCategory(admin, reportData.category || "unknown");
 
-  // payload 컬럼명이 다르면 여기만 맞추면 됨
+  // Adjust here if payload column names are different
   const baseline = reportData.baseline as Report["baseline"];
   const signals = reportData.signals as Report["signals"];
   const pipelineResult = reportData.pipeline_result as any;

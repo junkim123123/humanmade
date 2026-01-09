@@ -12,11 +12,11 @@ export const containsWholeToken = (haystackRaw: string, needleRaw: string) => {
   const needle = (needleRaw || "").toLowerCase().trim();
   if (!haystack || !needle) return false;
 
-  // 구문은 그대로 포함 검사
+  // Check for multi-word phrases directly
   if (needle.includes(" ")) return haystack.includes(needle);
 
-  // 단일 토큰은 경계 검사
-  const re = new RegExp(`(^|[^a-z0-9가-힣])${escapeRegExp(needle)}([^a-z0-9가-힣]|$)`);
+  // Single tokens require boundary checks
+  const re = new RegExp(`(^|[^a-z0-9])${escapeRegExp(needle)}([^a-z0-9]|$)`);
   return re.test(haystack);
 };
 
