@@ -37,8 +37,8 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
     },
     HOLD: {
       icon: AlertCircle,
-      color: "bg-amber-100 text-amber-700 border-amber-200",
-      bgColor: "bg-amber-50",
+      color: "bg-blue-50 text-blue-700 border-blue-100",
+      bgColor: "bg-blue-50/30",
       label: "Hold",
     },
     NO: {
@@ -78,9 +78,9 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
           <div className="flex-1 bg-slate-100 rounded-full h-2">
             <div
               className={`h-2 rounded-full transition-all ${
-                decision === "GO"
+                displayConfidence >= 0.8
                   ? "bg-emerald-500"
-                  : confidence >= 70
+                  : displayConfidence >= 0.5
                   ? "bg-amber-500"
                   : "bg-red-500"
               }`}

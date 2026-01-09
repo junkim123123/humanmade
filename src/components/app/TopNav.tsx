@@ -6,6 +6,7 @@ import { Menu, LogOut } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { buildAppNav, type UserRole } from "@/lib/nav";
 import UserMenu from "@/components/app/UserMenu";
+import { Logo } from "@/components/ui/Logo";
 import { signOut } from "@/app/actions/auth";
 
 export default function TopNav({ role = "VIEWER" }: { role?: UserRole }) {
@@ -49,6 +50,7 @@ export default function TopNav({ role = "VIEWER" }: { role?: UserRole }) {
         <div className="grid grid-cols-[1fr_auto_1fr] items-center h-full">
           {/* Logo */}
           <Link href="/app/reports" className="flex items-center gap-2 text-xl font-bold text-electric-blue-600 shrink-0">
+            <Logo className="w-7 h-7" />
             NexSupply
           </Link>
 

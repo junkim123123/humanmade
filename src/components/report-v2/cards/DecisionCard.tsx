@@ -74,7 +74,7 @@ export default function DecisionCard({ report, onShowMissing }: DecisionCardProp
           {missingInputs.slice(0, 3).map((missing, i) => (
             <div
               key={i}
-              className="text-xs px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full border border-amber-200 flex items-center gap-1"
+              className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 flex items-center gap-1"
             >
               <span className="font-medium">Initial Intelligence Draft:</span>
               <span>{missing.label}</span>
@@ -86,7 +86,7 @@ export default function DecisionCard({ report, onShowMissing }: DecisionCardProp
       {missingInputsCount > 0 && (
         <button
           onClick={() => {}} // Placeholder for unlock action
-          className="w-full mb-3 px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm font-medium hover:bg-amber-200 transition-colors border border-amber-200"
+          className="w-full mb-3 px-4 py-2 bg-emerald-50 text-emerald-800 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors border border-emerald-200"
         >
           Unlock proprietary data to see exact numbers
         </button>

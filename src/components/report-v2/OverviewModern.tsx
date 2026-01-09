@@ -362,7 +362,7 @@ export default function OverviewModern({ report }: OverviewModernProps) {
             <p className="text-[13px] text-slate-600 mb-4">
               Upload a clear label photo to unlock a stronger verdict and action plan.
             </p>
-            <button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full px-5 py-2.5 text-[14px] font-semibold border border-amber-400 hover:from-amber-600 hover:to-amber-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+            <button className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-full px-5 py-2.5 text-[14px] font-semibold border border-emerald-500 hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>

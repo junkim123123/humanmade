@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { Check, Eye, EyeOff, ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 
 function SignInPageContent() {
   const router = useRouter();
@@ -104,6 +105,9 @@ function SignInPageContent() {
         <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] rounded-xl border border-slate-200 bg-white p-8">
           {/* Left: Form */}
           <div className="flex flex-col gap-6">
+            <Link href="/" className="w-fit">
+              <Logo className="w-10 h-10 mb-2" />
+            </Link>
             <div className="space-y-1">
               <p className="text-[12px] font-medium uppercase tracking-widest text-slate-500">Sign in</p>
               <h1 className="text-[28px] font-bold text-slate-900 leading-tight">Save your reports and<br/>track progress all at once</h1>

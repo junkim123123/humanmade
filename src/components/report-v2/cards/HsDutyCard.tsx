@@ -24,7 +24,7 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
         <div className="px-6 py-5 border-b border-slate-100">
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-[16px] font-semibold text-slate-900">Estimate</h3>
-            <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-700 italic">Initial Intelligence Draft</span>
+            <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 italic">Initial Intelligence Draft</span>
           </div>
           <p className="text-[13px] text-slate-500">Draft range (duty, freight, unit landed cost). Confirmed during verification.</p>
         </div>
@@ -43,7 +43,7 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
                       <p className="font-mono font-semibold text-slate-900">
                         {candidate.code}
                       </p>
-                      <span className="text-[11px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-medium italic">
+                      <span className="text-[11px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded font-medium italic">
                         Initial Intelligence Draft
                       </span>
                       {candidate.confidence >= 0.92 && (
@@ -87,7 +87,7 @@ export default function HsDutyCard({ decisionSupport, hsCandidates }: HsDutyCard
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-[16px] font-semibold text-slate-900">Estimate</h3>
           {hs.status === "DRAFT" && (
-            <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-700 italic">Initial Intelligence Draft</span>
+            <span className="text-[12px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 italic">Initial Intelligence Draft</span>
           )}
         </div>
         <p className="text-[13px] text-slate-500">Draft range (duty, freight, unit landed cost). Confirmed during verification.</p>

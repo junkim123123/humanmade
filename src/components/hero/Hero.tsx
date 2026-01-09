@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { CountUp } from "@/components/animation/CountUp";
+import { Logo } from "@/components/ui/Logo";
 
 // Animated Mesh Gradient Background
 function MeshGradient() {
@@ -90,9 +91,12 @@ function FloatingUICard() {
 
           {/* NexSupply Row */}
           <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200">
-            <div>
-              <p className="font-semibold text-slate-900">NexSupply</p>
-              <p className="text-sm text-purple-600">Direct sourcing</p>
+            <div className="flex items-center gap-3">
+              <Logo className="w-8 h-8" />
+              <div>
+                <p className="font-semibold text-slate-900">NexSupply</p>
+                <p className="text-sm text-purple-600">Direct sourcing</p>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-purple-600">$8.3</p>

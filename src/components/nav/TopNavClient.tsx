@@ -14,6 +14,7 @@ import {
   LogIn,
   ShieldCheck,
 } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 import { UserMenu } from "./UserMenu";
 import { signOut } from "@/app/actions/auth";
 import type { User } from "@supabase/supabase-js";
@@ -84,7 +85,8 @@ export function TopNav({ variant, user }: TopNavProps) {
       <div className="mx-auto max-w-[1040px] px-4 sm:px-6 h-[var(--topbar-h)]">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center h-full">
           <Link href={variant === "public" ? "/" : "/app"} className="flex items-center gap-2 text-xl font-bold text-electric-blue-600 shrink-0">
-            NexSupply
+            <Logo className="w-7 h-7" />
+            <span>NexSupply</span>
           </Link>
           
           <div className="flex items-center gap-1 overflow-x-auto max-md:hidden">

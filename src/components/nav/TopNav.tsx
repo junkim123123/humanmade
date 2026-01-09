@@ -17,6 +17,7 @@ import {
   X,
   ShieldCheck,
 } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 import { signOut } from "@/app/actions/auth";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -201,8 +202,9 @@ export function PublicNavbar({ user }: PublicNavbarProps) {
     <nav ref={navRef} className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-lg font-semibold text-slate-900" aria-label="NexSupply home">
-            NexSupply
+          <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-slate-900" aria-label="NexSupply home">
+            <Logo className="w-7 h-7" />
+            <span>NexSupply</span>
           </Link>
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
@@ -311,8 +313,9 @@ export function AppNavbar({ user, needsAttentionCount = 0, showBilling = true }:
     <nav ref={navRef} className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <Link href="/app" className="text-lg font-semibold text-slate-900" aria-label="NexSupply app home">
-            NexSupply
+          <Link href="/app" className="flex items-center gap-2 text-lg font-semibold text-slate-900" aria-label="NexSupply app home">
+            <Logo className="w-7 h-7" />
+            <span>NexSupply</span>
           </Link>
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (

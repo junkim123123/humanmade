@@ -33,7 +33,7 @@ export default function LabelDraftCard({ report, onConfirm }: LabelDraftCardProp
   
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return "text-emerald-600 bg-emerald-50";
-    if (confidence >= 0.5) return "text-amber-600 bg-amber-50";
+    if (confidence >= 0.5) return "text-blue-600 bg-blue-50";
     return "text-slate-500 bg-slate-50";
   };
   
@@ -44,12 +44,12 @@ export default function LabelDraftCard({ report, onConfirm }: LabelDraftCardProp
   };
   
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-6">
+    <div className="rounded-lg border border-emerald-100 bg-emerald-50/30 p-6">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            <Info className="w-5 h-5 text-emerald-600" />
             <h3 className="font-semibold text-slate-900">Label Extracted (Draft)</h3>
           </div>
           <p className="text-sm text-slate-600">
@@ -57,7 +57,7 @@ export default function LabelDraftCard({ report, onConfirm }: LabelDraftCardProp
           </p>
         </div>
         {isDraft && (
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
             Needs Confirmation
           </span>
         )}
@@ -150,7 +150,7 @@ export default function LabelDraftCard({ report, onConfirm }: LabelDraftCardProp
 function LabelField({ label, value, confidence, evidence }: { label: string; value: string | null; confidence: number; evidence: string }) {
   const [showEvidence, setShowEvidence] = useState(false);
   
-  const confidenceColor = confidence >= 0.8 ? "text-emerald-600 bg-emerald-50" : confidence >= 0.5 ? "text-amber-600 bg-amber-50" : "text-slate-500 bg-slate-50";
+  const confidenceColor = confidence >= 0.8 ? "text-emerald-600 bg-emerald-50" : confidence >= 0.5 ? "text-blue-600 bg-blue-50" : "text-slate-500 bg-slate-50";
   const confidenceLabel = confidence >= 0.8 ? "High" : confidence >= 0.5 ? "Medium" : "Low";
   
   return (

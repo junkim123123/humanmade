@@ -8,7 +8,7 @@ import { useState } from "react";
  */
 export function DraftChip({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 ${className}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 ${className}`}>
       Initial Intelligence Draft
     </span>
   );
@@ -133,7 +133,7 @@ export function DraftSection({
   className?: string;
 }) {
   return (
-    <div className={`rounded-lg border border-amber-200 bg-amber-50 p-6 ${className}`}>
+    <div className={`rounded-lg border border-emerald-100 bg-emerald-50/30 p-6 ${className}`}>
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
           {title}

@@ -29,7 +29,7 @@ export default function DecisionStrip({ report }: DecisionStripProps) {
     } else if (evidenceLevel === "similar_import") {
       return { icon: TrendingUp, bgColor: "bg-blue-50", borderColor: "border-blue-200", iconColor: "text-blue-600", textColor: "text-blue-900" };
     } else {
-      return { icon: AlertCircle, bgColor: "bg-amber-50", borderColor: "border-amber-200", iconColor: "text-amber-600", textColor: "text-amber-900" };
+      return { icon: AlertCircle, bgColor: "bg-emerald-50/30", borderColor: "border-emerald-100", iconColor: "text-emerald-600", textColor: "text-emerald-900" };
     }
   };
 

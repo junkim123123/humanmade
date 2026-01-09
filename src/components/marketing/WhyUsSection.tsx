@@ -2,6 +2,7 @@
 
 import React from "react"
 import { X, Check } from "lucide-react"
+import { Logo } from "@/components/ui/Logo"
 
 export default function WhyUsSection() {
   const diyRisks = [
@@ -50,9 +51,12 @@ export default function WhyUsSection() {
 
           {/* NexSupply */}
           <div className="rounded-xl border-2 border-slate-900 bg-white p-6">
-            <h3 className="text-[16px] font-semibold text-slate-900 mb-4">
-              NexSupply
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <Logo className="w-5 h-5" />
+              <h3 className="text-[16px] font-semibold text-slate-900">
+                NexSupply
+              </h3>
+            </div>
             <ul className="space-y-3">
               {nexSupplyBenefits.map((benefit, idx) => (
                 <li key={idx} className="flex items-start gap-3">
