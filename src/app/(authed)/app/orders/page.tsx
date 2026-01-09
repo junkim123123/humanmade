@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getUserOrders } from "@/server/actions/orders";
 import Link from "next/link";
 import { Package, ArrowRight, Factory, Search, Ship } from "lucide-react";
+import { formatDate, formatCurrency } from "@/lib/utils/format";
 
 type OrderStatus =
   | "awaiting_contact"
@@ -141,7 +142,7 @@ export default function OrdersPage() {
 
             <h3 className="text-[24px] font-bold text-slate-900 mb-3">No active shipments yet.</h3>
             <p className="text-[15px] text-slate-600 mb-8 max-w-lg mx-auto leading-relaxed">
-              Once you approve a factory quote from your Blueprint, we take over execution. Your product moves through production, QC, and freight right here.
+              Once you approve a factory quote from your Blueprint, your order will move through production, QC, and ocean freight right here.
             </p>
             <Link
               href="/app/reports"
@@ -187,13 +188,13 @@ export default function OrdersPage() {
                       <div>
                         <p className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Total</p>
                         <p className="text-[14px] text-slate-900 mt-0.5">
-                          {order.total_amount ? `$${order.total_amount.toLocaleString()}` : "—"}
+                          {order.total_amount ? formatCurrency(order.total_amount) : "—"}
                         </p>
                       </div>
                       <div>
                         <p className="text-[12px] font-medium text-slate-400 uppercase tracking-wide">Est. Delivery</p>
                         <p className="text-[14px] text-slate-900 mt-0.5">
-                          {order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString() : "—"}
+                          {order.estimated_delivery ? formatDate(order.estimated_delivery) : "—"}
                         </p>
                       </div>
                     </div>

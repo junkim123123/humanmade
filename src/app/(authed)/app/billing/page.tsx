@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Wallet, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, HelpCircle, Gift, Check, X, ShieldCheck, Plus } from "lucide-react";
 import { fetchMyCredits, fetchMyCreditTransactions } from "./actions";
-import type { CreditTransaction } from "@/server/actions/credits";
+import { formatDate, formatCurrency } from "@/lib/utils/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -59,15 +59,6 @@ export default function BillingPage() {
   useEffect(() => {
     void loadData();
   }, []);
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   const handleRedeemCode = async () => {
     if (!codeInput.trim()) {
@@ -152,7 +143,7 @@ export default function BillingPage() {
                 </div>
                 
                 <div className="flex items-baseline gap-2 mb-10">
-                  <span className="text-6xl font-bold tracking-tight">${balanceInDollars}</span>
+                  <span className="text-6xl font-bold tracking-tight">{formatCurrency(balanceInDollars)}</span>
                   <span className="text-slate-400 font-medium text-xl uppercase">USD</span>
                 </div>
 
@@ -173,19 +164,27 @@ export default function BillingPage() {
                     className="w-full h-16 bg-white text-slate-900 rounded-2xl font-bold text-[18px] hover:bg-slate-50 transition-all shadow-lg flex items-center justify-center gap-2"
                   >
                     <Plus className="w-5 h-5" />
-                    Add Credit ($49)
+                    {balance === 0 ? "Add Initial Credit ($49)" : "Add More Credits ($49)"}
                   </button>
                   <div className="flex items-center justify-between px-2">
                     <p className="text-[12px] text-slate-400">1 credit = 1 product verification</p>
-                    <button 
-                      onClick={() => setShowPromo(!showPromo)}
-                      className="text-[12px] text-blue-400 font-bold hover:underline"
-                    >
-                      {showPromo ? "Hide promo code" : "Have a promo code?"}
-                    </button>
+                    {balance === 0 && (
+                      <span className="text-[11px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded animate-pulse">Required to start verification</span>
+                    )}
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Promo Code Toggle */}
+            <div className="flex justify-center">
+              <button 
+                onClick={() => setShowPromo(!showPromo)}
+                className="text-[13px] text-slate-400 font-medium hover:text-slate-900 transition-colors flex items-center gap-2"
+              >
+                <Gift className="w-4 h-4" />
+                {showPromo ? "Hide promo code entry" : "Have a promo code?"}
+              </button>
             </div>
 
             {/* Redeem Code - Collapsible */}

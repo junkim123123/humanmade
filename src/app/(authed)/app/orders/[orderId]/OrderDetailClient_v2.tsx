@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, MessageCircle, Send, Clock, Mail, Phone, Check, Paperclip } from "lucide-react";
+import { ArrowLeft, AlertCircle, MessageCircle, Send, Clock, Mail, Phone, Check } from "lucide-react";
 import { getOrderDetail, sendOrderMessage, updateOrderContact } from "@/server/actions/orders";
 import OrderTimeline from "@/components/orders/OrderTimeline";
-import { formatDate, formatCurrency, formatDateTime } from "@/lib/utils/format";
 
 interface OrderDetailData {
   id: string;
@@ -150,7 +149,7 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
       const isUser = senderRole === "user";
       const label = isUser ? "You" : "NexSupply";
       const body = (m.body || "").trim() || "Empty message";
-      const timestamp = m.created_at ? formatDateTime(m.created_at) : "";
+      const timestamp = m.created_at ? new Date(m.created_at).toLocaleString() : "";
       return { ...m, senderRole, isUser, label, body, timestamp };
     });
   }, [messages]);
@@ -303,12 +302,12 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
             <div className="space-y-1">
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Landed Total</p>
               <p className="text-[15px] font-bold text-slate-900">
-                {order.total_amount ? formatCurrency(order.total_amount) : "Calculating..."}
+                {order.total_amount ? `$${order.total_amount.toLocaleString()}` : "Calculating..."}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Created</p>
-              <p className="text-[15px] font-bold text-slate-900">{formatDate(order.created_at)}</p>
+              <p className="text-[15px] font-bold text-slate-900">{new Date(order.created_at).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}</p>
             </div>
           </div>
         </div>
@@ -355,9 +354,9 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
               {formattedMessages.length === 0 && (
                 <div className="flex justify-start">
                   <div className="max-w-[85%] rounded-2xl px-5 py-4 bg-white text-slate-900 border border-blue-100 shadow-sm">
-                    <p className="text-[11px] uppercase tracking-widest font-bold text-blue-600 mb-2">Nexy AI • Sourcing Assistant</p>
+                    <p className="text-[11px] uppercase tracking-widest font-bold text-blue-600 mb-2">Nexy • Just now</p>
                     <p className="text-[14px] leading-relaxed">
-                      Hello! I&apos;m Nexy, your AI-assisted sourcing manager. I&apos;ve started researching your product. To speed up factory matching, please confirm:<br/><br/>
+                      Hello! I&apos;m your sourcing manager. To speed up your quotes, please let me know:<br/><br/>
                       1. Your target unit price<br/>
                       2. Estimated order quantity<br/>
                       3. If you need samples first
@@ -398,7 +397,7 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
 
             <div className="flex items-end gap-3 bg-white p-1 rounded-2xl border border-slate-200 focus-within:ring-2 focus-within:ring-blue-600 transition-all shadow-inner">
               <button className="p-3 text-slate-400 hover:text-blue-600 transition-colors">
-                <Paperclip className="w-6 h-6" />
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
               </button>
               <textarea
                 value={messageInput}

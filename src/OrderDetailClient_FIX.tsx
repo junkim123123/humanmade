@@ -355,9 +355,9 @@ export default function OrderDetailClient({ orderId }: { orderId: string }) {
               {formattedMessages.length === 0 && (
                 <div className="flex justify-start">
                   <div className="max-w-[85%] rounded-2xl px-5 py-4 bg-white text-slate-900 border border-blue-100 shadow-sm">
-                    <p className="text-[11px] uppercase tracking-widest font-bold text-blue-600 mb-2">Nexy AI • Sourcing Assistant</p>
+                    <p className="text-[11px] uppercase tracking-widest font-bold text-blue-600 mb-2">Nexy • Just now</p>
                     <p className="text-[14px] leading-relaxed">
-                      Hello! I&apos;m Nexy, your AI-assisted sourcing manager. I&apos;ve started researching your product. To speed up factory matching, please confirm:<br/><br/>
+                      Hello! I&apos;m your sourcing manager. To speed up your quotes, please let me know:<br/><br/>
                       1. Your target unit price<br/>
                       2. Estimated order quantity<br/>
                       3. If you need samples first

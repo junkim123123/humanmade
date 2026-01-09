@@ -184,8 +184,11 @@ export default function MarginComparison() {
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 px-2">
               DIY vs NexSupply
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-4 mb-2">
               Compare self-sourcing on Alibaba vs our full-service factory direct sourcing.
+            </p>
+            <p className="text-sm font-semibold text-blue-600 bg-blue-50 w-fit mx-auto px-3 py-1 rounded-full border border-blue-100">
+              Specialized in Korea/Japan Retail Sourcing (Don Quijote partners)
             </p>
           </div>
 

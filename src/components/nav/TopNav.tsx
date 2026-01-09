@@ -15,6 +15,7 @@ import {
   User as UserIcon,
   UserPlus,
   X,
+  ShieldCheck,
 } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -128,6 +129,14 @@ export function UserMenu({ user, showBilling = true }: UserMenuProps) {
               onClick={() => setOpen(false)}
             >
               <HelpCircle className="h-4 w-4" /> Support
+            </Link>
+            <Link
+              href="/privacy"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+            >
+              <ShieldCheck className="h-4 w-4" /> Privacy
             </Link>
             <form action={signOut} role="none">
               <button

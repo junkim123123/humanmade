@@ -9,6 +9,11 @@ import {
 
 const FAQ_ITEMS = [
   {
+    question: "How accurate are the estimates?",
+    answer:
+      "Initial AI estimates are based on historical customs data and market averages. The $49 Blueprint provides refined quotes based on direct factory outreach and actual logistics data. We guarantee transparency by labeling all data sources and assumptions.",
+  },
+  {
     question: "What does deposit credited mean?",
     answer:
       "The $49 deposit covers factory outreach and verification work. If you proceed with an order, the $49 is credited toward your first order total.",
