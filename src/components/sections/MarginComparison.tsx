@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, X, Languages, Package, FileText, DollarSign, Clock, Shield, TrendingUp, CheckCircle2, MessageSquare, MapPin, User as UserIcon } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
 
 // Simple Document-Check SVG icon
 function DocumentCheckIcon({ className = "w-6 h-6 text-slate-400" }) {
@@ -66,7 +65,6 @@ function ComparisonColumn({
 
       {/* Title */}
       <div className="flex items-center gap-2 mb-6">
-        {isHighlight && <Logo className="w-6 h-6" />}
         <h3
           className={`text-lg lg:text-xl font-bold ${
             isHighlight ? "text-slate-900" : "text-slate-700"

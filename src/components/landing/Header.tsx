@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
 
 export function Header() {
   return (
@@ -11,7 +10,6 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Logo className="w-7 h-7" />
             <span className="text-2xl font-bold text-electric-blue-600">NexSupply</span>
           </Link>
 
