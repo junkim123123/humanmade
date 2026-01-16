@@ -26,6 +26,8 @@ export default function BillingPage() {
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeMessage, setCodeMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showPromo, setShowPromo] = useState(false);
+  const [topupStatus, setTopupStatus] = useState<"idle" | "loading" | "submitted">("idle");
+  const [topupMessage, setTopupMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Convert credits to dollar amount
   const balanceInDollars = balance * CREDIT_VALUE;
@@ -96,6 +98,38 @@ export default function BillingPage() {
     }
   };
 
+  const handleManualTopupRequest = async () => {
+    if (topupStatus === "loading") {
+      return;
+    }
+
+    setTopupStatus("loading");
+    setTopupMessage(null);
+
+    try {
+      const response = await fetch("/api/credits/manual-topup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creditsRequested: 1 }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to submit request");
+      }
+
+      setTopupStatus("submitted");
+      setTopupMessage({
+        type: "success",
+        text: data.message || "Request received. Manual top-up takes 3–6 hours.",
+      });
+    } catch (error) {
+      console.error("Failed to submit manual top-up request", error);
+      setTopupStatus("idle");
+      setTopupMessage({ type: "error", text: "Failed to submit request. Please try again." });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -159,11 +193,16 @@ export default function BillingPage() {
 
                 <div className="flex flex-col gap-4">
                   <button
-                    onClick={() => alert("Payment gateway integration in progress. Please contact support for bulk credits.")}
-                    className="w-full h-16 bg-white text-slate-900 rounded-2xl font-bold text-[18px] hover:bg-slate-50 transition-all shadow-lg flex items-center justify-center gap-2"
+                    onClick={handleManualTopupRequest}
+                    disabled={topupStatus === "loading" || topupStatus === "submitted"}
+                    className="w-full h-16 bg-white text-slate-900 rounded-2xl font-bold text-[18px] hover:bg-slate-50 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <Plus className="w-5 h-5" />
-                    {balance === 0 ? "Add Initial Credit ($49)" : "Add More Credits ($49)"}
+                    {topupStatus === "loading" ? (
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Plus className="w-5 h-5" />
+                    )}
+                    {balance === 0 ? "Request Initial Credit (Free)" : "Request More Credits (Free)"}
                   </button>
                   <div className="flex items-center justify-between px-2">
                     <p className="text-[12px] text-slate-400">1 credit = 1 product verification</p>
@@ -171,6 +210,19 @@ export default function BillingPage() {
                       <span className="text-[11px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded animate-pulse">Required to start verification</span>
                     )}
                   </div>
+                  <p className="text-[12px] text-slate-400 px-2">
+                    Free during beta · Manual top-up takes 3–6 hours
+                  </p>
+                  {topupMessage && (
+                    <div className={`mt-1 flex items-center gap-3 p-4 rounded-2xl ${
+                      topupMessage.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-100"
+                        : "bg-red-50 text-red-800 border border-red-100"
+                    }`}>
+                      {topupMessage.type === "success" ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
+                      <p className="text-[14px] font-semibold">{topupMessage.text}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -59,6 +59,11 @@ SUPPLIER_ENRICHMENT_ENABLED=false
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Optional: WhatsApp Cloud API (manual credit request notifications)
+WHATSAPP_PHONE_NUMBER_ID=your-phone-number-id
+WHATSAPP_ACCESS_TOKEN=your-whatsapp-access-token
+WHATSAPP_ADMIN_PHONE=your-admin-phone-number-with-country-code
 ```
 
 ## Client vs Server Rules
