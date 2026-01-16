@@ -129,10 +129,10 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
       <div ref={headerRef} className="bg-white border-b border-slate-200/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Row 1: Back link */}
-          <div className="pt-6 pb-4">
+          <div className="pt-4 sm:pt-6 pb-3 sm:pb-4">
             <Link
               href="/app/reports"
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors font-medium"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-500 hover:text-slate-900 transition-colors font-medium"
             >
               <ChevronLeft className="w-4 h-4" />
               Back to Reports
@@ -140,10 +140,10 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
           </div>
 
           {/* Row 2: Product Info - Clean and Spacious */}
-          <div className="pb-8">
+          <div className="pb-6 sm:pb-8">
             <div className="flex flex-col gap-2 mb-3">
               {(report as any).isSample && (
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100 w-fit uppercase tracking-tight">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] sm:text-[11px] font-bold border border-blue-100 w-fit uppercase tracking-tight">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
@@ -151,11 +151,11 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
                   Example Analysis Basis: {extractProductName(report.productName || (report as any).product_name)}
                 </div>
               )}
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
+              <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
                 {extractProductName(report.productName || (report as any).product_name)}
               </h1>
             </div>
-            <p className="text-base text-slate-600 max-w-2xl">
+            <p className="text-sm sm:text-base text-slate-600 max-w-2xl">
               Supply Chain Intelligence Report
             </p>
           </div>
@@ -164,20 +164,20 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
 
       {/* Sticky Bottom CTA - Simplified and Cleaner */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white shadow-2xl">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1">
               <p className="text-sm font-semibold text-slate-900 mb-1">
                 {isVerified ? "Verification in progress" : "Ready to optimize your sourcing?"}
               </p>
-              <p className="text-sm text-slate-600">
+              <p className="text-xs sm:text-sm text-slate-600">
                 {isVerified ? "We're currently contacting direct factories." : "Access verified factories with 15-20% better margins"}
               </p>
             </div>
             <button
               onClick={handleRequestVerification}
               disabled={isRequesting}
-              className={`inline-flex items-center justify-center h-12 px-8 text-base font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap ${
+              className={`inline-flex w-full sm:w-auto items-center justify-center h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap ${
                 isVerified 
                   ? "bg-slate-100 text-slate-900 hover:bg-slate-200" 
                   : "bg-blue-600 text-white hover:bg-blue-700"
