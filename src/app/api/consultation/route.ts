@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Missing contact info." }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseAdmin() as any;
     const { error } = await supabase
       .from("consultation_requests")
       .insert([{ contact_info: contactInfo, source }]);
