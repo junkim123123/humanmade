@@ -28,6 +28,7 @@ export default function BillingPage() {
   const [showPromo, setShowPromo] = useState(false);
   const [topupStatus, setTopupStatus] = useState<"idle" | "loading" | "submitted">("idle");
   const [topupMessage, setTopupMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [topupFallbackUrl, setTopupFallbackUrl] = useState<string | null>(null);
 
   // Convert credits to dollar amount
   const balanceInDollars = balance * CREDIT_VALUE;
@@ -105,6 +106,7 @@ export default function BillingPage() {
 
     setTopupStatus("loading");
     setTopupMessage(null);
+    setTopupFallbackUrl(null);
 
     try {
       const response = await fetch("/api/credits/manual-topup", {
@@ -119,6 +121,7 @@ export default function BillingPage() {
       }
 
       setTopupStatus("submitted");
+      setTopupFallbackUrl(data.fallbackUrl || null);
       setTopupMessage({
         type: "success",
         text: data.message || "Request received. Manual top-up takes 3–6 hours.",
@@ -222,6 +225,16 @@ export default function BillingPage() {
                       {topupMessage.type === "success" ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
                       <p className="text-[14px] font-semibold">{topupMessage.text}</p>
                     </div>
+                  )}
+                  {topupFallbackUrl && (
+                    <a
+                      href={topupFallbackUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-semibold text-blue-600 hover:text-blue-700 underline px-2"
+                    >
+                      Send request via WhatsApp
+                    </a>
                   )}
                 </div>
               </div>

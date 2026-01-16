@@ -8,13 +8,19 @@ type ManualTopupPayload = {
   notes?: string;
 };
 
+const FALLBACK_WA_ME_PHONE = "13146577892";
+
 async function sendWhatsAppNotification(message: string) {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
   const adminPhone = process.env.WHATSAPP_ADMIN_PHONE;
 
   if (!phoneNumberId || !accessToken || !adminPhone) {
-    return { sent: false, error: "WhatsApp env vars not configured" };
+    return {
+      sent: false,
+      error: "WhatsApp env vars not configured",
+      fallbackUrl: `https://wa.me/${FALLBACK_WA_ME_PHONE}?text=${encodeURIComponent(message)}`,
+    };
   }
 
   try {
@@ -35,13 +41,21 @@ async function sendWhatsAppNotification(message: string) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("[Manual Topup] WhatsApp send failed:", response.status, errorText);
-      return { sent: false, error: errorText };
+      return {
+        sent: false,
+        error: errorText,
+        fallbackUrl: `https://wa.me/${FALLBACK_WA_ME_PHONE}?text=${encodeURIComponent(message)}`,
+      };
     }
 
     return { sent: true };
   } catch (error) {
     console.error("[Manual Topup] WhatsApp send error:", error);
-    return { sent: false, error: "Request failed" };
+    return {
+      sent: false,
+      error: "Request failed",
+      fallbackUrl: `https://wa.me/${FALLBACK_WA_ME_PHONE}?text=${encodeURIComponent(message)}`,
+    };
   }
 }
 
@@ -118,6 +132,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       whatsappSent: whatsappResult.sent,
+      fallbackUrl: whatsappResult.fallbackUrl || null,
       message: "Request received. Manual top-up takes 3–6 hours.",
     });
   } catch (error) {
