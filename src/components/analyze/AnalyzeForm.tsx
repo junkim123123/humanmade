@@ -450,7 +450,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
       )}
 
       <div className="rounded-2xl p-[1px] bg-gradient-to-br from-slate-200 via-blue-200 to-slate-200 shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
-        <div className="relative rounded-2xl bg-white/95 px-5 py-6 sm:px-8 sm:py-10">
+        <div className="relative rounded-2xl bg-white/95 px-4 py-5 sm:px-8 sm:py-10">
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px] opacity-60" />
 
           <div className="relative space-y-6">
@@ -474,7 +474,7 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
               <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                 <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all" style={{ width: `${progressPercent}%` }} />
               </div>
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] sm:text-xs">
                 {steps.map((step) => (
                   <div
                     key={step.id}
@@ -519,12 +519,12 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                       disabled={loading}
                       validationErrors={submitted ? validationErrors : {}}
                     />
-                    <div className="flex justify-end">
+                    <div className="flex flex-col sm:flex-row sm:justify-end">
                       <button
                         type="button"
                         onClick={handleNextFromUpload}
                         className={cn(
-                          "inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-all",
+                          "inline-flex h-11 w-full sm:w-auto items-center justify-center rounded-xl px-6 text-sm font-semibold transition-all",
                           files.product
                             ? "bg-slate-900 text-white hover:bg-slate-800"
                             : "bg-slate-200 text-slate-500 cursor-not-allowed"
@@ -564,18 +564,18 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                         ))}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+                        className="inline-flex h-11 w-full sm:w-auto items-center justify-center rounded-xl px-5 text-sm font-semibold text-slate-600 hover:text-slate-900"
                       >
                         Back
                       </button>
                       <button
                         type="button"
                         onClick={handleNext}
-                        className="inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800"
+                        className="inline-flex h-11 w-full sm:w-auto items-center justify-center rounded-xl px-6 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800"
                       >
                         Continue to price
                       </button>
@@ -636,17 +636,17 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+                        className="inline-flex h-11 w-full sm:w-auto items-center justify-center rounded-xl px-5 text-sm font-semibold text-slate-600 hover:text-slate-900"
                       >
                         Back
                       </button>
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex flex-col items-stretch sm:items-end gap-2">
                         <button
                           type="button"
                           onClick={handleSubmit}
                           disabled={loading || !hasValidInput}
                           className={cn(
-                            "inline-flex h-12 items-center justify-center rounded-xl px-8 text-base font-semibold transition-all shadow-lg",
+                            "inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-xl px-8 text-base font-semibold transition-all shadow-lg",
                             !hasValidInput
                               ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
                               : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"

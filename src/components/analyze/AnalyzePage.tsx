@@ -11,7 +11,7 @@ export function AnalyzePage({ mode }: AnalyzePageProps) {
     <div className="relative min-h-screen bg-slate-50">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:26px_26px] opacity-60" />
       {/* Hero Section - Compact */}
-      <div className="relative border-b border-slate-200/60 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <div className="relative border-b border-slate-200/60 bg-white/80 backdrop-blur-md sm:sticky sm:top-0 z-50">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="max-w-2xl">
