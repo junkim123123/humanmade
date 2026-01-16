@@ -25,7 +25,7 @@ export function ProductShowcase({ products, maxItems = 8 }: ProductShowcaseProps
         {/* Header */}
         <div className="text-center mb-10">
           <h2 className="text-[24px] font-bold text-slate-900 sm:text-[28px]">
-            Products we've sourced
+            Verified Supply Success
           </h2>
           <p className="mt-2 text-[15px] text-slate-600">
             Real products. Real factories. Real results.

@@ -156,7 +156,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
               </h1>
             </div>
             <p className="text-base text-slate-600 max-w-2xl">
-              Initial cost analysis complete. Review the estimate below and optimize with our verified network.
+              Supply Chain Intelligence Report
             </p>
           </div>
         </div>
@@ -183,7 +183,7 @@ export default function ReportV2HeaderWithTabs({ report, sections, onHeightChang
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
             >
-              {isRequesting ? "Starting..." : isVerified ? "View Order" : "Start Verification"}
+              {isRequesting ? "Starting..." : isVerified ? "View Order" : "Lock in This Margin"}
             </button>
           </div>
         </div>

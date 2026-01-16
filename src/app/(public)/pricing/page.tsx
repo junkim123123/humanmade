@@ -46,7 +46,7 @@ export default function PricingPage() {
                   Free Analyze
                 </h2>
                 <p className="text-[14px] text-slate-600 max-w-md">
-                  Instant Landed Cost &amp; Profit Analysis using AI and import data.
+                  Instant Cost Simulation &amp; Profit Analysis using verified import data.
                 </p>
               </div>
               <div className="text-right shrink-0">
@@ -68,9 +68,9 @@ export default function PricingPage() {
                   <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
                     Blueprint
                   </h2>
-                  <p className="text-[14px] text-slate-600 max-w-md">
-                    We validate the factory, negotiate MOQs, and confirm the exact landed cost blueprint.
-                  </p>
+                <p className="text-[14px] text-slate-600 max-w-md">
+                  Sourcing Feasibility: We validate factories, negotiate MOQs, and confirm your real landed cost.
+                </p>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[26px] font-bold text-slate-900">
@@ -99,9 +99,9 @@ export default function PricingPage() {
                   <h2 className="text-[18px] font-semibold text-slate-900 mb-1">
                     Execute
                   </h2>
-                  <p className="text-[14px] text-slate-600 max-w-md">
-                    End-to-end logistics coordination, from factory floor to your door.
-                  </p>
+                <p className="text-[14px] text-slate-600 max-w-md">
+                  Complete Order Management, from the factory floor to your warehouse door.
+                </p>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-[26px] font-bold text-slate-900">
@@ -166,15 +166,15 @@ export default function PricingPage() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                  <span>At least 3 viable factory quotes</span>
+                  <span>3 Verified Factory Quotes (Direct Source)</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                  <span>MOQ and lead time confirmed</span>
+                  <span>MOQ, Lead Time, and Production Schedule</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-[14px] text-slate-700">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                  <span>Label, origin, and compliance checks</span>
+                  <span>Tariff Analysis &amp; Compliance Checklist</span>
                 </li>
               </ul>
             </div>

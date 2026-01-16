@@ -18,7 +18,7 @@ export const SectionVerifyPricing = forwardRef<HTMLDivElement, SectionVerifyPric
               Example Basis • Sample Product: Fruit Gummies Variety Pack
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
-              Simple, Transparent Pricing
+              Clear, Verified Fee Structure
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               No hidden fees. Pay only when you see results.

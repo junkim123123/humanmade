@@ -190,7 +190,7 @@ export default function MarginComparison() {
               Compare self-sourcing on Alibaba vs our full-service factory direct sourcing.
             </p>
             <p className="text-sm font-semibold text-blue-600 bg-blue-50 w-fit mx-auto px-3 py-1 rounded-full border border-blue-100">
-              Specialized in Korea/Japan Retail Sourcing
+              Verified Korea/Japan Direct Supply Chain
             </p>
           </div>
 
@@ -285,14 +285,14 @@ export default function MarginComparison() {
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <TrendingUp className="w-4 h-4 text-slate-500" />
-                          <span className="text-sm font-medium text-slate-700">Intelligence Level</span>
+                          <span className="text-sm font-medium text-slate-700">Data Verification</span>
                         </div>
                       </td>
                       <td className="py-4 px-4 text-center">
-                        <span className="text-sm text-slate-600">Manual Search</span>
+                        <span className="text-sm text-slate-600">Public Search</span>
                       </td>
                       <td className="py-4 px-4 text-center">
-                        <span className="text-sm font-semibold text-emerald-600">Data-Driven Optimization Engine</span>
+                        <span className="text-sm font-semibold text-emerald-600">Direct Network & Logistics Data</span>
                       </td>
                     </tr>
                   </tbody>

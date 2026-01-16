@@ -92,7 +92,7 @@ export function SectionProductShowcase({ products }: SectionProductShowcaseProps
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-[24px] font-bold text-slate-900 sm:text-[28px]">
-            Products we've sourced
+            Verified Supply Success
           </h2>
           <p className="mt-2 text-[15px] text-slate-600">
             Real products. Measurable results.

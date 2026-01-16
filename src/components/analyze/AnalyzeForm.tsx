@@ -56,6 +56,25 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
   }>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [marketplace, setMarketplace] = useState<string>("Amazon FBA");
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const steps = [
+    {
+      id: 1,
+      title: "Upload product photo",
+      prompt: "Show us the product you want analyzed.",
+    },
+    {
+      id: 2,
+      title: "Marketplace context",
+      prompt: "Where will you sell this product?",
+    },
+    {
+      id: 3,
+      title: "Target selling price",
+      prompt: "What price are you aiming for?",
+    },
+  ];
 
   // Hydrate from localStorage draft (used when public -> login -> app)
   useEffect(() => {
@@ -83,6 +102,27 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
   const hasValidInput = useMemo(() => {
     return !!files.product; // Only product photo is required
   }, [files.product]);
+
+  const progressPercent = Math.round(((currentStep - 1) / (steps.length - 1)) * 100);
+
+  const handleNextFromUpload = () => {
+    setSubmitted(true);
+    if (!files.product) {
+      setValidationErrors({ product: "Product photo is required." });
+      toast.error("Please provide a product photo.");
+      return;
+    }
+    setValidationErrors({});
+    setCurrentStep(2);
+  };
+
+  const handleBack = () => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentStep((prev) => Math.min(steps.length, prev + 1));
+  };
 
   const handleSubmit = async () => {
     setSubmitted(true);
@@ -398,162 +438,234 @@ export function AnalyzeForm({ mode }: AnalyzeFormProps) {
 
   return (
     <div className="w-full">
-      <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[1fr_auto]">
-        {/* Main Workflow Area */}
-        <div className="space-y-6">
-          {loading ? (
-            <LoadingState 
-              progress={loadingProgress}
-              currentStep={loadingStep}
-            />
-          ) : (
-            <ThreeImageUpload 
-              ref={uploadRef}
-              onFilesChange={(selected) => setFiles(selected)} 
-              disabled={loading}
-              validationErrors={submitted ? validationErrors : {}}
-            />
-          )}
-          
-          {/* Smart Input Group - Marketplace Context */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">Marketplace Context</h3>
-              <div className="flex flex-wrap gap-2">
-                {["Amazon FBA", "Shopify", "eBay", "Other"].map((channel) => (
-                  <button
-                    key={channel}
-                    type="button"
-                    onClick={() => setMarketplace(channel)}
+      {apiError && (
+        <div className="mb-4 p-3 sm:p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-xs sm:text-sm text-red-700">
+          {apiError}
+        </div>
+      )}
+      {restoredDraft && (
+        <div className="mb-4 p-3 sm:p-4 rounded-xl border border-amber-200/60 bg-amber-50/80 backdrop-blur-sm text-xs sm:text-sm text-amber-700">
+          Draft restored. Re-attach your photos and submit.
+        </div>
+      )}
+
+      <div className="rounded-2xl p-[1px] bg-gradient-to-br from-slate-200 via-blue-200 to-slate-200 shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
+        <div className="relative rounded-2xl bg-white/95 px-5 py-6 sm:px-8 sm:py-10">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px] opacity-60" />
+
+          <div className="relative space-y-6">
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Sourcing Engineering Workflow
+              </p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                Guided Supply Chain Analysis
+              </h2>
+              <p className="text-sm text-slate-600 max-w-2xl">
+                Follow the steps below and we will build a professional, data-backed sourcing report.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span>Step {currentStep} of {steps.length}</span>
+                <span>{progressPercent}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all" style={{ width: `${progressPercent}%` }} />
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                {steps.map((step) => (
+                  <div
+                    key={step.id}
                     className={cn(
-                      "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors",
-                      marketplace === channel
-                        ? "bg-blue-500 border-blue-500 text-white"
-                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                      "rounded-lg border px-3 py-2 text-center font-semibold",
+                      currentStep >= step.id
+                        ? "border-blue-200 bg-blue-50 text-blue-700"
+                        : "border-slate-200 bg-white text-slate-500"
                     )}
                   >
-                    {channel}
-                  </button>
+                    Step {step.id}
+                  </div>
                 ))}
               </div>
             </div>
-            
-            {/* Target Price - Emphasized */}
-            <div>
-              <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price</label>
-              <div className="relative">
-                <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-base sm:text-lg font-bold text-slate-700">$</span>
-                <input
-                  type="text"
-                  placeholder="9.99"
-                  value={form.shelfPrice}
-                  onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
-                  className="w-full h-12 sm:h-14 rounded-xl border-2 border-slate-200 bg-white pl-7 sm:pl-8 pr-4 text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                />
-              </div>
-              <p className="mt-2 text-xs text-slate-500">Required to calculate your profit margin</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Live Margin Calculator Sidebar */}
-        <div className="lg:sticky lg:top-6 lg:self-start mt-4 sm:mt-8 lg:mt-0">
-          {apiError && (
-            <div className="p-3 sm:p-4 rounded-xl border border-red-200/60 bg-red-50/80 backdrop-blur-sm text-xs sm:text-sm text-red-700 mb-4">
-              {apiError}
-            </div>
-          )}
-          {restoredDraft && (
-            <div className="p-3 sm:p-4 rounded-xl border border-amber-200/60 bg-amber-50/80 backdrop-blur-sm text-xs sm:text-sm text-amber-700 mb-4">
-              Draft restored. Re-attach your photos and submit.
-            </div>
-          )}
-
-          <div className="rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
-            {/* Live Calculator Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white">
-              <h3 className="text-base font-semibold text-slate-900 mb-1">Live Margin Calculator</h3>
-              <p className="text-xs text-slate-500">Updates as you fill in details</p>
-            </div>
-
-            {/* Form */}
-            <div className="p-4 sm:p-5 space-y-4">
-              {/* Destination - Compact */}
-              <div className="pb-4 border-b border-slate-100">
-                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">Destination</div>
-                <div className="text-sm font-semibold text-slate-900">United States</div>
-              </div>
-              
-              {/* Live Preview Placeholder */}
-              <div className="py-4 space-y-3 border-b border-slate-100">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500">Estimated Cost</span>
-                  <span className="text-sm font-semibold text-slate-900">--</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500">Profit Margin</span>
-                  <span className="text-sm font-semibold text-slate-900">--</span>
-                </div>
-              </div>
-
-              {/* Edit Assumptions - Accordion */}
-              <details className="group">
-                <summary className="flex items-center justify-between text-sm font-semibold text-slate-700 cursor-pointer hover:text-slate-900 transition-colors select-none py-2">
-                  <span className="flex items-center gap-2">
-                    <span className="text-slate-400 group-open:rotate-90 transition-transform text-xs">▶</span>
-                    <span>Edit Assumptions</span>
-                  </span>
-                  <span className="text-xs text-slate-400">Optional</span>
-                </summary>
-                <div className="mt-4 space-y-4 pl-4 border-l-2 border-slate-200">
-                  <p className="text-xs text-slate-500">Defaults used if not specified</p>
-                  
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Shipping mode</label>
-                    <select
-                      value={form.shippingMode}
-                      onChange={(e) => setForm((prev) => ({ ...prev, shippingMode: e.target.value }))}
-                      className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                    >
-                      <option value="air">Air</option>
-                      <option value="sea">Sea</option>
-                    </select>
-                  </div>
-
-                  {/* Weight and Dimensions fields removed. Gemini will infer all data from the product photo. */}
-                  <div className="text-xs text-slate-500 py-2">
-                    <strong>Note:</strong> our ai will infer all product data (weight, dimensions, price, etc.) from the uploaded photo. No manual entry required.
-                  </div>
-                </div>
-              </details>
-
-              {/* Submit - Full Width CTA */}
-              <div className="pt-4 border-t border-slate-200 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 pb-4 sm:pb-5 bg-slate-50/50">
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={loading || !hasValidInput}
-                  className={cn(
-                    "w-full h-12 sm:h-14 rounded-xl text-base font-semibold transition-all shadow-lg touch-manipulation",
-                    !hasValidInput
-                      ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                      : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-xl active:scale-[0.98]"
-                  )}
-                >
-                  {loading ? "Calculating..." : "Calculate Landed Cost"}
-                </button>
-                {mode === "public" && (
-                  <p className="mt-2 text-center text-xs text-slate-500">
-                    Save results requires sign in
+            {loading ? (
+              <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-8 sm:px-8">
+                <div className="mb-6 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Deep Analysis
                   </p>
-                )}
-                {mode === "app" && (
-                  <p className="mt-2 text-center text-xs text-slate-500">
-                    Signed in saves your report to Reports.
+                  <h3 className="text-lg font-semibold text-slate-900">Running multi-stage verification</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Matching factory data, HS codes, and logistics benchmarks.
                   </p>
-                )}
+                </div>
+                <LoadingState progress={loadingProgress} currentStep={loadingStep} />
               </div>
-            </div>
+            ) : (
+              <>
+                {currentStep === 1 && (
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Step 1</p>
+                      <h3 className="text-lg font-semibold text-slate-900">{steps[0].title}</h3>
+                      <p className="text-sm text-slate-600">{steps[0].prompt}</p>
+                    </div>
+                    <ThreeImageUpload
+                      ref={uploadRef}
+                      onFilesChange={(selected) => setFiles(selected)}
+                      disabled={loading}
+                      validationErrors={submitted ? validationErrors : {}}
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleNextFromUpload}
+                        className={cn(
+                          "inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-all",
+                          files.product
+                            ? "bg-slate-900 text-white hover:bg-slate-800"
+                            : "bg-slate-200 text-slate-500 cursor-not-allowed"
+                        )}
+                        disabled={!files.product}
+                      >
+                        Continue to context
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 2 && (
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Step 2</p>
+                      <h3 className="text-lg font-semibold text-slate-900">{steps[1].title}</h3>
+                      <p className="text-sm text-slate-600">{steps[1].prompt}</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+                      <h4 className="text-sm font-semibold text-slate-900 mb-3">Marketplace Context</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {["Amazon FBA", "Shopify", "eBay", "Other"].map((channel) => (
+                          <button
+                            key={channel}
+                            type="button"
+                            onClick={() => setMarketplace(channel)}
+                            className={cn(
+                              "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors",
+                              marketplace === channel
+                                ? "bg-blue-500 border-blue-500 text-white"
+                                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                            )}
+                          >
+                            {channel}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={handleBack}
+                        className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNext}
+                        className="inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800"
+                      >
+                        Continue to price
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 3 && (
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Step 3</p>
+                      <h3 className="text-lg font-semibold text-slate-900">{steps[2].title}</h3>
+                      <p className="text-sm text-slate-600">{steps[2].prompt}</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+                      <label className="text-sm font-semibold text-slate-900 mb-2 block">Target Sell Price</label>
+                      <div className="relative">
+                        <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-base sm:text-lg font-bold text-slate-700">$</span>
+                        <input
+                          type="text"
+                          placeholder="9.99"
+                          value={form.shelfPrice}
+                          onChange={(e) => setForm((prev) => ({ ...prev, shelfPrice: e.target.value }))}
+                          className="w-full h-12 sm:h-14 rounded-xl border-2 border-slate-200 bg-white pl-7 sm:pl-8 pr-4 text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                        />
+                      </div>
+                      <p className="mt-2 text-xs text-slate-500">Optional but recommended for margin accuracy.</p>
+                    </div>
+
+                    <details className="group rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+                      <summary className="flex items-center justify-between text-sm font-semibold text-slate-700 cursor-pointer hover:text-slate-900 transition-colors select-none">
+                        <span className="flex items-center gap-2">
+                          <span className="text-slate-400 group-open:rotate-90 transition-transform text-xs">▶</span>
+                          <span>Advanced assumptions</span>
+                        </span>
+                        <span className="text-xs text-slate-400">Optional</span>
+                      </summary>
+                      <div className="mt-4 space-y-4 pl-4 border-l-2 border-slate-200">
+                        <p className="text-xs text-slate-500">Defaults used if not specified.</p>
+                        <div>
+                          <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Shipping mode</label>
+                          <select
+                            value={form.shippingMode}
+                            onChange={(e) => setForm((prev) => ({ ...prev, shippingMode: e.target.value }))}
+                            className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                          >
+                            <option value="air">Air</option>
+                            <option value="sea">Sea</option>
+                          </select>
+                        </div>
+                        <div className="text-xs text-slate-500 py-2">
+                          <strong>Note:</strong> our ai will infer all product data (weight, dimensions, price, etc.) from the uploaded photo. No manual entry required.
+                        </div>
+                      </div>
+                    </details>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={handleBack}
+                        className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+                      >
+                        Back
+                      </button>
+                      <div className="flex flex-col items-end gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={loading || !hasValidInput}
+                          className={cn(
+                            "inline-flex h-12 items-center justify-center rounded-xl px-8 text-base font-semibold transition-all shadow-lg",
+                            !hasValidInput
+                              ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                              : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
+                          )}
+                        >
+                          {loading ? "Analyzing..." : "Run Deep Analysis"}
+                        </button>
+                        {mode === "public" && (
+                          <p className="text-xs text-slate-500">Save results requires sign in</p>
+                        )}
+                        {mode === "app" && (
+                          <p className="text-xs text-slate-500">Signed in saves your report to Reports.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

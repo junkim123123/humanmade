@@ -3,21 +3,39 @@
 import { Calendar, MapPin, Gift, Clock } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { submitConsultationRequest } from "@/app/actions/consultation";
 
 export function ZoomBookingSection() {
   const [showModal, setShowModal] = useState(false);
   const [contact, setContact] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Simulate admin notification (replace with real API call as needed)
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!contact.trim()) return;
+    
+    setError(null);
     setSubmitted(true);
-    setTimeout(() => {
-      setShowModal(false);
-      setContact("");
+    
+    try {
+      const result = await submitConsultationRequest(contact);
+      
+      if (result.success) {
+        setTimeout(() => {
+          setShowModal(false);
+          setContact("");
+          setSubmitted(false);
+        }, 1500);
+      } else {
+        setError("Failed to submit. Please try again.");
+        setSubmitted(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred.");
       setSubmitted(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -37,7 +55,7 @@ export function ZoomBookingSection() {
               <span className="text-sm font-semibold text-blue-900">Limited Time Offer</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Get Your $100 Bonus Credit
+              Your First Consultation Credit
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Meet our founders in St. Louis or Toronto to discuss your supply chain strategy.
@@ -93,10 +111,11 @@ export function ZoomBookingSection() {
                       className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition"
                       disabled={submitted}
                     >
-                      {submitted ? "Submitting..." : "Submit"}
+                      {submitted && !error ? "Submitting..." : "Submit"}
                     </button>
                   </form>
-                  {submitted && <p className="text-green-600 text-center mt-2">Submitted! We'll contact you soon.</p>}
+                  {error && <p className="text-red-500 text-center mt-2 text-sm">{error}</p>}
+                  {submitted && !error && <p className="text-green-600 text-center mt-2">Submitted! We'll contact you soon.</p>}
                 </div>
               </div>
             )}

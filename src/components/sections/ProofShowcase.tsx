@@ -31,7 +31,7 @@ const sampleProducts: ProductCard[] = [
   {
     id: "2",
     name: "Demon Slayer Keychain",
-    metric: "Data-driven factory matching",
+    metric: "Optimized Factory Direct",
     category: "Toys",
     colorClass: "bg-gradient-to-br from-sky-100 to-indigo-100 border-sky-200",
     image: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
@@ -40,7 +40,7 @@ const sampleProducts: ProductCard[] = [
   {
     id: "3",
     name: "3D Jelly Snacks",
-    metric: "Network-optimized quotes delivered",
+    metric: "Verified Sourcing Complete",
     category: "Snacks",
     colorClass: "bg-gradient-to-br from-amber-100 to-violet-100 border-amber-200",
     image: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
@@ -61,7 +61,7 @@ export default function ProofShowcase({ products = sampleProducts }: ProofShowca
         <FadeUp>
             <div className="text-center mb-16 lg:mb-20">
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6">
-                Products we've sourced
+                Verified Supply Success
               </h2>
               <p className="text-xl text-slate-500 max-w-2xl mx-auto">
                 Real products, verified factories, and measurable cost savings.

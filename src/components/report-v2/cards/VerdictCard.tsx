@@ -68,7 +68,7 @@ export default function VerdictCard({ verdict, verdictText, nudge }: VerdictCard
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="px-6 py-5 border-b border-slate-100">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[16px] font-semibold text-slate-900">Verdict</h3>
+          <h3 className="text-[16px] font-semibold text-slate-900">Expert Verdict</h3>
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${config.color}`}>
             <Icon className="w-4 h-4" />
             <span className="text-[13px] font-medium">{config.label}</span>

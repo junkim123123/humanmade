@@ -15,7 +15,7 @@ export function AnnouncementBar() {
         <div className="flex items-center justify-center gap-3 py-2.5 text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span className="text-center">
-            <span className="font-semibold">March Special:</span> Free $100 Credit for Consultations in St. Louis & Toronto.{" "}
+            <span className="font-semibold">Spring 2026 Special:</span> Free $100 Credit for Consultations in St. Louis & Toronto.{" "}
             <Link 
               href="#zoom-booking" 
               className="underline font-medium hover:text-indigo-200 transition-colors"

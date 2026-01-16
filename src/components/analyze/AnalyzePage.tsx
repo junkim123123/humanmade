@@ -8,7 +8,8 @@ interface AnalyzePageProps {
 
 export function AnalyzePage({ mode }: AnalyzePageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="relative min-h-screen bg-slate-50">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:26px_26px] opacity-60" />
       {/* Hero Section - Compact */}
       <div className="relative border-b border-slate-200/60 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
@@ -18,19 +19,16 @@ export function AnalyzePage({ mode }: AnalyzePageProps) {
                 Analyze (Free)
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
-                Upload a product photo to get your real landed cost and margin estimate in minutes.
+                Follow the guided workflow to build a verified supply chain report.
               </p>
             </div>
-            {/* Optional: Add a progress indicator or step count here if needed */}
           </div>
         </div>
       </div>
 
-      {/* Main Content - Dashboard Layout */}
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-           <AnalyzeForm mode={mode} />
-        </div>
+      {/* Main Content - Vault Card */}
+      <div className="relative max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
+        <AnalyzeForm mode={mode} />
       </div>
     </div>
   );

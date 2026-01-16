@@ -52,6 +52,7 @@ async function getStats() {
     quotesToday,
     activeConversations,
     uploadsCollected,
+    consultations,
   ] = await Promise.all([
     countOrZero(supabase.from('profiles').select('*', { count: 'exact', head: true })),
     countOrZero(supabase.from('reports').select('*', { count: 'exact', head: true })),
@@ -87,6 +88,7 @@ async function getStats() {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', lastWeek.toISOString())
     ),
+    safeCountOrZero(supabase.from('consultation_requests').select('*', { count: 'exact', head: true })),
   ])
 
   return {
@@ -98,6 +100,7 @@ async function getStats() {
     quotesToday,
     activeConversations,
     uploadsCollected,
+    consultations,
   }
 }
 
@@ -341,15 +344,24 @@ export default async function AdminDashboard() {
       </Card>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Verification requests" value={stats.verificationRequests} icon={CheckSquare} />
-        <StatCard title="In queue now" value={stats.inQueue} icon={Inbox} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard title="Consultations" value={stats.consultations} icon={MessageSquare} />
+        <StatCard title="Verification reqs" value={stats.verificationRequests} icon={CheckSquare} />
+        <StatCard title="In queue" value={stats.inQueue} icon={Inbox} />
         <StatCard title="Quotes today" value={stats.quotesToday} icon={FileText} />
-        <StatCard title="Active conversations" value={stats.activeConversations} icon={MessageSquare} />
+        <StatCard title="Conversations" value={stats.activeConversations} icon={MessageSquare} />
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link
+          href="/admin/consultations"
+          className="rounded-xl border-2 border-blue-100 bg-blue-50/30 p-6 hover:border-blue-400 hover:shadow-md transition-all"
+        >
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Consultations (New)</h3>
+          <p className="text-sm text-slate-600">Offline meeting requests from the landing page</p>
+          <p className="text-xs text-blue-600 mt-2 font-semibold">View Requests →</p>
+        </Link>
         <Link
           href="/admin/queue"
           className="rounded-xl border-2 border-slate-200 bg-white p-6 hover:border-blue-400 hover:shadow-md transition-all"

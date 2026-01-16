@@ -132,7 +132,7 @@ export default function Hero() {
             {/* Eyebrow */}
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-slate-600 uppercase tracking-wider">
-                Your AI Sourcing Team
+                Your Sourcing Data Desk
               </p>
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100 w-fit uppercase tracking-tight">
                 <span className="relative flex h-2 w-2">
@@ -145,14 +145,14 @@ export default function Hero() {
 
             {/* Headline - Premium sizing - Updated to concise messaging */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-slate-900 leading-[1.05] drop-shadow-sm">
-              Triple Your Margin.
+              Verify Your Costs.
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900">Go Factory Direct.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900">Secure Your Profit.</span>
             </h1>
 
             {/* Subtext */}
             <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-xl font-medium">
-              Use our free AI sourcing calculator to verify your real landed cost and secure 3x higher margins. We only make money when your goods arrive at the warehouse.
+              Use our free AI sourcing calculator to verify your real landed cost and secure your profit margins. We ensure your data is accurate before you place an order.
             </p>
 
             {/* CTAs */}

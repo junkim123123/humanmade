@@ -32,10 +32,10 @@ function FinalCta() {
         <div className="rounded-2xl bg-gradient-to-br from-slate-900/95 to-slate-800/90 p-8 sm:p-12 lg:p-16 shadow-2xl border-2 border-white/10 relative overflow-hidden">
           <div className="relative z-10 text-center">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-lg">
-              Ready to out-source your competition?
+              Ready to verify your supply chain?
             </h2>
             <p className="text-lg sm:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-              Let our OS engineer your optimal supply chain with proprietary intelligence and data-driven optimization.
+              Let our data engine verify your optimal supply chain with proprietary intelligence and field-tested logistics.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
@@ -116,10 +116,10 @@ export default function HomeDeck() {
           <section id="how-it-works" className="bg-white">
             <StickyScroll
               title="How it works"
-              subtitle="Photo to cost to door."
+              subtitle="Photo to Data to Door."
               steps={[
                 {
-                  title: "Free Analyze",
+                  title: "Step 1: Cost Analysis",
                   description: "Upload a product photo. Our AI calculates your real landed cost and margin estimate in minutes.",
                   color: "blue",
                   visual: (
@@ -159,8 +159,8 @@ export default function HomeDeck() {
                   ),
                 },
                 {
-                  title: "Blueprint ($49)",
-                  description: "$49 gets you a pro sourcing report: 3 optimized factory quotes, MOQ & lead times, HS code & tariff info, compliance basics, and a door-to-door logistics plan.",
+                  title: "Step 2: Feasibility ($49)",
+                  description: "$49 unlocks a full feasibility report: 3 direct factory quotes, real tariffs, and a door-to-door delivery roadmap.",
                   color: "purple",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
@@ -230,8 +230,8 @@ export default function HomeDeck() {
                   ),
                 },
                 {
-                  title: "Execute (7%)",
-                  description: "We handle production, quality control, and logistics. You pay 7% fee only when your order ships.",
+                  title: "Step 3: Fulfillment (7%)",
+                  description: "We handle production and quality control. You pay a 7% fee only when your verified goods are ready to ship.",
                   color: "emerald",
                   visual: (
                     <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">

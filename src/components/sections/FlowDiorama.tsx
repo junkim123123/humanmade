@@ -30,7 +30,7 @@ export default function FlowDiorama() {
           <div className="text-center md:text-left">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
               <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <h3 className="text-lg font-semibold text-slate-900">Analyze (Free)</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Cost Analysis (Free)</h3>
             </div>
             <p className="text-slate-600 leading-relaxed">
               Upload a product photo. Our AI calculates your real landed cost and margin estimate in minutes.
@@ -41,10 +41,10 @@ export default function FlowDiorama() {
           <div className="text-center md:text-left">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
               <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-              <h3 className="text-lg font-semibold text-slate-900">Verify ($49)</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Feasibility ($49)</h3>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              Deposit $49 to start factory validation. We reach out to verified suppliers and confirm pricing, MOQ, and lead times.
+              $49 unlocks a full feasibility report: 3 direct factory quotes, real tariffs, and a door-to-door delivery roadmap.
             </p>
           </div>
 
@@ -52,10 +52,10 @@ export default function FlowDiorama() {
           <div className="text-center md:text-left">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 mb-3">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-              <h3 className="text-lg font-semibold text-slate-900">Execute (7%)</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Fulfillment (7%)</h3>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              We handle production, quality control, and logistics. You pay 7% fee only when your order ships.
+              We handle production and quality control. You pay a 7% fee only when your verified goods are ready to ship.
             </p>
           </div>
         </div>
