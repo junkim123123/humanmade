@@ -3,7 +3,6 @@
 import { Calendar, MapPin, Gift, Clock } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { submitConsultationRequest } from "@/app/actions/consultation";
 
 export function ZoomBookingSection() {
   const [showModal, setShowModal] = useState(false);
@@ -19,9 +18,14 @@ export function ZoomBookingSection() {
     setSubmitted(true);
     
     try {
-      const result = await submitConsultationRequest(contact);
-      
-      if (result.success) {
+      const response = await fetch("/api/consultation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactInfo: contact, source: "zoom_booking_section" }),
+      });
+      const result = await response.json();
+
+      if (response.ok && result?.success) {
         setTimeout(() => {
           setShowModal(false);
           setContact("");
