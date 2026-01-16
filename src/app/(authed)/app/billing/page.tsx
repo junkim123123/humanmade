@@ -108,6 +108,10 @@ export default function BillingPage() {
     setTopupMessage(null);
     setTopupFallbackUrl(null);
 
+    const whatsappMessage = "Message for free credit";
+    const whatsappUrl = `https://wa.me/13146577892?text=${encodeURIComponent(whatsappMessage)}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
     try {
       const response = await fetch("/api/credits/manual-topup", {
         method: "POST",
@@ -121,7 +125,7 @@ export default function BillingPage() {
       }
 
       setTopupStatus("submitted");
-      setTopupFallbackUrl(data.fallbackUrl || null);
+      setTopupFallbackUrl(data.fallbackUrl || whatsappUrl);
       setTopupMessage({
         type: "success",
         text: data.message || "Request received. Manual top-up takes 3–6 hours.",
@@ -129,7 +133,11 @@ export default function BillingPage() {
     } catch (error) {
       console.error("Failed to submit manual top-up request", error);
       setTopupStatus("idle");
-      setTopupMessage({ type: "error", text: "Failed to submit request. Please try again." });
+      setTopupFallbackUrl(whatsappUrl);
+      setTopupMessage({
+        type: "error",
+        text: "WhatsApp opened. If the request did not submit, please send the message there.",
+      });
     }
   };
 
