@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { ProofProduct } from "./proofData";
 
@@ -25,13 +25,18 @@ export function ProofProductModal({
 }: ProofProductModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
   const photos = useMemo(() => {
     if (!product) return [];
-    return product.imageUrl ? [product.imageUrl] : [];
+    const urls = (product.imageUrls || []).filter(Boolean);
+    const fallback = product.imageUrl ? [product.imageUrl] : [];
+    return (urls.length > 0 ? urls : fallback).slice(0, 6);
   }, [product]);
 
   useEffect(() => {
     if (isOpen) {
+      setActiveIndex(0);
       closeButtonRef.current?.focus();
     }
   }, [isOpen]);
@@ -101,14 +106,29 @@ export function ProofProductModal({
           <div className="space-y-4">
             <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
               <div className="aspect-[4/3]">
-                {photos[0] && (
+                {photos[activeIndex] && (
                   <img
-                    src={photos[0]}
+                    src={photos[activeIndex]}
                     alt={`${product.name} preview`}
                     className="h-full w-full object-cover"
                   />
                 )}
               </div>
+              {photos.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] text-slate-600">
+                  {photos.map((_, idx) => (
+                    <button
+                      key={`photo-dot-${idx}`}
+                      type="button"
+                      onClick={() => setActiveIndex(idx)}
+                      className={`h-2 w-2 rounded-full ${
+                        idx === activeIndex ? "bg-slate-900" : "bg-slate-300"
+                      }`}
+                      aria-label={`Photo ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4">

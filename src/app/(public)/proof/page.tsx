@@ -3,15 +3,17 @@ import { FileText, Image, ListChecks } from "lucide-react";
 import { HeroProofSection } from "@/components/proof/HeroProofSection";
 import { ProofVideoSection } from "@/components/proof/ProofVideoSection";
 import { ProofLibrarySection } from "@/components/proof/ProofLibrarySection";
-import { proofProducts, proofVideos } from "@/components/proof/proofData";
+import { proofVideos } from "@/components/proof/proofData";
+import { loadProofProducts } from "@/lib/proof/loadProofProducts";
 
 export const metadata: Metadata = {
   title: "Proof | NexSupply",
   description: "Watch how we verify suppliers and costs in the field. Factory audits, customs data matching, and supplier outreach—all documented.",
 };
 
-export default function ProofPage() {
-  // TODO: Replace proofData with API fetch when backend is ready.
+export default async function ProofPage() {
+  const proofProducts = await loadProofProducts({ limit: 120 });
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50/90 to-slate-100/80">
       <HeroProofSection
@@ -63,7 +65,7 @@ export default function ProofPage() {
       <ProofLibrarySection
         title="Proof library"
         subtitle="Search real product proofs with lightweight evidence previews."
-        noteText="All proof packs are shared with IP authorization and sensitive details redacted."
+        noteText="Sample previews only. Full proof packs are shared with IP authorization and sensitive details redacted."
         products={proofProducts}
         searchPlaceholder="Search by product name"
         emptyMessage="No proof packs match those filters."

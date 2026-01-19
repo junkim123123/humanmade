@@ -14,6 +14,7 @@ export type ProofProduct = {
   id: string;
   name: string;
   imageUrl: string;
+  imageUrls?: string[];
   photosCount: number;
   tags: string[];
   highlights: string[];
