@@ -3,11 +3,7 @@ import { FileText, Image, ListChecks } from "lucide-react";
 import { HeroProofSection } from "@/components/proof/HeroProofSection";
 import { ProofVideoSection } from "@/components/proof/ProofVideoSection";
 import { ProofLibrarySection } from "@/components/proof/ProofLibrarySection";
-import {
-  proofLibraryTags,
-  proofProducts,
-  proofVideos,
-} from "@/components/proof/proofData";
+import { proofProducts, proofVideos } from "@/components/proof/proofData";
 
 export const metadata: Metadata = {
   title: "Proof | NexSupply",
@@ -69,12 +65,10 @@ export default function ProofPage() {
         subtitle="Search real product proofs with lightweight evidence previews."
         noteText="All proof packs are shared with IP authorization and sensitive details redacted."
         products={proofProducts}
-        tagOptions={[...proofLibraryTags]}
         searchPlaceholder="Search by product name"
         emptyMessage="No proof packs match those filters."
         resultsLabel="{count} proof packs"
         photosLabel="Photos"
-        tagLabel="Tags"
         outcomeLabel="Outcome"
         checklistLabel="Checklist preview"
         tagsLabel="Key tags"

@@ -4,14 +4,12 @@ interface ProofProductCardProps {
   product: ProofProduct;
   onClick: () => void;
   photosLabel: string;
-  tagLabel: string;
 }
 
 export function ProofProductCard({
   product,
   onClick,
   photosLabel,
-  tagLabel,
 }: ProofProductCardProps) {
   return (
     <button
@@ -40,8 +38,7 @@ export function ProofProductCard({
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <span className="text-[10px] uppercase tracking-[0.16em] text-slate-400">{tagLabel}</span>
-          {product.tags.slice(0, 3).map((tag) => (
+          {product.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
               className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-600"
@@ -50,7 +47,6 @@ export function ProofProductCard({
             </span>
           ))}
         </div>
-        <p className="text-xs text-slate-500">{product.highlights[0]}</p>
       </div>
     </button>
   );

@@ -323,9 +323,3 @@ export const proofProducts: ProofProduct[] = [
   },
 ];
 
-export const proofLibraryTags = [
-  "Verified supplier",
-  "Cost reduced",
-  "Lead time known",
-  "MOQ shown",
-] as const;
