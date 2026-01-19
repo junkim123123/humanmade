@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 type Cta = {
   label: string;
   href: string;
-  helper: string;
+  helper?: string;
 };
 
 type ProofPackItem = {
@@ -27,6 +27,8 @@ export function HeroProofSection({
   secondaryCta,
   proofPackItems,
 }: HeroProofSectionProps) {
+  const helperLine = [primaryCta.helper, secondaryCta.helper].filter(Boolean).join(" · ");
+
   return (
     <section id="proof-hero" className="bg-slate-50/70 py-10 lg:py-14">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -53,9 +55,9 @@ export function HeroProofSection({
             </a>
           </div>
 
-          <p className="mx-auto mt-3 max-w-2xl text-xs text-slate-500">
-            {primaryCta.helper} · {secondaryCta.helper}
-          </p>
+          {helperLine.length > 0 && (
+            <p className="mx-auto mt-3 max-w-2xl text-xs text-slate-500">{helperLine}</p>
+          )}
         </div>
 
         <div className="mt-10">

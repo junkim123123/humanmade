@@ -15,17 +15,17 @@ export default function ProofPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50/90 to-slate-100/80">
       <HeroProofSection
-        headline="Proof that your sourcing plan is engineered, not guessed."
-        subheadline="Proof is the evidence pack that ties photos, checklists, and supplier documentation to every verified quote."
+        headline="Proof, not guesses."
+        subheadline="Evidence packs tied to every verified quote."
         primaryCta={{
           label: "Start verification",
           href: "/verify",
-          helper: "Best when you need verified factories and documented quotes.",
+          helper: "",
         }}
         secondaryCta={{
           label: "Run an estimate",
           href: "/analyze",
-          helper: "Use this to get a quick cost snapshot before outreach.",
+          helper: "",
         }}
         proofPackItems={[
           {
