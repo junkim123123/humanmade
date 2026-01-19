@@ -13,6 +13,8 @@ import TrustSection from "@/components/marketing/TrustSection"
 import { AnnouncementBar } from "@/components/ui/AnnouncementBar"
 import { ZoomBookingSection } from "@/components/sections/ZoomBookingSection"
 import { LocalBadge } from "@/components/ui/LocalBadge"
+import type { ProofProduct } from "@/components/proof/proofData"
+import type { ProofStats } from "@/lib/proof/loadProofStats"
 
 function FinalCta() {
   return (
@@ -68,7 +70,12 @@ function FinalCta() {
   )
 }
 
-export default function HomeDeck() {
+type HomeDeckProps = {
+  proofTeaserProducts: ProofProduct[]
+  proofStats: ProofStats
+}
+
+export default function HomeDeck({ proofTeaserProducts, proofStats }: HomeDeckProps) {
   const getHeaderOffset = () => {
     const header =
       (typeof document !== "undefined" && (document.querySelector("[data-site-header]") as HTMLElement | null)) ||
@@ -112,7 +119,12 @@ export default function HomeDeck() {
             <Hero />
           </section>
 
-          {/* 2. Sticky Scroll - How it works */}
+          {/* 2. Proof Showcase - Social proof (above the fold) */}
+          <section id="products" className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-20 lg:py-24">
+            <ProofShowcase products={proofTeaserProducts} proofStats={proofStats} />
+          </section>
+
+          {/* 3. Sticky Scroll - How it works */}
           <section id="how-it-works" className="bg-white">
             <StickyScroll
               title="How it works"
@@ -297,14 +309,9 @@ export default function HomeDeck() {
             />
           </section>
 
-          {/* 3. Margin Comparison */}
+          {/* 4. Margin Comparison */}
           <section id="receipt-compare" className="bg-white py-16 sm:py-24 lg:py-32">
             <MarginComparison />
-          </section>
-
-          {/* 4. Proof Showcase - Social proof */}
-          <section id="products" className="bg-gradient-to-b from-white to-slate-50/40 py-16 sm:py-24 lg:py-32">
-            <ProofShowcase />
           </section>
 
           {/* 5. Zoom Booking Section */}
