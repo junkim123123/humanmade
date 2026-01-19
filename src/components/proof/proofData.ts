@@ -23,57 +23,30 @@ export type ProofProduct = {
 export const proofVideos: ProofVideo[] = [
   {
     id: "proof-video-ops-01",
-    title: "Warehouse intake and label verification",
-    category: "Operations",
-    duration: "2:14",
-    description: "See how inbound goods are checked against packing lists and labels.",
-    thumbnailUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
-    href: "https://www.youtube.com/watch?v=9Wzrd6ZyM4Q",
-  },
-  {
-    id: "proof-video-qc-01",
-    title: "AQL inspection walkthrough",
-    category: "QC",
-    duration: "3:02",
-    description: "Sampling method, defects chart, and pass/fail criteria in the field.",
-    thumbnailUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
-    href: "https://www.youtube.com/watch?v=J7oH3G2ZzqI",
-  },
-  {
-    id: "proof-video-sourcing-01",
     title: "Factory outreach sequence",
     category: "Sourcing",
     duration: "2:35",
     description: "Outbound sourcing and the first 48 hours of verification.",
-    thumbnailUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
-    href: "https://www.youtube.com/watch?v=9s4kVgDgC6Q",
+    thumbnailUrl: "/product-photos/Archery%20Toy%20Set/mmexport1758762357119.jpg",
+    href: "https://youtu.be/iJRGh4Tyhbw",
   },
   {
-    id: "proof-video-qc-02",
-    title: "On-site compliance checklist",
-    category: "QC",
-    duration: "1:58",
-    description: "Critical safety and compliance checks before shipment release.",
-    thumbnailUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
-    href: "https://www.youtube.com/watch?v=wHLsNR1f6bA",
-  },
-  {
-    id: "proof-video-ops-02",
-    title: "Port handoff and document control",
-    category: "Operations",
-    duration: "2:46",
-    description: "How we manage paperwork from factory exit to vessel booking.",
-    thumbnailUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
-    href: "https://www.youtube.com/watch?v=hpI9fS8lS5w",
-  },
-  {
-    id: "proof-video-sourcing-02",
+    id: "proof-video-qc-01",
     title: "Quote triangulation with evidence",
     category: "Sourcing",
     duration: "2:21",
     description: "Comparing pricing, lead time, and MOQ across verified suppliers.",
-    thumbnailUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
-    href: "https://www.youtube.com/watch?v=9gXw1mU9i0s",
+    thumbnailUrl: "/product-photos/Assorted%20Jelly/mmexport1758763750450.jpg",
+    href: "https://youtu.be/aJOCT_E0RlE",
+  },
+  {
+    id: "proof-video-ops-02",
+    title: "On-site compliance checklist",
+    category: "QC",
+    duration: "1:58",
+    description: "Critical safety and compliance checks before shipment release.",
+    thumbnailUrl: "/product-photos/Bread%20Barbershop%20Keyring/mmexport1758763349318.jpg",
+    href: "https://youtu.be/1pMa-6muGQ0",
   },
 ];
 
@@ -81,7 +54,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-001",
     name: "Fruit Lover Marshmallow",
-    imageUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
+    imageUrl: "/product-photos/Fruit%20Lover%20Marshmallow/mmexport1758763661424.jpg",
     photosCount: 6,
     tags: ["Verified supplier", "MOQ shown", "Lead time known"],
     highlights: [
@@ -96,7 +69,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-002",
     name: "Demon Slayer Keychain",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/Demon%20Slayer%20Keyring/mmexport1758763352938.jpg",
     photosCount: 8,
     tags: ["Cost reduced", "Verified supplier"],
     highlights: [
@@ -111,7 +84,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-003",
     name: "3D Jelly Snacks",
-    imageUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
+    imageUrl: "/product-photos/3D%20Jelly/mmexport1758762845466.jpg",
     photosCount: 5,
     tags: ["Lead time known", "MOQ shown"],
     highlights: [
@@ -126,7 +99,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-004",
     name: "Mini Plush Set",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/Plush%20Keyring/mmexport1758763868338.jpg",
     photosCount: 7,
     tags: ["Verified supplier", "Cost reduced"],
     highlights: [
@@ -141,7 +114,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-005",
     name: "Assorted Jelly Cups",
-    imageUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
+    imageUrl: "/product-photos/Assorted%20Jelly/mmexport1758763748818.jpg",
     photosCount: 4,
     tags: ["MOQ shown", "Cost reduced"],
     highlights: [
@@ -156,7 +129,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-006",
     name: "Premium Gummy Mix",
-    imageUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
+    imageUrl: "/product-photos/Yummy%20Jelly%20Beans/mmexport1758762692927.jpg",
     photosCount: 6,
     tags: ["Verified supplier", "Lead time known"],
     highlights: [
@@ -171,7 +144,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-007",
     name: "Collectible Acrylic Set",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/Chiikawa%20Acrylic/mmexport1758763210091.jpg",
     photosCount: 5,
     tags: ["Verified supplier", "MOQ shown"],
     highlights: [
@@ -186,7 +159,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-008",
     name: "Seasonal Candy Pack",
-    imageUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
+    imageUrl: "/product-photos/Seasonal%20Marshmallow/mmexport1758762893174.jpg",
     photosCount: 7,
     tags: ["Cost reduced", "Lead time known"],
     highlights: [
@@ -201,7 +174,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-009",
     name: "Character Keyring Bundle",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/Justice%20League%20Sweet%20Candy%20Keyring/mmexport1758763234478.jpg",
     photosCount: 6,
     tags: ["Verified supplier", "MOQ shown"],
     highlights: [
@@ -216,7 +189,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-010",
     name: "Fruit Jelly Bento",
-    imageUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
+    imageUrl: "/product-photos/Tasty%20Fruit%20Jelly/mmexport1758763753159.jpg",
     photosCount: 4,
     tags: ["Lead time known", "Cost reduced"],
     highlights: [
@@ -231,7 +204,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-011",
     name: "Marshmallow Gift Box",
-    imageUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
+    imageUrl: "/product-photos/BBQ%20Marshmallow/mmexport1758763625115.jpg",
     photosCount: 5,
     tags: ["Verified supplier", "MOQ shown"],
     highlights: [
@@ -246,7 +219,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-012",
     name: "Anime Bag Clip Set",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/Keroro%20Keyring/mmexport1758763261595.jpg",
     photosCount: 6,
     tags: ["Cost reduced", "Verified supplier"],
     highlights: [
@@ -261,7 +234,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-013",
     name: "Layered Jelly Trio",
-    imageUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
+    imageUrl: "/product-photos/Tanghulu%20Jelly/mmexport1758763731313.jpg",
     photosCount: 5,
     tags: ["MOQ shown", "Lead time known"],
     highlights: [
@@ -276,7 +249,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-014",
     name: "Holiday Marshmallow Mix",
-    imageUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
+    imageUrl: "/product-photos/Seasonal%20Marshmallow/mmexport1758763677584.jpg",
     photosCount: 7,
     tags: ["Verified supplier", "Cost reduced"],
     highlights: [
@@ -291,7 +264,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-015",
     name: "Collector Keychain Pack",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/Bread%20Barbershop%20Keyring/mmexport1758763348068.jpg",
     photosCount: 8,
     tags: ["Verified supplier", "MOQ shown"],
     highlights: [
@@ -306,7 +279,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-016",
     name: "Crystal Jelly Cups",
-    imageUrl: "/product-photos/3D Jelly/mmexport1758762843530.jpg",
+    imageUrl: "/product-photos/Crystal%20Candy/mmexport1758762708496.jpg",
     photosCount: 6,
     tags: ["Lead time known", "Cost reduced"],
     highlights: [
@@ -321,7 +294,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-017",
     name: "Soft Candy Assortment",
-    imageUrl: "/product-photos/Fruit Marshmallow/mmexport1758763658404.jpg",
+    imageUrl: "/product-photos/Soft%20Sweet%20Jelly%20Marshmallow/mmexport1758763612281.jpg",
     photosCount: 5,
     tags: ["Verified supplier", "MOQ shown"],
     highlights: [
@@ -336,7 +309,7 @@ export const proofProducts: ProofProduct[] = [
   {
     id: "proof-product-018",
     name: "Limited Edition Keyring",
-    imageUrl: "/product-photos/Demon Slayer Keyring/mmexport1758763260109.jpg",
+    imageUrl: "/product-photos/LINE%20FRIENDS%20Stand/mmexport1758763204852.jpg",
     photosCount: 7,
     tags: ["Cost reduced", "Verified supplier"],
     highlights: [
