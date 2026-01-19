@@ -27,7 +27,7 @@ export const proofVideos: ProofVideo[] = [
     category: "Sourcing",
     duration: "2:35",
     description: "Outbound sourcing and the first 48 hours of verification.",
-    thumbnailUrl: "/product-photos/Archery%20Toy%20Set/mmexport1758762357119.jpg",
+    thumbnailUrl: "https://img.youtube.com/vi/iJRGh4Tyhbw/hqdefault.jpg",
     href: "https://youtu.be/iJRGh4Tyhbw",
   },
   {
@@ -36,7 +36,7 @@ export const proofVideos: ProofVideo[] = [
     category: "Sourcing",
     duration: "2:21",
     description: "Comparing pricing, lead time, and MOQ across verified suppliers.",
-    thumbnailUrl: "/product-photos/Assorted%20Jelly/mmexport1758763750450.jpg",
+    thumbnailUrl: "https://img.youtube.com/vi/aJOCT_E0RlE/hqdefault.jpg",
     href: "https://youtu.be/aJOCT_E0RlE",
   },
   {
@@ -45,7 +45,7 @@ export const proofVideos: ProofVideo[] = [
     category: "QC",
     duration: "1:58",
     description: "Critical safety and compliance checks before shipment release.",
-    thumbnailUrl: "/product-photos/Bread%20Barbershop%20Keyring/mmexport1758763349318.jpg",
+    thumbnailUrl: "https://img.youtube.com/vi/1pMa-6muGQ0/hqdefault.jpg",
     href: "https://youtu.be/1pMa-6muGQ0",
   },
 ];
