@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Camera, FileText, ListChecks, PlayCircle } from "lucide-react";
+import { ArrowRight, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeUp, StaggerContainer } from "@/components/animation/ScrollReveal";
 import RetailerLogos from "@/components/marketing/RetailerLogos";
@@ -20,32 +20,17 @@ export default function ProofShowcase({ products, proofStats }: ProofShowcasePro
         <RetailerLogos className="mb-10" />
         {/* Header */}
         <FadeUp>
-            <div className="text-center mb-16 lg:mb-20">
+            <div className="text-center mb-12 lg:mb-14">
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-5">
                 Proof you can verify
               </h2>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                Photos, checklists, and supplier docs tied to every verified quote—so your plan is engineered, not guessed.
+              <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
+                Evidence tied to every verified quote.
               </p>
-
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-slate-600">
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2">
-                  <Camera className="h-4 w-4 text-slate-500" />
-                  {proofStats.packsCount.toLocaleString()} proof packs
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2">
-                  <Camera className="h-4 w-4 text-slate-500" />
-                  {proofStats.photosCount.toLocaleString()} photos
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2">
-                  <ListChecks className="h-4 w-4 text-slate-500" />
-                  QC checklists
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2">
-                  <FileText className="h-4 w-4 text-slate-500" />
-                  Supplier docs
-                </span>
-              </div>
+              <p className="mt-4 text-sm text-slate-500">
+                {proofStats.packsCount.toLocaleString()} proof packs •{" "}
+                {proofStats.photosCount.toLocaleString()} photos
+              </p>
             </div>
         </FadeUp>
 
